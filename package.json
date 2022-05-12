@@ -1,0 +1,31 @@
+{
+  "name": "autocomplete",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "ag-grid-community": "^27.2.1",
+    "ag-grid-enterprise": "^27.2.1",
+    "ag-grid-vue3": "^27.2.1",
+    "core-js": "^3.6.5",
+    "flatpickr": "^4.6.13",
+    "moment": "^2.29.3",
+    "vue": "^3.0.0",
+    "vue-flatpickr-component": "^9.0.6"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.5.15",
+    "@vue/cli-service": "~4.5.15",
+    "@vue/compiler-sfc": "^3.0.0",
+    "sass": "^1.26.5",
+    "sass-loader": "^8.0.2"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

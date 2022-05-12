@@ -264,6 +264,22 @@ export default {
 
 }
 
+// cellEditingStopped(event) {
+//     this.gridApi.setFocusedCell(event.rowIndex, event.colDef.field);
+// }
+
+//   <ag-grid-angular 
+//     style="height: 300px; width: 600px;" 
+//     class="ag-theme-balham"
+//     [rowData]="rowData" 
+//     [columnDefs]="columnDefs"
+//     [frameworkComponents]="frameworkComponents"
+//     (gridReady)="onGridReady($event)"
+//     (cellEditingStopped)="cellEditingStopped($event)"
+//     >
+//   </ag-grid-angular>
+
+
 </script>
 
 

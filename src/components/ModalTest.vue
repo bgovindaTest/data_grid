@@ -4,8 +4,15 @@
       Open a modal
     </button>
 
-    <Modal v-model="showModal" modal-class="fullscreen-modal" title="My first modal">
-      <Modalx/>
+    <Modal v-model="showModal" modal-class="fullscreen-modal" title="level2">
+          <button type="button"  @click="showModal2=true">
+            Open sub modal
+          </button>
+
+          <Modal v-model="showModal2" title="Sub Modal modal">
+            <p>hola</p>
+
+          </Modal>
     </Modal>
 
   </div>
@@ -13,18 +20,17 @@
 
 <script>
 import VueModal from '@kouts/vue-modal'
-import Modalx from "./components/ModalTest"
 
 
 export default {
-  el: 'App'
-  ,
+
   components: {
-    'Modal': VueModal,
-    'Modalx': Modalx
+    'Modal': VueModal
+
   },
   data: function() { return {
       showModal: false,
+      showModal2: false
 
     }
   }

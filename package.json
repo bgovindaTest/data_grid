@@ -13,6 +13,7 @@
     "ag-grid-vue3": "^27.2.1",
     "core-js": "^3.6.5",
     "flatpickr": "^4.6.13",
+    "mathjs": "^10.5.3",
     "moment": "^2.29.3",
     "vue": "^3.0.0",
     "vue-flatpickr-component": "^9.0.6"

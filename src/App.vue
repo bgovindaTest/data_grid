@@ -1,72 +1,76 @@
 <template>
-  <div>
-    <button type="button"  @click="showModal=true">
-      Open a modal
-    </button>
-
-    <Modal v-model="showModal" modal-class="fullscreen-modal" title="My first modal">
-      <Modalx/>
-    </Modal>
-
-  </div>
+  <ag-grid-vue
+    style="width: 100%; height: 100vh"
+    class="ag-theme-alpine"
+    :columnDefs="columnDefs"
+    :rowData="rowData"
+  >
+  </ag-grid-vue>
 </template>
 
 <script>
-import VueModal from '@kouts/vue-modal'
-import Modalx from "./components/ModalTest"
-
+import { AgGridVue } from "ag-grid-vue3";
 
 export default {
-  el: 'App'
-  ,
-  components: {
-    'Modal': VueModal,
-    'Modalx': Modalx
+  name: "App",
+  data() {
+    return {
+      columnDefs: null,
+      rowData: null,
+    };
   },
-  data: function() { return {
-      showModal: false,
+  components: {
+    "ag-grid-vue":AgGridVue
+  },
+  beforeMount() {
+    this.columnDefs = [
+      { field: "price", editable: true },
+      {
+            headerName: "Doubling",
+            field: "number",
+            editable: true,
+            width: 300
+      },
+      {field: "date", editable:true, cellEditor: "dateSelector" },
+      {
+          headerName: 'LANG',
+          field: 'lang',
+          editable: true,
+          cellEditor: 'agRichSelectCellEditor',
+          cellEditorParams: {
+              values: [null,'English', 'Spanish', 'French', 'Portuguese', '(other)'],
+          },
+          my_params: true,
 
-    }
-  }
+        // ...other props
+          cellStyle: function (params) {
+              console.log(params.colDef)
+              console.log(params)
+              if (params.value === 'English') {
+                  //mark police cells as red
+                  return {color: 'red', backgroundColor: 'green'};
+              }
+              return {color: '', backgroundColor: ''};
+          }
+      },
+      //is_valid:
+      //is_editable:
 
-}
 
 
+    ];
+
+    this.rowData = [
+      { price: 35000, number: 1, date: 'abcde', lang: null },
+      {  price: 32000, number: 2, date: null, lang: null },
+      {  price: 72000, number: 3, date: null, lang: null },
+    ];
+  },
+};
 </script>
 
 <style lang="scss">
-  @import "~@kouts/vue-modal/dist/vue-modal.css";
-
-.fullscreen-modal {
-  width: 100%;
-  max-width: 100%;
-  top: 0;
-  margin: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.fullscreen-modal .vm-titlebar {
-  flex-shrink: 0;
-}
-.fullscreen-modal .vm-content {
-  padding: 0;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; 
-}
-.fullscreen-modal .vm-content .scrollable-content {
-  position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 10px 15px 10px 15px;
-  flex-grow: 1;
-}
-.fullscreen-modal .fullscreen-modal-footer {
-  border-top: 1px solid #e5e5e5;
-  padding: 15px;
-}
-
-
+  @import "~ag-grid-community/dist/styles/ag-grid.css";
+  @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
+  * { margin: 0 }
 </style>

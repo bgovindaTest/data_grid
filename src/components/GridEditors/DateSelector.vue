@@ -36,6 +36,7 @@ function ParseDate (datestr, format) {
 //     // locale can also be used
 //     return moment(date).format(format);
 //   }
+//  swap between date and datetime format?
 // }
 
 function TypeCastDate(date_val, format_string) {

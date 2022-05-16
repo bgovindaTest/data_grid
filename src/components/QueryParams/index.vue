@@ -1,6 +1,6 @@
 <template>
 
-<div>
+<div class = "container">
     <!-- tabas  -->
     <div class="tabs is-centered">
         <ul>
@@ -10,9 +10,9 @@
         </ul>
     </div>
 
-    <div class="container" v-if = "current_tab == 'Sort'"> SortActive</div>
-    <div class="container" v-else-if = "current_tab == 'Filter'"> FilterActive </div>
-    <div class="container" v-else-if = "current_tab == 'Page'"> PageActive </div>
+    <div class="ml-5" v-if = "current_tab === 'Sort'"> SortActive</div>
+    <div class="ml-2" v-else-if = "current_tab === 'Filter'"> FilterActive </div>
+    <div class="container" v-else-if = "current_tab === 'Page'"> PageActive </div>
 
 
 </div>

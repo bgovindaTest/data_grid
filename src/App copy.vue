@@ -1,5 +1,6 @@
 <template>
-<BulmaTest />
+  <!-- <Header /> -->
+  <QueryParams />
 </template>
 
 <script>
@@ -13,7 +14,6 @@ SubModal
 
 // import Header from "./components/Header";
 import QueryParams from "./components/QueryParams/OrderBy/";
-// import BulmaTest from "./components/BulmaTest.vue"
 
 export default {
   name: "App",
@@ -24,16 +24,8 @@ export default {
   //   };
   // },
   components: {
-    "BulmaTest": QueryParams
+    // "Header":Header,
+    "QueryParams": QueryParams
   },
 };
 </script>
-
-<style lang='scss'>
-@import '@/assets/vue_modal';
-@import '@/assets/bulma.scss';
-
-
-
-
-</style>

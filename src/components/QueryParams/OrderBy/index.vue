@@ -4,90 +4,76 @@ This module stores the information needed to select the order at which rows will
 The possible column fields are stored in the columnSortNames array. The user selected values are stored in the
 order_by object. This information is parsed by get_route_params on RunQuery.
 
+
+  {'variable_name': "a", "sort_order": "" }
 -->
 <template>
-    <modal style="border: 1px solid black;"
-      name="orderby-modal"
-      draggable=".window-header"
-      transition="nice-modal-fade"
-      :min-width="400"
-      :min-height="500"
-      height="500px"
-      :delay="10"
-      classes= "modal-style"
-      :resizable="true"
-      @before-open="beforeOpen"
-      @before-close="beforeClose">
-      <div style="position: relative; height: 100%;">
-        <div class="window-header window-style">Order By
-          <span @click="closeModal()" style="float: right; color: white; padding-right: 5px;" >&times;</span>
-          <span @click="toggleHelp()" style="float: right; padding-right: 2px;" v-bind:class="{helpClass: true, helpActiveClass: params.help_active}">&#63;</span>
-        </div>
-        <!-- <div style="margin-left: 15px;"> -->
-        <div class="margin_shift">
-          <button class="action_button" @click="add_row()">Add</button>
-          <button class="action_button" @click="delete_row()">Delete</button>
-          <button class="action_button" @click="clear_rows()">Clear</button>
-        </div>
-
-        <div  style="width: 100%; max-height: 85%; overflow-y: auto; border-top: 1px solid black; margin-top: 5px;">
-
-            <div v-if="params.help_active" style="border-bottom: 2px dotted; max-width: 100%; word-wrap: break-word; margin-bottom: 8px;">
-              <div style="margin-left: 5px; padding-bottom: 5px;">
-                  <h4 style="display: inline;" >Sort By Help:</h4>
-                  <p style="display: inline; font-size: 13px;">
-                    The sort module is used to determine what order to retrieve the server side data. Each row condition has two
-                    parameters. The data variable to sort by and what order to sort it in i.e. ascending or descending.
-                    To close window click x in top right or click outside the box.<br>
-                    add: Creates a new condition to sort by.<br>
-                    delete: Delete the last condition<br>
-                    clear: Clears all sort conditions
-                  </p>
-              </div>
-            </div>
-
-
-
-            <form v-for="(n,index) in order_by" v-bind:key="index" style="margin-bottom: 5px; margin-top: 5px;" class="margin_shift">
-                  <p style="display: inline-block;">{{sort_name(index)}} </p>
-                  <select v-model="order_by[index].variable_name" style="display: inline-block; width: 150px; ; padding: 0px;" class="select">
-                      <option value="" disabled selected hidden>Select a Column</option>
-                      <option v-for="(valx, index2) in remaining_options(index)" :key="index2" :value="valx">{{valx}}</option>
-                  </select>
-
-                  <select v-model="order_by[index].sort_order" style="display: inline-block; width: 140px; padding: 0px;" class="select">
-                      <option value="" disabled selected hidden>Order By</option>
-                      <option value="asc">Ascending</option>
-                      <option value="desc">Descending</option>
-                  </select>
-            </form>
-
-        </div>
-        <!-- </div> -->
+<div>
+  <div class='level'>
+    <div class="levelLeft">
+      <button class="button is-small is-light" @click="AddRow()">Add</button>
+      <button class="button is-small ml-2 is-light" @click="DeleteRow()">Delete</button>
+      <button class="button is-small ml-2 is-light" @click="ClearRows()">Clear</button>
     </div>
-    <!-- <div> HI </div> -->
-  </modal>
+
+    <div class="levelRight">
+      <button class="button is-small is-success" @click="Accept()">Accept</button>
+      <button class="button is-small ml-2 is-danger" @click="Cancel()">Cancel</button>
+    </div>
+
+
+  </div>
+
+  <div v-for="(n,index) in order_by" v-bind:key="index" >
+        <p class="is-inline-block is-size-4 mr-2 mb-3" >{{SortLabel(index)}} </p>
+        <div class="select" >
+          <select class="is-inline-bloc" v-model="order_by[index].variable_name">
+              <option value="" disabled selected hidden>Select a Column</option>
+              <option v-for="(valx, index2) in remaining_options(index)" :key="index2" :value="valx">{{valx}}</option>
+          </select>
+        </div>
+        <div class="select" >
+          <select class="is-inline-block ml-2" v-model="order_by[index].sort_order">
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+          </select>
+        </div>
+        <button class="delete ml-2 is-vcentered mt-2" type="button" @click="DeleteRowAtIndex(index)"></button>
+  </div>
+
+
+
+</div>
 </template>
 <script>
+
+
 export default {
-  name: 'Orderby_Modal',
-  props: {
-    params: {
-      // required: true,
-      default: function () {return {'help_active': true} },
-      type: Object
-    },
-    order_by: {
-      // required: true,
-      default: function () {return [{}] },
-      type: Array
-    },
-    columnSortNames: {
-      // required: true,
-      default: function () {return [{}] },
-      type: Array
+
+  data() {
+    return {
+
+
+      order_by: [
+        {'variable_name': "a", "sort_order": "" },
+        {'variable_name': "b", "sort_order": "" },
+        {'variable_name': "c", "sort_order": "" },
+        {'variable_name': "d", "sort_order": "" }
+      ],
+      columnSortNames: ['a','b','c','d','e','f','g','h','i',
+        'j','k', 'l','m','n','o','p','q','r','s','t'] //,
+      // 'b': b,
+      // 'vx': vx
     }
+  },  
+
+  mounted: function () {
+    if (this.order_by.length < 1) {
+      this.order_by.push({'variable_name': "", "sort_order": "asc" })
+    }
+    this.SetDefaultSortOrder()
   },
+
 
   methods: {
     remaining_options (index) {
@@ -110,89 +96,55 @@ export default {
       return tmp
     },
 
-
-      sort_name(i) {
-        if (i==0) { return 'sort by: ' }
-        else {return 'then by'}
-      },
-
-      add_row() {
-        if (this.order_by.length < this.columnSortNames.length) {
-          this.order_by.push({'variable_name': "", "sort_order": "" })
+    SetDefaultSortOrder() {
+      for(var i =0; i < this.order_by.length; i++) {
+        if (this.order_by[i].sort_order.trim() === '') {
+          this.order_by[i].sort_order = 'asc'
         }
-      },
-      clear_rows() {
-        while(this.order_by.length > 1) {
-          this.order_by.pop()
-        }
+      }
+
+    },
+
+
+    SortLabel(i) {
+      if (i==0) { return 'sort by:' }
+      else {return 'then by:'}
+    },
+
+    AddRow() {
+      if (this.order_by.length < this.columnSortNames.length) {
+        this.order_by.push({'variable_name': "", "sort_order": "asc" })
+      }
+    },
+    ClearRows() {
+      while(this.order_by.length > 1) {
+        this.order_by.pop()
+      }
+      this.order_by[0]['variable_name'] = ""
+      this.order_by[0]['sort_order'] = "asc"
+    },
+    DeleteRowAtIndex(index) {
+      if (this.order_by.length <= 1 ) {
         this.order_by[0]['variable_name'] = ""
-        this.order_by[0]['sort_order'] = ""
-      },
-      delete_row() {
-        if (this.order_by.length > 1) {
-          this.order_by.pop()
-        }
-        if (this.order_by.length === 1) {
-          let x = this.order_by[0]
-          x.variable_name = ""
-          x.sort_order = ""
-        }
-      },
-    toggleHelp() {
-      this.params.help_active = !this.params.help_active
-    },
-    closeModal() {
-        this.$modal.hide('orderby-modal')
+        this.order_by[0]['sort_order'] = "asc" 
+      }
+      else if (index < 0 || index > this.order_by.length) {}
+      else {
+        this.order_by.splice(index, 1)
+      }
+
     },
 
-      beforeOpen() {},
-      beforeClose() {}
+    DeleteRow() {
+      if (this.order_by.length > 1) {
+        this.order_by.pop()
+      }
+      else if (this.order_by.length === 1) {
+        let x = this.order_by[0]
+        x.variable_name = ""
+        x.sort_order = "asc"
+      }
+    }
   }
 }
 </script>
-
-<style scoped>
-.helpClass {
-    cursor: pointer;
-    margin-right: 5px; 
-    margin-top: 0px;
-}
-
-.helpActiveClass {
-    color: white;
-}
-
-.modal-style {
-  border: 2px solid black;
-  overflow-y: auto;
-}
-
-select {
-  padding: 16px 20px;
-  border: 2px solid black;
-  border-radius: 4px;
-  background-color: #f1f1f1;
-}
-
-.action_button {
-  display: inline-block;
-}
-
-.window-style {
-  background: grey;
-  text-align: center;
-  height: 30px;
-  padding-top: 5px;
-  margin-bottom: 10px;
-  border-bottom: 2px solid black;
-}
-
-.window-style:hover {
-  cursor: pointer;
-}
-
-.margin_shift {
-  margin-left: 15px;
-}
-
-</style>

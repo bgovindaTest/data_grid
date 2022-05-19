@@ -46,8 +46,8 @@ datetime
 
 -->
 <template>
-<div>
-
+<div  >
+<div class="container" >
 
 
 
@@ -88,21 +88,21 @@ datetime
 
   <div v-for="(item, index) in filters" :key=index > {{item.column_name}} </div>
 
+  <!-- <template class="box"> -->
+    <div class="select mb-5">
+      <select>
+        <option>Select dropdown</option>
+        <option>With options</option>
+      </select>
+    </div>
+  <!-- </template> -->
+  <input class="input box" type="text" placeholder="Text input">
+  <textarea class="textarea box" placeholder="e.g. Hello world"></textarea>
+  <flat-pickr ref="datePicker" v-model="date" class="input box" placeholder="Text input button" ></flat-pickr>
 
 
-  <input class="input" type="text" placeholder="Text input">
-  <textarea class="textarea" placeholder="e.g. Hello world"></textarea>
 
-  <div class="select">
-    <select>
-      <option>Select dropdown</option>
-      <option>With options</option>
-    </select>
-  </div>
-
-
-  <flat-pickr ref="datePicker" v-model="date" class="input" placeholder="Text input button" ></flat-pickr>
-
+</div>
 </div>
 </template>
 
@@ -169,6 +169,9 @@ export default {
 
 
   },
+  //before mount verify values columns is an array with length atleast 2.
+
+
   methods: {
     AddFilter (column_filter) {
       // console.log(column_filter)

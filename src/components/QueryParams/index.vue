@@ -36,6 +36,7 @@ export default {
     methods: {
         UpdateActive(tab_name) { this.current_tab = tab_name}
     }
+    //parse filters for upload?
 
 }
 </script>

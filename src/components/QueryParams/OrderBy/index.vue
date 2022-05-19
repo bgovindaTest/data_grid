@@ -5,7 +5,7 @@ The possible column fields are stored in the columnSortNames array. The user sel
 order_by object. This information is parsed by get_route_params on RunQuery.
 
 
-  {'variable_name': "a", "sort_order": "" }
+  {'column_name': "a", "column_order": "" }
 -->
 <template>
 <div>
@@ -27,13 +27,13 @@ order_by object. This information is parsed by get_route_params on RunQuery.
   <div v-for="(n,index) in order_by" v-bind:key="index" >
         <p class="is-inline-block is-size-4 mr-2 mb-3" >{{SortLabel(index)}} </p>
         <div class="select" >
-          <select class="is-inline-bloc" v-model="order_by[index].variable_name">
+          <select class="is-inline-bloc" v-model="order_by[index].column_name">
               <option value="" disabled selected hidden>Select a Column</option>
               <option v-for="(valx, index2) in remaining_options(index)" :key="index2" :value="valx">{{valx}}</option>
           </select>
         </div>
         <div class="select" >
-          <select class="is-inline-block ml-2" v-model="order_by[index].sort_order">
+          <select class="is-inline-block ml-2" v-model="order_by[index].column_order">
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
           </select>
@@ -55,10 +55,10 @@ export default {
 
 
       order_by: [
-        {'variable_name': "a", "sort_order": "" },
-        {'variable_name': "b", "sort_order": "" },
-        {'variable_name': "c", "sort_order": "" },
-        {'variable_name': "d", "sort_order": "" }
+        {'column_name': "a", "column_order": "" },
+        {'column_name': "b", "column_order": "" },
+        {'column_name': "c", "column_order": "" },
+        {'column_name': "d", "column_order": "" }
       ],
       columnSortNames: ['a','b','c','d','e','f','g','h','i',
         'j','k', 'l','m','n','o','p','q','r','s','t'] //,
@@ -69,7 +69,7 @@ export default {
 
   mounted: function () {
     if (this.order_by.length < 1) {
-      this.order_by.push({'variable_name': "", "sort_order": "asc" })
+      this.order_by.push({'column_name': "", "column_order": "asc" })
     }
     this.SetDefaultSortOrder()
   },
@@ -78,13 +78,13 @@ export default {
   methods: {
     remaining_options (index) {
       var tmp = []
-      var current_value = this.order_by[index].variable_name
+      var current_value = this.order_by[index].column_name
       this.columnSortNames.forEach( (cv) => {
         var hit = false
         var i
         for (i=0; i <this.order_by.length; i++) {
           // console.log(ob)
-          if (this.order_by[i].variable_name === cv) {
+          if (this.order_by[i].column_name === cv) {
             hit = true
             break
           }          
@@ -98,8 +98,8 @@ export default {
 
     SetDefaultSortOrder() {
       for(var i =0; i < this.order_by.length; i++) {
-        if (this.order_by[i].sort_order.trim() === '') {
-          this.order_by[i].sort_order = 'asc'
+        if (this.order_by[i].column_order.trim() === '') {
+          this.order_by[i].column_order = 'asc'
         }
       }
 
@@ -113,20 +113,20 @@ export default {
 
     AddRow() {
       if (this.order_by.length < this.columnSortNames.length) {
-        this.order_by.push({'variable_name': "", "sort_order": "asc" })
+        this.order_by.push({'column_name': "", "column_order": "asc" })
       }
     },
     ClearRows() {
       while(this.order_by.length > 1) {
         this.order_by.pop()
       }
-      this.order_by[0]['variable_name'] = ""
-      this.order_by[0]['sort_order'] = "asc"
+      this.order_by[0]['column_name'] = ""
+      this.order_by[0]['column_order'] = "asc"
     },
     DeleteRowAtIndex(index) {
       if (this.order_by.length <= 1 ) {
-        this.order_by[0]['variable_name'] = ""
-        this.order_by[0]['sort_order'] = "asc" 
+        this.order_by[0]['column_name'] = ""
+        this.order_by[0]['column_order'] = "asc" 
       }
       else if (index < 0 || index > this.order_by.length) {}
       else {
@@ -141,8 +141,8 @@ export default {
       }
       else if (this.order_by.length === 1) {
         let x = this.order_by[0]
-        x.variable_name = ""
-        x.sort_order = "asc"
+        x.column_name = ""
+        x.column_order = "asc"
       }
     }
   }

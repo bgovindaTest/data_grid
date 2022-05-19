@@ -1,5 +1,9 @@
 <template>
-<BulmaTest />
+
+<Filter />
+
+
+
 </template>
 
 <script>
@@ -12,7 +16,8 @@ SubModal
 
 
 // import Header from "./components/Header";
-import QueryParams from "./components/QueryParams/OrderBy/";
+import OrderParams from "./components/QueryParams/OrderBy/";
+import FilterParams from "./components/QueryParams/Filter/";
 // import BulmaTest from "./components/BulmaTest.vue"
 
 export default {
@@ -24,7 +29,8 @@ export default {
   //   };
   // },
   components: {
-    "BulmaTest": QueryParams
+    "OrderParams": OrderParams,
+    "Filter": FilterParams
   },
 };
 </script>

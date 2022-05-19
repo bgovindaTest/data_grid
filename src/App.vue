@@ -19,15 +19,24 @@ SubModal
 import OrderParams from "./components/QueryParams/OrderBy/";
 import FilterParams from "./components/QueryParams/Filter/";
 // import BulmaTest from "./components/BulmaTest.vue"
+import flatPickr from 'vue-flatpickr-component';
+// import 'flatpickr/dist/flatpickr.css';
+
 
 export default {
   name: "App",
-  // data() {
-  //   return {
-  //     columnDefs: null,
-  //     rowData: null,
-  //   };
-  // },
+  data() {
+    return {
+      date: null,
+      columnDefs: null,
+      config: {
+        altInputClass: "input"
+      },
+      rowData: null,
+    };
+  },
+    // components: { flatPickr },
+
   components: {
     "OrderParams": OrderParams,
     "Filter": FilterParams

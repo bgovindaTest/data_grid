@@ -54,55 +54,60 @@ datetime
 
   <div class='level'>
     <div class="levelLeft">
-      <button class="button is-small is-light" @click="AddRow()">Add</button>
-      <button class="button is-small ml-2 is-light" @click="DeleteRow()">Delete</button>
-      <button class="button is-small ml-2 is-light" @click="ClearRows()">Clear</button>
+      <!-- filter selector -->
+      <div class="dropdown" :class='{"is-active": dropdown_active}'>
+        <div class="dropdown-trigger">
+          <button class="button" aria-haspopup="true" aria-controls="dropdown-menu" @click="dropdown_active = !dropdown_active"
+            @blur="dropdown_active=false"
+          >
+            <span>Select Filter</span>
+            <span class="icon">
+              <font-awesome-icon :icon="['fas', 'angle-down']" />
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            <a  v-for="(item, index) in columns" :key="index"  href="#" class="dropdown-item"  @mousedown="AddFilter(item)">
+              <p  >{{item.column_name}}</p>
+            </a>
+          </div>
+        </div>
+      </div>
+
+
+      <button class="button  ml-2 is-light" @click="DeleteRow()">Delete</button>
+      <button class="button  ml-2 is-light" @click="ClearRows()">Clear</button>
     </div>
 
     <div class="levelRight">
       <button class="button is-small is-success" @click="Accept()">Accept</button>
       <button class="button is-small ml-2 is-danger" @click="Cancel()">Cancel</button>
     </div>
+  </div>
+
+  <div v-for="(item, index) in filters" :key=index > {{item.column_name}} </div>
 
 
+
+  <input class="input" type="text" placeholder="Text input">
+  <textarea class="textarea" placeholder="e.g. Hello world"></textarea>
+
+  <div class="select">
+    <select>
+      <option>Select dropdown</option>
+      <option>With options</option>
+    </select>
   </div>
 
 
-
-
-  <div class="dropdown" :class='{"is-active": dropdown_active}'>
-    <div class="dropdown-trigger">
-      <button class="button" aria-haspopup="true" aria-controls="dropdown-menu" @click="dropdown_active = !dropdown_active"
-        @blur="dropdown_active=false"
-      >
-        <span>Select Filter</span>
-        <span class="icon">
-          <font-awesome-icon :icon="['fas', 'angle-down']" />
-        </span>
-      </button>
-    </div>
-    <div class="dropdown-menu" id="dropdown-menu" role="menu">
-      <div class="dropdown-content">
-        <a  v-for="(item, index) in columns" :key="index"  href="#" class="dropdown-item">
-          <p @mousedown="AddFilter(item)" >{{item.column_name}}</p>
-        </a>
-      </div>
-    </div>
-  </div>
-
-
+  <flat-pickr ref="datePicker" v-model="date" class="input" placeholder="Text input button" ></flat-pickr>
 
 </div>
 </template>
 
 <script>
-// import NumericFilter from '../filters/numeric_filter.vue'
-// import DateFilter from '../filters/date_filter.vue'
-// import StringFilter from '../filters/string_filter.vue'
-// import PermissionsFilter from '../filters/permissions_filter.vue'
-// import BoolFilter from '../filters/bool_filter.vue'
-// import FilterSelect from '../filters/filter_select.vue'
-// import QuickFilter from '../filters/quick_filter.vue'
+
 
 /*
 variable_name
@@ -112,13 +117,41 @@ value
 */
 
 
+import flatPickr from 'vue-flatpickr-component';
+import moment from "moment"
+// import 'flatpickr/dist/flatpickr.css';
+
+function ParseDate (datestr, format) {
+    // console.log(datestr, format)
+    let dx = TypeCastDate(datestr, format)
+    // return datestr
+    return dx
+}
+
+function TypeCastDate(date_val, format_string) {
+    var date_formats = ['YYYY-MM-DD','YYYY-M-DD','YYYY-MM-D','YYYY-M-D', 'MM/DD/YYYY','M/DD/YYYY','MM/D/YYYY','M/D/YYYY']
+    var moment_date = moment(date_val, date_formats, true)
+    if (moment_date.isValid()) {
+        // return moment_date.format(format_string)
+        return moment_date.toDate()
+    } else {
+        return false
+    }
+}
+
+
 
 export default {
-  // components: {NumericFilter, DateFilter, StringFilter,BoolFilter, PermissionsFilter, FilterSelect, QuickFilter},
+
+  components: { flatPickr },
   data() {
     return {
       dropdown_active: false,
-
+      date: null,
+      config: {
+          allowInput: true,
+          "parseDate": ParseDate
+      },
       columns: [
         {'column_name': 'a', 'data_type': 'text'},
         {'column_name': 'b', 'data_type': 'date'},
@@ -140,11 +173,7 @@ export default {
     AddFilter (column_filter) {
       // console.log(column_filter)
       this.filters.push(column_filter)
-      console.log(this.filters)
-      console.log('hi')
-      console.log(column_filter.column_name)
       this.dropdown_active=false
-      console.log('bye')
 
 
     },
@@ -168,3 +197,8 @@ export default {
   // }
 }
 </script>
+
+<style scoped lang="scss">
+  @import '~flatpickr/dist/flatpickr.css';
+
+</style>

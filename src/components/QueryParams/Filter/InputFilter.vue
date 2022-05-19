@@ -100,66 +100,33 @@ Add border ?
 
 </template>
 <script>
-import HelpFilterWindow from '@/components/modal_windows/filters/help_filter_window.vue'
-const bool_filter_description = "this is a description of the bool filter"
 
 export default {
-  name: 'Numeric_Filter_Entry',
-  components: {HelpFilterWindow},
+  props: ['data_type'],
 
-  props: {
-    filter_data: {
-      default: function () {
-        return {'data_type': 'float',
-        'query_type': "",
-        'filter_active': true,
-        'filter_show': true,
-        'help_active': false,
-        'data_describe': "",
-        'value': { 'value_1': null, 'value_2': null, 'value_list': ""},
-        'variable_name': ""
-        } 
+  // data () {
+  //   return {
+  //   }
+  // },
+  computed: {
+      isNumber() {
+          return this.data_type in ['integer', 'float', 'real', 
+            'number', 'decimal', 'numeric', 'smallint','bigint',
+            'double precision', 'serial', 'bigserial', 'smallserial'
+            ]
       },
-      type: Object
-    }
-
+      isText() { return this.data_type in ['character', 'varying', 'varchar', 'char', 'text'] },
+      isDate() { return this.data_type === 'date' },
+      isDateTime() {return this.data_type === 'timestamp'},
+      isTime() {return this.data_type === 'time'},
+      isInterval() {return this.data_type === 'interval'},
+      isBoolean() {return this.data_type === 'bool' || this.data_type === 'boolean'}
   },
 
-
-  data () {
-    return {
-    //before, after, between or on
-    //  data_type: "integer",
-    //  query_type: "equals",
-    //  variable_name: "test_name",
-    //  value_1: null,
-    //  value_2: null,
-    //  value_string: null,
-    //  isShow: true,
-    //  helpActive: false,
-     filter_description: bool_filter_description,
-    }
-  },
 
   methods: {
-      isInteger() {
-          if (this.filter_data.data_type === "integer") {return true}
-          return false
-      },
-      isQueryType(entry_type) {
-          if (this.filter_data.query_type === entry_type) {return true}
-          return false
-      },
-      clearValues() {
-            this.filter_data.value.value_1 = null
-            this.filter_data.value.value_2 = null
-            this.filter_data.value.value_list = null
-      },
-    toggleHelp() {
-      this.filter_data.help_active = !this.filter_data.help_active
-    }
-      //Clear Old Data
-      // add description??
+
+  
 
   }
 }

@@ -3,7 +3,7 @@ import App from './App.vue'
 import 'ag-grid-enterprise';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-// import { faPhone, faAngleDown } from "@fortawesome/free-solid-svg-icons";
+// // import { faPhone, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 
 

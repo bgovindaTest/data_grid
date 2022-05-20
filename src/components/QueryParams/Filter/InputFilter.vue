@@ -1,4 +1,7 @@
 <!--
+Generates filter input based on operator and data_type
+
+
 This is the vue script for the popup window that is displayed to prevent a user from
 editing/adding to multiple components.
 
@@ -14,22 +17,19 @@ Add border ?
 <template>
 <div>
 
-<!-- display title -->
-<!-- selector? -->
 
-
-<!-- if date, time, datetime/etc -->
-<div v-if="isTimeUnit">
-timeUnit
-</div>
-
-<div v-else>
-something else
-</div>
-
+<!-- if text area -->
 
 
 <!-- else -->
+
+  <!-- show one based on data type-->
+  <!-- between show two based on data type -->
+
+
+
+
+
 
 
 

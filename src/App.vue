@@ -1,77 +1,116 @@
 <template>
-<div>
+  <grid-header />
+  <ag-grid-vue
+    style="width: 100%; height: calc(100vh - 3.25rem)"
+    class="ag-theme-alpine"
+    :columnDefs="columnDefs"
+    :rowData="rowData"
+  >
+  </ag-grid-vue>
+    <Modal v-model="modalx.modal1" modal-class="fullscreen-modal" title="My first modal">
+        <ag-grid-vue
+          style="width: 100%; height: 100%"
+          class="ag-theme-alpine"
+          :columnDefs="columnDefs2"
+          :rowData="rowData2"
+        >
+        </ag-grid-vue>
+    </Modal>
 
-<font-awesome-icon :icon="['fas', 'angle-down']" color="red" filter="brightness(50%)"/>
-<font-awesome-icon :icon="['fas', 'angle-down']" color="red" filter="brightness(500%)" style="background-color:blue"/>
-<button >  <font-awesome-icon :icon="['fas', 'undo']" /> </button>
-<button @click="is_deleted = !is_deleted" > 
-  
-  <font-awesome-icon :icon="['far', 'trash-alt']" v-if="is_deleted" />   
-  <font-awesome-icon :icon="['fas', 'trash-alt']" v-else /> 
-  
-  
-</button>
-
-<!-- <button @click="showModal = !showModal"> modal </button>
-
-<Modal v-model="showModal" modal-class="fullscreen-modal" title="My first modal"> -->
-  <!-- <Filter /> -->
-<!-- </Modal> -->
-
-
-
-</div>
 
 </template>
 
 <script>
-/*
-Header
-Grid
-Placholders
-SubModal
-*/
-
-
-// import Header from "./components/Header";
-import OrderParams from "./components/QueryParams/OrderBy/";
-import FilterParams from "./components/QueryParams/Filter/";
-// import BulmaTest from "./components/BulmaTest.vue"
-import flatPickr from 'vue-flatpickr-component';
-// import 'flatpickr/dist/flatpickr.css';
+import { AgGridVue } from "ag-grid-vue3";
+import AutoComplete from "./components/GridEditors/AutoComplete"
+import DateSelector from "./components/GridEditors/DateSelector"
+import DeleteUndoSelector from "./components/GridEditors/DeleteUndoSelector"
+import SubGridSelector from "./components/GridEditors/SubGridSelector"
+import GridHeader from "./components/GridLayout/Header"
 import VueModal from '@kouts/vue-modal'
+
 
 export default {
   name: "App",
   data() {
     return {
-      date: null,
-      is_deleted: false,
       columnDefs: null,
-      config: {
-        altInputClass: "input"
-      },
       rowData: null,
-      showModal: false
+      columnDefs2: null,
+      rowData2: null,
+      showModal:true,
+      modalx: {modal1: true}
+
+
+
+
     };
   },
-    // components: { flatPickr },
+  methods: {
+
+  },
 
   components: {
-    "OrderParams": OrderParams,
-    "Filter": FilterParams,
-    'Modal': VueModal,
+    "ag-grid-vue":AgGridVue,
+    "autoComplete": AutoComplete,
+    "dateSelector": DateSelector,
+    "deleteUndoSelector": DeleteUndoSelector,
+    "subGridSelector": SubGridSelector,
+    "grid-header": GridHeader,
+    "Modal": VueModal
+  },
+  beforeMount() {
+
+    this.columnDefs = [
+      { field: "sub_grid",
+        cellRenderer: "subGridSelector"
+      },      
+      { field: "make" },
+      { field: "model" },
+      { field: "price", editable: true },
+      {
+            headerName: "Doubling",
+            field: "number",
+            //cellEditor: "doublingEditor",
+            cellEditor: "autoComplete",
+            editable: true,
+            width: 300
+      },
+      {field: "date", editable:true, cellEditor: "dateSelector" },
+      {
+          field: 'lang',
+          editable: true,
+          cellEditor: 'agRichSelectCellEditor',
+          cellEditorParams: {
+              values: ['English', 'Spanish', 'French', 'Portuguese', '(other)'],
+          }
+        // ...other props
+      },
+      { field: "bool",  cellRenderer: "deleteUndoSelector" },
+
+
+    ];
+
+    this.rowData = [
+      { make: "Toyota", model: "Celica", price: 35000, number: 1, date: 'abcde', lang: null, bool: true , "meta": this.modalx }
+      // { make: "Ford", model: "Mondeo", price: 32000, number: 2, date: null, lang: null, bool: true },
+      // { make: "Porsche", model: "Boxster", price: 72000, number: 3, date: null, lang: null, bool: true },
+    ],
+
+    this.columnDefs2 = [{ field: "yolo" }],
+    this.rowData2 = [ {"yolo": 1}, {'yolo': 2}, {"yolo": 3} ]
+
+
   },
 };
 </script>
 
-<style lang='scss'>
-@import '@/assets/vue_modal';
-@import '@/assets/bulma.scss';
-
-
-
-
+<style lang="scss">
+  @import "~ag-grid-community/dist/styles/ag-grid.css";
+  @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
+  @import "@/assets/bulma.scss";
+  @import "@/assets/vue_modal.scss";
+  * { margin: 0 }
 
 
 </style>

@@ -1,37 +1,18 @@
 <template>
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-
-
+<nav class="navbar" role="navigation" aria-label="main navigation" style="height:20px;">
     <div id="navbarBasicExample" class="navbar-menu">
         <div class="navbar-start">
-        <a class="navbar-item">
-            Home
-        </a>
-
-        <a class="navbar-item">
-            Documentation
-        </a>
+        <a class="navbar-item">Home</a>
+        <a class="navbar-item">Documentation</a>
 
         <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-            Links
-
-            </a>
-
+            <a class="navbar-link">SubGrids</a>
             <div class="navbar-dropdown">
-            <a class="navbar-item">
-                About
-            </a>
-            <a class="navbar-item">
-                Jobs
-            </a>
-            <a class="navbar-item">
-                Contact
-            </a>
-            <hr class="navbar-divider">
-            <a class="navbar-item">
-                Report an issue
-            </a>
+                <a class="navbar-item">About</a>
+                <a class="navbar-item">Jobs</a>
+                <a class="navbar-item">Contact</a>
+                <hr class="navbar-divider">
+                <a class="navbar-item">Report an issue</a>
             </div>
         </div>
         </div>
@@ -49,19 +30,18 @@
         </div>
         </div>
     </div>
-    </nav>
+</nav>
 </template>
 
 <script>
 
 export default {
 
+  methods: {
+
+  }
 
 }
 
 
 </script>
-
-<style lang="scss" scoped>
-    @import '../assets/bulma.scss';
-</style>

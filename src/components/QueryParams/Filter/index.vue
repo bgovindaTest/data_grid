@@ -89,15 +89,30 @@ datetime
   <div v-for="(item, index) in filters" :key=index > {{item.column_name}} </div>
 
   <!-- <template class="box"> -->
-    <div class="select mb-5">
-      <select>
-        <option>Select dropdown</option>
-        <option>With options</option>
-      </select>
+    <div class="control block">
+      <label class="label">Email</label>
+      <div class="select">
+        <select>
+          <option>Select dropdown</option>
+          <option>With options</option>
+        </select>
+      </div>
     </div>
   <!-- </template> -->
-  <input class="input box" type="text" placeholder="Text input">
-  <textarea class="textarea box" placeholder="e.g. Hello world"></textarea>
+  <div class="block">
+        <label class="label mr-3" style="display: inline;">Input</label>
+          <!--filter type -->
+          <div class="select is-small">
+            <select>
+              <option>Select Filter</option>
+              <option>With options Between All the data</option>
+            </select>
+          </div>
+  </div>
+
+    <input class="input" type="text" placeholder="Text input">
+  <!-- </div> -->
+  <textarea class="textarea block" placeholder="e.g. Hello world"></textarea>
   <flat-pickr ref="datePicker" v-model="date" class="input box" placeholder="Text input button" ></flat-pickr>
 
 

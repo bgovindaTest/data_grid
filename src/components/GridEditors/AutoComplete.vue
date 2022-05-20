@@ -1,7 +1,60 @@
 <!--
+This module is responsible for initializing the data parameters and functions required for the autocomplet widget.
+Each grid_column_rule has the structure below. A more indepth description is in ./library/grid_rules.js
+  {
+    field: 'field_name
+    cellEditorFramework: 'AutocompleteAg'
+    cellEditorParams: {
+        selectValues: selectValues,
+        return_value: 'appointment_code', (return_value is used as key)
+        column_info: [
+            {header: "id" , init_width: 50},
+            {header: "name", init_width: 50},
+            {header: "username", init_width: 75 },
+            {header: "email", init_width: 200 },
+            {header: "phone", init_width: 150 },
+            {header: "website", init_width: 100 }
+        ]
+        match_string: (string) default __match_string__
+        match_string_function: function?
+        map_route: string
+        map_params: {} 
+        crud_value: 'id'
+        map_function: //the map function is place here during initialization
+        return_field: ""
+    }
+The cellEditorFramework must be equal to 'AutocompleteAg' This tells the grid which input format to use.
+selectValues: is the array that contains all the data and return values for the autocomplete column and related calculated fields. The data can be 
+    initialized in each ./pages/xxx.vue if no map_route is defined i.e. !grid_row_rule.hasOwnProperty('map_route') this will be left unchanged. 
+    Otherwise this will be overwritten by data from the server.
+return_value: this is a name of a unique column in selectValues. This is whats returned by the autocomplete. Its also used as the key
+    in the created maping function that allows calculated columns to generate values based on the return value inputed in a cell
+match_string: the name appended to selectValues and search by the autocomplete widget. the input is searched against this column.
+    in general its a concatenation of all the columns
+map_string_function: a function provided in the form function (select_value_row) { //concatenate columns return select_value_row[map_string_name]}
+    this function allows for custom function to create match string. Otherwise all columns are concatenated together and spacing is removed.
+map_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
+    to extract the selectValues array. 
+map_params: this is an object. If provided can send paramters along with the map_route to determine how to filter out the map_route.
+crud_value: 
+map_function:
+return_field: this is the name of the column that the data will be saved to. Its used when the name of the column being pulled is different then the
+    save column. For example, classification_name i.e. App or Physician is the value displayed and used for the autocomplete, however in the providers
+    table the value is stored as classification_id. So in this example field would be classification_name and return_field would be classification_id
 
+Inputs:
+grid_column_rules: Array of grid_column_rule
+autocomplete_map: this object is sent from the main_page.vue it will store all the autocomplete information used by AutocompleteAg and corresponding
+    calculated functions
+axios_object: This is the axios module. Its passed from the main_page.vue. This allows for cals to be made to the server.
+grid_params: This contains additional information and functions for initializing the data grid. Here it will be used to send data to the user
+    to update on the status of loading data. If and error occurs this module throws and error.
 
+axios return object
+{ 'error_msg': err_msg, 'is_error': true, 'rows': [], 'table_name': table_name, 'route_name': route_name }
 
+Returns:
+autocomplete_map[field] -> {'selectValues': [{}], 'mapFunction': map_function, 'key': return_value, 'crud_value', crud_value }
 -->
 
 

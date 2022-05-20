@@ -39,7 +39,7 @@ export default {
       columnDefs2: null,
       rowData2: null,
       showModal:true,
-      modalx: {modal1: true}
+      modalx: {modal1: false}
 
 
 
@@ -92,9 +92,9 @@ export default {
     ];
 
     this.rowData = [
-      { make: "Toyota", model: "Celica", price: 35000, number: 1, date: 'abcde', lang: null, bool: true , "meta": this.modalx }
-      // { make: "Ford", model: "Mondeo", price: 32000, number: 2, date: null, lang: null, bool: true },
-      // { make: "Porsche", model: "Boxster", price: 72000, number: 3, date: null, lang: null, bool: true },
+      { make: "Toyota", model: "Celica", price: 35000, number: 1, date: 'abcde', lang: null, bool: true , "meta": this.modalx },
+      { make: "Ford", model: "Mondeo", price: 32000, number: 2, date: null, lang: null, bool: true , "meta": this.modalx },
+      { make: "Porsche", model: "Boxster", price: 72000, number: 3, date: null, lang: null, bool: true , "meta": this.modalx },
     ],
 
     this.columnDefs2 = [{ field: "yolo" }],

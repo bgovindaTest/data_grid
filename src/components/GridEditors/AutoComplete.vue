@@ -74,7 +74,6 @@ gridWidth + 'px'
         :rowSelection="rowSelection"
         :overlayLoadingTemplate="overlayLoadingTemplate"
         :overlayNoRowsTemplate="overlayNoRowsTemplate"
-        stopEditingWhenGridLosesFocus: true
         @gridReady="onGridReady($event)"
         @rowClicked="rowClicked($event)"
         @keydown.down = 'onKeydown'
@@ -132,8 +131,7 @@ export default {
             // this simple editor doubles any value entered into the input
             let fx = this.handleClickOutside
             document.removeEventListener('click', fx)
-
-
+            this.params.eGridCell.focus()
             return this.value;
         },
 
@@ -155,12 +153,6 @@ export default {
 
         rowConfirmed() {
             let x = this.gridApi.getSelectedRows()[0]
-            // console.log( x )
-            // console.log( this.gridApi.getDisplayedRowAtIndex(0) )
-            //if x is undefined?
-
-
-
             if (this.gridApi.getSelectedRows()[0]) {
                 this.selectedObject = this.gridApi.getSelectedRows()[0];
                 this.isCanceled = false;
@@ -280,28 +272,21 @@ export default {
 
             // }
             if (!this.$refs.autoCompleteArea.contains(event.target)) {
+                //reset values?
                 this.params.api.stopEditing(); 
 
             }
 
         },
 
-    // mounted() { document.addEventListener('click', this.handleClickOutside)},
-    // destroyed() { document.removeEventListener('click', this.handleClickOutside)},
-
-
    },
     mounted() {
-        console.log('mounted')
         document.addEventListener('click', this.handleClickOutside)
-
         this.input = this.$refs.input;
         this.value = this.params.value;
         if (this.params.key == "Backspace") {this.value = "" } 
         else if (this.params.key == "Delete") { this.value = ""}
         else if (this.params.charPress !== null ) { this.value = this.params.charPress }
-        console.log(this.params.return_value)
-        console.log(this.params.column_info)
         this.$nextTick(() =>  { this.$refs.input.focus() } );
     }
 }

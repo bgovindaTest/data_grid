@@ -12,7 +12,6 @@ let that = null
 
 function OnClose (dates, currentdatestring, picker) {
         //very hacky not sure if it will hold
-		console.log("on closed fired")
         setTimeout(() => {  that.params.api.stopEditing(); }, 10);
 }
 
@@ -87,7 +86,6 @@ export default {
    methods: {
         getValue() {
             // this simple editor doubles any value entered into the input
-            console.log(typeof this.date)
             return this.date;
         },
 

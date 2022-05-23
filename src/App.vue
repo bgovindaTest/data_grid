@@ -101,6 +101,21 @@ export default {
             field: "number",
             //cellEditor: "doublingEditor",
             cellEditor: "autoComplete",
+            cellEditorParams: {
+                return_value: 'appointment_code',
+                //display_value
+                //crud_value:
+                column_info: [
+                    {header: "id" , init_width: 50},
+                    {header: "name", init_width: 50},
+                    {header: "username", init_width: 75 },
+                    {header: "email", init_width: 200 },
+                    {header: "phone", init_width: 150 },
+                    {header: "website", init_width: 100 }
+                ]
+            },
+
+
             editable: true,
             width: 300
       },

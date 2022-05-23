@@ -2,10 +2,11 @@
 This module is responsible for initializing the data parameters and functions required for the autocomplet widget.
 Each grid_column_rule has the structure below. A more indepth description is in ./library/grid_rules.js
   {
-    field: 'field_name
-    cellEditorFramework: 'AutocompleteAg'
+    field: 'field_name,
+    data_type: 
+    cellEditorFramework: "autoComplete"
     cellEditorParams: {
-        selectValues: selectValues,
+        rowDataValues: selectValues, for drop down?
         return_value: 'appointment_code', (return_value is used as key)
         column_info: [
             {header: "id" , init_width: 50},
@@ -15,45 +16,36 @@ Each grid_column_rule has the structure below. A more indepth description is in 
             {header: "phone", init_width: 150 },
             {header: "website", init_width: 100 }
         ]
-        match_string: (string) default __match_string__
-        match_string_function: function?
         map_route: string
         map_params: {} 
         crud_value: 'id'
-        map_function: //the map function is place here during initialization
         return_field: ""
+        view_aliases: {}
+        lookup_aliases: {}
     }
+
+    //make object by default. 
+
+    cellEditor: "autoComplete",
 The cellEditorFramework must be equal to 'AutocompleteAg' This tells the grid which input format to use.
 selectValues: is the array that contains all the data and return values for the autocomplete column and related calculated fields. The data can be 
     initialized in each ./pages/xxx.vue if no map_route is defined i.e. !grid_row_rule.hasOwnProperty('map_route') this will be left unchanged. 
     Otherwise this will be overwritten by data from the server.
 return_value: this is a name of a unique column in selectValues. This is whats returned by the autocomplete. Its also used as the key
     in the created maping function that allows calculated columns to generate values based on the return value inputed in a cell
-match_string: the name appended to selectValues and search by the autocomplete widget. the input is searched against this column.
-    in general its a concatenation of all the columns
-map_string_function: a function provided in the form function (select_value_row) { //concatenate columns return select_value_row[map_string_name]}
-    this function allows for custom function to create match string. Otherwise all columns are concatenated together and spacing is removed.
-map_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
+api_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
     to extract the selectValues array. 
-map_params: this is an object. If provided can send paramters along with the map_route to determine how to filter out the map_route.
-crud_value: 
-map_function:
-return_field: this is the name of the column that the data will be saved to. Its used when the name of the column being pulled is different then the
-    save column. For example, classification_name i.e. App or Physician is the value displayed and used for the autocomplete, however in the providers
-    table the value is stored as classification_id. So in this example field would be classification_name and return_field would be classification_id
+    use post or get route?
+crud_value:
 
-Inputs:
-grid_column_rules: Array of grid_column_rule
-autocomplete_map: this object is sent from the main_page.vue it will store all the autocomplete information used by AutocompleteAg and corresponding
-    calculated functions
-grid_params: This contains additional information and functions for initializing the data grid. Here it will be used to send data to the user
-    to update on the status of loading data. If and error occurs this module throws and error.
 
 axios return object
 { 'error_msg': err_msg, 'is_error': true, 'rows': [], 'table_name': table_name, 'route_name': route_name }
 
 Returns:
 autocomplete_map[field] -> {'selectValues': [{}], 'mapFunction': map_function, 'key': return_value, 'crud_value', crud_value }
+
+gridWidth + 'px'
 -->
 
 
@@ -74,20 +66,21 @@ autocomplete_map[field] -> {'selectValues': [{}], 'mapFunction': map_function, '
 
     />
     <ag-grid-vue
-      style="font-weight: 150;"
-      :style="{ height: gridHeight + 'px', 'max-width': gridWidth + 'px' }"
-      class="ag-theme-alpine"
-      :columnDefs="columnDefs"
-      :rowData="rowData"
-      :rowSelection="rowSelection"
-      @gridReady="onGridReady($event)"
-      @rowClicked="rowClicked($event)"
-      @keydown.down = 'onKeydown'
-      @keydown.up = 'onKeydown'
-
-      @keydown.enter = 'onKeydown'
-
-      @keydown = 'onKeydown'
+        style="font-weight: 150;"
+        :style="{ height: gridHeight + 'px', 'max-width': gridWidth + 'px' }"
+        class="ag-theme-alpine"
+        :columnDefs="columnDefs"
+        :rowData="rowData"
+        :rowSelection="rowSelection"
+        :overlayLoadingTemplate="overlayLoadingTemplate"
+        :overlayNoRowsTemplate="overlayNoRowsTemplate"
+        stopEditingWhenGridLosesFocus: true
+        @gridReady="onGridReady($event)"
+        @rowClicked="rowClicked($event)"
+        @keydown.down = 'onKeydown'
+        @keydown.up = 'onKeydown'
+        @keydown.enter = 'onKeydown'
+        @keydown = 'onKeydown'
 
     ></ag-grid-vue>
   </div>
@@ -97,16 +90,12 @@ autocomplete_map[field] -> {'selectValues': [{}], 'mapFunction': map_function, '
 import { AgGridVue } from "ag-grid-vue3";
 const debounce = require('debounce')
 
-function hi() {console.log('debounce hi')}
-
-debounce(hi, 500)
-//   @gridReady="onGridReady($event)"
-
 export default {
  
    data() {
        return {
             gridApi: null,
+
             value: null,
             queryChars: 2,
             gridHeight: 175,
@@ -125,19 +114,15 @@ export default {
                 { x: "Porsche", y: "Boxster"},
                 { x: "Brandon", y: "G"},
                 { x: "Kim", y: "K"},
-            ]
+            ],
+
+            overlayNoRowsTemplate: '<span class="ag-overlay-loading-center">No Rows</span>',
+            overlayLoadingTemplate: '<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
        }
     },
 
-  components: {
-    "ag-grid-vue":AgGridVue
-  },
+    components: { "ag-grid-vue":AgGridVue} ,
 
-//   watch: {
-//     inputValue(val) {
-//       this.processDataInput(val);
-//     },
-//   },
 
 
    methods: {
@@ -145,6 +130,10 @@ export default {
        // the final value to send to the grid, on completion of editing
         getValue() {
             // this simple editor doubles any value entered into the input
+            let fx = this.handleClickOutside
+            document.removeEventListener('click', fx)
+
+
             return this.value;
         },
 
@@ -192,6 +181,7 @@ export default {
         },
 
         onGridReady(event) {
+            console.log('ongridread')
             this.gridApi = event.api;
             // this.gridApi.sizeColumnsToFit();
             // this.columnFilter = this.gridApi.getFilterInstance(this.propertyName);
@@ -249,62 +239,71 @@ export default {
             else { this.$refs.input.focus() }
         },
 
-        change: debounce( function(e) {
+        change: debounce( async function(e) {
+                this.gridApi.showLoadingOverlay();
+                // await new Promise(r => setTimeout(r, 2000))
                 this.gridApi.setQuickFilter(this.value)
                 if (this.gridApi.getDisplayedRowAtIndex(0) !== undefined) {
                     this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
                     this.gridApi.ensureIndexVisible(0, "top");
                 }
-            }, 500
+                this.gridApi.hideOverlay()
+            }, 1000
         ),
 
-
-
-        // change() {
-        //     this.gridApi.setQuickFilter(this.value)
-        //     if (this.gridApi.getDisplayedRowAtIndex(0) !== undefined) {
-        //         this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
-        //         this.gridApi.ensureIndexVisible(0, "top");
-        //     }
-
-
-        //     let fx = this.test_log
-        //     debounce(fx, 5000)
-        // },
-
-        test_log() {
-            console.log('hola')
-        },
-
-
-
-        updateFilter() {
-            if (this.columnFilter && this.gridApi) {
-                this.columnFilter.setModel({
-                type: "startsWith",
-                filter: this.inputValue,
-                });
-                this.columnFilter.onFilterChanged();
-                if (this.gridApi.getDisplayedRowAtIndex(0)) {
-                this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
-                this.gridApi.ensureIndexVisible(0, "top");
-                } else {
-                this.gridApi.deselectAll();
+        client_filter() {
+                this.gridApi.showLoadingOverlay();
+                this.gridApi.setQuickFilter(this.value)
+                if (this.gridApi.getDisplayedRowAtIndex(0) !== undefined) {
+                    this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
+                    this.gridApi.ensureIndexVisible(0, "top");
                 }
-            }
+                this.gridApi.hideOverlay()
         },
+
+
+
+        async server_filter() {
+            this.gridApi.showLoadingOverlay()
+            //try catch
+
+            //await filter
+            //clear row_data
+            //add_new_data
+            this.gridApi.hideOverlay()
+
+        },
+        set_params() {},
+        handleClickOutside(event) {
+            // if (!this.$el.contains(event.target)) {
+            //     this.params.api.stopEditing();
+
+            // }
+            if (!this.$refs.autoCompleteArea.contains(event.target)) {
+                this.params.api.stopEditing(); 
+
+            }
+
+        },
+
+    // mounted() { document.addEventListener('click', this.handleClickOutside)},
+    // destroyed() { document.removeEventListener('click', this.handleClickOutside)},
+
 
    },
     mounted() {
+        console.log('mounted')
+        document.addEventListener('click', this.handleClickOutside)
+
         this.input = this.$refs.input;
         this.value = this.params.value;
         if (this.params.key == "Backspace") {this.value = "" } 
         else if (this.params.key == "Delete") { this.value = ""}
         else if (this.params.charPress !== null ) { this.value = this.params.charPress }
+        console.log(this.params.return_value)
+        console.log(this.params.column_info)
         this.$nextTick(() =>  { this.$refs.input.focus() } );
     }
-
-
 }
 
 

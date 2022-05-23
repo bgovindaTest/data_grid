@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
 import 'ag-grid-enterprise';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -16,4 +18,6 @@ library.add(faAngleDown, faTrashAlt, faTrashRegular, faUndo)
 // Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 // createApp(App).mount('#app')
-createApp(App).component("font-awesome-icon", FontAwesomeIcon).mount('#app')
+const app = createApp(App).component("font-awesome-icon", FontAwesomeIcon) //.mount('#app')
+app.use(VueAxios, axios.create({ baseURL: 'https://jsonplaceholder.typicode.com/todos/'  }  ))
+app.mount('#app')

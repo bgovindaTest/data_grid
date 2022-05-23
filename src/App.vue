@@ -1,7 +1,12 @@
 <template>
-  <h1>hola</h1>
-  <button @click="bxc()"> clickx </button>
-  <!-- <grid-header />
+  <!-- <h1>hola</h1>
+  <button @click="bxc()"> nada </button>
+  <div>
+    <button @click="json_pholder()"> call </button>
+    <div>{{ph}}</div>
+  </div> -->
+
+ <grid-header />
   <ag-grid-vue
     style="width: 100%; height: calc(100vh - 3.25rem)"
     class="ag-theme-alpine"
@@ -9,6 +14,7 @@
     :rowData="rowData"
   >
   </ag-grid-vue>
+  <!--
     <Modal v-model="modalx.modal1" modal-class="fullscreen-modal" title="My first modal">
         <ag-grid-vue
           style="width: 100%; height: 100%"
@@ -27,7 +33,7 @@ import { AgGridVue } from "ag-grid-vue3";
 import AutoComplete from "./components/GridEditors/AutoComplete"
 import DateSelector from "./components/GridEditors/DateSelector"
 import DeleteUndoSelector from "./components/GridEditors/DeleteUndoSelector"
-import SubGridSelector from "./components/GridEditors/SubGridSelector"
+// import SubGridSelector from "./components/GridEditors/SubGridSelector"
 import GridHeader from "./components/GridLayout/Header"
 import VueModal from '@kouts/vue-modal'
 
@@ -42,6 +48,8 @@ export default {
       columnDefs2: null,
       rowData2: null,
       showModal:true,
+      count: 1,
+      ph: 'hola',
       modalx: {modal1: false}
 
 
@@ -56,27 +64,35 @@ export default {
     }
 
   },
-  // computed: {
-  //   url_header () {
-  //     return this.$route
-  //   }
-  // },
+  methods: {
+    async json_pholder () {
+      let x = this.count
+      this.count +=1
+      // let rx = `https://jsonplaceholder.typicode.com/todos/${x}`
+      let rx = '/' + String(x)
+      console.log(rx)
+      let response = await this.axios.get(rx)
+      let data = response.data
+      this.ph = data
+
+    }
+  },
 
   components: {
     "ag-grid-vue":AgGridVue,
     "autoComplete": AutoComplete,
     "dateSelector": DateSelector,
     "deleteUndoSelector": DeleteUndoSelector,
-    "subGridSelector": SubGridSelector,
+    // "subGridSelector": SubGridSelector,
     "grid-header": GridHeader,
     "Modal": VueModal
   },
   beforeMount() {
 
     this.columnDefs = [
-      { field: "sub_grid",
-        cellRenderer: "subGridSelector"
-      },      
+      // { field: "sub_grid",
+      //   cellRenderer: "subGridSelector"
+      // },      
       { field: "make" },
       { field: "model" },
       { field: "price", editable: true },

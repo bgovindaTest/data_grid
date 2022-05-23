@@ -46,6 +46,7 @@ Inputs:
 grid_column_rules: Array of grid_column_rule
 autocomplete_map: this object is sent from the main_page.vue it will store all the autocomplete information used by AutocompleteAg and corresponding
     calculated functions
+axios_object: This is the axios module. Its passed from the main_page.vue. This allows for cals to be made to the server.
 grid_params: This contains additional information and functions for initializing the data grid. Here it will be used to send data to the user
     to update on the status of loading data. If and error occurs this module throws and error.
 
@@ -95,11 +96,6 @@ autocomplete_map[field] -> {'selectValues': [{}], 'mapFunction': map_function, '
 
 <script>
 import { AgGridVue } from "ag-grid-vue3";
-const debounce = require('debounce')
-
-function hi() {console.log('debounce hi')}
-
-debounce(hi, 500)
 //   @gridReady="onGridReady($event)"
 
 export default {
@@ -113,7 +109,6 @@ export default {
             gridWidth: 375,
             rowSelection: "single",
             propertyName: 'x',
-            is_async: false,
             columnDefs: [
                 { field: "x" },
                 { field: "y" },
@@ -166,8 +161,8 @@ export default {
 
         rowConfirmed() {
             let x = this.gridApi.getSelectedRows()[0]
-            // console.log( x )
-            // console.log( this.gridApi.getDisplayedRowAtIndex(0) )
+            console.log( x )
+            console.log( this.gridApi.getDisplayedRowAtIndex(0) )
             //if x is undefined?
 
 
@@ -176,7 +171,7 @@ export default {
                 this.selectedObject = this.gridApi.getSelectedRows()[0];
                 this.isCanceled = false;
                 this.value = this.selectedObject['x']
-                //console.log(this.value)
+                console.log(this.value)
             }
             //get firs row_data field?
             this.params.api.stopEditing();
@@ -231,8 +226,16 @@ export default {
 
 
         onKeydown(event) {
+
+            console.log(event)
             if (event.key == "ArrowLeft" || event.key == "ArrowRight") { return false; }
+
+
+
             event.stopPropagation();
+            //determine focus?
+            // console.log(event.key)
+
             if (event.key == "Escape") {
                 this.params.api.stopEditing();
                 // this.$refs.autoCompleteArea.removeEventListener("keydown", () => null);
@@ -246,67 +249,94 @@ export default {
                 this.navigateGrid();
                 return false;
             }
-            else { this.$refs.input.focus() }
-        },
-
-        change: debounce( function(e) {
-                this.gridApi.setQuickFilter(this.value)
-                if (this.gridApi.getDisplayedRowAtIndex(0) !== undefined) {
-                    this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
-                    this.gridApi.ensureIndexVisible(0, "top");
-                }
-            }, 500
-        ),
-
-
-
-        // change() {
-        //     this.gridApi.setQuickFilter(this.value)
-        //     if (this.gridApi.getDisplayedRowAtIndex(0) !== undefined) {
-        //         this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
-        //         this.gridApi.ensureIndexVisible(0, "top");
-        //     }
-
-
-        //     let fx = this.test_log
-        //     debounce(fx, 5000)
-        // },
-
-        test_log() {
-            console.log('hola')
-        },
-
-
-
-        updateFilter() {
-            if (this.columnFilter && this.gridApi) {
-                this.columnFilter.setModel({
-                type: "startsWith",
-                filter: this.inputValue,
-                });
-                this.columnFilter.onFilterChanged();
-                if (this.gridApi.getDisplayedRowAtIndex(0)) {
-                this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
-                this.gridApi.ensureIndexVisible(0, "top");
-                } else {
-                this.gridApi.deselectAll();
-                }
+            else {
+                this.$refs.input.focus()
             }
         },
 
+
+
+    change() {
+        console.log('change')
+        this.gridApi.setQuickFilter(this.value)
+
+        this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
+        this.gridApi.ensureIndexVisible(0, "top");
+
+
+    },
+
+    updateFilter() {
+      if (this.columnFilter && this.gridApi) {
+        this.columnFilter.setModel({
+          type: "startsWith",
+          filter: this.inputValue,
+        });
+        this.columnFilter.onFilterChanged();
+        if (this.gridApi.getDisplayedRowAtIndex(0)) {
+          this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
+          this.gridApi.ensureIndexVisible(0, "top");
+        } else {
+          this.gridApi.deselectAll();
+        }
+      }
+    },
+
+
+    //setFirstRow
+    //debounce
+    //xyz
+
    },
-    mounted() {
+   mounted() {
         this.input = this.$refs.input;
+
         this.value = this.params.value;
-        if (this.params.key == "Backspace") {this.value = "" } 
-        else if (this.params.key == "Delete") { this.value = ""}
-        else if (this.params.charPress !== null ) { this.value = this.params.charPress }
-        this.$nextTick(() =>  { this.$refs.input.focus() } );
-    }
+
+
+        if (this.params.key == "Backspace") {
+            this.value = ""
+        } else if (this.params.key == "Delete") {
+            this.value = ""
+        } else if (this.params.charPress !== null ) {
+            this.value = this.params.charPress
+        }
+
+        this.$nextTick(() => 
+        {
+            this.$refs.input.focus()
+
+        }
+
+        
+        
+        
+        );
+   }
 
 
 }
 
+// cellEditingStopped(event) {
+//     this.gridApi.setFocusedCell(event.rowIndex, event.colDef.field);
+// }
+
+//   <ag-grid-angular 
+//     style="height: 300px; width: 600px;" 
+//     class="ag-theme-balham"
+//     [rowData]="rowData" 
+//     [columnDefs]="columnDefs"
+//     [frameworkComponents]="frameworkComponents"
+//     (gridReady)="onGridReady($event)"
+//     (cellEditingStopped)="cellEditingStopped($event)"
+//     >
+//   </ag-grid-angular>
 
 
 </script>
+
+
+<style lang="scss">
+  @import "~ag-grid-community/dist/styles/ag-grid.css";
+  @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
+</style>

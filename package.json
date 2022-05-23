@@ -15,11 +15,14 @@
     "ag-grid-community": "^27.2.1",
     "ag-grid-enterprise": "^27.2.1",
     "ag-grid-vue3": "^27.2.1",
+    "axios": "^0.27.2",
     "core-js": "^3.6.5",
+    "debounce": "^1.2.1",
     "flatpickr": "^4.6.13",
     "mathjs": "^10.5.3",
     "moment": "^2.29.3",
     "vue": "^3.0.0",
+    "vue-axios": "^3.4.1",
     "vue-flatpickr-component": "^9.0.6"
   },
   "devDependencies": {

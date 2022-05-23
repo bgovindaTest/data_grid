@@ -86,6 +86,7 @@ export default {
    methods: {
         getValue() {
             // this simple editor doubles any value entered into the input
+            this.params.eGridCell.focus()
             return this.date;
         },
 

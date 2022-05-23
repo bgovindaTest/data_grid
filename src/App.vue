@@ -1,5 +1,7 @@
 <template>
-  <grid-header />
+  <h1>hola</h1>
+  <button @click="bxc()"> clickx </button>
+  <!-- <grid-header />
   <ag-grid-vue
     style="width: 100%; height: calc(100vh - 3.25rem)"
     class="ag-theme-alpine"
@@ -15,7 +17,7 @@
           :rowData="rowData2"
         >
         </ag-grid-vue>
-    </Modal>
+    </Modal> -->
 
 
 </template>
@@ -34,6 +36,7 @@ export default {
   name: "App",
   data() {
     return {
+      bx: null,
       columnDefs: null,
       rowData: null,
       columnDefs2: null,
@@ -47,8 +50,17 @@ export default {
     };
   },
   methods: {
+    bxc() { 
+      this.bx = $route; //.query.page;
+      console.log(this.bx)
+    }
 
   },
+  // computed: {
+  //   url_header () {
+  //     return this.$route
+  //   }
+  // },
 
   components: {
     "ag-grid-vue":AgGridVue,

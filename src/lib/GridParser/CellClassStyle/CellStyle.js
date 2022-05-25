@@ -4,6 +4,8 @@ function is fired. The functions below output an css object that defines the sta
 no css change occurs. If there is an error the function will return the error css style, otherwise it will return the normal
 css for the grid.
 
+colors
+https://www.ag-grid.com/vue-data-grid/expressions-and-context/
 
 */
 const field_functions = require('@/library/app_functions/field_functions')

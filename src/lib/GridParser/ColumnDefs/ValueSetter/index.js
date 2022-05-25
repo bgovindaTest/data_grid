@@ -28,6 +28,36 @@ The function is called in @/library/init_functions/function_init.js
 */
 const moment = require('moment')
 
+function ValueSetterInit(grid_column_rule, gridParams, columnDef) {
+    /*
+    value_setter functions in the grid_rules array should have the form
+    function (input_params) {
+        //initialize paramters for return function
+        return function (params) {
+            //use paramters from input_params
+            //make some calculations
+            //return final value
+        }
+    }
+    */
+   if (!grid_column_rule.hasOwnProperty('valueSetter')) {return}
+   var valueSetterObject = grid_column_rule['valueSetter']
+   if (IsPrimitiveType(valueSetterObject) ) {
+       columnDef['valueSetter'] = valueSetterObject
+       return
+   }
+   if (!grid_column_rule['valueSetter'].hasOwnProperty('input_params') ) {
+       console.log(grid_column_rule)
+       throw new Error("Missing input params")
+    //    grid_column_rule['valueSetter']['input_params'] = {}
+   }
+   var input_params = grid_column_rule['valueSetter']['input_params']
+   ProcessInputParams( input_params, grid_column_rule, gridParams )
+   var fnx = grid_column_rule['valueSetter']['function']
+   columnDef['valueSetter'] = fnx(input_params)
+}
+
+
 function ValueAutocompleteSetter(params, map_function, selectValues, columnName, return_value, column_match_string='__match_string__') {
     /*
     The setter is used for the autocomplete widget. If copy and paste is used it will search against the selectValues
@@ -80,113 +110,6 @@ function ValueAutocompleteSetter(params, map_function, selectValues, columnName,
     return true
 }
 
-function ValueIntegerSetter(params, columnName) {
-    var newx = params.newValue
-    var oldx = params.oldValue
-    if(typeof newx === 'undefined') {return false}
-    newx = parseInt(newx)
-    if (oldx === newx) {return false}
-    if (isNaN(newx)) {
-        params.data[columnName] = null
-        return true
-    } else {
-        params.data[columnName] = newx
-        return true
-    }
-}
-
-function ValueFloatSetter(params, columnName) {
-    var newx = params.newValue
-    var oldx = params.oldValue
-    if(typeof newx === 'undefined') {return false}
-    newx = parseFloat(newx)
-    if (oldx === newx) {return false}
-    if (isNaN(newx)) {
-        params.data[columnName] = null 
-        return true
-    } else {
-        params.data[columnName] = newx
-        return true
-    }
-}
-
-function ValueDateSetter(params, columnName) {
-
-    var date_formats = ['YYYY-MM-DD','YYYY-M-DD','YYYY-MM-D','YYYY-M-D', 'MM/DD/YYYY','M/DD/YYYY','MM/D/YYYY','M/D/YYYY']
-    var afd = params.newValue
-    var moment_date = moment(afd, date_formats, true)
-    if (!moment_date.isValid()) { 
-        params.data[columnName] = null
-        return true
-    }
-    var new_date_string = moment_date.format('MM/DD/YYYY')
-    var old_date_string = params.oldValue
-    if (new_date_string === old_date_string) {return false}
-    params.data[columnName] = new_date_string
-    return true
-}
-
-function ValueStringSetter(params, columnName) {
-    var newx = params.newValue
-    var oldx = params.oldValue
-    if(typeof newx === 'undefined') {return false}
-    if(newx === null) {
-        params.data[columnName] = null
-        return false
-    }
-    newx = newx.trim()
-    if (oldx === newx) {return false}
-    if (newx === "") {
-        params.data[columnName] = null 
-        return true
-    }
-    params.data[columnName] = newx
-    return true
-}
-
-function ValueAutocompleteSetterInputParams(input_params) {
-    return function (params) {
-        return ValueAutocompleteSetter(params, input_params['mapFunction'], input_params['selectValues'], 
-            input_params['field'], input_params['return_value'])
-    }
-}
-
-function ValueIntegerSetterInputParams(input_params) {
-    return function (params) {
-        return ValueIntegerSetter(params, input_params['field'])
-    }
-}
 
 
-function ValueFloatSetterInputParams(input_params) {
-    return function (params) {
-        return ValueFloatSetter(params, input_params['field'])
-    }
-}
-
-function ValueDateSetterInputParams(input_params) {
-    return function (params) {
-        return ValueDateSetter(params, input_params['field'])
-    }
-}
-
-function ValueStringSetterInputParams(input_params) {
-    return function (params) {
-        return ValueStringSetter(params, input_params['field'])
-    }
-}
-
-
-
-module.exports = {
-    'ValueAutocompleteSetter': ValueAutocompleteSetter,
-    'ValueIntegerSetter': ValueIntegerSetter,
-    'ValueFloatSetter': ValueFloatSetter,
-    'ValueDateSetter': ValueDateSetter,
-    'ValueStringSetter': ValueStringSetter,
-    'ValueAutocompleteSetterInputParams': ValueAutocompleteSetterInputParams,
-    'ValueIntegerSetterInputParams': ValueIntegerSetterInputParams,
-    'ValueFloatSetterInputParams': ValueFloatSetterInputParams,
-    'ValueDateSetterInputParams': ValueDateSetterInputParams,
-    'ValueStringSetterInputParams': ValueStringSetterInputParams
-}
+module.exports = {}

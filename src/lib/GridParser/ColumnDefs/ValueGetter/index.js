@@ -28,6 +28,30 @@ valueGetter: function (input_params) {
 }
 */
 
+function ValueGetterInit(grid_column_rule, gridParams, columnDef) {
+    /*
+    valueGetter initialization function
+    */
+    if (!grid_column_rule.hasOwnProperty('valueGetter')) {return}
+    var valueGetterObject = grid_column_rule['valueGetter']
+    if (IsPrimitiveType(valueGetterObject) ) {
+        columnDef['valueGetter'] = valueGetterObject
+        return
+    }
+    if (!grid_column_rule['valueGetter'].hasOwnProperty('input_params') ) {
+        console.log(grid_column_rule)
+        throw new Error("Missing input params")
+        // grid_column_rule['valueGetter']['input_params'] = {}
+    }
+    var input_params = grid_column_rule['valueGetter']['input_params']
+    // console.log(input_params)
+    ProcessInputParams( input_params, grid_column_rule, gridParams )
+    var fnx = grid_column_rule['valueGetter']['function']
+    columnDef['valueGetter'] = fnx(input_params)
+
+}
+
+
 
 function ValueGetterAndSetterMap (params, map_function,  display_field, display_field_backup, 
     autocomplete_field, autocomplete_backup_field, field) {

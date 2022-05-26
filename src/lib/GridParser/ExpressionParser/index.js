@@ -3,12 +3,7 @@ This module handles converting string expression syntax into javascript function
 
 Handles function processing
 
-
-IsError
-ValueGetter
-https://mathjs.org/examples/advanced/web_server/index.html
-params
-
+If dealing with large number CreateFunction requires big parameter
 */
 import {create, all} from 'mathjs'
 import type_check from '../../TypeCheck'
@@ -39,13 +34,32 @@ function lookup(lookup_column, lookup_column_name, params) {
 function ImportFunctions(mathx) {
     mathx.import({
         "ifnull": ifnull,
-        "lookup": lookup
+        "lookup": lookup,
+        'isobject': type_check.IsObject,
+        'isstring': type_check.IsString,
+        'isarray': type_check.IsArray,
+        'isboolean': type_check.IsBoolean,
+        'isnumber': type_check.IsNumber,
+        'isbasictype': type_check.IsBasicType,
+        'isnull': type_check.IsNull,
+        'isinteger': type_check.IsInteger,
+        'isdate': type_check.IsDate,
+        'isundefined': type_check.IsUndefined
     })
 }
 
-function CreateScopeObject (params, globals,global_prefix="") {
-    let scopex = params.data
-    scopex['_global_'] = globals
+function CreateScopeObject (params_data, globals) {
+    //params_data is params.data from aggrid rows
+    let scopex = {}
+    let params_keys = Object.keys(params_data)
+    for (var i=0; i < params_keys.length; i++) {
+        scopex[params_keys[i]] = params_data[ params_keys[i] ]
+    }
+    // console.log(globals)
+    let keys = Object.keys(globals)
+    for (var i=0; i < keys.length; i++) {
+        scopex[keys[i]] = globals[ keys[i] ]
+    }
     return scopex
 }
 
@@ -55,7 +69,7 @@ function CreateFunction(expression, mjx_type=null) {
     if (mjx_type === 'big' ) {
         mx = math_big
     }
-    return math.complile(expression)
+    return math.compile(expression)
 }
 
 function DeactivateInsecureFunctions(mathx) {
@@ -70,7 +84,37 @@ function DeactivateInsecureFunctions(mathx) {
       }, { override: true })
 }
 
-function EvaluateFunction(mjs_fn, scope, globals) {
+function EvaluateFunction(fn, params, globals) {
     //add globals?
-    return mjs_fn.evaluate(scope)
+    let scope = CreateScopeObject(params, globals)
+    return fn.evaluate(scope)
+}
+
+function CreateAggridFunction( expr, globals, options ) {
+
+    let mathjs_type_set = null
+    if (options.hasOwnProperty['mathjs_type_set'] ) {
+        mathjs_type_set = options['mathjs_type_set']
+    }
+    //options is big
+
+    let fx = CreateFunction(expr, mathjs_type_set )
+    let fn = function (params) {
+        let res = EvaluateFunction(fx, params, globals)
+        return res
+    }
+    return fn
+}
+
+ImportFunctions(math)
+ImportFunctions(math_big)
+
+module.exports = {
+    "math":math,
+    "math_big": math_big,
+    "CreateScopeObject": CreateScopeObject,
+    "CreateFunction": CreateFunction,
+    "DeactivateInsecureFunctions": DeactivateInsecureFunctions,
+    "EvaluateFunction":EvaluateFunction,
+    "CreateAggridFunction": CreateAggridFunction
 }

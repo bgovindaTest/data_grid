@@ -1,8 +1,9 @@
 /*
 gridObjects: {
-    '__init_params__':  { }
-    '__default_values__': { }
-
+    '__init_params__':  { },
+    '__url_params__': { },
+    '__default_values__': { },
+    '__drop_downs__': {},
 
     //first grid if main doesnt exists
     //others are subgrid to be called
@@ -12,7 +13,26 @@ gridObjects: {
     }
 }
 
-columDefs:
+if autocomplete path to api and/or name of dropdown.
+is flat or object
+
+headerParams:
+    new_sheet:
+    allow_insert:
+
+crudRoute:
+    default: ->
+    select:  ->
+    insert:  ->
+    update:  ->
+    delete:  ->
+
+New Row Inputs:
+new_row_inputs = {} is an object passed from url page in pages folder. It contains parameters for what to put in each row
+    when insert row is selected. Default ke:value pairs are used in place when their is not a value already in place.
+
+
+columDefs: these keys are checked and modified based on initial entry. Everythign in columnDefs is passed to Aggrid.
     headerName: (string) Name of column displayed in aggrid table. If object is empty the value in field is used
     field: (string) column_name stored in each row in row_data. i.e.
         rowData = [ {'field_name': value11, 'field_name2': value12}, {'field_name': value21, 'field_name2': value22} ]
@@ -23,7 +43,7 @@ columDefs:
     valueFormatter: blah
     width: (integer or grid_rules_object). Generally an integer. Sets the intial width of the columns 
     suppressMenu: (boolean) should generally be set to true.  
-    cellStyle: (grid_rules_object). This function controls the style of each cell. If its a funciton its fired everytime the row changes.  
+    cellClassStyle: (grid_rules_object). This function controls the style of each cell. If its a funciton its fired everytime the row changes.  
     resizable: (boolean) default should set to true,
     lockVisible: (boolean) default should set to true
     editable: (boolean or grid_rules_object): Used to determine if a user can click into a cell and edit the contents. The user_permissions get passed to
@@ -47,7 +67,8 @@ configuration:
     is_server_field: (boolean) this is used by the grid_rules_object to determine if this column should be sent to the server. This is required sense editable
         field can take a function, which makes the information ambiguous if it should be sent to the server.
         if is_editable is default server field along with id?
-    help:
+            editable sends fields by default.
+    grid_help:
     
 metaFields:
     backup_field:
@@ -56,22 +77,14 @@ metaFields:
     data_type:
     has_been_modified: bool (default false)
 
-reRoute:
-//select route
-//insert route
-//update route
-//delete route
-//new row insert rule.
-New Row Inputs:
-new_row_inputs = {} is an object passed from url page in pages folder. It contains parameters for what to put in each row
-    when insert row is selected. Default ke:value pairs are used in place when their is not a value already in place.
-
 */
 // import field_functions from "@/library/app_functions/field_functions"
 
 //InitialParams
 //ExpressionParser
 //ColumnDefs
+
+const meta_field = '__meta_field__'
 
 class ExpressionParser {
     constructor(json_grid, global_params) {

@@ -147,4 +147,42 @@ export default {
     }
   }
 }
+
+function ColumnSortParams(where_sort_rules) {
+    /*
+    This function takes the where_sort_rules object and creates two objects used to determine what
+    columns can be sorted from the server data and an object to store the rules for the sort passed. The variable_name
+    is added to columnSortNames if the where_sort_rules as is_sort: true. if it has a sort_order: asc/desc as a default value
+    its added to the order_by object as a default 
+
+    returns:
+        columnSortNames: List of all columns that a user can sort by
+        order_by: [{'variable_name': , 'sort_order':}] a json list that contains what columns should be sorted
+            in what order and how.
+    */
+    var i
+    var columnSortNames = []
+    var sort_rules = []
+    for (i=0; i< where_sort_rules.length; i++) {
+        var variable_name = where_sort_rules[i].variable_name
+        if (! where_sort_rules[i].hasOwnProperty('is_sort') ) {continue}
+        var is_sort = where_sort_rules[i].is_sort
+        if (!is_sort) {continue}
+        if (!columnSortNames.includes(variable_name) ) { 
+            columnSortNames.push(variable_name) 
+            if (where_sort_rules[i].hasOwnProperty('sort_order') ) {
+                var sort_order = where_sort_rules[i].sort_order
+                if ( ['asc', 'desc'].includes(sort_order.toLowerCase()) ) {
+                    sort_rules.push({'variable_name': variable_name, 'sort_order': sort_order})
+                } else { sort_rules.push({'variable_name': variable_name, 'sort_order': 'desc'}) }
+            }
+        }
+    }
+    var output = {}
+    output['columnSortNames'] = columnSortNames
+    output['order_by'] = sort_rules
+    return output
+}
+
+
 </script>

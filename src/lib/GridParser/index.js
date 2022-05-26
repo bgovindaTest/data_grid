@@ -5,6 +5,8 @@ gridObjects: {
     '__default_values__': { },
     '__drop_downs__': {},
 
+
+    validators: {} //contains validation functions
     //first grid if main doesnt exists
     //others are subgrid to be called
     'grids': {
@@ -32,6 +34,7 @@ new_row_inputs = {} is an object passed from url page in pages folder. It contai
     when insert row is selected. Default ke:value pairs are used in place when their is not a value already in place.
 
 
+
 columDefs: these keys are checked and modified based on initial entry. Everythign in columnDefs is passed to Aggrid.
     headerName: (string) Name of column displayed in aggrid table. If object is empty the value in field is used
     field: (string) column_name stored in each row in row_data. i.e.
@@ -41,6 +44,7 @@ columDefs: these keys are checked and modified based on initial entry. Everythig
         calculated data. The valueGetter function fires everytime a value in a row changes.
     valueSetter: (optional) (grid_rules_object). Need to add for date column?
     valueFormatter: blah
+    toolTip: expression for variables
     width: (integer or grid_rules_object). Generally an integer. Sets the intial width of the columns 
     suppressMenu: (boolean) should generally be set to true.  
     cellClassStyle: (grid_rules_object). This function controls the style of each cell. If its a funciton its fired everytime the row changes.  
@@ -61,6 +65,13 @@ columDefs: these keys are checked and modified based on initial entry. Everythig
     sortable: (boolean) false
     resizable: (boolean) default should set to true,
     lockVisible: (boolean) default should set to true
+
+    NativeFields: fields are not parsed. taken as is and passed to aggrid directly
+        i.e. valueGetter = valueGetterNative
+        valueGetterNative: 
+        valueSetterNative: (optional) (grid_rules_object). Need to add for date column?
+        valueFormatterNative: blah
+        toolTipNative: expression for variables
 
 
 configuration:

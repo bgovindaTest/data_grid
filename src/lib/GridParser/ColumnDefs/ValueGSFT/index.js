@@ -1,46 +1,63 @@
 /*
-//Value Setter Helper, selectData and AutocompleteParams are required for the autocomplete functionality
-
-ValueSetterHelper modifies the return object from autocomplete into the form required for ag-grid. 
-autocomplete returns an object containing a value where as ag-grid requires a primitive type i.e. 
-string, interger, float.
-
-
-
-
-wrapped in function?
-valueSetter: function (input_params) {
-    //initalize the following from input_params. column_name, map_function, return_value, key_value, backup_key_value, map_backup_field
-    //send initialize parameters to ValueGetterAndSetMap or some other function
-    return function (params) {
-        return ValueGetterAndSetterMap(params, column_name, map_function, return_value, key_value, backup_key_value, map_backup_field)
-    }
-The function is called in @/library/init_functions/function_init.js
+Parses grids json object and converts expression syntax into javascript functions. 
 
 Responsible for creating valueGetter, valueSetter and valueFormatter
-
+NativeFields: fields are not parsed. taken as is and passed to aggrid directly
+    i.e. valueGetter = valueGetterNative
+    valueGetterNative: 
+    valueSetterNative: (optional) (grid_rules_object). Need to add for date column?
+    valueFormatterNative: blah
+    toolTipNative: expression for variables
 */
 const ex = require('../../ExpressionParser')
-CreateAggridFunction( expr, globals, options )
-
 
 class ValueGSFT {
-    constructor(grid, globals) {
+    constructor(grids, globals) {
         //grid is json object for aggrid
-        this.grid = grid
+        this.grids = grids
+        this.grid  = null
         this.globals = globals
 
     }
-    RunInit() {}
-    ValueSetterInit(grid_row){}
-    ValueGetterInit(grid_row){}
-    ValueFormatterInit(grid_row){}
-    ToolTipInit(grid_row){}
+    RunGridsInit() {
+        let grid_keys = Object.keys(this.grids)
+        for( let i = 0; i < grid_keys.length; i+= 1) {
+            let grid_key = grid_keys[i]
+            this.grid = this.grids[ grid_key]
+            this.RunGridInit()
+        }
+    }
+
+    RunGridInit() {
+        for(let i=0; i < this.grid.length; i++) {
+            let grid_row = this.grid[i]
+            this.ValueTransform(grid_row, 'valueGetter')
+            this.ValueTransform(grid_row, 'valueSetter')
+            this.ValueTransform(grid_row, 'valueFormatter')
+            this.ValueTransform(grid_row, 'toolTip')
+        }
+
+    }
+    ValueTransform(grid_row, parameter_name) {
+        let native_name = parameter_name +'Native'
+        let globalx = this.globals
+        if (grid_row.hasOwnProperty(parameter_name) ) {
+            let expr = grid_row[parameter_name]
+            let options = this.OptionsParser(grid_row)
+            grid_row[parameter_name] = ex.CreateAggridFunction(expr, globalx, options)
+        } else if ( grid_row.hasOwnProperty(native_name) ) {
+            grid_row[parameter_name] = grid_row[native_name]
+        }
+    }
+    OptionsParser(grid_row) {
+        let options = {}
+        if (grid_row.hasOwnProperty['data_type']) {
+            let dx = grid_row['data_type'].toLowerCase()
+            if (dx.includes('big')) { options['mathjs_type_set'] = 'big' }
+        }
+        return options
+    }
 
 }
 
-
-
-
-
-module.exports = {}
+module.exports = {'ValueGSFT': ValueGSFT}

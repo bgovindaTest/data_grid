@@ -1,11 +1,12 @@
 <template>
-
+  <button @click="CLOG()">params</button>
   <ag-grid-vue
     style="width: 100%; height: calc(100vh - 3.25rem)"
     class="ag-theme-alpine"
     :columnDefs="columnDefs"
     :rowData="rowData"
     @cell-value-changed="onCellValueChanged"
+    @grid-ready="onGridReady"
   />
 
   <!-- <h1>hola</h1>
@@ -62,8 +63,9 @@ export default {
       showModal:true,
       count: 1,
       ph: 'hola',
-      modalx: {modal1: false}
-
+      modalx: {modal1: false},
+      api: null,
+      columnApi: null
 
 
 
@@ -93,6 +95,13 @@ export default {
       let data = response.data
       this.ph = data
 
+    },
+    onGridReady: function (params) {
+      this.api = params.api;
+      this.columnApi = params.columnApi;      
+    },
+    CLOG: function () {
+      console.log(this.columnApi)
     }
   },
 
@@ -114,7 +123,7 @@ export default {
       // },      
       { field: "make" },
       { field: "model" },
-      { field: "price", editable: true },
+      { field: "price", editable: true, 'validator': function() {console.log('hi')} },
       {
             headerName: "Doubling",
             field: "number",

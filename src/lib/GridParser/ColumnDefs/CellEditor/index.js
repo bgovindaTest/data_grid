@@ -1,6 +1,8 @@
 /*
 Valid cell editors and processing?
 
+Handles dropdowns and xyz
+
 grid_init.js is the main module to initialize the app.
 
 
@@ -52,35 +54,6 @@ grid_column_rules Input Parameters: These also go in the grid_column_rules. It u
 }
 
 
-validation:  {'function': function (input_params) { return function (params) {} }, 'input_params': {}}
-cell_style:  {'function': function (input_params) { return function (params) {} }, 'input_params': {}}
-valueGetter: {'function': function (input_params) { return function (params) {} }, 'input_params': {}}
-valueSetter: {'function': function (input_params) { return function (params) {} }, 'input_params': {}}
-editable:    {'function': function (input_params) { return function (params) {} }, 'input_params': {}}
-
-Option 1: aggrid paramter has primitive type
-cell_style: (boolean, number, string)
-
-Option 2: return a function
-function (input_params) {}
-
-Option 3: return a primative type:
-function (input_params) {}
-
-#Grid Rules Object
-grid_params: {
-    defaultColDef: {},
-    crudRouteOptions: {},
-    insertRouteFunction: {} Determines how insert should initialize rows.
-    saveRouteFunction: {}
-    validation_functions: []
-    additional: function ()
-    //fields i.e. editable, backup, private?
-}
-
 
 
 */
-
-//submodal
-//delete and undo button

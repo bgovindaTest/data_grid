@@ -5,10 +5,20 @@ gridObjects: {
     '__default_values__': { },
     '__drop_downs__': {},
 
-
-    validators: {} //contains validation functions
     //first grid if main doesnt exists
     //others are subgrid to be called
+    pageParams: {
+        'main': {
+            crudRoute:
+            headerParams:
+            crudInsteadOf: {
+                'insert': 'update'
+            }
+            newRowDefaults: {}
+        }
+    }
+
+
     'grids': {
         'main': AgGridColumnDef + stuff_configurations (for headers?),
         'xyz': AgGridColumnDef,
@@ -29,10 +39,14 @@ crudRoute:
     update:  ->
     delete:  ->
 
+crudInsteadOf: {
+    'insert': 'update'
+}
+
 New Row Inputs:
 new_row_inputs = {} is an object passed from url page in pages folder. It contains parameters for what to put in each row
     when insert row is selected. Default ke:value pairs are used in place when their is not a value already in place.
-
+New Row defaults really needed for submodal behavior
 
 
 columDefs: these keys are checked and modified based on initial entry. Everythign in columnDefs is passed to Aggrid.
@@ -96,69 +110,13 @@ metaFields:
 //ColumnDefs
 
 const meta_field = '__meta_field__'
+async function GetUrlParams() {}
 
-class ExpressionParser {
-    constructor(json_grid, global_params) {
-        this.jg = json_grid
-        this.gp = global_params
-    }
-    CreateErrorFunction() {}
-    CreateValueGetterFunction(){}
-    CreateFunction() {}
-}
-
-
-async function InitializeAggrid(gridParams, grid_column_rules, autocomplete_map, axios_object) {
-    /*
-    Initialize All Maps
-    Initialize Validations
-    Initialize RowNode
-    Initialize columns in grid_row_rules
-        Extract: editable_fields, backup_fields, private_fields
-    Create Default New and Update Process Functions For Creating Rows: initializes rowData to have all 
-        editable, backup and private_fields
-
-    Create Default New and Update Process Functions For Sending Rows to the server: initializes rowData to have all 
-        editable, backup and private_fields
-    Append Server Error to columnDefs
-
-    */
-    //SetServerAndOtherDataFields?
-    // await crud_functions.PullUserPermissions(gridParams)
-    await autocomplete_init.InitializeAutocompleteMaps(grid_column_rules, autocomplete_map, axios_object, gridParams)
-    var columnDefinitions = column_def_init.CreateColumnDefinitions(grid_column_rules, gridParams)
-    // console.log(grid_column_rules)
-    return columnDefinitions
-}
-
-function CreateColumnDefinitions(grid_column_rules, gridParams) {
-    /*
 
 
 
-    */
-    var columnDefinitions = []
-    var validation_function_list = []
-    // CreateUpdatedAtColumn(grid_column_rules)
-    field_functions.InitalizeRowDataFieldsDefinitions(grid_column_rules, gridParams )
-    // function_init.CLOG()
-
-    // function_init.CLOG()
-    for (let i =0; i < grid_column_rules.length; i++) {
-        var columnDef = {}
-        var grid_column_rule = grid_column_rules[i]
-        InitializeColumnDefinitions(columnDef, grid_column_rule)
-        function_init.InitializeStyleGetSetValidEditFunctions(grid_column_rule, gridParams, columnDef,validation_function_list)
-        ColumnDefDefaultParameters(columnDef)
-        AddAutocompleteEditor(grid_column_rule, columnDef)
-        AddDateComparator(grid_column_rule, columnDef) //checks if data_type === 'date'
-        columnDefinitions.push(columnDef)
-    }
-    // //Need to initialize column def if not in grid_params.
-    CreateNodeIdColumn(validation_function_list, gridParams, columnDefinitions)
-    // CreateUpdatedAtColumn(columnDefinitions)
-    CreateServerErrorColumn(columnDefinitions)
-    return columnDefinitions
+function CreateColumnDefinitions(grid_column_rules, gridParams) {
+    /* Initial Imports */
 }
 
 

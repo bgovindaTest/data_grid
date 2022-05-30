@@ -7,6 +7,7 @@ allowNull: true/false
 defaultValue: 
 validator: function()
 isCrud: true/false  serverValid: appends if allow null permissions?
+isRequired: true/false
 
 dataType:  //used for sorting? need to add time and datetime filters
 
@@ -33,6 +34,7 @@ suppressToolPanel - removes it from the tool panel.
 
 */
 const ex = require('../../ExpressionParser')
+const type_check = require('../../TypeCheck')
 const cellClassRules = require('../CellClassRules')
 
 class ColumnDefsInit {
@@ -59,8 +61,8 @@ class ColumnDefsInit {
             this.ValueTransform(grid_column, 'valueSetter')
             this.ValueTransform(grid_column, 'valueFormatter')
             this.ValueTransform(grid_column, 'toolTip')
-            this.Validatiors(grid_column)
             this.IsEditable(grid_column)
+            this.Validators(grid_column)
             this.CellClassRules(grid_column)
         }
 
@@ -77,32 +79,29 @@ class ColumnDefsInit {
         }
     }
     CellClassRules(grid_column) {
-        let globalx = this.globals
-        if (grid_column.hasOwnProperty(this.css) ) { 
-            if (Object.keys(this.css).length === 0) {return }
+        if (grid_column.hasOwnProperty('cellClassRules') ) { 
+            if (Object.keys('cellClassRules').length === 0) {
+                let is_editable = grid_column['editable']
+                let validator_function = null
+                if (grid_column.hasOwnProperty('validator')) { validator_function = grid_column['validator'] }
+                cellClassRules.CellClassRulesInit( grid_column, is_editable, validator_function )
+            
+            }
         } else { return }
-
-        let expr = grid_column[this.is_valid]
-        let options = this.OptionsParser(grid_column)
-        grid_column[this.is_valid] = ex.CreateAggridFunction(expr, globalx, options)
-
-        let is_editable = null
-        let fvn = null
-        let cssX = null
-
-
     }
 
     HideColumns (grid_column) {
-
-
+        if (grid_column.hasOwnProperty('editable') ) { return } 
+        else { return }
     }
 
     IsEditable (grid_column) {
+        if (grid_column.hasOwnProperty('editable') ) { return } 
+        else { return }
 
     }
 
-    Validatiors(grid_column) {
+    Validators(grid_column) {
         let globalx = this.globals
         if (grid_column.hasOwnProperty(this.validator) ) {
             let expr = grid_column[this.is_valid]

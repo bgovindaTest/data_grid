@@ -534,6 +534,220 @@ function IsSaveRow(rowx) {
     else {return false}
 }
 
+/*
+This module is responsible for creating the names of all the fields (public and private) that are to be entered into each row
+or used as row level calculation paramters. This module is repsonsible for appending field_variables object into the grid_params object.
+
+Private variable start and end with two underscores. So this structure should be excluded from use as a field name.
+
+is_server_field: added in grid_column_rules. Used to determine if data in that column should be sent to the server.
+
+Initialize private variables
+
+__fieldname__backup__: each field or computed map value has a backup that can be refrence. for editable fields the data is stored
+    in the column field and the field_backup. This allows the grid to determine if values have been changed or allows referencing
+    to historical data
+__fieldname__is_valid__: ValueGetter and sets boolean?
+__is_empty__: the is a funciton that requires the editable array. the editable array are all columns that should be checked for not null
+    values if all values are null it returns true otherwise it returns false. Used to determine what crud operations to use.
+__is_complete__: check if all rows have non null values
+__is_changed__: compares editable fields to backups. if everything equivalent no change.
+__is_incomplete__: checks all fields in the editable array per row. If a row has some values entered but not all it returns true. otherwise
+    it returns false
+__is_deleted__: this is a boolean value set by the user delete function. if delete is set this will be true otherwise it will be false. If
+    __allow_delete__ is false this variable is not allowed to be set to true.
+__save_route__: this determines what route data changes should be sent to i.e. insert/update/upsert. by default new rows are insert and
+    data pulled from server are update.
+
+__allow_update__: (boolean) data sent from server or set on new insert. Used to help determine if contents are editable. New rows will generally set this to
+    true
+__allow_delete__: (boolean) data sent from server or set on new insert. Used to help determine if contents are deletable. New rows will generally set this to
+    true
+__is_assigned__: (boolean) determines if the user has specialty permissions for this data type.
+__is_query_row__: boolean. establishes if data is sent from server or created by insert on grid
+__is_new_row__:  boolean determines if row should be treated as new row regardless if sent from server or created by the grid using insert.
+
+node_id: This is added to rows during the saving functionality. This is used as a mapping to connect server data errors to the row in rowData.
+    This may or maynot be present but should not be added anywhere else within the program.
+
+id: this column is required to be defined in each table. This is the corresponding id in postgresql. node_id and id are directly called and
+    checked for on the server side.
+
+InitalizeRowDataFieldsDefinitions is the main module and it returns:
+gridParams['field_variables'] = {
+    'fields': field_list, list of all columns that had field defined in it
+    'backup_fields': field_backup_list, list of the field converted to their backup names
+    'server_fields': server_field_list, list of fields that are the primary data points to be entered by the user.
+        this data is saved to the server on save.
+    'backup_server_fields': server_field_backup_list, backup name of the server fields
+    'validation_fields': validation_fields, every data column field that also has the 'validation' object defined.
+        this will contain a validation function. This module checks for its existance and ats the field to the list
+        of fields that have validations to check for
+    'validation_field_names': validation_field_names, the list of field names covereted to the private name for validation fields
+        stored in 
+    'error_fields': error_fields, All the fields used outside of the validations used to determine if a row is ready to be saved. i.e.
+        its complete and has no error.
+    'row_parameters': list of fields used to control row level behavior such as can delete, can update, is_assigned
+    'field_map': {field} -> {'field': "", 'backup_field': "", 'validation_field': "", 'data_type': "", 'is_server_field': false, 'has_validation': false }
+}
+
+//Default crud options: When new rows are created or pulled from the server. Many of the private variables need to be initialized
+The functions below contain the default parameter which can be overwritten in the main page.
+DefaultNewRouteParameters
+DefaultUpdateRouteParameters
+
+*/
+
+function CLOG () {console.log('hi from clog')}
+
+function InitalizeRowDataFieldsDefinitions(grid_column_rules, gridParams ) {
+    /*
+    Adds field information to gridParams
+    */
+    var field_list = []
+    var server_field_list = []
+    var field_backup_list = []
+    var server_field_backup_list = []
+
+    var validation_fields = []
+    var validation_field_names = []
+
+    var field_map = {} //field, data_type, is_validation: , validation_field: itself, backup_field, is_private
+
+    for (let i=0; i< grid_column_rules.length; i++) {
+        var grid_column_rule = grid_column_rules[i]
+        FieldAppend(field_list, field_backup_list, grid_column_rule)
+        ServerFieldAppend(server_field_list, server_field_backup_list ,grid_column_rule)
+        ValidationFieldParameters(validation_fields, validation_field_names, grid_column_rule)
+        FieldMapAppend(field_map, grid_column_rule)
+    }
+    var error_fields = ErrorParamters()
+    var row_parameters = GridParameters()
+
+    gridParams['field_variables'] = {
+        'fields': field_list,
+        'backup_fields': field_backup_list,
+        'server_fields': server_field_list,
+        'backup_server_fields': server_field_backup_list,
+        'validation_fields': validation_fields,
+        'validation_field_names': validation_field_names,
+        'error_fields': error_fields,
+        'row_parameters': row_parameters,
+        'field_map': field_map
+    }
+    //full list
+}
+
+function FieldMapAppend(field_map, grid_column_rule) {
+
+    if (! grid_column_rule.hasOwnProperty('field')) { return  }
+    var dx = {'field': "", 'backup_field': "", 'validation_field': "", 'data_type': "", 'is_server_field': false, 'has_validation': false }
+
+    var field_name = grid_column_rule['field']
+
+    dx['field'] = field_name
+    dx['backup_field'] = BackupFieldName( field_name ) 
+
+    if (grid_column_rule.hasOwnProperty('is_server_field')) {
+        dx['is_server_field'] = grid_column_rule['is_server_field']
+    }
+    
+    if (grid_column_rule.hasOwnProperty('validation')) {
+        dx['validation_field'] = ValidationFieldName(grid_column_rule['field'] )
+        dx['has_validation']   = true
+    }
+
+    if (grid_column_rule.hasOwnProperty('data_type')) {
+        dx['data_type'] = grid_column_rule['data_type']
+    }
+    field_map[field_name] = dx
+
+}
+
+
+
+
+function AddDefaultParametersDefValue(input_params, field_list, default_value) {
+    for (let i=0; i < field_list.length; i++) {
+        input_params[field_list[i]] = default_value
+    }
+}
+
+//meta field
+//meta field name
+//meta fiel backup
+
+function IsError (params, validation_function_list) {
+    /*
+    Checks if all editable fields are null
+    Loops through columns in row whos keys are in the keys variable. If any value is an empty string
+    returns true. If a user enters into a cell and leaves, the grid by default leaves an empty string.
+
+    need to change empty paramters
+    */
+    var is_error = false
+    for (var i=0; i< validation_function_list.length; i++) {
+        var is_valid = validation_function_list[i](params)
+        if (!is_valid) {is_error = true}
+    }
+    params.data[field_functions.is_error()] = is_error
+    return is_error
+}
+
+function IsEmpty (params,server_fields) { 
+    //Determines if cell value is Null. If any value is empty its false
+    for (var i=0; i< server_fields.length; i++) {
+        var value = params.data[server_fields[i]]
+        if (value !== null) {
+            params.data[field_functions.is_empty()] = false
+            return
+        }
+    }
+    params.data[field_functions.is_empty()] = true
+}
+
+
+function IsComplete (params,server_fields) { 
+    //Determines if cell value is Null. If any value is empty its false
+    for (var i=0; i< server_fields.length; i++) {
+        var value = params.data[server_fields[i]]
+        if (value === null) {
+            params.data[field_functions.is_complete()] = false
+            return
+        }
+    }
+    params.data[field_functions.is_complete()] = true
+}
+
+
+function IsIncomplete(params) {
+    if( params.data[field_functions.is_complete()] || params.data[field_functions.is_empty()] ) {
+        params.data[field_functions.is_incomplete()] = false
+    } else {
+        params.data[field_functions.is_incomplete()] = true
+    }
+}
+
+
+//parameters for row
+function IsChanged (params, server_fields) {
+    //Determines if cell value is Null. If any value is empty its false
+    // console.log(server_fields)
+    for (var i=0; i< server_fields.length; i++) {
+        var value = params.data[server_fields[i]]
+        var backup_value = params.data[ field_functions.BackupFieldName(server_fields[i]) ]
+        if (value !== backup_value ) {
+            params.data[field_functions.is_changed()] = true
+            return
+        }
+    }
+    params.data[field_functions.is_changed()] = false
+    return
+}
+
+
+
+
 
 
 module.exports = {

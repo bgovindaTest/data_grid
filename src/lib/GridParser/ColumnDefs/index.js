@@ -4,12 +4,17 @@ Parses grids json object and converts expression syntax into javascript function
 gridOptions.suppressPropertyNamesCheck = true
 
 allowNull: true/false
-defaultValue: 
+
 validator: function()
 isCrud: true/false  serverValid: appends if allow null permissions?
 isRequired: true/false
 
 dataType:  //used for sorting? need to add time and datetime filters
+
+
+defaultValue: handle raw value or replacement from row params?
+defaultSortby: [1.'asc'] or
+defaultFitler: (value) 
 
 Responsible for creating valueGetter, valueSetter and valueFormatter
 NativeFields: fields are not parsed. taken as is and passed to aggrid directly
@@ -32,31 +37,35 @@ var columnDefs = [
 hide - hides the field
 suppressToolPanel - removes it from the tool panel.
 
+pageParams (rowPrams: for subgrid)\
+    globals:
+    url_params:
+    row_params: (available for subgrid )
+
+subgrid params (valid names and default)
 */
 const ex = require('../../ExpressionParser')
-const type_check = require('../../TypeCheck')
 const cellClassRules = require('../CellClassRules')
 
 class ColumnDefsInit {
-    constructor(grids, pageParams) {
-        //grid is json object for aggrid
-        this.grids = grids
-        this.grid  = null
-        this.globals = pageParams.globals || {}
-
-    }
-    RunGridsInit() {
-        let grid_keys = Object.keys(this.grids)
-        for( let i = 0; i < grid_keys.length; i+= 1) {
-            let grid_key = grid_keys[i]
-            this.grid = this.grids[ grid_key]
-            this.RunGridInit()
-        }
+    //for main loader
+    //grid is json object for aggrid
+    constructor(grid, pageParams, rowParams) {
+        this.grid  = grid
+        this.globals   = pageParams.globals || {}
+        this.dropDowns = pageParams.dropDowns || {}
+        this.urlParams = pageParams.urlParams || {}
+        this.rowParams = rowParams
     }
 
     RunGridInit() {
-        for(let i=0; i < this.grid.length; i++) {
-            let grid_column = this.grid[i]
+        //make copy?
+        //grid = JSON.parse(JSON.stringify(food)) for deep copy
+        let grid = JSON.parse(JSON.stringify(this.grid))
+        let defaultSortBy  = []  //name value?
+        let defaultFilter  = {} //name operator value
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
             this.ValueTransform(grid_column, 'valueGetter')
             this.ValueTransform(grid_column, 'valueSetter')
             this.ValueTransform(grid_column, 'valueFormatter')
@@ -64,10 +73,18 @@ class ColumnDefsInit {
             this.IsEditable(grid_column)
             this.Validators(grid_column)
             this.CellClassRules(grid_column)
+            this.CellEditorParams(grid_column)
+            //determine if defaultValue or should replaceWithRowParam
         }
-
+        defaultSortBy = this.ProcessSortBy(defaultSortBy)
+        return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter}
     }
     ValueTransform(grid_column, parameter_name) {
+        /*
+        Adds valueGetter, valueSetter, valueFormatter and toolTip. by default assumes is
+        an expression. if Navtive is used i.e. valueGetterNative. the value is passed to 
+        valueGetter with the native value.
+        */
         let native_name = parameter_name +'Native'
         let globalx = this.globals
         if (grid_column.hasOwnProperty(parameter_name) ) {
@@ -79,39 +96,62 @@ class ColumnDefsInit {
         }
     }
     CellClassRules(grid_column) {
+        /*
+        Creates cellClassRules object for aggrid. if object is present and empty creates default
+        object. otherwise each key value pair is processed. the value should be an expression syntax.
+        The class names need to be available in assets/cell_survey.scss
+        */
         if (grid_column.hasOwnProperty('cellClassRules') ) { 
-            if (Object.keys('cellClassRules').length === 0) {
+            if (Object.keys(grid_column['cellClassRules']).length === 0) {
                 let is_editable = grid_column['editable']
                 let validator_function = null
                 if (grid_column.hasOwnProperty('validator')) { validator_function = grid_column['validator'] }
                 cellClassRules.CellClassRulesInit( grid_column, is_editable, validator_function )
-            
+            }
+            else {
+                let keys = Object.keys(grid_column['cellClassRules'])
+                let globalx = this.globals
+                for (let i = 0; i< keys.length; i++) {
+                    let expression_string = grid_column['cellClassRules'][keys[i]]
+                    let fn = ex.CreateAggridFunction(expression_string, globalx, {} )
+                    grid_column['cellClassRules'][keys[i]] = fn
+                }
             }
         } else { return }
     }
 
     HideColumns (grid_column) {
-        if (grid_column.hasOwnProperty('editable') ) { return } 
-        else { return }
+        if (grid_column.hasOwnProperty('hide') ) { return } 
+        else { grid_column['hide'] = false }
     }
 
     IsEditable (grid_column) {
+        //may have read write params that need to be processed in the future
         if (grid_column.hasOwnProperty('editable') ) { return } 
-        else { return }
-
+        else { grid_column['editable'] = false }
     }
 
     Validators(grid_column) {
+        //creates validation function for aggrid cell
         let globalx = this.globals
-        if (grid_column.hasOwnProperty(this.validator) ) {
-            let expr = grid_column[this.is_valid]
+        if (grid_column.hasOwnProperty('validator') ) {
+            let expr = grid_column['validator']
             let options = this.OptionsParser(grid_column)
-            grid_column[this.is_valid] = ex.CreateAggridFunction(expr, globalx, options)
+            grid_column['validator'] = ex.CreateAggridFunction(expr, globalx, options)
         }
     }
+    //overwrite if rowParams or urlParams available?
+    DefaultValues() {}
+    DefaultSort() {}
+    DefaultOrderBy() {}
 
+    CellEditorParams() {
+        //how to handle subgrid?
+        //data types
+    }
 
     OptionsParser(grid_column) {
+        //aditional options present in 
         let options = {}
         if (grid_column.hasOwnProperty['dataType']) {
             let dx = grid_column['dataType'].toLowerCase()
@@ -119,8 +159,6 @@ class ColumnDefsInit {
         }
         return options
     }
-
 }
-
 
 module.exports = {'ColumnDefsInit': ColumnDefsInit}

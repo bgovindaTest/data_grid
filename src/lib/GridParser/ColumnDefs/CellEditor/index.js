@@ -4,10 +4,7 @@ Valid cell editors and processing?
 Handles dropdowns and xyz
 
 grid_init.js is the main module to initialize the app.
-
-
 grid_column_rules Input Parameters: These also go in the grid_column_rules. It used to set the how user enters data. Two options are below.
-
 
 2.) Autocomplete and Drop Down Widget. The autocomplete widget requires several parameters stored in cellEdtiorParams.
     selectValues: [{}] is a json array containing the data shown in the drop down and used in the autocomplete
@@ -50,6 +47,10 @@ grid_column_rules Input Parameters: These also go in the grid_column_rules. It u
         map_route: string
         map_params: {} 
         crud_value: id
+        api_route: ()
+        api_type: (get/post)
+        real_time: false
+        api_name: if drop down loaded initialy?
         map_function: //the map function is place here during initializations
 }
 
@@ -57,3 +58,12 @@ grid_column_rules Input Parameters: These also go in the grid_column_rules. It u
 
 
 */
+
+// cellEditor: 'agRichSelectCellEditor',
+// allowNull
+// cellEditorParams: {
+//     values: ['Male', 'Female'],
+//     key is first?
+//     cellEditorPopup: true,
+//   },
+// },

@@ -1,47 +1,46 @@
 /*
-gridObjects: {
-    '__init_params__':  { },
-    '__url_params__': { },
-    '__default_values__': { },
+/*
+
+    'qparams_prefix':"",
+    'url_prefix':"",
+    '__init_params__':  {},
+    '__url_params__': {},
     '__drop_downs__': {},
+    '__is_read_only__':  true/false (do the have modification permssions)
+        //if no force editable to false
 
-    //first grid if main doesnt exists
-    //others are subgrid to be called
-    pageParams: {
-        'main': {
-            crudRoute:
-            headerParams:
-            crudInsteadOf: {
-                'insert': 'update'
-            }
-            newRowDefaults: {}
-        }
+    //first grid is main. others can be called as subgrids
+    grids: [
+        {'name': 'x'
+         'help': ""
+        'headerParams': {links}
+        'crud_params': //i.e. new row, update, delete, etc read/etc
+        'columnDef': //agrid info
+        },
+        {'name': 'y'
+        'crud_params': //i.e. new row, update, delete, etc read/etc
+        'columnDef': //agrid info
+        },
+    ]
+
+    crudRoute:
+        default: ->
+        select:  ->
+        insert:  ->
+        update:  ->
+        delete:  ->
+
+    crudInsteadOf: {
+        'insert': 'update'
     }
 
 
-    'grids': {
-        'main': AgGridColumnDef + stuff_configurations (for headers?),
-        'xyz': AgGridColumnDef,
-    }
-}
-
-if autocomplete path to api and/or name of dropdown.
-is flat or object
 
 headerParams:
     new_sheet:
     allow_insert:
 
-crudRoute:
-    default: ->
-    select:  ->
-    insert:  ->
-    update:  ->
-    delete:  ->
 
-crudInsteadOf: {
-    'insert': 'update'
-}
 
 New Row Inputs:
 new_row_inputs = {} is an object passed from url page in pages folder. It contains parameters for what to put in each row
@@ -103,7 +102,6 @@ metaFields:
     has_been_modified: bool (default false)
 
 */
-// import field_functions from "@/library/app_functions/field_functions"
 
 //InitialParams
 //ExpressionParser
@@ -119,5 +117,7 @@ function CreateColumnDefinitions(grid_column_rules, gridParams) {
     /* Initial Imports */
 }
 
+
+function HeaderParams() {}
 
 //import create_automap

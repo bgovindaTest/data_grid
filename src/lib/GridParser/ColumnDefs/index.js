@@ -3,18 +3,26 @@ Parses grids json object and converts expression syntax into javascript function
 
 gridOptions.suppressPropertyNamesCheck = true
 
-allowNull: true/false
-
 validator: function()
-isCrud: true/false  serverValid: appends if allow null permissions?
-isRequired: true/false
+ 
+isCrud:   true/false
+editable: true/false {'update_only': true/false, 'insert_only': true/false}
+
 
 dataType:  //used for sorting? need to add time and datetime filters
 
+allowNull: true/false
+isRequired: true/false
+ignoreError: true/false (for calculated fields?)
 
-defaultValue: handle raw value or replacement from row params?
-defaultSortby: [1.'asc'] or
-defaultFitler: (value) 
+
+ifNull: 'psql string calls to replace value'
+defaultValue: {'value': 'string', 'type': '', 'key': '' } handle raw value or replacement from row params?
+defaultOrderby: 'asc/desc' (done by column order in columnDefs)
+defaultFitler: {'value': 'string/bool/', 'type': ''} type is 'raw'
+    from: {'field'}
+
+showFilter: default true (if false cant be changed) should hide from filter module
 
 Responsible for creating valueGetter, valueSetter and valueFormatter
 NativeFields: fields are not parsed. taken as is and passed to aggrid directly
@@ -24,16 +32,6 @@ NativeFields: fields are not parsed. taken as is and passed to aggrid directly
     valueFormatterNative: blah
     toolTipNative: expression for variables
 
-var columnDefs = [
-    {
-       headerName: "Stone_ID",
-       field: "Stone_ID",
-       width: 100,
-       hide: true,
-       suppressToolPanel: true
-    }
-]
-
 hide - hides the field
 suppressToolPanel - removes it from the tool panel.
 
@@ -42,10 +40,23 @@ pageParams (rowPrams: for subgrid)\
     url_params:
     row_params: (available for subgrid )
 
+primaryKey: 'default id'
+
+AutoComplete and Aggrid PullDown:
+
+AgGridRichSelect Editor flat data
+staticDropDownKey: 'name of drop down'
+staticDropDown: [{}]
+
 subgrid params (valid names and default)
 */
 const ex = require('../../ExpressionParser')
 const cellClassRules = require('../CellClassRules')
+const lodashClonedeep = require('lodash.clonedeep')
+const meta_column_name = '_ag-meta_'
+
+//import axios
+//create configurations.
 
 class ColumnDefsInit {
     //for main loader
@@ -55,15 +66,15 @@ class ColumnDefsInit {
         this.globals   = pageParams.globals || {}
         this.dropDowns = pageParams.dropDowns || {}
         this.urlParams = pageParams.urlParams || {}
-        this.rowParams = rowParams
+        this.rowParams = rowParams || {}
     }
 
     RunGridInit() {
         //make copy?
         //grid = JSON.parse(JSON.stringify(food)) for deep copy
-        let grid = JSON.parse(JSON.stringify(this.grid))
+        let grid = lodashCloneDeep(this.grid) //messes up column order probably?
         let defaultSortBy  = []  //name value?
-        let defaultFilter  = {} //name operator value
+        let defaultFilter  = [] //name operator value
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             this.ValueTransform(grid_column, 'valueGetter')
@@ -71,12 +82,17 @@ class ColumnDefsInit {
             this.ValueTransform(grid_column, 'valueFormatter')
             this.ValueTransform(grid_column, 'toolTip')
             this.IsEditable(grid_column)
+            this.HideColumns(grid_column)
             this.Validators(grid_column)
             this.CellClassRules(grid_column)
             this.CellEditorParams(grid_column)
-            //determine if defaultValue or should replaceWithRowParam
+            this.DefaultSortBy(grid_column,defaultSortBy)
+            this.DefaultFilter(grid_column,defaultFilter)
+            this.DefaultValue(grid_column)
+            this.DefaultParameters(grid_column)
+            this.CellWidth(grid_column)
         }
-        defaultSortBy = this.ProcessSortBy(defaultSortBy)
+        this.MetaColumn(grid)
         return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter}
     }
     ValueTransform(grid_column, parameter_name) {
@@ -120,6 +136,48 @@ class ColumnDefsInit {
         } else { return }
     }
 
+    DefaultValue(grid_column) {
+        // if string or boolean or null?
+        // defaultValue: {'value': 'string', 'type': '', 'key': '' } handle raw value or replacement from row params?
+    }
+
+    DefaultSortBy(grid_column, defaultSortBy) {
+        if (! grid_column.hasOwnProperty['defaultOrderBy']) {return}
+        let order_by = grid_column['defaultOrderBy']
+        let field = grid_column['field']
+        if (! ['asc','desc'].includes(order_by)) {
+            defaultSortBy.push({'field': field, 'order_by': order_by})
+        } else { defaultSortBy.push({'field': field, 'order_by': 'asc'}) }
+    }
+    DefaultFilter(grid_column, defaultFilter) {
+        if (! grid_column.hasOwnProperty['defaultFilter']) {return}
+        defaultFitler.push(defaultFilter)
+    }
+
+    DefaultParameters(grid_column) {
+        /* Add default condtions to column */
+        if (! grid_column.hasOwnProperty['editable']) {return}
+
+        if (! grid_column.hasOwnProperty['isCrud']) {return}
+
+        if (! grid_column.hasOwnProperty['isRequired']) {return}
+        if (! grid_column.hasOwnProperty['dataType']) {return}
+
+        if (! grid_column.hasOwnProperty['width']) {return}
+
+        if (! grid_column.hasOwnProperty['dataType']) {return}
+
+        if (! grid_column.hasOwnProperty['editable']) {return}
+        if (! grid_column.hasOwnProperty['isRequired']) {return}
+        if (! grid_column.hasOwnProperty['dataType']) {return}
+
+
+        if (! grid_column.hasOwnProperty['ifNull']) {return}
+
+        if (! grid_column.hasOwnProperty['hide']) {return}
+        // ifNull: 'psql string calls to replace value'
+    }
+
     HideColumns (grid_column) {
         if (grid_column.hasOwnProperty('hide') ) { return } 
         else { grid_column['hide'] = false }
@@ -127,6 +185,7 @@ class ColumnDefsInit {
 
     IsEditable (grid_column) {
         //may have read write params that need to be processed in the future
+        //if new row vs quried row. will decide from metadata?
         if (grid_column.hasOwnProperty('editable') ) { return } 
         else { grid_column['editable'] = false }
     }
@@ -140,14 +199,38 @@ class ColumnDefsInit {
             grid_column['validator'] = ex.CreateAggridFunction(expr, globalx, options)
         }
     }
-    //overwrite if rowParams or urlParams available?
-    DefaultValues() {}
-    DefaultSort() {}
-    DefaultOrderBy() {}
 
-    CellEditorParams() {
-        //how to handle subgrid?
-        //data types
+    MetaColumn( grid ) {
+        /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
+        let mx = {
+            'field': meta_column_name,
+            'editable': false,
+            'hide': true,
+            'suppressToolPanel': true,
+            'defaultValue': null //should be a function creates backups. and how row was added.
+        }
+        //need overwrites for debugging
+        grid.push(mx)
+    }
+
+
+    async CellEditorParams(grid_column) {
+        /*
+        Handles specialized modules. i.e. autocomplete and aggrid rich cell editor
+
+        Adds valueGetter and valueSetter inorder to handle data processing.
+
+        Pull Data if needed on init?
+
+        */
+        if (! grid_column.hasOwnProperty['cellEditor']) {return}
+        let cedit = grid_column['cellEditor']
+        //check cell editor type?
+        if (cedit === 'agRichSelectCellEditor' ) {}
+        else if (cedit === 'autoComplete' ) {}
+        else if (cedit === 'subGrid' ) {}
+        else if (cedit === 'deleteUndo' ) {}
+        else if (cedit === 'dateSelector' ) {}
     }
 
     OptionsParser(grid_column) {

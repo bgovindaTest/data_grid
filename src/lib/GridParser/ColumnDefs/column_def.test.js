@@ -25,3 +25,16 @@ test('create and evaluate function', () => {
     let res = ex.EvaluateFunction(fn, data, globals)
     expect(res).toBe(3)
 })
+
+
+class ColumnDefsInit {
+    //for main loader
+    //grid is json object for aggrid
+    constructor(grid, pageParams, rowParams) {
+        this.grid  = grid
+        this.globals   = pageParams.globals || {}
+        this.dropDowns = pageParams.dropDowns || {}
+        this.urlParams = pageParams.urlParams || {}
+        this.rowParams = rowParams
+}
+}

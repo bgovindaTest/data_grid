@@ -17,6 +17,9 @@ ignoreError: true/false (for calculated fields?)
 
 
 ifNull: 'psql string calls to replace value'
+    'default', 'current_timestamp', 'current_time','null',
+    'current_date', 'localtime', 'localtimestamp', ""
+
 defaultValue: {'value': 'string', 'type': '', 'key': '' } handle raw value or replacement from row params?
 defaultOrderby: 'asc/desc' (done by column order in columnDefs)
 defaultFitler: {'value': 'string/bool/', 'type': ''} type is 'raw'
@@ -51,6 +54,7 @@ staticDropDown: [{}]
 subgrid params (valid names and default)
 */
 const ex = require('../../ExpressionParser')
+const type_check = require('../../../TypeCheck')
 const cellClassRules = require('../CellClassRules')
 const lodashClonedeep = require('lodash.clonedeep')
 const meta_column_name = '_ag-meta_'
@@ -73,20 +77,23 @@ class ColumnDefsInit {
         //make copy?
         //grid = JSON.parse(JSON.stringify(food)) for deep copy
         let grid = lodashCloneDeep(this.grid) //messes up column order probably?
-        let defaultSortBy  = []  //name value?
+        let defaultOrderBy  = []  //name value?
         let defaultFilter  = [] //name operator value
+
+        //prepend delete_undo column
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             this.ValueTransform(grid_column, 'valueGetter')
             this.ValueTransform(grid_column, 'valueSetter')
             this.ValueTransform(grid_column, 'valueFormatter')
             this.ValueTransform(grid_column, 'toolTip')
+            this.IfNull(grid_column)
             this.IsEditable(grid_column)
             this.HideColumns(grid_column)
             this.Validators(grid_column)
             this.CellClassRules(grid_column)
             this.CellEditorParams(grid_column)
-            this.DefaultSortBy(grid_column,defaultSortBy)
+            this.DefaultOrderBy(grid_column,defaultOrderBy)
             this.DefaultFilter(grid_column,defaultFilter)
             this.DefaultValue(grid_column)
             this.DefaultParameters(grid_column)
@@ -138,16 +145,24 @@ class ColumnDefsInit {
 
     DefaultValue(grid_column) {
         // if string or boolean or null?
-        // defaultValue: {'value': 'string', 'type': '', 'key': '' } handle raw value or replacement from row params?
+        // need to make changes for linked object.
+        if (! grid_column.hasOwnProperty['defaultValue']) {return}
+        let x = grid_column['defaultValue']
+        if (type_check.IsNull(x) ) {
+            grid_column['defaultValue'] = {'value': null, 'type': 'string', 'key': '' }
+        }
+        else if (type_check.IsBasicType(x)  ) {
+            grid_column['defaultValue'] = {'value': String(x), 'type': 'string', 'key': '' }
+        }
     }
 
-    DefaultSortBy(grid_column, defaultSortBy) {
+    DefaultOrderBy(grid_column, defaultOrderBy) {
         if (! grid_column.hasOwnProperty['defaultOrderBy']) {return}
         let order_by = grid_column['defaultOrderBy']
         let field = grid_column['field']
         if (! ['asc','desc'].includes(order_by)) {
-            defaultSortBy.push({'field': field, 'order_by': order_by})
-        } else { defaultSortBy.push({'field': field, 'order_by': 'asc'}) }
+            defaultOrderBy.push({'field': field, 'order_by': order_by})
+        } else { defaultOrderBy.push({'field': field, 'order_by': 'asc'}) }
     }
     DefaultFilter(grid_column, defaultFilter) {
         if (! grid_column.hasOwnProperty['defaultFilter']) {return}
@@ -202,17 +217,74 @@ class ColumnDefsInit {
 
     MetaColumn( grid ) {
         /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
+
+        let meta_def_fns =   this.MetaColumnDefaultValues()
+        let fi = meta_def_fns['fi']
+        let fu = meta_def_fns['fu']
+
         let mx = {
             'field': meta_column_name,
             'editable': false,
             'hide': true,
             'suppressToolPanel': true,
-            'defaultValue': null //should be a function creates backups. and how row was added.
+            'defaultInsertValue': fi, //should be a function creates backups. and how row was added.
+            'defaultUpdateValue': fu //
         }
         //need overwrites for debugging
         grid.push(mx)
     }
+    MetaColumnDefaultValues( grid ) {
+        /*
+        Creates object stored in meta_column. Stores backup and 
 
+            // function (aggrid_params, backup_fields, crud_type) {
+            //     //crud_type is insert or update 
+            //  new rows default to insert. 
+            // rows generated from query default to update. crud reroutes can be set in
+            // pages config.
+            // let backups = {'backups': {}, 'row_type': '' }
+        */
+
+        //is_crud
+        //need to add column for delete
+
+        let backups = {}
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            if (! grid_column.hasOwnProperty['isCrud'] ) {continue}
+            let field_name = grid_column['field']
+            let default_value = grid_column['defaultValue'].value
+            backups[field_name] = default_value
+        }
+
+        //for rows created from querying the database
+        let fu = function (row_data) {
+            //row_data is whats stored in server object
+            let meta_column = { 'row_type': 'update', 'is_deleted': false }
+            let field_names = Object.keys(backups)
+            let meta_backup = {}
+            for (let i = 0; i< field_names.length; i++ ) {
+                let field_name = field_names[i]
+                if (row_data.hasOwnProperty(field_name) ) { meta_backup[field_name] = row_data[field_name] }
+                else { meta_backup[field_name] = null }
+            }
+            meta_column['backups'] = meta_backup
+            return meta_column
+        }
+        //for newly added rows via add row or new_sheet
+        let fi = function () {
+            let meta_column = { 'row_type': 'insert', 'is_deleted': false }
+            let field_names = Object.keys(backups)
+            let meta_backup = {}
+            for (let i = 0; i< field_names.length; i++ ) {
+                let field_name = field_names[i]
+                meta_backup[field_name] = backups[field_name]
+            }
+            meta_column['backups'] = meta_backup
+            return meta_column
+        }
+        return {'fi': fi, 'fu': fu}
+    }
 
     async CellEditorParams(grid_column) {
         /*
@@ -227,10 +299,12 @@ class ColumnDefsInit {
         let cedit = grid_column['cellEditor']
         //check cell editor type?
         if (cedit === 'agRichSelectCellEditor' ) {}
-        else if (cedit === 'autoComplete' ) {}
-        else if (cedit === 'subGrid' ) {}
-        else if (cedit === 'deleteUndo' ) {}
+
+        else if (cedit === 'subGrid' ) {} //has placeholder for modal?
+        else if (cedit === 'deleteUndo' ) {} //rules for delete/undo?
         else if (cedit === 'dateSelector' ) {}
+        else if (cedit === 'autoComplete' ) {}
+
     }
 
     OptionsParser(grid_column) {
@@ -242,6 +316,21 @@ class ColumnDefsInit {
         }
         return options
     }
+    IfNull(grid_column) {
+        //verify valid if null replacement value
+        if (grid_column.hasOwnProperty['ifNull'] ) { return }
+        let default_values = [
+            /*
+            These are default values that can be direclty entered into crud operations. These
+            */
+            'default', 'current_timestamp', 'current_time','null',
+            'current_date', 'localtime', 'localtimestamp', ""
+        ]
+        let if_null = grid_column['ifNull']
+        if (! default_values.includes(if_null) ) { grid_column['ifNull'] = 'default' }
+    }
+
 }
+
 
 module.exports = {'ColumnDefsInit': ColumnDefsInit}

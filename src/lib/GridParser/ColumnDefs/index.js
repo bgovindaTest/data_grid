@@ -26,6 +26,7 @@ defaultFitler: {'value': 'string/bool/', 'type': ''} type is 'raw'
     from: {'field'}
 
 showFilter: default true (if false cant be changed) should hide from filter module
+showSort: default true (if false cant be used for sorting)
 
 Responsible for creating valueGetter, valueSetter and valueFormatter
 NativeFields: fields are not parsed. taken as is and passed to aggrid directly
@@ -119,6 +120,9 @@ class ColumnDefsInit {
                 break
             }
         }
+        du_column['showSort']   = false
+        du_column['showFilter'] = false
+
         //hide button if all false dont show
         if (du_column.hasOwnProperty['allowAction'] ) { if (du_column['allowAction'] === false) {return} }
         //defaultParameters
@@ -214,26 +218,22 @@ class ColumnDefsInit {
     }
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
-        if (! grid_column.hasOwnProperty['editable']) {return}
-
-        if (! grid_column.hasOwnProperty['isCrud']) {return}
-
-        if (! grid_column.hasOwnProperty['isRequired']) {return}
-        if (! grid_column.hasOwnProperty['dataType']) {return}
-
-        if (! grid_column.hasOwnProperty['width']) {return}
-
-        if (! grid_column.hasOwnProperty['dataType']) {return}
-
-        if (! grid_column.hasOwnProperty['editable']) {return}
-        if (! grid_column.hasOwnProperty['isRequired']) {return}
-        if (! grid_column.hasOwnProperty['dataType']) {return}
-
-
-        if (! grid_column.hasOwnProperty['ifNull']) {return}
-
-        if (! grid_column.hasOwnProperty['hide']) {return}
+        //editable and isCrud permissions
+        if (grid_column.hasOwnProperty['editable']) {
+            if (! grid_column.hasOwnProperty['isCrud']) {grid_column['isCrud'] = true}
+            if (! grid_column.hasOwnProperty['isRequired']) { grid_column['isRequired']  = false }
+            if (! grid_column.hasOwnProperty['ignoreError']) { grid_column['ignoreError'] = false }
+            if (! grid_column.hasOwnProperty['allowNull']) { grid_column['allowNull'] = true }
+        } else { 
+            if (! grid_column.hasOwnProperty['isCrud']) {grid_column['isCrud'] = false} 
+            if (! grid_column.hasOwnProperty['isRequired']) { grid_column.hasOwnProperty['isRequired'] = false }
+            if (! grid_column.hasOwnProperty['ignoreError']) { grid_column['ignoreError'] = false }
+            if (! grid_column.hasOwnProperty['allowNull']) { grid_column['allowNull'] = true }
+        }
+        if (! grid_column.hasOwnProperty['dataType']) {grid_column['dataType'] = 'text'}
+        if (! grid_column.hasOwnProperty['width'])   { grid_column['width'] = 500 }
         // ifNull: 'psql string calls to replace value'
+        this.IfNull(grid_column)
     }
     HideColumns (grid_column) {
         if (grid_column.hasOwnProperty('hide') ) { return } 
@@ -256,7 +256,6 @@ class ColumnDefsInit {
     }
     MetaColumn( grid ) {
         /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
-
         let meta_def_fns =   this.MetaColumnDefaultValues()
         let fi = meta_def_fns['fi']
         let fu = meta_def_fns['fu']
@@ -267,7 +266,9 @@ class ColumnDefsInit {
             'hide': true,
             'suppressToolPanel': true,
             'defaultInsertValue': fi, //should be a function creates backups. and how row was added.
-            'defaultUpdateValue': fu //
+            'defaultUpdateValue': fu, //
+            'showSort': false,
+            'showFilter': false
         }
         //need overwrites for debugging
         grid.push(mx)
@@ -337,9 +338,7 @@ class ColumnDefsInit {
         let cedit = grid_column['cellEditor']
         //check cell editor type?
         if (cedit === 'agRichSelectCellEditor' ) {}
-
         else if (cedit === 'subGrid' ) {} //has placeholder for modal?
-        else if (cedit === 'deleteUndo' ) {} //rules for delete/undo?
         else if (cedit === 'dateSelector' ) {}
         else if (cedit === 'autoComplete' ) {}
 
@@ -355,7 +354,7 @@ class ColumnDefsInit {
     }
     IfNull(grid_column) {
         //verify valid if null replacement value
-        if (grid_column.hasOwnProperty['ifNull'] ) { return }
+        if (!grid_column.hasOwnProperty['ifNull'] ) { grid_column['ifNull'] = 'null' }
         let default_values = [
             /*
             These are default values that can be direclty entered into crud operations. These
@@ -364,7 +363,7 @@ class ColumnDefsInit {
             'current_date', 'localtime', 'localtimestamp', ""
         ]
         let if_null = grid_column['ifNull']
-        if (! default_values.includes(if_null) ) { grid_column['ifNull'] = 'default' }
+        if (! default_values.includes(if_null) ) { grid_column['ifNull'] = 'null' }
     }
 }
 

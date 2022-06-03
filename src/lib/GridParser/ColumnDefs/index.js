@@ -50,7 +50,8 @@ AutoComplete and Aggrid PullDown:
 
 AgGridRichSelect Editor flat data
 staticDropDownKey: 'name of drop down'
-staticDropDown: [{}]
+staticDropDown: api or array of objects [{}]
+staticDropDownFilters?
 
 subgrid params (valid names and default)
 */

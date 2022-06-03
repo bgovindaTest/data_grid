@@ -4,9 +4,10 @@
     'url_prefix':"",
     '__init_params__':  {},
     '__url_params__': {},
-    '__drop_downs__': {},
     '__is_read_only__':  true/false (do the have modification permssions)
         //if no force editable to false
+
+    //parse for static dropDowns (api route only)
 
     //first grid is main. others can be called as subgrids
     grids: [
@@ -19,11 +20,6 @@
         'columnDef': //agrid info
         },
     ]
-*/
-
-
-
-
 //precedence
 
 //UrlParams
@@ -37,3 +33,36 @@
 // meta_column_name
 
 //into global object
+
+*/
+
+
+class InitializeParameters {
+    constructor() {
+        this.url  = null
+        this.urlParams = null
+        this.init_params = null
+        this.is_read_only = null
+        this.folderName = null
+        this.pageName = null
+    }
+    async RunInitialization() {
+        this.ParseUrlParams()
+        await this.PullAppLayout()
+        await this.LoadInitialParams()
+        await this.DownloadStaticDropDowns()
+        await this.CreateMainGrid()
+    }
+
+    ParseUrlParams() {}
+
+    async PullAppLayout() {
+        //parse url params
+        //get jsonObject and user permissions
+    }
+    async LoadInitialParams() {}
+
+    async DownloadStaticDropDowns() {}
+    async CreateMainGrid() {}
+    HeaderParams()
+}

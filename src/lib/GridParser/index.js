@@ -108,16 +108,11 @@ metaFields:
 //ColumnDefs
 
 const meta_field = '__meta_field__'
-async function GetUrlParams() {}
 
 
 
+async function LoadInitialization() {
+    //run InitialParams
+    //RunColumnDefs for first grid
 
-function CreateColumnDefinitions(grid_column_rules, gridParams) {
-    /* Initial Imports */
 }
-
-
-function HeaderParams() {}
-
-//import create_automap

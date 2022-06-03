@@ -56,9 +56,10 @@ subgrid params (valid names and default)
 const ex = require('../../ExpressionParser')
 const type_check = require('../../../TypeCheck')
 const cellClassRules = require('../CellClassRules')
-const lodashClonedeep = require('lodash.clonedeep')
-const meta_column_name = '_ag-meta_'
+const lodashCloneDeep = require('lodash.clonedeep')
 
+const meta_column_name = '_ag-meta_'
+const meta_delete_undo_name = '_ag-meta-delete-undo_'
 //import axios
 //create configurations.
 
@@ -72,7 +73,6 @@ class ColumnDefsInit {
         this.urlParams = pageParams.urlParams || {}
         this.rowParams = rowParams || {}
     }
-
     RunGridInit() {
         //make copy?
         //grid = JSON.parse(JSON.stringify(food)) for deep copy
@@ -81,8 +81,10 @@ class ColumnDefsInit {
         let defaultFilter  = [] //name operator value
 
         //prepend delete_undo column
+        InitializeDeleteUndoColumn(grid)
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
+            if (grid_column['field'] === meta_delete_undo_name ) { continue }
             this.ValueTransform(grid_column, 'valueGetter')
             this.ValueTransform(grid_column, 'valueSetter')
             this.ValueTransform(grid_column, 'valueFormatter')
@@ -101,6 +103,50 @@ class ColumnDefsInit {
         }
         this.MetaColumn(grid)
         return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter}
+    }
+    InitializeDeleteUndoColumn(grid) {
+        /*
+        Used to add delete/undo button to grid. Handles intialization parameters if provided.
+        Sets paramaters on when to show the delete/undo options.
+        */
+        let du_column = {}
+        let du_defined = false
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            if (grid_column['field'] === meta_delete_undo_name ) { //use cell editor?
+                du_column  = grid_column
+                du_defined = true
+                break
+            }
+        }
+        //hide button if all false dont show
+        if (du_column.hasOwnProperty['allowAction'] ) { if (du_column['allowAction'] === false) {return} }
+        //defaultParameters
+        let headerName = 'GridAction'
+        let defaultCellEditorParams = {
+            "allowDelete":{'update': true, 'insert': false}, //shows delete for pulled data only (has precedence)
+            "allowUndo": {'update': true,  'insert': true} //shows undo for insert and update  (has precedence)
+        }
+        if (!du_column.hasOwnProperty('headerName') ) { du_column['headerName'] = headerName }        
+        if (!du_column.hasOwnProperty('cellEditor') ) { du_column['cellEditor'] = 'deleteUndoSelector' }        
+        if (!du_column.hasOwnProperty('cellEditorParams') ) {
+            du_column['cellEditorParams'] = defaultCellEditorParams
+            if (!du_defined) { grid.unshift(du_column) }
+            return
+        }
+        let duc = du_column['cellEditorParams']
+        if (duc.hasOwnProperty['allowDelete']) {
+            let ducx = duc['allowDelete']
+            if (! ducx.hasOwnProperty['update'] ) {ducx['update'] = defaultCellEditorParams['allowDelete']['update'] }
+            if (! ducx.hasOwnProperty['delete'] ) {ducx['delete'] = defaultCellEditorParams['allowDelete']['delete'] }
+        } else { duc['allowDelete'] = defaultCellEditorParams['allowDelete'] }
+        if (duc.hasOwnProperty['allowUndo']) {
+            let ducx = duc['allowUndo']
+            if (! ducx.hasOwnProperty['update'] ) {ducx['update'] = defaultCellEditorParams['allowDelete']['update'] }
+            if (! ducx.hasOwnProperty['delete'] ) {ducx['delete'] = defaultCellEditorParams['allowDelete']['delete'] }
+        } else { duc['allowUndo'] = defaultCellEditorParams['allowUndo'] }
+        //typechecks
+        if (!du_defined) { grid.unshift(du_column) }
     }
     ValueTransform(grid_column, parameter_name) {
         /*
@@ -142,7 +188,6 @@ class ColumnDefsInit {
             }
         } else { return }
     }
-
     DefaultValue(grid_column) {
         // if string or boolean or null?
         // need to make changes for linked object.
@@ -155,7 +200,6 @@ class ColumnDefsInit {
             grid_column['defaultValue'] = {'value': String(x), 'type': 'string', 'key': '' }
         }
     }
-
     DefaultOrderBy(grid_column, defaultOrderBy) {
         if (! grid_column.hasOwnProperty['defaultOrderBy']) {return}
         let order_by = grid_column['defaultOrderBy']
@@ -168,7 +212,6 @@ class ColumnDefsInit {
         if (! grid_column.hasOwnProperty['defaultFilter']) {return}
         defaultFitler.push(defaultFilter)
     }
-
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
         if (! grid_column.hasOwnProperty['editable']) {return}
@@ -192,19 +235,16 @@ class ColumnDefsInit {
         if (! grid_column.hasOwnProperty['hide']) {return}
         // ifNull: 'psql string calls to replace value'
     }
-
     HideColumns (grid_column) {
         if (grid_column.hasOwnProperty('hide') ) { return } 
         else { grid_column['hide'] = false }
     }
-
     IsEditable (grid_column) {
         //may have read write params that need to be processed in the future
         //if new row vs quried row. will decide from metadata?
         if (grid_column.hasOwnProperty('editable') ) { return } 
         else { grid_column['editable'] = false }
     }
-
     Validators(grid_column) {
         //creates validation function for aggrid cell
         let globalx = this.globals
@@ -214,7 +254,6 @@ class ColumnDefsInit {
             grid_column['validator'] = ex.CreateAggridFunction(expr, globalx, options)
         }
     }
-
     MetaColumn( grid ) {
         /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
 
@@ -260,7 +299,7 @@ class ColumnDefsInit {
         //for rows created from querying the database
         let fu = function (row_data) {
             //row_data is whats stored in server object
-            let meta_column = { 'row_type': 'update', 'is_deleted': false }
+            let meta_column = { 'row_type': 'update', 'meta_delete_undo_name': false }
             let field_names = Object.keys(backups)
             let meta_backup = {}
             for (let i = 0; i< field_names.length; i++ ) {
@@ -273,7 +312,7 @@ class ColumnDefsInit {
         }
         //for newly added rows via add row or new_sheet
         let fi = function () {
-            let meta_column = { 'row_type': 'insert', 'is_deleted': false }
+            let meta_column = { 'row_type': 'insert', 'meta_delete_undo_name': false }
             let field_names = Object.keys(backups)
             let meta_backup = {}
             for (let i = 0; i< field_names.length; i++ ) {
@@ -285,7 +324,6 @@ class ColumnDefsInit {
         }
         return {'fi': fi, 'fu': fu}
     }
-
     async CellEditorParams(grid_column) {
         /*
         Handles specialized modules. i.e. autocomplete and aggrid rich cell editor
@@ -306,7 +344,6 @@ class ColumnDefsInit {
         else if (cedit === 'autoComplete' ) {}
 
     }
-
     OptionsParser(grid_column) {
         //aditional options present in 
         let options = {}
@@ -329,8 +366,6 @@ class ColumnDefsInit {
         let if_null = grid_column['ifNull']
         if (! default_values.includes(if_null) ) { grid_column['ifNull'] = 'default' }
     }
-
 }
-
 
 module.exports = {'ColumnDefsInit': ColumnDefsInit}

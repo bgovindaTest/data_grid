@@ -20,12 +20,15 @@ ifNull: 'psql string calls to replace value'
     'default', 'current_timestamp', 'current_time','null',
     'current_date', 'localtime', 'localtimestamp', ""
 
-defaultValue: {'value': 'string', 'type': '', 'key': '' } handle raw value or replacement from row params?
+//need to add parameters to defaultValue and defaultFilter to deal with sub modal cases
+defaultValue: {'value': 'string', 'type': '', 'key': '', 'field': '' } handle raw value or replacement from row params?
 defaultOrderby: 'asc/desc' (done by column order in columnDefs)
-defaultFitler: {'value': 'string/bool/', 'type': ''} type is 'raw'
+defaultFitler: {'value': 'string/bool/', 'type': '', 'key': '', 'field': ''} type is 'raw'
     from: {'field'}
 
 showFilter: default true (if false cant be changed) should hide from filter module
+//need an enforce to prevent clear from working?
+//if false dont allow clear.
 showSort: default true (if false cant be used for sorting)
 
 Responsible for creating valueGetter, valueSetter and valueFormatter
@@ -178,7 +181,8 @@ class ColumnDefsInit {
         */
         if (grid_column.hasOwnProperty('cellClassRules') ) { 
             if (Object.keys(grid_column['cellClassRules']).length === 0) {
-                let is_editable = grid_column['editable']
+                let is_editable = false
+                if (grid_column.hasOwnProperty('editable')) { is_editable = grid_column['editable'] }
                 let validator_function = null
                 if (grid_column.hasOwnProperty('validator')) { validator_function = grid_column['validator'] }
                 cellClassRules.CellClassRulesInit( grid_column, is_editable, validator_function )
@@ -192,8 +196,26 @@ class ColumnDefsInit {
                     grid_column['cellClassRules'][keys[i]] = fn
                 }
             }
-        } else { return }
+        } else {
+            let is_editable = false
+            if (grid_column.hasOwnProperty('editable')) { is_editable = grid_column['editable'] }
+            let validator_function = null
+            if (grid_column.hasOwnProperty('validator')) { validator_function = grid_column['validator'] }
+            cellClassRules.CellClassRulesInit( grid_column, is_editable, validator_function )
+        }
     }
+    /*
+        for custom styles?
+        cellStyle: params => {
+            if (params.value === 'Police') {
+                //mark police cells as red
+                return {color: 'red', backgroundColor: 'green'};
+                //default would be {color: '', backgroundColor: ''}
+            }
+            return null;
+        }
+    */
+
     DefaultValue(grid_column) {
         // if string or boolean or null?
         // need to make changes for linked object.
@@ -211,9 +233,9 @@ class ColumnDefsInit {
     }
     DefaultOrderBy(grid_column, defaultOrderBy) {
         if (! grid_column.hasOwnProperty('defaultOrderBy') ) {return}
-        let order_by = grid_column['defaultOrderBy']
+        let order_by = String(grid_column['defaultOrderBy']).toLowerCase()
         let field = grid_column['field']
-        if (! ['asc','desc'].includes(order_by)) {
+        if (['asc','desc'].includes(order_by)) {
             defaultOrderBy.push({'field': field, 'order_by': order_by})
         } else { defaultOrderBy.push({'field': field, 'order_by': 'asc'}) }
     }

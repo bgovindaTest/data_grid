@@ -83,51 +83,125 @@ const cdef = cd.ColumnDefsInit
 //     expect(true).toBe(true)
 // })
 
-test('validator initialization', () => {
-    //prepends delete/undo
-    let grid_column =
-        {
-            'field': 'test',
-            'ifNull': 'default',
-            'isCrud': true,
-            'validator': 'test > 1'
-        }
+// test('validator initialization', () => {
+//     //prepends delete/undo
+//     let grid_column =
+//         {
+//             'field': 'test',
+//             'ifNull': 'default',
+//             'isCrud': true,
+//             'validator': 'test > 1'
+//         }
+//     let x = new cdef({},{}, {})
+//     x.Validators(grid_column)
+//     let fn = grid_column['validator']
+//     let params = {'data': {'test': -2} }
+//     expect(fn(params)).toBe(false)
+// })
+
+// test('cellClassRules intialized with validator', () => {
+//     //prepends delete/undo
+//     let grid_column =
+//         {
+//             'field': 'test',
+//             'ifNull': 'default',
+//             'isCrud': true,
+//             'validator': 'test > 1',
+//             'cellClassRules': {}
+//         }
+//     let x = new cdef({},{}, {})
+//     x.Validators(grid_column)
+//     x.CellClassRules(grid_column)
+//     let params = {'data': {'test': 2} }
+//     let cc = grid_column['cellClassRules']
+//     let res = [cc['editable_pass_style'](params), cc['editable_error_style'](params),
+//         cc['non_editable_pass_style'](params), cc['non_editable_error_style'](params) ]
+//     expect(res).toMatchObject([false, false, true, false])
+// })
+
+// test('cellClassRules intialized with validator editable', () => {
+//     //prepends delete/undo
+//     let grid_column =
+//         {
+//             'field': 'test',
+//             'ifNull': 'default',
+//             'isCrud': true,
+//             'editable': true,
+//             'validator': 'test > 1',
+//             'cellClassRules': {}
+//         }
+//     let x = new cdef({},{}, {})
+//     x.Validators(grid_column)
+//     x.CellClassRules(grid_column)
+//     let params = {'data': {'test': 2} }
+//     let cc = grid_column['cellClassRules']
+//     let res = [cc['editable_pass_style'](params), cc['editable_error_style'](params),
+//         cc['non_editable_pass_style'](params), cc['non_editable_error_style'](params) ]
+//     expect(res).toMatchObject([true, false, false, false])
+// })
+
+// test('cellClassRules empty', () => {
+//     //prepends delete/undo
+//     let grid_column =
+//         {
+//             'field': 'test',
+//             'ifNull': 'default',
+//             'isCrud': true,
+//             'cellClassRules': {}
+//         }
+//     let x = new cdef({},{}, {})
+//     x.Validators(grid_column)
+//     x.CellClassRules(grid_column)
+//     let fn = grid_column['cellClassRules']['editable_pass_style']
+//     expect(fn({})).toBe(true)
+// })
+
+test('default order by', () => {
+    let grid = [
+        { 'field': 'a', 'defaultOrderBy': 'asc'},
+        { 'field': 'b'},
+        { 'field': 'c', 'defaultOrderBy': 'desc'},
+        { 'field': 'd', 'defaultOrderBy': 'x'}
+    ]
+    let defaultOrderBy = []
     let x = new cdef({},{}, {})
-    x.Validators(grid_column)
-    let fn = grid_column['validator']
-    let params = {'data': {'test': -2} }
-    expect(fn(params)).toBe(false)
+    x.DefaultOrderBy(grid[0], defaultOrderBy)
+    x.DefaultOrderBy(grid[1], defaultOrderBy)
+    x.DefaultOrderBy(grid[2], defaultOrderBy)
+    x.DefaultOrderBy(grid[3], defaultOrderBy)
+    let exp = [{'field': 'a', 'order_by': 'asc'}, {'field': 'c', 'order_by': 'desc'}, {'field': 'd', 'order_by': 'asc'}]
+    expect(defaultOrderBy).toMatchObject(exp)
 })
 
-test('cellClassRules intialized with validator', () => {
-    //prepends delete/undo
-    let grid_column =
-        {
-            'field': 'test',
-            'ifNull': 'default',
-            'isCrud': true,
-            'validator': 'test > 1',
-            'cellClassRules': {}
-        }
+test('default filter', () => {
+    let grid = [
+        { 'field': 'a', 'defaultOrderBy': 'asc'},
+        { 'field': 'b'},
+        { 'field': 'c', 'defaultOrderBy': 'desc'},
+        { 'field': 'd', 'defaultOrderBy': 'x'}
+    ]
+    let defaultOrderBy = []
     let x = new cdef({},{}, {})
-    x.Validators(grid_column)
-    let fn = grid_column['validator']
-    let params = {'data': {'test': -2} }
-    expect(fn(params)).toBe(false)
+    x.DefaultOrderBy(grid[0], defaultOrderBy)
+    x.DefaultOrderBy(grid[1], defaultOrderBy)
+    x.DefaultOrderBy(grid[2], defaultOrderBy)
+    x.DefaultOrderBy(grid[3], defaultOrderBy)
+    let exp = [{'field': 'a', 'order_by': 'asc'}, {'field': 'c', 'order_by': 'desc'}, {'field': 'd', 'order_by': 'asc'}]
+    expect(defaultOrderBy).toMatchObject(exp)
 })
 
 
-// this.CellClassRules(grid_column)
+//defaultFilter and defaultValue for sub modal field key for submodal
 
-
-
-// this.CellEditorParams(grid_column)
-// this.DefaultOrderBy(grid_column,defaultOrderBy)
 // this.DefaultFilter(grid_column,defaultFilter)
 // this.DefaultValue(grid_column)
-// this.DefaultParameters(grid_column)
+// enforce fitler
+
+
+
 // this.CellWidth(grid_column)
 
+// this.CellEditorParams(grid_column)
 // RunGridInit()
 // this.IsEditable(grid_column)
 // this.HideColumns(grid_column)

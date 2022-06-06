@@ -101,6 +101,8 @@ metaFields:
     data_type:
     has_been_modified: bool (default false)
 
+
+    //initial pull?
 */
 
 //InitialParams

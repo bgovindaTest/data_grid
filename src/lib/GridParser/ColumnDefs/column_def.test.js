@@ -1,40 +1,41 @@
-const ex = require('./index.js')
+const cd = require('./index.js')
+const cdef = cd.ColumnDefsInit
 
-// gridObjects: {
-//     '__init_params__':  { },
-//     '__url_params__': { },
-//     '__default_values__': { },
-//     '__drop_downs__': {},
+test('value getter/setter/formatter parser test', () => {
+    //creates a function
+    let x = new cdef({},{}, {})
+    let grid_column = {
+        'field': 'test',
+        'valueGetter': 'test + 1'
+    }
+    x.ValueTransform(grid_column, 'valueGetter')
 
-//     //first grid if main doesnt exists
-//     //others are subgrid to be called
-//     'grids': {
-//         'main': AgGridColumnDef + stuff_configurations (for headers?),
-//         'xyz': AgGridColumnDef,
-//     }
-// }
+    let fn = grid_column['valueGetter']
+    let params = {'data': {'test': '1' }}
+    expect(2).toBe(2)
+})
 
-
-test('load module', () => { expect(true).toBe(true) })
-
-test('create and evaluate function', () => {
-    let expr = '1+x+global_x'
-    let data = {'x':1}
-    let globals = {'global_x': 1}
-    let fn =   ex.CreateFunction(expr)
-    let res = ex.EvaluateFunction(fn, data, globals)
-    expect(res).toBe(3)
+test('value getter/setter/formatter native test', () => {
+    //replaces valueGetter with native unprocessed string
+    let x = new cdef({},{}, {})
+    let grid_column = {
+        'field': 'test',
+        'valueGetterNative': 'test + 1'
+    }
+    x.ValueTransform(grid_column, 'valueGetter')
+    let sx = grid_column['valueGetter']
+    expect(sx).toBe('test + 1')
 })
 
 
-class ColumnDefsInit {
-    //for main loader
-    //grid is json object for aggrid
-    constructor(grid, pageParams, rowParams) {
-        this.grid  = grid
-        this.globals   = pageParams.globals || {}
-        this.dropDowns = pageParams.dropDowns || {}
-        this.urlParams = pageParams.urlParams || {}
-        this.rowParams = rowParams
-}
-}
+// this.IfNull(grid_column)
+// this.IsEditable(grid_column)
+// this.HideColumns(grid_column)
+// this.Validators(grid_column)
+// this.CellClassRules(grid_column)
+// this.CellEditorParams(grid_column)
+// this.DefaultOrderBy(grid_column,defaultOrderBy)
+// this.DefaultFilter(grid_column,defaultFilter)
+// this.DefaultValue(grid_column)
+// this.DefaultParameters(grid_column)
+// this.CellWidth(grid_column)

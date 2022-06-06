@@ -48,8 +48,9 @@ function ImportFunctions(mathx) {
     })
 }
 
-function CreateScopeObject (params_data, globals) {
+function CreateScopeObject (params, globals) {
     //params_data is params.data from aggrid rows
+    let params_data = params.data
     let scopex = {}
     let params_keys = Object.keys(params_data)
     for (var i=0; i < params_keys.length; i++) {
@@ -69,7 +70,7 @@ function CreateFunction(expression, mjx_type=null) {
     if (mjx_type === 'big' ) {
         mx = math_big
     }
-    return math.compile(expression)
+    return mx.compile(expression)
 }
 
 function DeactivateInsecureFunctions(mathx) {
@@ -106,6 +107,7 @@ function CreateAggridFunction( expr, globals, options ) {
     return fn
 }
 
+//adds user defined functions
 ImportFunctions(math)
 ImportFunctions(math_big)
 

@@ -9,7 +9,7 @@ non_editable_error_style
 */
 
 const ex = require('../../ExpressionParser')
-const type_check = require('../../TypeCheck')
+const type_check = require('../../../TypeCheck')
 
 function CellClassRulesInit( grid_column, is_editable, validator_function ) {
 

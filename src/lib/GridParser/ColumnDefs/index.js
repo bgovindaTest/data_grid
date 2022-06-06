@@ -55,9 +55,10 @@ staticDropDownFilters?
 
 subgrid params (valid names and default)
 */
-const ex = require('../../ExpressionParser')
-const type_check = require('../../../TypeCheck')
-const cellClassRules = require('../CellClassRules')
+const ex = require('../ExpressionParser')
+const cellClassRules = require('./CellClassRules')
+const type_check = require('../../TypeCheck')
+
 const lodashCloneDeep = require('lodash.clonedeep')
 
 const meta_column_name = '_ag-meta_'
@@ -161,13 +162,13 @@ class ColumnDefsInit {
         */
         let native_name = parameter_name +'Native'
         let globalx = this.globals
-        if (grid_column.hasOwnProperty(parameter_name) ) {
+        if ( grid_column.hasOwnProperty(native_name) ) {
+            grid_column[parameter_name] = grid_column[native_name]
+        } else if (grid_column.hasOwnProperty(parameter_name) ) {
             let expr = grid_column[parameter_name]
             let options = this.OptionsParser(grid_column)
             grid_column[parameter_name] = ex.CreateAggridFunction(expr, globalx, options)
-        } else if ( grid_column.hasOwnProperty(native_name) ) {
-            grid_column[parameter_name] = grid_column[native_name]
-        }
+        } 
     }
     CellClassRules(grid_column) {
         /*

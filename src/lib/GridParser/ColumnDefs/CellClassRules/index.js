@@ -24,29 +24,56 @@ function CellClassRulesInit( grid_column, is_editable, validator_function ) {
         cellClassRules['non_editable_error_style'] = NonEditableErrorStyle(is_editable, validator_function)
     }
     grid_column['cellClassRules'] = cellClassRules
-
 }
 
 function EditablePassStyle(is_editable, validator_function) {
-    return function (params) { 
-        return is_editable && validator_function(params)
+    if (type_check.IsFunction(is_editable) ) {
+        return function (params) { 
+            return !is_editable(params) && validator_function(params)
+        }
     }
+    else {
+        return function (params) { 
+            return is_editable && validator_function(params)
+        }
+    }
+
 }
 function EditableErrorStyle(is_editable, validator_function) {
-    return function (params) { 
-        return is_editable && !validator_function(params)
+    if (type_check.IsFunction(is_editable) ) {
+        return function (params) { 
+            return !is_editable(params) && validator_function(params)
+        }
+    }
+    else {
+        return function (params) { 
+            return is_editable(params) && !validator_function(params)
+        }
     }
 }
 function NonEditablePassStyle(is_editable, validator_function) {
-    return function (params) { 
-        return !is_editable && validator_function(params)
+    if (type_check.IsFunction(is_editable) ) {
+        return function (params) { 
+            return !is_editable && validator_function(params)
+        }
+    }
+    else {
+        return function (params) { 
+            return !is_editable(params) && validator_function(params)
+        }
     }
 }
 function NonEditableErrorStyle(is_editable, validator_function) {
-    return function (params) { 
-        return !is_editable && validator_function(params)
+    if (type_check.IsFunction(is_editable) ) {
+        return function (params) { 
+            return !is_editable(params) && validator_function(params)
+        }
+    }
+    else {
+        return function (params) { 
+            return !is_editable && validator_function(params)
+        }
     }
 }
-
 
 module.exports = {'CellClassRulesInit': CellClassRulesInit}

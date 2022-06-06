@@ -126,7 +126,7 @@ class ColumnDefsInit {
         du_column['showFilter'] = false
 
         //hide button if all false dont show
-        if (du_column.hasOwnProperty['allowAction'] ) { if (du_column['allowAction'] === false) {return} }
+        if (du_column.hasOwnProperty('allowAction') ) { if (du_column['allowAction'] === false) {return} }
         //defaultParameters
         let headerName = 'GridAction'
         let defaultCellEditorParams = {
@@ -141,15 +141,15 @@ class ColumnDefsInit {
             return
         }
         let duc = du_column['cellEditorParams']
-        if (duc.hasOwnProperty['allowDelete']) {
+        if (duc.hasOwnProperty('allowDelete') ) {
             let ducx = duc['allowDelete']
-            if (! ducx.hasOwnProperty['update'] ) {ducx['update'] = defaultCellEditorParams['allowDelete']['update'] }
-            if (! ducx.hasOwnProperty['delete'] ) {ducx['delete'] = defaultCellEditorParams['allowDelete']['delete'] }
+            if (! ducx.hasOwnProperty('update') ) {ducx['update'] = defaultCellEditorParams['allowDelete']['update'] }
+            if (! ducx.hasOwnProperty('delete') ) {ducx['delete'] = defaultCellEditorParams['allowDelete']['delete'] }
         } else { duc['allowDelete'] = defaultCellEditorParams['allowDelete'] }
-        if (duc.hasOwnProperty['allowUndo']) {
+        if (duc.hasOwnProperty('allowUndo')) {
             let ducx = duc['allowUndo']
-            if (! ducx.hasOwnProperty['update'] ) {ducx['update'] = defaultCellEditorParams['allowDelete']['update'] }
-            if (! ducx.hasOwnProperty['delete'] ) {ducx['delete'] = defaultCellEditorParams['allowDelete']['delete'] }
+            if (! ducx.hasOwnProperty('update') ) {ducx['update'] = defaultCellEditorParams['allowDelete']['update'] }
+            if (! ducx.hasOwnProperty('delete') ) {ducx['delete'] = defaultCellEditorParams['allowDelete']['delete'] }
         } else { duc['allowUndo'] = defaultCellEditorParams['allowUndo'] }
         //typechecks
         if (!du_defined) { grid.unshift(du_column) }
@@ -197,17 +197,20 @@ class ColumnDefsInit {
     DefaultValue(grid_column) {
         // if string or boolean or null?
         // need to make changes for linked object.
-        if (! grid_column.hasOwnProperty['defaultValue']) {return}
+        if (! grid_column.hasOwnProperty('defaultValue') ) {return}
         let x = grid_column['defaultValue']
         if (type_check.IsNull(x) ) {
-            grid_column['defaultValue'] = {'value': null, 'type': 'string', 'key': '' }
+            grid_column['defaultValue'] = {'value': null, 'type': 'string'}
         }
         else if (type_check.IsBasicType(x)  ) {
-            grid_column['defaultValue'] = {'value': String(x), 'type': 'string', 'key': '' }
+            grid_column['defaultValue'] = {'value': String(x), 'type': 'string'}
+        }
+        else {
+            grid_column['defaultValue'] = {'value': x, 'type': 'object'}
         }
     }
     DefaultOrderBy(grid_column, defaultOrderBy) {
-        if (! grid_column.hasOwnProperty['defaultOrderBy']) {return}
+        if (! grid_column.hasOwnProperty('defaultOrderBy') ) {return}
         let order_by = grid_column['defaultOrderBy']
         let field = grid_column['field']
         if (! ['asc','desc'].includes(order_by)) {
@@ -215,25 +218,25 @@ class ColumnDefsInit {
         } else { defaultOrderBy.push({'field': field, 'order_by': 'asc'}) }
     }
     DefaultFilter(grid_column, defaultFilter) {
-        if (! grid_column.hasOwnProperty['defaultFilter']) {return}
+        if (! grid_column.hasOwnProperty('defaultFilter') ) {return}
         defaultFitler.push(defaultFilter)
     }
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
         //editable and isCrud permissions
-        if (grid_column.hasOwnProperty['editable']) {
-            if (! grid_column.hasOwnProperty['isCrud']) {grid_column['isCrud'] = true}
-            if (! grid_column.hasOwnProperty['isRequired']) { grid_column['isRequired']  = false }
-            if (! grid_column.hasOwnProperty['ignoreError']) { grid_column['ignoreError'] = false }
-            if (! grid_column.hasOwnProperty['allowNull']) { grid_column['allowNull'] = true }
+        if (grid_column.hasOwnProperty('editable')) {
+            if (! grid_column.hasOwnProperty('isCrud')) {grid_column['isCrud'] = true}
+            if (! grid_column.hasOwnProperty('isRequired')) { grid_column['isRequired']  = false }
+            if (! grid_column.hasOwnProperty('ignoreError')) { grid_column['ignoreError'] = false }
+            if (! grid_column.hasOwnProperty('allowNull')) { grid_column['allowNull'] = true }
         } else { 
-            if (! grid_column.hasOwnProperty['isCrud']) {grid_column['isCrud'] = false} 
-            if (! grid_column.hasOwnProperty['isRequired']) { grid_column.hasOwnProperty['isRequired'] = false }
-            if (! grid_column.hasOwnProperty['ignoreError']) { grid_column['ignoreError'] = false }
-            if (! grid_column.hasOwnProperty['allowNull']) { grid_column['allowNull'] = true }
+            if (! grid_column.hasOwnProperty('isCrud')) {grid_column['isCrud'] = false} 
+            if (! grid_column.hasOwnProperty('isRequired')) { grid_column['isRequired'] = false }
+            if (! grid_column.hasOwnProperty('ignoreError')) { grid_column['ignoreError'] = false }
+            if (! grid_column.hasOwnProperty('allowNull')) { grid_column['allowNull'] = true }
         }
-        if (! grid_column.hasOwnProperty['dataType']) {grid_column['dataType'] = 'text'}
-        if (! grid_column.hasOwnProperty['width'])   { grid_column['width'] = 500 }
+        if (! grid_column.hasOwnProperty('dataType')) {grid_column['dataType'] = 'text'}
+        if (! grid_column.hasOwnProperty('width'))   { grid_column['width'] = 500 }
         // ifNull: 'psql string calls to replace value'
         this.IfNull(grid_column)
     }
@@ -258,7 +261,7 @@ class ColumnDefsInit {
     }
     MetaColumn( grid ) {
         /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
-        let meta_def_fns =   this.MetaColumnDefaultValues()
+        let meta_def_fns =   this.MetaColumnDefaultValues(grid)
         let fi = meta_def_fns['fi']
         let fu = meta_def_fns['fu']
 
@@ -293,9 +296,12 @@ class ColumnDefsInit {
         let backups = {}
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
-            if (! grid_column.hasOwnProperty['isCrud'] ) {continue}
+            if (! grid_column.hasOwnProperty('isCrud') ) {continue}
             let field_name = grid_column['field']
-            let default_value = grid_column['defaultValue'].value
+            let default_value = null
+            if (grid_column.hasOwnProperty('defaultValue')) {
+                default_value = grid_column['defaultValue'].value || null
+            }
             backups[field_name] = default_value
         }
 
@@ -336,7 +342,7 @@ class ColumnDefsInit {
         Pull Data if needed on init?
 
         */
-        if (! grid_column.hasOwnProperty['cellEditor']) {return}
+        if (! grid_column.hasOwnProperty('cellEditor')) {return}
         let cedit = grid_column['cellEditor']
         //check cell editor type?
         if (cedit === 'agRichSelectCellEditor' ) {}
@@ -348,7 +354,7 @@ class ColumnDefsInit {
     OptionsParser(grid_column) {
         //aditional options present in 
         let options = {}
-        if (grid_column.hasOwnProperty['dataType']) {
+        if (grid_column.hasOwnProperty('dataType')) {
             let dx = grid_column['dataType'].toLowerCase()
             if (dx.includes('big')) { options['mathjs_type_set'] = 'big' }
         }
@@ -356,7 +362,7 @@ class ColumnDefsInit {
     }
     IfNull(grid_column) {
         //verify valid if null replacement value
-        if (!grid_column.hasOwnProperty['ifNull'] ) { grid_column['ifNull'] = 'null' }
+        if (! grid_column.hasOwnProperty('ifNull') ) { grid_column['ifNull'] = 'null' }
         let default_values = [
             /*
             These are default values that can be direclty entered into crud operations. These

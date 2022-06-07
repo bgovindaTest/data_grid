@@ -109,12 +109,33 @@ metaFields:
 //ExpressionParser
 //ColumnDefs
 
-const meta_field = '__meta_field__'
+const meta_column_name = '_ag-meta_'
+const meta_delete_undo_name = '_ag-meta-delete-undo_'
+
+/*
+add placeholder json object for grid initialization.
+
+*/
 
 
-
-async function LoadInitialization() {
-    //run InitialParams
-    //RunColumnDefs for first grid
-
+class LoadInit {
+    //for main loader
+    //grid is json object for aggrid
+    constructor(grid, pageParams, rowParams) {
+        this.grid  = grid
+        this.globals   = pageParams.globals || {}
+        this.dropDowns = pageParams.dropDowns || {}
+        this.urlParams = pageParams.urlParams || {}
+        this.rowParams = rowParams || {}
+    }
+    async LoadInitialization() {
+        //run InitialParams
+        //RunColumnDefs for first grid
+    
+    }
+    async ParseMain() {
+        //run InitialParams
+        //RunColumnDefs for first grid
+    
+    }
 }

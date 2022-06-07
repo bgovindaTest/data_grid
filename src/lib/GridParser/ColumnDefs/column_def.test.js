@@ -175,19 +175,18 @@ test('default order by', () => {
 
 test('default filter', () => {
     let grid = [
-        { 'field': 'a', 'defaultOrderBy': 'asc'},
-        { 'field': 'b'},
-        { 'field': 'c', 'defaultOrderBy': 'desc'},
-        { 'field': 'd', 'defaultOrderBy': 'x'}
+        { 'field': 'a', 'defaultFilter': {'value': 'a1'}},
+        { 'field': 'b', 'defaultFilter': {'value': 'b1'}},
+        { 'field': 'c', 'defaultFilter': {'value': 'c1'}}
     ]
-    let defaultOrderBy = []
+    //defaultFitler: {'value': 'string/bool/', 'type': '', 'key': '', 'field': ''}
+    let defaultFilter = []
     let x = new cdef({},{}, {})
-    x.DefaultOrderBy(grid[0], defaultOrderBy)
-    x.DefaultOrderBy(grid[1], defaultOrderBy)
-    x.DefaultOrderBy(grid[2], defaultOrderBy)
-    x.DefaultOrderBy(grid[3], defaultOrderBy)
-    let exp = [{'field': 'a', 'order_by': 'asc'}, {'field': 'c', 'order_by': 'desc'}, {'field': 'd', 'order_by': 'asc'}]
-    expect(defaultOrderBy).toMatchObject(exp)
+    x.DefaultFilter(grid[0], defaultFilter)
+    x.DefaultFilter(grid[1], defaultFilter)
+    x.DefaultFilter(grid[2], defaultFilter)
+    let exp = [ {'value': 'a1'}, {'value': 'b1'}, {'value': 'c1'}, ]
+    expect(defaultFilter).toMatchObject(exp)
 })
 
 

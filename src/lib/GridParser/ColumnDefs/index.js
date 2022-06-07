@@ -21,6 +21,7 @@ ifNull: 'psql string calls to replace value'
     'current_date', 'localtime', 'localtimestamp', ""
 
 //need to add parameters to defaultValue and defaultFilter to deal with sub modal cases
+//field determines which data to get from params.data in aggrid. key is if its an object.
 defaultValue: {'value': 'string', 'type': '', 'key': '', 'field': '' } handle raw value or replacement from row params?
 defaultOrderby: 'asc/desc' (done by column order in columnDefs)
 defaultFitler: {'value': 'string/bool/', 'type': '', 'key': '', 'field': ''} type is 'raw'
@@ -106,6 +107,7 @@ class ColumnDefsInit {
             this.DefaultValue(grid_column)
             this.DefaultParameters(grid_column)
             this.CellWidth(grid_column)
+            this.AddValueSetter(grid_column)
         }
         this.MetaColumn(grid)
         return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter}
@@ -240,8 +242,13 @@ class ColumnDefsInit {
         } else { defaultOrderBy.push({'field': field, 'order_by': 'asc'}) }
     }
     DefaultFilter(grid_column, defaultFilter) {
+        // if (Object.keys(this.rowParams).length === 0 ) {
+
+        // } else {
+
+        // }
         if (! grid_column.hasOwnProperty('defaultFilter') ) {return}
-        defaultFitler.push(defaultFilter)
+        defaultFilter.push(grid_column['defaultFilter'])
     }
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
@@ -394,6 +401,11 @@ class ColumnDefsInit {
         ]
         let if_null = grid_column['ifNull']
         if (! default_values.includes(if_null) ) { grid_column['ifNull'] = 'null' }
+    }
+    AddValueSetter(grid_column) {
+        //if invalid type return null
+        //used for numbers and date and datetime
+        //if date try autoconvert?
     }
 }
 

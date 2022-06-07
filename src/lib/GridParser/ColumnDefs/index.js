@@ -64,6 +64,7 @@ const cellClassRules = require('./CellClassRules')
 const type_check = require('../../TypeCheck')
 
 const lodashCloneDeep = require('lodash.clonedeep')
+const { number } = require('mathjs')
 
 const meta_column_name = '_ag-meta_'
 const meta_delete_undo_name = '_ag-meta-delete-undo_'
@@ -248,7 +249,10 @@ class ColumnDefsInit {
 
         // }
         if (! grid_column.hasOwnProperty('defaultFilter') ) {return}
-        defaultFilter.push(grid_column['defaultFilter'])
+        let x = grid_column['defaultFilter']
+        if (! x.hasOwnProperty['field'] ) { x['field'] = grid_column['field'] }
+
+        defaultFilter.push(x)
     }
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
@@ -403,10 +407,61 @@ class ColumnDefsInit {
         if (! default_values.includes(if_null) ) { grid_column['ifNull'] = 'null' }
     }
     AddValueSetter(grid_column) {
-        //if invalid type return null
-        //used for numbers and date and datetime
-        //if date try autoconvert?
+        /*
+        Adds value setter to numbers and date. If not correct format return null
+
+        */
+
+        if (grid_column.hasOwnProperty('valueSetter')) {return}
+        let field = grid_column['field']
+
+        let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
+        'real', 'double precision', 'money', 'numeric', 'float']
+
+        if (number_types.includes(grid_column['dataType'])) {
+
+            let fn = function (params) {
+                if (! type_check.IsNumber(params.newValue) ) {
+                    params.data[field] = null
+                    return true
+                }
+                else {
+                    params.data[field] = params.newValue
+                    return true
+                }
+            }
+            grid_column['valueSetter'] = fn
+            return
+        }
+
+        let date_types = ['date', 'timestamp', 'time']
+        if (date_types.includes(grid_column['dataType'])) {
+            let fn = function (params) {
+                if (! type_check.IsDate(params.newValue) ) {
+                    params.data[field] = null
+                    return true
+                }
+                else {
+                    params.data[field] = params.newValue
+                    return true
+                }
+            }
+            grid_column['valueSetter'] = fn
+            return
+        }
     }
+    AddValueGetter(grid_column) {
+        //mainly for autocomplete and AgGridRichSelector. used for returning 
+        //key value.
+
+    }
+
+}
+
+//submodal function initializer
+
+function SubModalInit() {
+    //loads class creates object returns values?
 }
 
 module.exports = {'ColumnDefsInit': ColumnDefsInit}

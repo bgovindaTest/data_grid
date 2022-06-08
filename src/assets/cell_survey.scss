@@ -1,0 +1,34 @@
+// var errVar = {'border-color': 'red', 'border-width':'medium', 'background-color': ""}
+// var passVar = {'border-color': '', 'border-width': 'thin', 'background-color': ""}
+// var warningVar = {'border-color': 'orange', 'border-width':'medium', 'background-color': ""}
+
+// var computedErrVar = {'border-color': 'red', 'border-width':'medium', 'background-color': 'rgba(189, 195, 199, 0.3)'}
+// var computedPassVar = {'border-color': '', 'border-width': 'thin', 'background-color': 'rgba(189, 195, 199, 0.3)'}
+// var computedWarningVar = {'border-color': 'orange', 'border-width': 'thin', 'background-color': 'rgba(189, 195, 199, 0.3)'}
+// colors https://www.ag-grid.com/vue-data-grid/expressions-and-context/
+// var deletedStyle = {'border-color': '', 'border-width': 'thin', 'background-color': 'rgba(46, 49, 49, 0.5)'}
+
+
+.editable_pass_style {
+    border-color: '';
+    border-width: 'thin'; 
+    background-color: ""
+}
+
+.editable_error_style {
+    border-color: 'red';
+    border-width: 'thin'; 
+    background-color: ""
+}
+
+.non_editable_pass_style {
+    border-color: '';
+    border-width: 'thin'; 
+    background-color: "rgba(189, 195, 199, 0.3)"
+}
+
+.non_editable_error_style {
+    border-color: 'red';
+    border-width: 'thin'; 
+    background-color: "rgba(189, 195, 199, 0.3)"
+}

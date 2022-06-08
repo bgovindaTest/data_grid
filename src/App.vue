@@ -1,5 +1,6 @@
 <template>
-  <button @click="CLOG()">params</button>
+<div>
+  <grid-header/>
   <ag-grid-vue
     style="width: 100%; height: calc(100vh - 3.25rem)"
     class="ag-theme-alpine"
@@ -31,149 +32,61 @@
         </ag-grid-vue>
     </Modal> -->
 
-
+</div>
 </template>
 
 <script>
 import { AgGridVue } from "ag-grid-vue3";
-// import AutoComplete from "./components/GridEditors/AutoComplete"
-// import DateSelector from "./components/GridEditors/DateSelector"
-// import DeleteUndoSelector from "./components/GridEditors/DeleteUndoSelector"
-// import SubGridSelector from "./components/GridEditors/SubGridSelector"
-// import GridHeader from "./components/GridLayout/Header"
-// import VueModal from '@kouts/vue-modal'
-// import grid_mix from '@/mixins/grid.js'
-// import PageLoader from '@/components/GridLayout/PageLoader'
+import VueModal from '@kouts/vue-modal'
+import AutoComplete from "./components/GridEditors/AutoComplete"
+import DateSelector from "./components/GridEditors/DateSelector"
+import DeleteUndoSelector from "./components/GridEditors/DeleteUndoSelector"
+import SubGridSelector from "./components/GridEditors/SubGridSelector"
+import GridHeader from "./components/GridLayout/Header"
 
-
-//loads main page
-//async other components?
-//creates columnDef array object
-
+import grid_mixin from "@/mixins/grid_mixin"
 export default {
   name: "App",
-  // mixins: [grid_mix],
+  mixins: [grid_mixin],
   data() {
     return {
-      bx: null,
       columnDefs: null,
       rowData: null,
-      columnDefs2: null,
-      rowData2: null,
       showModal:true,
-      count: 1,
-      ph: 'hola',
       modalx: {modal1: false},
       api: null,
       columnApi: null
-
-
-
     };
   },
   methods: {
-    bxc() { 
-      this.bx = $route; //.query.page;
-      console.log(this.bx)
-    }
-
-  },
-  methods: {
     onCellValueChanged(event) {
-
       console.log(event)
-      // event.data['bool'] = false
-      // event.api.refreshCells()
-    },
-    async json_pholder () {
-      let x = this.count
-      this.count +=1
-      // let rx = `https://jsonplaceholder.typicode.com/todos/${x}`
-      let rx = '/' + String(x)
-      console.log(rx)
-      let response = await this.axios.get(rx)
-      let data = response.data
-      this.ph = data
-
     },
     onGridReady: function (params) {
       this.api = params.api;
       this.columnApi = params.columnApi;      
     },
-    CLOG: function () {
-      console.log(this.columnApi)
-    }
   },
 
   components: {
     "ag-grid-vue":AgGridVue,
-    // "autoComplete": AutoComplete,
-    // "dateSelector": DateSelector,
-    // "deleteUndoSelector": DeleteUndoSelector,
-    // // "subGridSelector": SubGridSelector,
-    // "grid-header": GridHeader,
-    // "Modal": VueModal,
-    // "PageLoader": PageLoader
+    "autoComplete": AutoComplete,
+    "dateSelector": DateSelector,
+    "deleteUndoSelector": DeleteUndoSelector,
+    // "subGridSelector": SubGridSelector,
+    "grid-header": GridHeader,
+    "Modal": VueModal
   },
   beforeMount() {
-
-    this.columnDefs = [
-      // { field: "sub_grid",
-      //   cellRenderer: "subGridSelector"
-      // },      
-      { field: "make" },
-      { field: "model" },
-      { field: "price", editable: true, 'validator': function() {console.log('hi')} },
-      {
-            headerName: "Doubling",
-            field: "number",
-            //cellEditor: "doublingEditor",
-            // cellEditor: "autoComplete",
-            // cellEditorParams: {
-            //     return_value: 'appointment_code',
-            //     //display_value
-            //     //crud_value:
-            //     column_info: [
-            //         {header: "id" , init_width: 50},
-            //         {header: "name", init_width: 50},
-            //         {header: "username", init_width: 75 },
-            //         {header: "email", init_width: 200 },
-            //         {header: "phone", init_width: 150 },
-            //         {header: "website", init_width: 100 }
-            //     ]
-            // },
-
-
-            editable: true,
-            width: 300
-      },
-      {field: "date", editable:true},//, cellEditor: "dateSelector" },
-      {
-          field: 'lang',
-          editable: true,
-          // cellEditor: 'agRichSelectCellEditor',
-          // cellEditorParams: {
-          //     values: ['English', 'Spanish', 'French', 'Portuguese', '(other)'],
-          // }
-        // ...other props
-      },
-      { field: "bool" },
-
-
-    ];
-
-    this.rowData = [
-      { make: "Toyota", model: "Celica", price: 35000, number: 1, date: 'abcde', lang: null, bool: true },//, "meta": this.modalx },
-      { make: "Ford", model: "Mondeo", price: 32000, number: 2, date: null, lang: null, bool: true},// , "meta": this.modalx },
-      { make: "Porsche", model: "Boxster", price: 72000, number: 3, date: null, lang: null, bool: true},// , "meta": this.modalx },
-    ],
-
-    this.columnDefs2 = [{ field: "yolo" }],
-    this.rowData2 = [ {"yolo": 1}, {'yolo': 2}, {"yolo": 3} ]
-
-
+    let debugConfig = this.LoadDebugParams()
+    let columnDefs = debugConfig.page[0].columnDefs
+    let rowData = debugConfig.page[0].rowData
+    this.columnDefs = columnDefs
+    this.rowData = rowData
   },
 };
+
+
 </script>
 
 <style lang="scss">

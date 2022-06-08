@@ -1,6 +1,39 @@
 /*
 Parses grids json object and converts expression syntax into javascript functions. 
 
+    'qparams_prefix':"",
+    'url_prefix':"",
+    '__init_params__':  {},
+    '__url_params__': {},
+    '__drop_downs__': {},
+    '__is_read_only__':  true/false (do the have modification permssions)
+        //if no force editable to false
+
+    //first grid is main. others can be called as subgrids
+    grids: [
+        {'name': 'x'
+         'help': ""
+        'headerParams': {links}
+        'crud_params': //i.e. new row, update, delete, etc read/etc
+        'columnDef': //agrid info
+        },
+        {'name': 'y'
+        'crud_params': //i.e. new row, update, delete, etc read/etc
+        'columnDef': //agrid info
+        },
+    ]
+
+    crudRoute:
+        default: ->
+        select:  ->
+        insert:  ->
+        update:  ->
+        delete:  ->
+
+    crudInsteadOf: {
+        'insert': 'update'
+    }
+
 gridOptions.suppressPropertyNamesCheck = true
 
 validator: function()
@@ -64,7 +97,6 @@ const cellClassRules = require('./CellClassRules')
 const type_check = require('../../TypeCheck')
 
 const lodashCloneDeep = require('lodash.clonedeep')
-const { number } = require('mathjs')
 
 const meta_column_name = '_ag-meta_'
 const meta_delete_undo_name = '_ag-meta-delete-undo_'

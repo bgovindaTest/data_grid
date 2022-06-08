@@ -25,15 +25,13 @@ try: catch added to grid functions because range selection lingers and will try 
 rows that were selected before filter
 */
 
-const field_functions    = require("@/library/app_functions/field_functions")
-
-function redraw_rows(gridOptions) {
+function RedrawRows(gridOptions) {
     //redraws all visible rows
     gridOptions.api.redrawRows()
     gridOptions.api.refreshCells()
 }
 
-function remove_row_data(rowData) {
+function RemoveRowData(rowData) {
     /*
     This function takes the rowData object and removes all rows without setting new object. This removes
     all rows without breaking linking to object throughout app

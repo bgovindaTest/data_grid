@@ -15,6 +15,31 @@ For saving data the server expect a req.body object containing the following str
 otherwise each object in the array should contain the key:value pairs required
 to save data to the server.
 
+This module is used to intialize the modal windows and query data that is created on the client side and
+sent to the server side.
+
+InitializeQueryParams: Main function to initialze query params and modal windows. Takes the data_rules, pagination object
+    and params object. returns {"pagination": pagination, 'order_by':order_by, 'columnSortNames': columnSortNames, 'where': where, 'modalParams': modalParams }
+NextPage: Changes the offest parateter in the pagination object to retrieve next group of server data.
+CreateGetRouteParams: This takes the where, pagination, order_by objects and processes them to be sent to the server.
+
+Below is the structure of the main inputs 
+where_sort_rules (data_rules), pagination and params example:
+var query_rules =[
+  {'variable_name': 'date_test','data_describe': "I'm Batmant",'is_sort': true, 
+    'is_filter': true, 'filter_active': true, 'filter_show': true, 'data_type': 'date', 'query_type': 'date', 'value': null },
+  {'variable_name': 'date_test2','data_describe': "I'm Batmant",
+    'is_sort': false, 'is_filter': false, 'filter_active': true, 'filter_show': false, 'data_type': 'date', 'query_type': 'date', 'value': null },
+  {'variable_name': 'int_test' ,'is_sort': true,  'is_filter': true,
+    'filter_active': true, 'filter_show': false, 'data_type': 'integer', 'query_type': '', 'value': {'value_1':'35.8'} },
+  {'variable_name': 'float_test','data_describe': "I'm Batmant",
+    'is_sort': true, 'sort_order': 'desc', 'is_filter': true, 'filter_active': true, 
+    'filter_show': false, 'data_type': 'float', 'query_type': '', 'value': {'value_2':'35.8'} },
+  {'variable_name': 'string_test' ,'is_sort': true, 'is_filter': true, 'filter_active': true,
+    'filter_show': false, 'data_type': 'string', 'query_type': '', 'value': 'abc' },
+]
+
+
 req.body['insert'] = [{}]
 req.body['update'] = [{}]
 req.body['upsert'] = [{}]
@@ -534,69 +559,7 @@ function IsSaveRow(rowx) {
     else {return false}
 }
 
-/*
-This module is responsible for creating the names of all the fields (public and private) that are to be entered into each row
-or used as row level calculation paramters. This module is repsonsible for appending field_variables object into the grid_params object.
 
-Private variable start and end with two underscores. So this structure should be excluded from use as a field name.
-
-is_server_field: added in grid_column_rules. Used to determine if data in that column should be sent to the server.
-
-Initialize private variables
-
-__fieldname__backup__: each field or computed map value has a backup that can be refrence. for editable fields the data is stored
-    in the column field and the field_backup. This allows the grid to determine if values have been changed or allows referencing
-    to historical data
-__fieldname__is_valid__: ValueGetter and sets boolean?
-__is_empty__: the is a funciton that requires the editable array. the editable array are all columns that should be checked for not null
-    values if all values are null it returns true otherwise it returns false. Used to determine what crud operations to use.
-__is_complete__: check if all rows have non null values
-__is_changed__: compares editable fields to backups. if everything equivalent no change.
-__is_incomplete__: checks all fields in the editable array per row. If a row has some values entered but not all it returns true. otherwise
-    it returns false
-__is_deleted__: this is a boolean value set by the user delete function. if delete is set this will be true otherwise it will be false. If
-    __allow_delete__ is false this variable is not allowed to be set to true.
-__save_route__: this determines what route data changes should be sent to i.e. insert/update/upsert. by default new rows are insert and
-    data pulled from server are update.
-
-__allow_update__: (boolean) data sent from server or set on new insert. Used to help determine if contents are editable. New rows will generally set this to
-    true
-__allow_delete__: (boolean) data sent from server or set on new insert. Used to help determine if contents are deletable. New rows will generally set this to
-    true
-__is_assigned__: (boolean) determines if the user has specialty permissions for this data type.
-__is_query_row__: boolean. establishes if data is sent from server or created by insert on grid
-__is_new_row__:  boolean determines if row should be treated as new row regardless if sent from server or created by the grid using insert.
-
-node_id: This is added to rows during the saving functionality. This is used as a mapping to connect server data errors to the row in rowData.
-    This may or maynot be present but should not be added anywhere else within the program.
-
-id: this column is required to be defined in each table. This is the corresponding id in postgresql. node_id and id are directly called and
-    checked for on the server side.
-
-InitalizeRowDataFieldsDefinitions is the main module and it returns:
-gridParams['field_variables'] = {
-    'fields': field_list, list of all columns that had field defined in it
-    'backup_fields': field_backup_list, list of the field converted to their backup names
-    'server_fields': server_field_list, list of fields that are the primary data points to be entered by the user.
-        this data is saved to the server on save.
-    'backup_server_fields': server_field_backup_list, backup name of the server fields
-    'validation_fields': validation_fields, every data column field that also has the 'validation' object defined.
-        this will contain a validation function. This module checks for its existance and ats the field to the list
-        of fields that have validations to check for
-    'validation_field_names': validation_field_names, the list of field names covereted to the private name for validation fields
-        stored in 
-    'error_fields': error_fields, All the fields used outside of the validations used to determine if a row is ready to be saved. i.e.
-        its complete and has no error.
-    'row_parameters': list of fields used to control row level behavior such as can delete, can update, is_assigned
-    'field_map': {field} -> {'field': "", 'backup_field': "", 'validation_field': "", 'data_type': "", 'is_server_field': false, 'has_validation': false }
-}
-
-//Default crud options: When new rows are created or pulled from the server. Many of the private variables need to be initialized
-The functions below contain the default parameter which can be overwritten in the main page.
-DefaultNewRouteParameters
-DefaultUpdateRouteParameters
-
-*/
 
 function CLOG () {console.log('hi from clog')}
 
@@ -745,8 +708,77 @@ function IsChanged (params, server_fields) {
     return
 }
 
+function NewRowInputsInitialize(new_row_inputs, gridParams) {
+    /*
+    This initializes the new_row_inputs with default values if not already defined. new_row_inputs is used when creating new 
+    rows via insert in grid_functions.js This is used to initialize new rows and its corresponding paramters.
+        // New Row Inputs:
+        // new_row_inputs = {} is an object passed from url page in pages folder. It contains parameters for what to put in each row
+        //     when insert row is selected. Default ke:value pairs are used in place when their is not a value already in place.
+        //new_row_inputs
+    */
+    var server_fields  = gridParams['field_variables']['server_fields']
+    var default_params = field_functions.DefaultNewRouteParameters()
 
+    for (let key in default_params) {
+        if (query_row_inputs.hasOwnProperty(key)) {continue}
+        new_row_inputs[key] = default_params[key]
+    }
 
+    for (let i =0; i < server_fields.length; i++) {
+        if (query_row_inputs.hasOwnProperty(server_fields[i])) {continue}
+        new_row_inputs[server_fields[i]] = null
+    }
+
+}
+
+function QueryRouteRowInputsInitialize(query_row_inputs) {
+    /*
+    This function finish initializing the default parameters in query_row_inputs. This object is used to add default parameters 
+    to each row for data pulled from the server. A common change is to set what route the row will goto on save. The default route is update.
+    */
+    var default_params = field_functions.DefaultUpdateRouteParameters()
+    for (let key in default_params) {
+        if (query_row_inputs.hasOwnProperty(key)) {continue}
+        query_row_input[key] = default_params[key]
+    }
+}
+
+function NewRowInputsInitialize(new_row_inputs, gridParams) {
+    /*
+    This initializes the new_row_inputs with default values if not already defined. new_row_inputs is used when creating new 
+    rows via insert in grid_functions.js This is used to initialize new rows and its corresponding paramters.
+        // New Row Inputs:
+        // new_row_inputs = {} is an object passed from url page in pages folder. It contains parameters for what to put in each row
+        //     when insert row is selected. Default ke:value pairs are used in place when their is not a value already in place.
+        //new_row_inputs
+    */
+    var server_fields  = gridParams['field_variables']['server_fields']
+    var default_params = field_functions.DefaultNewRouteParameters()
+
+    for (let key in default_params) {
+        if (query_row_inputs.hasOwnProperty(key)) {continue}
+        new_row_inputs[key] = default_params[key]
+    }
+
+    for (let i =0; i < server_fields.length; i++) {
+        if (query_row_inputs.hasOwnProperty(server_fields[i])) {continue}
+        new_row_inputs[server_fields[i]] = null
+    }
+
+}
+
+function QueryRouteRowInputsInitialize(query_row_inputs) {
+    /*
+    This function finish initializing the default parameters in query_row_inputs. This object is used to add default parameters 
+    to each row for data pulled from the server. A common change is to set what route the row will goto on save. The default route is update.
+    */
+    var default_params = field_functions.DefaultUpdateRouteParameters()
+    for (let key in default_params) {
+        if (query_row_inputs.hasOwnProperty(key)) {continue}
+        query_row_input[key] = default_params[key]
+    }
+}
 
 
 

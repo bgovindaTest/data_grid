@@ -329,14 +329,16 @@ class ColumnDefsInit {
         let meta_def_fns =   this.MetaColumnDefaultValues(grid)
         let fi = meta_def_fns['fi']
         let fu = meta_def_fns['fu']
+        let fundo = meta_def_fns['fundo']
 
         let mx = {
             'field': meta_column_name,
             'editable': false,
             'hide': true,
             'suppressToolPanel': true,
-            'defaultInsertValue': fi, //should be a function creates backups. and how row was added.
-            'defaultUpdateValue': fu, //
+            'initDefaultInsertRow': fi, //should be a function creates backups. and how row was added.
+            'initUpdateRow': fu, //
+            'undoRow': fundo,
             'showSort': false,
             'showFilter': false
         }
@@ -371,6 +373,28 @@ class ColumnDefsInit {
         }
 
         //for rows created from querying the database
+        let fu = this.InitDefaultUpdateRow(backups)
+        //for newly added rows via add row or new_sheet
+        let fi = this.InitDefaultUpdateRow(backups)
+        let fundo = this.UndoRow()
+        return {'fi': fi, 'fu': fu, 'fundo': fundo}
+    }
+    //meta functions for creating and reseting rows
+    InitDefaultInsertRow(backups) {
+        let fi = function () {
+            let meta_column = { 'row_type': 'insert', 'meta_delete_undo_name': false }
+            let field_names = Object.keys(backups)
+            let meta_backup = {}
+            for (let i = 0; i< field_names.length; i++ ) {
+                let field_name = field_names[i]
+                meta_backup[field_name] = backups[field_name]
+            }
+            meta_column['backups'] = meta_backup
+            return meta_column
+        }
+        return fi
+    }
+    InitDefaultUpdateRow(backups) {
         let fu = function (row_data) {
             //row_data is whats stored in server object
             let meta_column = { 'row_type': 'update', 'meta_delete_undo_name': false }
@@ -384,20 +408,142 @@ class ColumnDefsInit {
             meta_column['backups'] = meta_backup
             return meta_column
         }
-        //for newly added rows via add row or new_sheet
-        let fi = function () {
-            let meta_column = { 'row_type': 'insert', 'meta_delete_undo_name': false }
-            let field_names = Object.keys(backups)
-            let meta_backup = {}
+        return fu
+    }
+    UndoRow() {
+        let fundo = function (row_data) {
+            //undo row to initial state.
+            if (! row_data.hasOwnProperty( meta_column_name )) {return}
+            let meta_column = row_data[ meta_column_name]
+            let meta_backup = meta_column[ 'backups' ]
+            let field_names = Object.keys(meta_backup)
             for (let i = 0; i< field_names.length; i++ ) {
                 let field_name = field_names[i]
-                meta_backup[field_name] = backups[field_name]
+                row_data[field_name] = meta_backup[field_name]
             }
-            meta_column['backups'] = meta_backup
-            return meta_column
+            row_data[meta_delete_undo_name] = false
         }
-        return {'fi': fi, 'fu': fu}
+        return fundo
     }
+    DeleteRow() {}
+    //meta field meta field name meta fiel backup
+    RowHasError (params, validation_function_list) {
+        /*
+        Checks if all editable fields are null
+        Loops through columns in row whos keys are in the keys variable. If any value is an empty string
+        returns true. If a user enters into a cell and leaves, the grid by default leaves an empty string.
+
+        need to change empty paramters
+        */
+        var is_error = false
+        for (var i=0; i< validation_function_list.length; i++) {
+            var is_valid = validation_function_list[i](params)
+            if (!is_valid) {is_error = true}
+        }
+        params.data[field_functions.is_error()] = is_error
+        return is_error
+    }
+
+    RowIsEmpty (params,server_fields) { 
+        //Determines if cell value is Null. If any value is empty its false
+        for (var i=0; i< server_fields.length; i++) {
+            var value = params.data[server_fields[i]]
+            if (value !== null) {
+                params.data[field_functions.is_empty()] = false
+                return
+            }
+        }
+        params.data[field_functions.is_empty()] = true
+    }
+
+
+    RowIsComplete (params,server_fields) { 
+        //Determines if cell value is Null. If any value is empty its false
+        for (var i=0; i< server_fields.length; i++) {
+            var value = params.data[server_fields[i]]
+            if (value === null) {
+                params.data[field_functions.is_complete()] = false
+                return
+            }
+        }
+        params.data[field_functions.is_complete()] = true
+    }
+
+
+    RowIsIncomplete(params) {
+        if( params.data[field_functions.is_complete()] || params.data[field_functions.is_empty()] ) {
+            params.data[field_functions.is_incomplete()] = false
+        } else {
+            params.data[field_functions.is_incomplete()] = true
+        }
+    }
+
+
+    //parameters for row
+    RowIsChanged (params, server_fields) {
+        //Determines if cell value is Null. If any value is empty its false
+        // console.log(server_fields)
+        for (var i=0; i< server_fields.length; i++) {
+            var value = params.data[server_fields[i]]
+            var backup_value = params.data[ field_functions.BackupFieldName(server_fields[i]) ]
+            if (value !== backup_value ) {
+                params.data[field_functions.is_changed()] = true
+                return
+            }
+        }
+        params.data[field_functions.is_changed()] = false
+        return
+    }
+
+    IsBlocking(rowx) {
+        /*
+        If the row meets teh criteria below it has sometype of error that should prevent the saving
+        function from continue
+        */
+        if ( !rowx[field_functions.is_deleted()] && rowx[field_functions.is_changed()] && 
+                ( rowx[field_functions.is_incomplete()] || rowx[field_functions.is_error()] ) ) {
+                   return true 
+        } else { return false}
+    }
+    
+    IsSaveRow(rowx) {
+        /*
+        Filter passes if the row should be included for saving.
+    
+        If new row skip if deleted. if new row and is changed is complete and no error should pass
+    
+        if old row i.e. for update. Can change if 
+    
+        */
+        if ( ( rowx[field_functions.is_new_row()] && !rowx[field_functions.is_deleted()] &&
+                ( rowx[field_functions.is_changed()] && rowx[field_functions.is_complete()] 
+                && !rowx[field_functions.is_error()]  ) 
+             )
+        ) {return true} 
+        else if ( ( !rowx[field_functions.is_new_row()] &&
+            (
+                ( rowx[field_functions.is_changed()] && rowx[field_functions.is_complete()] 
+                && !rowx[field_functions.is_error()]  ) || rowx[field_functions.is_deleted()]
+            )
+            ) 
+        ) {return true}
+        else {return false}
+    }
+
+    async CheckBlockingRows(rowData) {
+        /*
+        This loops though all rows in rowData and determines if any rows should be saved but have errors that
+        should be fixed first
+    
+        */
+        //need to update conditional. I dont think its right
+        let count = 0
+        for (let i=0; i<rowData.length; i++) {
+            if (IsBlocking(rowData[i]) ) { count +=1 }
+        }
+        return count
+    }
+
     async CellEditorParams(grid_column) {
         /*
         Handles specialized modules. i.e. autocomplete and aggrid rich cell editor

@@ -10,6 +10,7 @@ Combines modules from GridFunctions and GridParser into main mixin
 // define a mixin object
 const debugConfig = require('./load_placeholder.js')
 
+//combines modal operations with grid functions?
 
 var myMixin = {
 data () {

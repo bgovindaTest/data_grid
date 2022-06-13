@@ -37,6 +37,10 @@ Parses grids json object and converts expression syntax into javascript function
 gridOptions.suppressPropertyNamesCheck = true
 
 validator: function()
+
+//not implemented yet also need try catch console log error.
+validatorRequiredFields: [] //must all be not null or will not run. returns null in that case
+valueGetterRequiredFields: [] //must all be not null or will not run. returns null in that case
  
 isCrud:   true/false
 editable: true/false {'update_only': true/false, 'insert_only': true/false}
@@ -359,8 +363,21 @@ class ColumnDefsInit {
 
         //is_crud
         //need to add column for delete
-
-        let backups = {}
+        let backups = this.CreateMetaBakupColumn(grid)
+        let fupdate = this.InitDefaultUpdateRow(backups) //for rows created from querying the database
+        let finsert = this.InitDefaultInsertRow(backups) //for newly added rows via add row or new_sheet
+        let fundo   = this.UndoRow(backups) //function to reset row based on backup values
+        let fdel    = this.DeleteRow()
+        let ferror  = this.RowHasError(grid,backups) //combines all validations functions
+        let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
+        let fchange = this.RowIsChanged(grid)  //different from backup fields
+        return {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
+            'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange }
+    }
+    //meta functions for creating and reseting rows
+    CreateMetaBakupColumn( grid ) {
+        //parse grid and creates backups object.
+        backups = {}
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             if (! grid_column.hasOwnProperty('isCrud') ) {continue}
@@ -371,15 +388,9 @@ class ColumnDefsInit {
             }
             backups[field_name] = default_value
         }
-
-        //for rows created from querying the database
-        let fu = this.InitDefaultUpdateRow(backups)
-        //for newly added rows via add row or new_sheet
-        let fi = this.InitDefaultUpdateRow(backups)
-        let fundo = this.UndoRow()
-        return {'fi': fi, 'fu': fu, 'fundo': fundo}
+        return backups
     }
-    //meta functions for creating and reseting rows
+
     InitDefaultInsertRow(backups) {
         let fi = function () {
             let meta_column = { 'row_type': 'insert', 'meta_delete_undo_name': false }
@@ -425,9 +436,17 @@ class ColumnDefsInit {
         }
         return fundo
     }
-    DeleteRow() {}
+    DeleteRow() {
+        let fdel = function (row_data) {
+            //undo row to initial state.
+            if (! row_data.hasOwnProperty( meta_delete_undo_name )) {return}
+            row_data[meta_delete_undo_name] = true
+        }
+        return fdel
+
+    }
     //meta field meta field name meta fiel backup
-    RowHasError (params, validation_function_list) {
+    RowHasError (grid) {
         /*
         Checks if all editable fields are null
         Loops through columns in row whos keys are in the keys variable. If any value is an empty string
@@ -435,75 +454,60 @@ class ColumnDefsInit {
 
         need to change empty paramters
         */
-        var is_error = false
-        for (var i=0; i< validation_function_list.length; i++) {
-            var is_valid = validation_function_list[i](params)
-            if (!is_valid) {is_error = true}
-        }
-        params.data[field_functions.is_error()] = is_error
-        return is_error
-    }
 
-    RowIsEmpty (params,server_fields) { 
-        //Determines if cell value is Null. If any value is empty its false
-        for (var i=0; i< server_fields.length; i++) {
-            var value = params.data[server_fields[i]]
-            if (value !== null) {
-                params.data[field_functions.is_empty()] = false
-                return
+        // allowNull: true/false
+        // isRequired: true/false
+
+        let fvalids = []
+        let allowNull = {}
+        let isRequired = {}
+
+        let ferror = function (params) {
+            for (var i=0; i< fvalids.length; i++) {
+                let fv = fvalids[i](params)
+                is_valid = fv(params)
             }
+            params.data[field_functions.is_error()] = is_error
+            return is_error
         }
-        params.data[field_functions.is_empty()] = true
+        return ferror
     }
 
-
-    RowIsComplete (params,server_fields) { 
+    RowIsComplete (grid, backups) { 
         //Determines if cell value is Null. If any value is empty its false
-        for (var i=0; i< server_fields.length; i++) {
-            var value = params.data[server_fields[i]]
-            if (value === null) {
-                params.data[field_functions.is_complete()] = false
-                return
+        let fcomp = function(params) {
+            for (var i=0; i< server_fields.length; i++) {
+                var value = params.data[server_fields[i]]
+                if (value === null) {
+                    params.data[field_functions.is_complete()] = false
+                    return
+                }
             }
+            params.data[field_functions.is_complete()] = true
         }
-        params.data[field_functions.is_complete()] = true
+        return fcomp
+
     }
-
-
-    RowIsIncomplete(params) {
-        if( params.data[field_functions.is_complete()] || params.data[field_functions.is_empty()] ) {
-            params.data[field_functions.is_incomplete()] = false
-        } else {
-            params.data[field_functions.is_incomplete()] = true
-        }
-    }
-
 
     //parameters for row
-    RowIsChanged (params, server_fields) {
+    RowIsChanged (grid, backups) {
         //Determines if cell value is Null. If any value is empty its false
         // console.log(server_fields)
-        for (var i=0; i< server_fields.length; i++) {
-            var value = params.data[server_fields[i]]
-            var backup_value = params.data[ field_functions.BackupFieldName(server_fields[i]) ]
-            if (value !== backup_value ) {
-                params.data[field_functions.is_changed()] = true
-                return
+        let fchange = function(params) {
+            for (var i=0; i< server_fields.length; i++) {
+                var value = params.data[server_fields[i]]
+                var backup_value = params.data[ field_functions.BackupFieldName(server_fields[i]) ]
+                if (value !== backup_value ) {
+                    params.data[field_functions.is_changed()] = true
+                    return
+                }
             }
-        }
-        params.data[field_functions.is_changed()] = false
-        return
-    }
+            params.data[field_functions.is_changed()] = false
+            return
 
-    IsBlocking(rowx) {
-        /*
-        If the row meets teh criteria below it has sometype of error that should prevent the saving
-        function from continue
-        */
-        if ( !rowx[field_functions.is_deleted()] && rowx[field_functions.is_changed()] && 
-                ( rowx[field_functions.is_incomplete()] || rowx[field_functions.is_error()] ) ) {
-                   return true 
-        } else { return false}
+        }
+        return fchange
+
     }
     
     IsSaveRow(rowx) {
@@ -513,8 +517,13 @@ class ColumnDefsInit {
         If new row skip if deleted. if new row and is changed is complete and no error should pass
     
         if old row i.e. for update. Can change if 
-    
+
+        loop through everything and return crud params by type
+
+        batch and debounce?
         */
+
+
         if ( ( rowx[field_functions.is_new_row()] && !rowx[field_functions.is_deleted()] &&
                 ( rowx[field_functions.is_changed()] && rowx[field_functions.is_complete()] 
                 && !rowx[field_functions.is_error()]  ) 
@@ -530,19 +539,6 @@ class ColumnDefsInit {
         else {return false}
     }
 
-    async CheckBlockingRows(rowData) {
-        /*
-        This loops though all rows in rowData and determines if any rows should be saved but have errors that
-        should be fixed first
-    
-        */
-        //need to update conditional. I dont think its right
-        let count = 0
-        for (let i=0; i<rowData.length; i++) {
-            if (IsBlocking(rowData[i]) ) { count +=1 }
-        }
-        return count
-    }
 
     async CellEditorParams(grid_column) {
         /*

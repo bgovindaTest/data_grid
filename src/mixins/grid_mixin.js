@@ -12,6 +12,12 @@ const debugConfig = require('./load_placeholder.js')
 
 //combines modal operations with grid functions?
 
+/*
+on grid ready initialize app?
+
+*/
+
+
 var myMixin = {
 data () {
     return {

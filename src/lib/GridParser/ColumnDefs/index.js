@@ -38,6 +38,7 @@ gridOptions.suppressPropertyNamesCheck = true
 
 validator: function()
 
+
 //not implemented yet also need try catch console log error.
 validatorRequiredFields: [] //must all be not null or will not run. returns null in that case
 valueGetterRequiredFields: [] //must all be not null or will not run. returns null in that case
@@ -50,7 +51,7 @@ dataType:  //used for sorting? need to add time and datetime filters
 
 allowNull: true/false
 isRequired: true/false
-ignoreError: true/false (for calculated fields?)
+ignoreError: true/false (for calculated fields?) allow to pass or skip?
 
 
 ifNull: 'psql string calls to replace value'
@@ -118,6 +119,7 @@ class ColumnDefsInit {
         this.rowParams = rowParams || {}
     }
     RunGridInit() {
+        //for MainGrid
         //make copy?
         //grid = JSON.parse(JSON.stringify(food)) for deep copy
         let grid = lodashCloneDeep(this.grid) //messes up column order probably?
@@ -148,6 +150,14 @@ class ColumnDefsInit {
         }
         this.MetaColumn(grid)
         return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter}
+    }
+    RunSubGridInit() {
+        //this.RunGridInit()
+    }
+    RunMainGridInit() {
+        //grid_name or position
+        //this.RunGridInit()
+        //returns gridConfiguration
     }
     InitializeDeleteUndoColumn(grid) {
         /*
@@ -369,10 +379,13 @@ class ColumnDefsInit {
         let fundo   = this.UndoRow(backups) //function to reset row based on backup values
         let fdel    = this.DeleteRow()
         let ferror  = this.RowHasError(grid,backups) //combines all validations functions
+        let fwarn   = this.RowHasWarning(grid,backups) //validations with ignored error
         let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
         let fchange = this.RowIsChanged(grid)  //different from backup fields
-        return {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
-            'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange }
+        let grid_functions =  {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
+            'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
+        let fsave_prep = this.RowIsReadyForSave(grid_functions)
+        grid_functions['fsave_prep'] = fsave_prep
     }
     //meta functions for creating and reseting rows
     CreateMetaBakupColumn( grid ) {
@@ -445,6 +458,10 @@ class ColumnDefsInit {
         return fdel
 
     }
+    IsDeleted(row_data) {
+        if (! row_data.hasOwnProperty( meta_delete_undo_name )) {return false}
+        return row_data[meta_delete_undo_name] //should be boolean
+    }
     //meta field meta field name meta fiel backup
     RowHasError (grid) {
         /*
@@ -458,10 +475,16 @@ class ColumnDefsInit {
         // allowNull: true/false
         // isRequired: true/false
 
-        let fvalids = []
+
+        let fvalids = [] //need to get validation functions.
         let allowNull = {}
         let isRequired = {}
 
+        //ignoreError check if true. removes validation function from
+        //ferror
+
+
+        //true, false or null
         let ferror = function (params) {
             for (var i=0; i< fvalids.length; i++) {
                 let fv = fvalids[i](params)
@@ -472,6 +495,80 @@ class ColumnDefsInit {
         }
         return ferror
     }
+
+    ExtractSaveParams(grid) {
+        /*
+
+            allowNull: true/false
+            isRequired: true/false
+            ignoreError: true/false (for calculated fields?) allow to pass or skip?
+        */
+
+        //isCrud or has validator
+        let fields = []
+        let fwarn = {} //need to get validation functions.
+        let ferrs = {}
+        let allowNull = {}
+        let isRequired = {}
+        let ignoreError = {}
+        for(let i=0; i < grid.length; i++) {
+            let isCrud     = false
+            let hasValid   = false
+            let grid_column = grid[i]
+            let field = grid_column['field']
+
+            if (grid_column.hasOwnProperty('isCrud')) { isCrud = grid_column['isCrud'] }
+            if (grid_column.hasOwnProperty('validator')) { hasValid = true }
+            if (!isCrud || !hasValid) { continue }
+            fields.push(field)
+            if (grid_column.hasOwnProperty('isRequired'))  { isRequired[field]  = grid_column['isRequired'] }
+            if (grid_column.hasOwnProperty('ignoreError')) { ignoreError[field] = grid_column['ignoreError'] }
+            if (grid_column.hasOwnProperty('allowNull'))   { allowNull[field]   = grid_column['allowNull'] }
+            if (grid_column.hasOwnProperty('validator'))   { 
+                
+                //error or warning
+                allowNull   = grid_column['allowNull'] 
+            
+            }
+
+            // if (grid_column.hasOwnProperty('validator')) {}
+        }
+
+    }
+
+    RowHasWarning (grid) {
+        /*
+        Checks if all editable fields are null
+        Loops through columns in row whos keys are in the keys variable. If any value is an empty string
+        returns true. If a user enters into a cell and leaves, the grid by default leaves an empty string.
+
+        need to change empty paramters
+        */
+
+        // allowNull: true/false
+        // isRequired: true/false
+
+        let fvalids = [] //need to get validation functions.
+        let allowNull = {}
+        let isRequired = {}
+
+        //ignoreError check if true. removes validation function from
+        //ferror
+
+
+        //true, false or null
+        //loop through fields?
+        let ferror = function (params) {
+            for (var i=0; i< fvalids.length; i++) {
+                let fv = fvalids[i](params)
+                is_valid = fv(params)
+            }
+            params.data[field_functions.is_error()] = is_error
+            return is_error
+        }
+        return ferror
+    }
+
 
     RowIsComplete (grid, backups) { 
         //Determines if cell value is Null. If any value is empty its false
@@ -510,7 +607,7 @@ class ColumnDefsInit {
 
     }
     
-    IsSaveRow(rowx) {
+    async IsSaveRow(grid_functions) {
         /*
         Filter passes if the row should be included for saving.
     
@@ -522,23 +619,50 @@ class ColumnDefsInit {
 
         batch and debounce?
         */
+        // {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
+        // 'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange }
+        let IsChanged   = grid_functions['fchange']
+        let IsCompleted = grid_functions['fcomp']
+        let IsError     = grid_functions['ferror']
+        let IsWarning   = grid_functions['fwarn']
 
 
-        if ( ( rowx[field_functions.is_new_row()] && !rowx[field_functions.is_deleted()] &&
-                ( rowx[field_functions.is_changed()] && rowx[field_functions.is_complete()] 
-                && !rowx[field_functions.is_error()]  ) 
-             )
-        ) {return true} 
-        else if ( ( !rowx[field_functions.is_new_row()] &&
-            (
-                ( rowx[field_functions.is_changed()] && rowx[field_functions.is_complete()] 
-                && !rowx[field_functions.is_error()]  ) || rowx[field_functions.is_deleted()]
-            )
-            ) 
-        ) {return true}
-        else {return false}
+        let incomplete = 0
+        let errors     = 0
+        let warnings   = 0
+        let saves      = 0
+        let save_object = {'insert': [], 'update': [], 'delete': [], 'error_count': errors,
+            'incomplete_count': incomplete, 'warning_count': warnings, 'save_count': saves }
+
+        let tableData = []
+        batch_count = 0
+        for (let i=0; i< tableData.length; i++) {
+            //allow ui to refresh for batch value changes
+            batch_count += 1
+            if (batch_count > 1000) {
+                batch_count = 0
+                await new Promise(r => setTimeout(r, 20))
+            }
+
+            let rowData = tableData[i]
+            if (! IsChanged(rowData) ) { continue }
+            if ( this.IsDeleted(rowData) ) {
+                save_object['delete'].push(rowData)
+                continue
+            }
+
+            if (! IsCompleted(rowData)) {
+                incomplete += 1
+                continue
+            }
+            let is_error = IsError(rowData)
+            if (is_error === false || is_error === null ) {
+                let row_type = rowData[meta_column_name]['row_type']
+                save_object[row_type].push(rowData)
+                if (is_error === null) {errors +=1} 
+            } else {errors += 1}
+        }
     }
-
 
     async CellEditorParams(grid_column) {
         /*

@@ -102,3 +102,5 @@ metaFields:
 
     //initial pull?
 */
+
+Creates configurations for aggrid.

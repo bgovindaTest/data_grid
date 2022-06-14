@@ -94,17 +94,42 @@ function EvaluateFunction(fn, params, globals) {
 function CreateAggridFunction( expr, globals, options ) {
 
     let mathjs_type_set = null
-    if (options.hasOwnProperty['mathjs_type_set'] ) {
-        mathjs_type_set = options['mathjs_type_set']
-    }
+    if (options.hasOwnProperty['mathjs_type_set'] ) { mathjs_type_set = options['mathjs_type_set'] }
     //options is big
+    let requiredFields = null
+    if (options.hasOwnProperty['requiredFields'] ) { requiredFields = options['requiredFields'] }
+    if (!type_check.IsArray(requiredFields)) {requiredFields = null}
 
     let fx = CreateFunction(expr, mathjs_type_set )
-    let fn = function (params) {
-        let res = EvaluateFunction(fx, params, globals)
-        return res
+    if (requiredFields === null) {
+        let fn = function (params) {
+            try{
+                let res = EvaluateFunction(fx, params, globals)
+                return res
+            } catch (error) {
+                console.error(error)
+                return null
+            }
+        }
+        return fn
+    } else {
+        //has required fields
+        let fn = function (params) {
+            for(let i =0; i < requiredFields.length; i++) {
+                let field = requiredFields[i]
+                let cell_value = params.data[field]
+                if (type_check.IsNull(cell_value) || type_check.IsUndefined(cell_value) ) {return null}
+            }
+            try{
+                let res = EvaluateFunction(fx, params, globals)
+                return res
+            } catch (error) {
+                console.error(error)
+                return null
+            }
+        }
+        return fn
     }
-    return fn
 }
 
 //adds user defined functions

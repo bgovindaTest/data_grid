@@ -97,9 +97,9 @@ staticDropDownFilters?
 
 subgrid params (valid names and default)
 */
-const ex = require('../ExpressionParser')
-const cellClassRules = require('./CellClassRules')
-const type_check = require('../../TypeCheck')
+const ex = require('./ExpressionParser')
+const cellClassRules = require('./ColumnDefs/CellClassRules')
+const type_check = require('../TypeCheck')
 
 const lodashCloneDeep = require('lodash.clonedeep')
 
@@ -107,6 +107,9 @@ const meta_column_name = '_ag-meta_'
 const meta_delete_undo_name = '_ag-meta-delete-undo_'
 //import axios
 //create configurations.
+
+
+//Creates main layout
 
 class ColumnDefsInit {
     //for main loader
@@ -149,9 +152,12 @@ class ColumnDefsInit {
             this.AddValueSetter(grid_column)
         }
         this.MetaColumn(grid)
+        //filterParams
+        //SortByParams
+        //HeaderParams
         return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter}
     }
-    RunSubGridInit() {
+    RunSubGridInit(grid, rowParams) {
         //this.RunGridInit()
     }
     RunMainGridInit() {
@@ -289,11 +295,7 @@ class ColumnDefsInit {
         } else { defaultOrderBy.push({'field': field, 'order_by': 'asc'}) }
     }
     DefaultFilter(grid_column, defaultFilter) {
-        // if (Object.keys(this.rowParams).length === 0 ) {
-
-        // } else {
-
-        // }
+        //appends default filter information.
         if (! grid_column.hasOwnProperty('defaultFilter') ) {return}
         let x = grid_column['defaultFilter']
         if (! x.hasOwnProperty['field'] ) { x['field'] = grid_column['field'] }
@@ -341,8 +343,8 @@ class ColumnDefsInit {
     MetaColumn( grid ) {
         /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
         let meta_def_fns =   this.MetaColumnDefaultValues(grid)
-        let fi = meta_def_fns['fi']
-        let fu = meta_def_fns['fu']
+        let fi = meta_def_fns['finsert']
+        let fu = meta_def_fns['fundo']
         let fundo = meta_def_fns['fundo']
 
         let mx = {
@@ -378,19 +380,20 @@ class ColumnDefsInit {
         let finsert = this.InitDefaultInsertRow(backups) //for newly added rows via add row or new_sheet
         let fundo   = this.UndoRow(backups) //function to reset row based on backup values
         let fdel    = this.DeleteRow()
-        let ferror  = this.RowHasError(grid,backups) //combines all validations functions
-        let fwarn   = this.RowHasWarning(grid,backups) //validations with ignored error
-        let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
-        let fchange = this.RowIsChanged(grid)  //different from backup fields
+        // let ferror  = this.RowHasError(grid,backups) //combines all validations functions
+        // let fwarn   = this.RowHasWarning(grid,backups) //validations with ignored error
+        // let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
+        // let fchange = this.RowIsChanged(grid)  //different from backup fields
         let grid_functions =  {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
-            'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
-        let fsave_prep = this.RowIsReadyForSave(grid_functions)
-        grid_functions['fsave_prep'] = fsave_prep
+            'fdel': fdel}//  , 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
+        // let fsave_prep = this.RowIsReadyForSave(grid_functions)
+        // grid_functions['fsave_prep'] = fsave_prep
+        return grid_functions
     }
     //meta functions for creating and reseting rows
     CreateMetaBakupColumn( grid ) {
         //parse grid and creates backups object.
-        backups = {}
+        let backups = {}
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             if (! grid_column.hasOwnProperty('isCrud') ) {continue}

@@ -235,8 +235,14 @@ data () {
         orderByModal: false,
         gridApi: null,
         columnApi: null,
-        gridOptions: null
+        gridOptions: null,
         //generated functions?
+
+        //
+        queryParams: {},
+        orderByParams: {},
+        filterParams: {},
+        enforcedFilterParams: {},
 
     }
 },
@@ -250,6 +256,11 @@ methods: {
 
 
     Insert: async function () {},
+
+    async AppendStaticDropDown() {
+        //runs after gridParser. pull any static arrays?
+    },
+
     //UI functions
     RedrawRows() {
         //redraws all visible rows gridOptions.api === gridApi
@@ -534,6 +545,10 @@ methods: {
     
         initialize get_route_params when initial RunQuery is ran.
         */
+
+        //query_loading modal launch
+        //other buttons dont run during loading?
+
         var query_object = query_routes[route_name]
         if (!is_next_page) {
             //initialize get_route_params
@@ -562,6 +577,12 @@ methods: {
         var processedOutput =  ProcessServerDataForAggrid(output['rows'], get_route_params['input_params'], field_variables)
         //if error throw?
     
+        //remove tableData
+
+
+        //add processedOutput
+
+
         return processedOutput
         //if no errors? else //Add error to loadModule?
     
@@ -719,6 +740,61 @@ methods: {
         //if error AddServerErrorMessagesToRow field_functions.server_error()
         // AddServerErrorMessagesToRow(saveRows, row_error_map)
     },
+    ExtractSaveParams(grid) {
+        /*
+
+            allowNull: true/false
+            isRequired: true/false
+            ignoreError: true/false (for calculated fields?) allow to pass or skip?
+        */
+
+        //isCrud or has validator
+        let fields = []
+        let fwarn = {} //need to get validation functions.
+        let ferrs = {}
+        let allowNull = {}
+        let isRequired = {}
+        let ignoreError = {}
+        for(let i=0; i < grid.length; i++) {
+            let isCrud     = false
+            let hasValid   = false
+            let grid_column = grid[i]
+            let field = grid_column['field']
+            let is_error = false
+            let is_required = false
+
+            if (grid_column.hasOwnProperty('isCrud')) { isCrud = grid_column['isCrud'] }
+            if (grid_column.hasOwnProperty('validator')) { hasValid = true }
+            if (!isCrud || !hasValid) { continue }
+            fields.push(field)
+            if (grid_column.hasOwnProperty('isRequired'))  { isRequired[field]  = grid_column['isRequired'] }
+            if (grid_column.hasOwnProperty('ignoreError')) { 
+                ignoreError[field] = grid_column['ignoreError']
+                is_error = ignoreError[field]
+            }
+            if (grid_column.hasOwnProperty('allowNull'))   { 
+                allowNull[field]   = grid_column['allowNull'] 
+                is_required 
+            }
+            if (grid_column.hasOwnProperty('validator'))   { 
+                
+                //error or warning
+
+                allowNull   = grid_column['allowNull'] 
+            
+            }
+
+            // if (grid_column.hasOwnProperty('validator')) {}
+        }
+
+    },
+
+
+
+    CrudInsert() {},
+    CrudDelete() {},
+    CrudUpdate() {},
+
     FixData() {
         //clear save object.
         //close save modal
@@ -809,7 +885,10 @@ methods: {
     
         return rowy
     },
-    
+    ProcessLookupData() {
+        //converts flat sql query to json object for lookups
+        //i.e. autocomplete and agrichselect editor
+    },
     async ExtractRowsForSave(rowData) {
         /*
         This extracts all completed rows that should be sent to the server for saving.
@@ -823,6 +902,64 @@ methods: {
         }
         return saveRows
     },
+
+    async IsSaveRow(grid_functions) {
+        /*
+        Filter passes if the row should be included for saving.
+    
+        If new row skip if deleted. if new row and is changed is complete and no error should pass
+    
+        if old row i.e. for update. Can change if 
+
+        loop through everything and return crud params by type
+
+        batch and debounce?
+        */
+        // {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
+        // 'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange }
+        let IsChanged   = grid_functions['fchange']
+        let IsCompleted = grid_functions['fcomp']
+        let IsError     = grid_functions['ferror']
+        let IsWarning   = grid_functions['fwarn']
+
+
+        let incomplete = 0
+        let errors     = 0
+        let warnings   = 0
+        let saves      = 0
+        let save_object = {'insert': [], 'update': [], 'delete': [], 'error_count': errors,
+            'incomplete_count': incomplete, 'warning_count': warnings, 'save_count': saves }
+
+        let tableData = []
+        batch_count = 0
+        for (let i=0; i< tableData.length; i++) {
+            //allow ui to refresh for batch value changes
+            batch_count += 1
+            if (batch_count > 1000) {
+                batch_count = 0
+                await new Promise(r => setTimeout(r, 20))
+            }
+
+            let rowData = tableData[i]
+            if (! IsChanged(rowData) ) { continue }
+            if ( this.IsDeleted(rowData) ) {
+                save_object['delete'].push(rowData)
+                continue
+            }
+
+            if (! IsCompleted(rowData)) {
+                incomplete += 1
+                continue
+            }
+            let is_error = IsError(rowData)
+            if (is_error === false || is_error === null ) {
+                let row_type = rowData[meta_column_name]['row_type']
+                save_object[row_type].push(rowData)
+                if (is_error === null) {errors +=1} 
+            } else {errors += 1}
+        }
+    },
+
 
     AddDefaultParametersDefValue(input_params, field_list, default_value) {
         for (let i=0; i < field_list.length; i++) {
@@ -848,9 +985,9 @@ methods: {
         var where = queryParams['where']
         var order_by = queryParams['order_by']
         var pagination = queryParams['pagination']
-        ParseWhereObject(req_body, where)
-        ParseOrderBy(req_body, order_by)
-        ParsePagination(req_body, pagination)
+        this.ParseWhereObject(req_body, where)
+        this.ParseOrderBy(req_body, order_by)
+        this.ParsePagination(req_body, pagination)
         return req_body
     },
 

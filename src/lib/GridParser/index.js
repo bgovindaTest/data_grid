@@ -23,7 +23,7 @@ Parses grids json object and converts expression syntax into javascript function
                     update:  ->
                     delete:  ->
 
-                crudInsteadOf: {
+                crudInsteadOf: { //how the app processed the information?
                     'insert': 'update'
                 }
             }
@@ -155,10 +155,12 @@ class ColumnDefsInit {
             this.AddValueSetter(grid_column)
         }
         this.MetaColumn(grid)
+        let fns = this.MetaAuxillaryFunction( grid )
         //filterParams
         //SortByParams
         //HeaderParams
-        return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter}
+        return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter,
+            'enforcedFilter': null}
     }
     RunSubGridInit(grid, rowParams) {
         //this.RunGridInit()
@@ -345,26 +347,19 @@ class ColumnDefsInit {
     }
     MetaColumn( grid ) {
         /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
-        let meta_def_fns =   this.MetaColumnDefaultValues(grid)
-        let fi = meta_def_fns['finsert']
-        let fu = meta_def_fns['fundo']
-        let fundo = meta_def_fns['fundo']
-
         let mx = {
             'field': meta_column_name,
             'editable': false,
             'hide': true,
             'suppressToolPanel': true,
-            'initDefaultInsertRow': fi, //should be a function creates backups. and how row was added.
-            'initUpdateRow': fu, //
-            'undoRow': fundo,
             'showSort': false,
             'showFilter': false
         }
         //need overwrites for debugging
         grid.push(mx)
     }
-    MetaColumnDefaultValues( grid ) {
+
+    MetaAuxillaryFunction( grid ) {
         /*
         Creates object stored in meta_column. Stores backup and 
 
@@ -387,12 +382,16 @@ class ColumnDefsInit {
         // let fwarn   = this.RowHasWarning(grid,backups) //validations with ignored error
         // let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
         // let fchange = this.RowIsChanged(grid)  //different from backup fields
+        let fcrud_type = null
         let grid_functions =  {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
             'fdel': fdel}//  , 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
         // let fsave_prep = this.RowIsReadyForSave(grid_functions)
         // grid_functions['fsave_prep'] = fsave_prep
+        meta_def_fns['deleteWarning'] =  '?' //this comes from grid delete_undo column.
         return grid_functions
     }
+
+    CrudInsteadOf() {}
     //meta functions for creating and reseting rows
     CreateMetaBakupColumn( grid ) {
         //parse grid and creates backups object.
@@ -481,7 +480,6 @@ class ColumnDefsInit {
         // allowNull: true/false
         // isRequired: true/false
 
-
         let fvalids = [] //need to get validation functions.
         let allowNull = {}
         let isRequired = {}
@@ -501,56 +499,6 @@ class ColumnDefsInit {
         }
         return ferror
     }
-
-    ExtractSaveParams(grid) {
-        /*
-
-            allowNull: true/false
-            isRequired: true/false
-            ignoreError: true/false (for calculated fields?) allow to pass or skip?
-        */
-
-        //isCrud or has validator
-        let fields = []
-        let fwarn = {} //need to get validation functions.
-        let ferrs = {}
-        let allowNull = {}
-        let isRequired = {}
-        let ignoreError = {}
-        for(let i=0; i < grid.length; i++) {
-            let isCrud     = false
-            let hasValid   = false
-            let grid_column = grid[i]
-            let field = grid_column['field']
-            let is_error = false
-            let is_required = false
-
-            if (grid_column.hasOwnProperty('isCrud')) { isCrud = grid_column['isCrud'] }
-            if (grid_column.hasOwnProperty('validator')) { hasValid = true }
-            if (!isCrud || !hasValid) { continue }
-            fields.push(field)
-            if (grid_column.hasOwnProperty('isRequired'))  { isRequired[field]  = grid_column['isRequired'] }
-            if (grid_column.hasOwnProperty('ignoreError')) { 
-                ignoreError[field] = grid_column['ignoreError']
-                is_error = ignoreError[field]
-            }
-            if (grid_column.hasOwnProperty('allowNull'))   { 
-                allowNull[field]   = grid_column['allowNull'] 
-                is_required 
-            }
-            if (grid_column.hasOwnProperty('validator'))   { 
-                
-                //error or warning
-
-                allowNull   = grid_column['allowNull'] 
-            
-            }
-
-            // if (grid_column.hasOwnProperty('validator')) {}
-        }
-
-    }
-
     RowHasWarning (grid) {
         /*
         Checks if all editable fields are null
@@ -598,7 +546,6 @@ class ColumnDefsInit {
             params.data[field_functions.is_complete()] = true
         }
         return fcomp
-
     }
 
     //parameters for row
@@ -636,47 +583,37 @@ class ColumnDefsInit {
         */
         // {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
         // 'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange }
-        let IsChanged   = grid_functions['fchange']
-        let IsCompleted = grid_functions['fcomp']
-        let IsError     = grid_functions['ferror']
-        let IsWarning   = grid_functions['fwarn']
+        let IsChanged       = grid_functions['fchange']
+        let IsCompleted     = grid_functions['fcomp']
+        let IsError         = grid_functions['ferror']
+        let IsWarning       = grid_functions['fwarn']
+        let CrudType        = grid_functions['fcrud_type']
 
-
-        let incomplete = 0
-        let errors     = 0
-        let warnings   = 0
-        let saves      = 0
-        let save_object = {'insert': [], 'update': [], 'delete': [], 'error_count': errors,
-            'incomplete_count': incomplete, 'warning_count': warnings, 'save_count': saves }
-
-        let tableData = []
-        batch_count = 0
-        for (let i=0; i< tableData.length; i++) {
-            //allow ui to refresh for batch value changes
-            batch_count += 1
-            if (batch_count > 1000) {
-                batch_count = 0
-                await new Promise(r => setTimeout(r, 20))
-            }
-
-            let rowData = tableData[i]
-            if (! IsChanged(rowData) ) { continue }
+        let fis_save = function (rowData) {
+            let save_object = {'crud_type': null, 'incomplete': false, 'error': false, 'is_save': false,
+                'is_warning': incomplete, 'warning_count': warnings, 'save_count': saves }
+            if (! IsChanged(rowData) ) { return save_object }
             if ( this.IsDeleted(rowData) ) {
-                save_object['delete'].push(rowData)
-                continue
+                save_object['crud_type'] = 'delete'
+                return
             }
-
-            if (! IsCompleted(rowData)) {
-                incomplete += 1
-                continue
+            save_object['crud_type'] = CrudType(rowData)
+            if (! IsCompleted(rowData)) { 
+                save_object['incomplete'] = true    
+                return save_object
             }
-            let is_error = IsError(rowData)
-            if (is_error === false || is_error === null ) {
-                let row_type = rowData[meta_column_name]['row_type']
-                save_object[row_type].push(rowData)
-                if (is_error === null) {errors +=1} 
-            } else {errors += 1}
+            if (IsError(rowData)) {
+                save_object['error'] = true
+                return save_object 
+            }
+            if (IsWarning(rowData)) {
+                save_object['error'] = true
+                return save_object 
+            }
+            save_object['is_save'] = true
+            return save_object
         }
+        return fis_save
     }
 
     async CellEditorParams(grid_column) {
@@ -695,7 +632,6 @@ class ColumnDefsInit {
         else if (cedit === 'subGrid' ) {} //has placeholder for modal?
         else if (cedit === 'dateSelector' ) {}
         else if (cedit === 'autoComplete' ) {}
-
     }
     OptionsParser(grid_column) {
         //aditional options present in 
@@ -728,6 +664,7 @@ class ColumnDefsInit {
         if (grid_column.hasOwnProperty('valueSetter')) {return}
         let field = grid_column['field']
 
+        //numbers
         let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
         'real', 'double precision', 'money', 'numeric', 'float']
 
@@ -746,7 +683,7 @@ class ColumnDefsInit {
             grid_column['valueSetter'] = fn
             return
         }
-
+        //dates and types
         let date_types = ['date', 'timestamp', 'time']
         if (date_types.includes(grid_column['dataType'])) {
             let fn = function (params) {
@@ -762,20 +699,15 @@ class ColumnDefsInit {
             grid_column['valueSetter'] = fn
             return
         }
+        //autocomplete and agrichselector
     }
     AddValueGetter(grid_column) {
         //mainly for autocomplete and AgGridRichSelector. used for returning 
         //key value.
     }
     CrudRoutes() {}
-    CrudInsteadOf() {}
+    ContextWindow() {}
 
-}
-
-//submodal function initializer
-
-function SubModalInit() {
-    //loads class creates object returns values?
 }
 
 module.exports = {'ColumnDefsInit': ColumnDefsInit}

@@ -15,6 +15,19 @@ Parses grids json object and converts expression syntax into javascript function
          'help': ""
         'headerParams': {links}
         'crud_params': //i.e. new row, update, delete, etc read/etc
+            {
+                crudRoute:
+                    default: ->
+                    select:  ->
+                    insert:  ->
+                    update:  ->
+                    delete:  ->
+
+                crudInsteadOf: {
+                    'insert': 'update'
+                }
+            }
+
         'columnDef': //agrid info
         },
         {'name': 'y'
@@ -23,16 +36,6 @@ Parses grids json object and converts expression syntax into javascript function
         },
     ]
 
-    crudRoute:
-        default: ->
-        select:  ->
-        insert:  ->
-        update:  ->
-        delete:  ->
-
-    crudInsteadOf: {
-        'insert': 'update'
-    }
 
 gridOptions.suppressPropertyNamesCheck = true
 
@@ -519,17 +522,26 @@ class ColumnDefsInit {
             let hasValid   = false
             let grid_column = grid[i]
             let field = grid_column['field']
+            let is_error = false
+            let is_required = false
 
             if (grid_column.hasOwnProperty('isCrud')) { isCrud = grid_column['isCrud'] }
             if (grid_column.hasOwnProperty('validator')) { hasValid = true }
             if (!isCrud || !hasValid) { continue }
             fields.push(field)
             if (grid_column.hasOwnProperty('isRequired'))  { isRequired[field]  = grid_column['isRequired'] }
-            if (grid_column.hasOwnProperty('ignoreError')) { ignoreError[field] = grid_column['ignoreError'] }
-            if (grid_column.hasOwnProperty('allowNull'))   { allowNull[field]   = grid_column['allowNull'] }
+            if (grid_column.hasOwnProperty('ignoreError')) { 
+                ignoreError[field] = grid_column['ignoreError']
+                is_error = ignoreError[field]
+            }
+            if (grid_column.hasOwnProperty('allowNull'))   { 
+                allowNull[field]   = grid_column['allowNull'] 
+                is_required 
+            }
             if (grid_column.hasOwnProperty('validator'))   { 
                 
                 //error or warning
+
                 allowNull   = grid_column['allowNull'] 
             
             }
@@ -754,8 +766,9 @@ class ColumnDefsInit {
     AddValueGetter(grid_column) {
         //mainly for autocomplete and AgGridRichSelector. used for returning 
         //key value.
-
     }
+    CrudRoutes() {}
+    CrudInsteadOf() {}
 
 }
 

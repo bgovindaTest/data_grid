@@ -180,9 +180,6 @@ UpdateCrudPrep() {}
 // const meta_column_name = '_ag-meta_'
 // const meta_delete_undo_name = '_ag-meta-delete-undo_'
 
-// define a mixin object
-const debugConfig = require('./load_placeholder.js')
-
 //combines modal operations with grid functions?
 
 /*
@@ -221,6 +218,8 @@ on grid ready initialize app?
 // }
 
 
+//has axios object in main plugin.
+
 var myMixin = {
 data () {
     return {
@@ -235,116 +234,101 @@ data () {
         filterModal: false,
         orderByModal: false,
         gridApi: null,
+        columnApi: null,
+        gridOptions: null
+        //generated functions?
 
-        //subgrid params
-        subTableData: null,
-        subHeaderParams: null,
-        subSaveModal: null,
-        subFilterModal: null,
-        subOrderByModal: null,
     }
 },
 
 methods: {
-    LoadDebugParams: function () {
-        let defConfig = debugConfig
-        return defConfig
+    onGridReady(params) {
+        this.gridApi     = params.api
+        this.columnApi   = params.columnApi
+        this.gridOptions = params
     },
 
 
-    LoadInitialParams: async function () {
-            //gets url parameters and loads grid_configuration file.
-            //checks existance and permissions
-            console.log('hello from mixin!')
-            this.SetMainGrid()
-            //extract crud functions?
-            this.loading = false
-    },
-    LoadMainGrid: async function () {},
-    LoadData: async function () {},
     Insert: async function () {},
     //UI functions
-    RedrawRows(gridApi) {
+    RedrawRows() {
         //redraws all visible rows gridOptions.api === gridApi
         // gridApi.redrawRows() --maynot be needed anymore
-        gridApi.refreshCells()
+        this.gridApi.refreshCells()
     },
 
-    RemoveRowData(rowData) {
+    RemoveTableData() {
         /*
         This function takes the rowData object and removes all rows without setting new object. This removes
         all rows without breaking linking to object throughout app
 
         rowData: main array for aggrid contains all table data
         */
-        rowData.length = 0
+        this.tableData.length = 0
     },
 
-    ResetAllRowData(gridOptions, rowData, server_fields) {
+    ResetAllRowData() {
         //returns rowData to backup value. stored in metadata column
-        for (let i=0; i<rowData.length; i++) {
-            UndoRow (rowData[i], server_fields)
+        for (let i=0; i< this.tableData.length; i++) {
+            let rowData = this.tableData[i]
+            this.UndoRow (rowData[i])
         }
-        RedrawRows(gridOptions)
+        this.RedrawRows()
     },
 
-    AppendRows(rowData, rows ) {
+    AppendRows( rows ) {
         /*
-        This add new rows to the main rowData object in aggrid. Can accept and array of rows
+        This add new rows to the main tableData object in aggrid. Can accept and array of rows
         or just one json row.
         */
         if( Array.isArray(rows) ){
             for (let i = 0; i < rows.length; i++) {
-                rowData.push(rows[i])
+                this.tableData.push(rows[i])
             }
         }
-        else {
-            rowData.push(rows)
-        }
+        else { this.tableData.push(rows) }
     },
-    AppendRowsTop(rowData, rows ) {
+    AppendRowsTop(rows ) {
         /*
         This add new rows to the main rowData object in aggrid. Can accept and array of rows
         or just one json row.
         */
         if( Array.isArray(rows) ){
-            for (let i = 0; i < rows.length; i++) { rowData.unshift(rows[i]) }
-        } else { rowData.unshift(rows) }
+            for (let i = 0; i < rows.length; i++) { this.tableData.unshift(rows[i]) }
+        } else { this.tableData.unshift(rows) }
     },
 
-    NewSheet(gridOptions, rowData, pagination, new_input_params) {
+    NewSheet() {
         /*
         Get page limit size from pagination?
         //check if valid. If not get default 1k?
         */
-        var pageSize = this.ReturnPageSize(pagination)
+        var pageSize = this.ReturnPageSize()
         var rows = []
         for (let i =0; i < pageSize; i++) {
-            rows.push(CreateNewRow(new_input_params))
+            rows.push( this.CreateNewRow() )
         }
-        this.RemoveRowData(rowData)
-        this.AppendRows(rowData, rows)
-        this.RedrawRows(gridOptions)
+        this.RemoveTableData()
+        this.AppendRows(rows)
+        this.RedrawRows()
     },
 
-    ReturnPageSize(pagination) {
+    ReturnPageSize() {
         //Use page limit size from pagination to determine size of page.
         //For new sheet.
-        var lx =parseInt(pagination['limit'] )
-        if (isNaN(lx)) {return 1000} 
-        if (lx < 10) { return 10}
-        else if (lx > 5000) { return 5000}
+        let lx = this.pagination['limit']
+        if (isNaN(lx)) {return 1000}
         return lx
     },
 
-    Undo(gridOptions, server_fields) {
+    Undo() {
         /*
         undo loops through all rows that have been highlighted when undo function is selected
         and runs UndoRow on them. This replaces the current values with those stored in the backup
         paramters.
         */
         try{
-            var api = gridOptions.api
+            let api = this.gridApi
             var rangeSelection = api.getCellRanges()
             if (rangeSelection.length === 0) { return }
             rangeSelection = rangeSelection[0]
@@ -355,53 +339,42 @@ methods: {
                 var rowModel = api.getModel()
                 var rowNode = rowModel.getRow(rowIndex)
                 var rowx = rowNode.data
-                this.UndoRow(rowx, server_fields)
+                this.UndoRow(rowx)
                 rowNodes.push(rowNode)
             }
-            this.RedrawRows(gridOptions)
+            this.RedrawRows()
         } catch (err) {
             console.log("undo faild. lingering selection the likely cause after using view")
         }
     },
 
 
-    UndoRow (rowx, server_fields) {
+    UndoRow (rowx) {
         //set row data back to backup/original value
         //use columnDef parameter
-        SetBackup(rowx, server_fields)
-        SetDelete(rowx, false)
-
-        // let mx = {
-        //     'field': meta_column_name,
-        //     'editable': false,
-        //     'hide': true,
-        //     'suppressToolPanel': true,
-        //     'initDefaultInsertRow': fi, //should be a function creates backups. and how row was added.
-        //     'initUpdateRow': fu, //
-        //     'undoRow': fundo,
-        //     'showSort': false,
-        //     'showFilter': false
-        // }
-
+        this.SetBackup(rowx)
+        this.SetDelete(rowx, false)
     },
 
-    SetBackup (rowx, server_fields) {
+    SetBackup (rowx) {
         //returns all server fields to original values.
+
+        //get from prams object
         for(var i = 0; i < server_fields.length; i++) {
-            var key = server_fields[i]
+            var key = server_fields[i] //change here
             var backupKey = field_functions.BackupFieldName(key)
             rowx[key]  = rowx[backupKey]
         }
     },
 
 
-    Delete(gridOptions, bool_value) {
+    Delete(bool_value) {
         //used to delete rows in add dat
         //check if allow delete.
         //button function
         // console.log('Delete function')
         try {
-            var api = gridOptions.api
+            let api = this.gridApi
             var rangeSelection = api.getCellRanges()
             if (rangeSelection.length === 0) { return }
             rangeSelection = rangeSelection[0]
@@ -746,18 +719,21 @@ methods: {
         //if error AddServerErrorMessagesToRow field_functions.server_error()
         // AddServerErrorMessagesToRow(saveRows, row_error_map)
     },
-    
-    UpdateModalSaveInformation(saveModalParams, req_body, save_count) {
+    FixData() {
+        //clear save object.
+        //close save modal
+    },
+    ContinueSave() {
+        //continues save 
+    },
+    UpdateSaveInfo() {
         saveModalParams['insert_count'] += req_body['insert'].length
         saveModalParams['update_count'] += req_body['update'].length
         saveModalParams['delete_count'] += req_body['delete'].length
         saveModalParams['upsert_count'] += req_body['upsert'].length
         saveModalParams['row_start'] += saveModalParams['row_end']
-        saveModalParams['row_end']   += save_count
-    },
-    
-    UpdateModalRowErrorInformation(saveModalParams, number_errors) {
         saveModalParams['error_count'] += number_errors
+        saveModalParams['row_end']   += save_count
     },
     
     async SendSaveDataAndProcessError ( save_route, req_body, row_map, saveModalParams, axios_object  ) {
@@ -852,6 +828,106 @@ methods: {
         for (let i=0; i < field_list.length; i++) {
             input_params[field_list[i]] = default_value
         }
+    },
+
+    /*
+    CreateGetRouteParams takes the objects generated by the modal windows, parses them and preprocess the data type. If all values
+    are valid its included in the final object. Else its excluded from the final object sent to the server.
+    */
+    CreateGetRouteParams(queryParams) {
+        /*
+        Pulls data rules and intializes paramters. queryParams is an object that contains the current values
+        from all the modal windows.
+        req_body from client has the following structure
+        req.body['rules'] = [{}] //rules contain informations such as include read only.
+        req.body['where'] = [{}]
+        req.body['order_by'] = [{}]
+        req.body['pagination'] = {}
+        */
+        var req_body = {'where': [], 'order_by': [], 'pagination': {}, 'rules': [{}] }
+        var where = queryParams['where']
+        var order_by = queryParams['order_by']
+        var pagination = queryParams['pagination']
+        ParseWhereObject(req_body, where)
+        ParseOrderBy(req_body, order_by)
+        ParsePagination(req_body, pagination)
+        return req_body
+    },
+
+    ParsePagination(req_body, pagination) {
+        var lx = parseInt(pagination['limit'])
+        var offset = parseInt(pagination['offset'])
+        if (isNaN(lx) ) {lx = 1000} else if (lx < 10 ) {lx = 10} else if (lx > 5000) {lx = 5000}
+        if (isNaN(offset) ) {offset = 0} else if (offset < 0 ) {offset = 0}
+        var pgx = req_body['pagination']
+        pgx['limit']  = lx
+        pgx['offset'] = offset
+    },
+
+    ParseOrderBy(req_body, order_by) {
+        //if column name is empty or sort_by is empty continue
+        var order_by_list = req_body['order_by']
+        for (var i =0; i < order_by.length; i++) {
+            var ox = order_by[i]
+            var cn = ox['variable_name'].trim()
+            var sb = ox['sort_order'].toUpperCase()
+            if (['ASC', 'DESC'].includes(sb) && cn !== "" ) {
+                order_by_list.push({'variable_name': cn, 'sort_order': sb})
+            }
+        }
+    },
+
+    ParseWhereObject(req_body, where_list) {
+        /*
+        where_list: contains the where statemenents generated by the modal windows where, order_by and pagination
+        where_list_out: container object for req_body. contains processed where statements to send to the server
+        */
+        var where_list_out = req_body['where']
+        for(var i =0; i< where_list.length; i++) {
+            var where_statement = where_list[i]
+            var filter_active = where_statement['filter_active']
+            if (!filter_active) {continue }
+            var dt = where_statement['data_type']
+            if (dt === 'permissions') {
+                QueryPermissionsParse (where_list_out, where_statement)
+            } else if (dt === 'quick_filter') {
+                QueryQuickFilterParse (where_list_out, where_statement)
+            } else if (dt === 'integer') {
+                QueryNumberParse (where_list_out, where_statement, dt)
+            } else if (dt === 'float') {
+                QueryNumberParse (where_list_out, where_statement, dt)
+            } else if (dt === 'string') {
+                QueryStringParse (where_list_out, where_statement)
+            } else if (dt === 'boolean') {
+                QueryBooleanParse (where_list_out, where_statement, dt)
+            } else if (dt === 'date') {
+                QueryDateParse (where_list_out, where_statement)
+            }
+        }
+    },
+
+    // //Create Initial Paramters for pagination
+    PaginationInitialization(pagination_rules) {
+        var pagination = {}
+        if (pagination_rules.hasOwnProperty('offset')) {
+            pagination['offset'] = parseInt(pagination_rules['offset'])
+            if (isNaN(pagination['offset'])) {
+                pagination['offset'] = 0
+            } else { if (pagination['offset'] < 0) { pagination['offset'] = 0 } }
+
+        } else { pagination['offset'] = 0 }
+
+        if (pagination_rules.hasOwnProperty('limit')) {
+            pagination['limit'] = parseInt(pagination_rules['limit'])
+            if (isNaN(pagination['limit'])) {
+                pagination['limit'] = 1000
+            } else { 
+                if (pagination['limit'] < 10) { pagination['limit'] = 10 } 
+                else if ( pagination['limit'] > 5000 ) { pagination['limit'] = 5000 } 
+            }
+        } else { pagination['limit'] = 1000 }
+
+        return pagination
     }
 }
 

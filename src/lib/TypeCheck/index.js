@@ -62,6 +62,21 @@ function IsDate(x) {
     else { return false }
 }
 
+function ParseDate (datestr, format) {
+    // console.log(datestr, format)
+    let dx = TypeCastDate(datestr, format)
+    // return datestr
+    return dx
+}
+
+function TypeCastDate(date_val, format_string) {
+    var date_formats = ['YYYY-MM-DD','YYYY-M-DD','YYYY-MM-D','YYYY-M-D', 'MM/DD/YYYY','M/DD/YYYY','MM/D/YYYY','M/D/YYYY']
+    var moment_date = moment(date_val, date_formats, true)
+    return moment_date.toDate()
+}
+
+
+
 module.exports = {
     'IsObject': IsObject,
     'IsString': IsString,

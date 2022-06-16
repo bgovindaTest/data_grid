@@ -16,16 +16,11 @@ Parses grids json object and converts expression syntax into javascript function
         'headerParams': {links}
         'crud_params': //i.e. new row, update, delete, etc read/etc
             {
-                crudRoute:
-                    default: ->
-                    select:  ->
-                    insert:  ->
-                    update:  ->
-                    delete:  ->
-
-                crudInsteadOf: { //how the app processed the information?
-                    'insert': 'update'
-                }
+                default: ->
+                select:  ->
+                insert:  -> //string or {'route': , 'instead': 'update'}
+                update:  ->
+                delete:  ->
             }
 
         'columnDef': //agrid info
@@ -65,8 +60,7 @@ ifNull: 'psql string calls to replace value'
 //field determines which data to get from params.data in aggrid. key is if its an object.
 defaultValue: {'value': 'string', 'type': '', 'key': '', 'field': '' } handle raw value or replacement from row params?
 defaultOrderby: 'asc/desc' (done by column order in columnDefs)
-defaultFitler: {'value': 'string/bool/', 'type': '', 'key': '', 'field': ''} type is 'raw'
-    from: {'field'}
+defaultFitler: string value
 
 showFilter: default true (if false cant be changed) should hide from filter module
 //need an enforce to prevent clear from working?
@@ -99,6 +93,11 @@ staticDropDown: api or array of objects [{}]
 staticDropDownFilters?
 
 subgrid params (valid names and default)
+
+rowDataDefaults = {
+    'defaultFilter': key value? fro row params
+}
+
 */
 const ex = require('./ExpressionParser')
 const cellClassRules = require('./ColumnDefs/CellClassRules')
@@ -108,11 +107,6 @@ const lodashCloneDeep = require('lodash.clonedeep')
 
 const meta_column_name = '_ag-meta_'
 const meta_delete_undo_name = '_ag-meta-delete-undo_'
-//import axios
-//create configurations.
-
-
-//Creates main layout
 
 class ColumnDefsInit {
     //for main loader
@@ -124,6 +118,18 @@ class ColumnDefsInit {
         this.urlParams = pageParams.urlParams || {}
         this.rowParams = rowParams || {}
     }
+
+    RunSubGridInit(grid, rowParams) {
+        //Copy grid
+        //Add default values from rowData
+        //this.RunGridInit()
+        //return
+    }
+    RunMainGridInit() {
+        //grid_name or position
+        //this.RunGridInit()
+        //returns gridConfiguration
+    }
     RunGridInit() {
         //for MainGrid
         //make copy?
@@ -131,6 +137,7 @@ class ColumnDefsInit {
         let grid = lodashCloneDeep(this.grid) //messes up column order probably?
         let defaultOrderBy  = []  //name value?
         let defaultFilter  = [] //name operator value
+        let enforcedFilter = []
 
         //prepend delete_undo column
         InitializeDeleteUndoColumn(grid)
@@ -148,7 +155,7 @@ class ColumnDefsInit {
             this.CellClassRules(grid_column)
             this.CellEditorParams(grid_column)
             this.DefaultOrderBy(grid_column,defaultOrderBy)
-            this.DefaultFilter(grid_column,defaultFilter)
+            this.DefaultFilter(grid_column,defaultFilter, enforcedFilter)
             this.DefaultValue(grid_column)
             this.DefaultParameters(grid_column)
             this.CellWidth(grid_column)
@@ -160,16 +167,10 @@ class ColumnDefsInit {
         //SortByParams
         //HeaderParams
         return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter,
-            'enforcedFilter': null}
+            'enforcedFilter': enforcedFilter}
     }
-    RunSubGridInit(grid, rowParams) {
-        //this.RunGridInit()
-    }
-    RunMainGridInit() {
-        //grid_name or position
-        //this.RunGridInit()
-        //returns gridConfiguration
-    }
+
+
     InitializeDeleteUndoColumn(grid) {
         /*
         Used to add delete/undo button to grid. Handles intialization parameters if provided.
@@ -264,17 +265,6 @@ class ColumnDefsInit {
             cellClassRules.CellClassRulesInit( grid_column, is_editable, validator_function )
         }
     }
-    /*
-        for custom styles?
-        cellStyle: params => {
-            if (params.value === 'Police') {
-                //mark police cells as red
-                return {color: 'red', backgroundColor: 'green'};
-                //default would be {color: '', backgroundColor: ''}
-            }
-            return null;
-        }
-    */
 
     DefaultValue(grid_column) {
         // if string or boolean or null?
@@ -304,6 +294,8 @@ class ColumnDefsInit {
         if (! grid_column.hasOwnProperty('defaultFilter') ) {return}
         let x = grid_column['defaultFilter']
         if (! x.hasOwnProperty['field'] ) { x['field'] = grid_column['field'] }
+
+        // showFilter
 
         defaultFilter.push(x)
     }
@@ -410,6 +402,7 @@ class ColumnDefsInit {
     }
 
     InitDefaultInsertRow(backups) {
+        //Adds default value or null to new rows.
         let fi = function () {
             let meta_column = { 'row_type': 'insert', 'meta_delete_undo_name': false }
             let field_names = Object.keys(backups)
@@ -424,6 +417,7 @@ class ColumnDefsInit {
         return fi
     }
     InitDefaultUpdateRow(backups) {
+        //adds rowData pulled from server to rows
         let fu = function (row_data) {
             //row_data is whats stored in server object
             let meta_column = { 'row_type': 'update', 'meta_delete_undo_name': false }
@@ -477,26 +471,7 @@ class ColumnDefsInit {
         need to change empty paramters
         */
 
-        // allowNull: true/false
-        // isRequired: true/false
-
-        let fvalids = [] //need to get validation functions.
-        let allowNull = {}
-        let isRequired = {}
-
-        //ignoreError check if true. removes validation function from
-        //ferror
-
-
-        //true, false or null
-        let ferror = function (params) {
-            for (var i=0; i< fvalids.length; i++) {
-                let fv = fvalids[i](params)
-                is_valid = fv(params)
-            }
-            params.data[field_functions.is_error()] = is_error
-            return is_error
-        }
+        let ferror = this.ExtractRowLevelValidations(grid, true)
         return ferror
     }
     RowHasWarning (grid) {
@@ -507,29 +482,76 @@ class ColumnDefsInit {
 
         need to change empty paramters
         */
+        let fwarn = this.ExtractRowLevelValidations(grid, false)
+        return fwarn
+    }
 
-        // allowNull: true/false
-        // isRequired: true/false
-
-        let fvalids = [] //need to get validation functions.
+    ExtractRowLevelValidations(grid,is_error) {
+        //creates row level error and warning function.
+        //return true if there is an error or warning.
+        let validators = {} //need to get validation functions.
         let allowNull = {}
         let isRequired = {}
+        let fieldsList = []
+        let ignoreError = {}
 
-        //ignoreError check if true. removes validation function from
-        //ferror
 
-
-        //true, false or null
-        //loop through fields?
-        let ferror = function (params) {
-            for (var i=0; i< fvalids.length; i++) {
-                let fv = fvalids[i](params)
-                is_valid = fv(params)
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            let field = grid_column['field']
+            if (grid_column.hasOwnProperty('validator') || grid_column.hasOwnProperty('isCrud') || grid_column.hasOwnProperty('isRequired') ){
+                fieldsList.push(field)
             }
-            params.data[field_functions.is_error()] = is_error
-            return is_error
+            if (grid_column.hasOwnProperty ('ignoreError') ) { ignoreError[field] = grid_column['ignoreError'] }
+            if (grid_column.hasOwnProperty( 'isRequired') )  { isRequired[field] = grid_column['isRequired'] }
+            if (grid_column.hasOwnProperty( 'allowNull') )   { allowNull[field] = grid_column['allowNull'] }
+
+            //add validator based on if error or warning
+            if (is_error) {
+                if (!grid_column.hasOwnProperty('validator') ) { continue }
+                if (this.HasPropertyAndTrue( ignoreError, field) ) { continue }
+                validators[field] = grid_column['validator']
+
+            } else {
+                if (!grid_column.hasOwnProperty('validator') ) { continue }
+                if (this.HasPropertyAndFalse( ignoreError, field) ) { continue }
+                validators[field] = grid_column['validator']
+            }
         }
-        return ferror
+
+
+        let ferror_warn = function (params) {
+            for(let i = 0; i < fieldsList.length; i++) {
+                let field = fieldsList[i]
+                let value = params.getValue(field)
+                if (this.HasPropertyAndFalse(allowNull, field) ) { if (type_check.IsNull(value)) { return true }  }
+                if (this.HasPropertyAndTrue(isRequired, field))  { if  (type_check.IsNull(value)) { return true } }
+                if (validators.hasOwnProperty(field) ) {
+                    let fx = validators[field]
+                    if (fx(params) === false) { return true}
+                }
+            }
+            return true
+        }
+        return ferror_warn
+
+    }
+
+    HasPropertyAndTrue( objectx, key) {
+        //key is a string
+        if (objectx.hasOwnProperty(key) ) {
+            if (objectx[key] === true) {return true}
+        }
+        return false
+    }
+
+    HasPropertyAndFalse( objectx, key) {
+        //key is a string
+        if (objectx.hasOwnProperty(key) ) {
+            if (objectx[key] === false) {return true}
+            return false
+        }
+        return false
     }
 
 
@@ -591,7 +613,7 @@ class ColumnDefsInit {
 
         let fis_save = function (rowData) {
             let save_object = {'crud_type': null, 'incomplete': false, 'error': false, 'is_save': false,
-                'is_warning': incomplete, 'warning_count': warnings, 'save_count': saves }
+                'is_warning': false}
             if (! IsChanged(rowData) ) { return save_object }
             if ( this.IsDeleted(rowData) ) {
                 save_object['crud_type'] = 'delete'
@@ -599,7 +621,7 @@ class ColumnDefsInit {
             }
             save_object['crud_type'] = CrudType(rowData)
             if (! IsCompleted(rowData)) { 
-                save_object['incomplete'] = true    
+                save_object['incomplete'] = true
                 return save_object
             }
             if (IsError(rowData)) {
@@ -608,7 +630,7 @@ class ColumnDefsInit {
             }
             if (IsWarning(rowData)) {
                 save_object['error'] = true
-                return save_object 
+                return save_object
             }
             save_object['is_save'] = true
             return save_object
@@ -634,12 +656,15 @@ class ColumnDefsInit {
         else if (cedit === 'autoComplete' ) {}
     }
     OptionsParser(grid_column) {
-        //aditional options present in 
+        //aditional options present in
+        // if (options.hasOwnProperty['requiredFields'] ) { requiredFields = options['requiredFields'] }
         let options = {}
         if (grid_column.hasOwnProperty('dataType')) {
             let dx = grid_column['dataType'].toLowerCase()
             if (dx.includes('big')) { options['mathjs_type_set'] = 'big' }
         }
+        if (grid_column.hasOwnProperty('requiredFields')) { options['requiredFields'] = grid_column['requiredFields'] }
+
         return options
     }
     IfNull(grid_column) {
@@ -683,7 +708,7 @@ class ColumnDefsInit {
             grid_column['valueSetter'] = fn
             return
         }
-        //dates and types
+        //dates and types. Date transform
         let date_types = ['date', 'timestamp', 'time']
         if (date_types.includes(grid_column['dataType'])) {
             let fn = function (params) {
@@ -692,6 +717,7 @@ class ColumnDefsInit {
                     return true
                 }
                 else {
+                    //type cast?
                     params.data[field] = params.newValue
                     return true
                 }
@@ -701,11 +727,16 @@ class ColumnDefsInit {
         }
         //autocomplete and agrichselector
     }
-    AddValueGetter(grid_column) {
+    AddLookupValueGetter(grid_column) {
         //mainly for autocomplete and AgGridRichSelector. used for returning 
         //key value.
+        //if not avaialable?
+        // if (options.hasOwnProperty['requiredFields'] ) { requiredFields = options['requiredFields'] }
     }
-    CrudRoutes() {}
+    CrudRoutes() {
+        //parse crud routes and instead of query?
+
+    }
     ContextWindow() {}
 
 }

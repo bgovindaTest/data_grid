@@ -24,6 +24,7 @@ Parses grids json object and converts expression syntax into javascript function
             }
 
         'columnDef': //agrid info
+        'deleteWarning': ''
         },
         {'name': 'y'
         'crud_params': //i.e. new row, update, delete, etc read/etc
@@ -36,14 +37,13 @@ gridOptions.suppressPropertyNamesCheck = true
 
 validator: function()
 
-
 //not implemented yet also need try catch console log error.
 validatorRequiredFields: [] //must all be not null or will not run. returns null in that case
 valueGetterRequiredFields: [] //must all be not null or will not run. returns null in that case
  
 isCrud:   true/false
-editable: true/false {'update_only': true/false, 'insert_only': true/false}
-
+editable: true/false {'updat': true/false, 'insert': true/false}
+deleteWarning: string (determines if delete should happen)
 
 dataType:  //used for sorting? need to add time and datetime filters
 
@@ -95,7 +95,8 @@ staticDropDownFilters?
 subgrid params (valid names and default)
 
 rowDataDefaults = {
-    'defaultFilter': key value? fro row params
+    'defaultFilter': [] key value? fro row params
+    'defaultValue':  []
 }
 
 */
@@ -120,6 +121,8 @@ class ColumnDefsInit {
     }
 
     RunSubGridInit(grid, rowParams) {
+        //add rowParams?
+
         //Copy grid
         //Add default values from rowData
         //this.RunGridInit()
@@ -144,6 +147,8 @@ class ColumnDefsInit {
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             if (grid_column['field'] === meta_delete_undo_name ) { continue }
+            //CrudParams
+            //NavBar
             this.ValueTransform(grid_column, 'valueGetter')
             this.ValueTransform(grid_column, 'valueSetter')
             this.ValueTransform(grid_column, 'valueFormatter')
@@ -370,20 +375,22 @@ class ColumnDefsInit {
         let finsert = this.InitDefaultInsertRow(backups) //for newly added rows via add row or new_sheet
         let fundo   = this.UndoRow(backups) //function to reset row based on backup values
         let fdel    = this.DeleteRow()
-        // let ferror  = this.RowHasError(grid,backups) //combines all validations functions
-        // let fwarn   = this.RowHasWarning(grid,backups) //validations with ignored error
-        // let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
-        // let fchange = this.RowIsChanged(grid)  //different from backup fields
-        let fcrud_type = null
+        let ferror  = this.RowHasError(grid) //combines all validations functions
+        let fwarn   = this.RowHasWarning(grid) //validations with ignored error
+        let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
+        let fchange = this.RowIsChanged(grid)  //different from backup fields
         let grid_functions =  {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
-            'fdel': fdel}//  , 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
-        // let fsave_prep = this.RowIsReadyForSave(grid_functions)
-        // grid_functions['fsave_prep'] = fsave_prep
-        meta_def_fns['deleteWarning'] =  '?' //this comes from grid delete_undo column.
+            'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
+        let fis_save = this.IsSaveRow(grid_functions)
+        grid_functions['fis_save'] = fis_save
+        grid_functions['deleteWarning'] = ""
+        if (grid.hasOwnProperty('deleteWarning') ) {
+            //displays on save to warn of possible rejected deletes
+            grid_functions['deleteWarning'] = grid['deleteWarning']
+        }
         return grid_functions
     }
 
-    CrudInsteadOf() {}
     //meta functions for creating and reseting rows
     CreateMetaBakupColumn( grid ) {
         //parse grid and creates backups object.
@@ -458,8 +465,9 @@ class ColumnDefsInit {
 
     }
     IsDeleted(row_data) {
-        if (! row_data.hasOwnProperty( meta_delete_undo_name )) {return false}
-        return row_data[meta_delete_undo_name] //should be boolean
+        if (! row_data.hasOwnProperty(meta_column_name)) {return false}
+        let metacol = row_data[meta_column_name]
+        return this.HasPropertyAndTrue(metacol, meta_delete_undo_name )
     }
     //meta field meta field name meta fiel backup
     RowHasError (grid) {
@@ -495,7 +503,7 @@ class ColumnDefsInit {
         let fieldsList = []
         let ignoreError = {}
 
-
+        //IsCalculated
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             let field = grid_column['field']
@@ -519,11 +527,19 @@ class ColumnDefsInit {
             }
         }
 
-
-        let ferror_warn = function (params) {
+        //does rowData have values for undefined?
+        //may need to add values for calculations
+        let ferror_warn = function (rowData) {
             for(let i = 0; i < fieldsList.length; i++) {
                 let field = fieldsList[i]
-                let value = params.getValue(field)
+                let value = rowData[field]
+                if (this.IsUndefined(value) && !this.validators.hasOwnProperty(field) ) {continue}
+
+                
+                // if (this.HasPropertyAndTrue(isCalculated, field)) {
+                // need to check how clauclated fields stored
+                // }
+                else {value = rowData[field]}
                 if (this.HasPropertyAndFalse(allowNull, field) ) { if (type_check.IsNull(value)) { return true }  }
                 if (this.HasPropertyAndTrue(isRequired, field))  { if  (type_check.IsNull(value)) { return true } }
                 if (validators.hasOwnProperty(field) ) {
@@ -531,7 +547,7 @@ class ColumnDefsInit {
                     if (fx(params) === false) { return true}
                 }
             }
-            return true
+            return false
         }
         return ferror_warn
 
@@ -555,43 +571,69 @@ class ColumnDefsInit {
     }
 
 
-    RowIsComplete (grid, backups) { 
+    RowIsComplete (grid) { 
         //Determines if cell value is Null. If any value is empty its false
-        let fcomp = function(params) {
-            for (var i=0; i< server_fields.length; i++) {
-                var value = params.data[server_fields[i]]
-                if (value === null) {
-                    params.data[field_functions.is_complete()] = false
-                    return
-                }
+        let noNull = {}
+        let isRequired = {}
+        let fieldList = []
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            let field = grid_column['field']
+            if (this.HasPropertyAndTrue( grid_column, 'isCrud') ){ fieldList.push(field) } else {continue}
+            if (this.HasPropertyAndTrue( grid_column, 'isRequired') )  { isRequired[field] = true }
+            if (this.HasPropertyAndFalse( grid_column,'allowNull') )   { noNull[field] = true }
+        }
+
+
+        //IsComplete returns false if empty
+        let fcomp = function(rowData) {
+            let is_empty = true
+            for (var i=0; i< fieldList.length; i++) {
+                let field = fieldList[i]
+                var value = rowData[field]
+                if (type_check.IsNull(value) || type_check.IsUndefined(value) ) {
+                    if (isRequired.hasOwnProperty(field)) {return false}
+                    if (noNull.hasOwnProperty(field)) {return false}
+                } else { is_empty = false }
+
             }
-            params.data[field_functions.is_complete()] = true
+            return true && ! is_empty
         }
         return fcomp
     }
 
     //parameters for row
-    RowIsChanged (grid, backups) {
+    RowIsChanged (grid) {
+        let fieldList = []
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            let field = grid_column['field']
+            if (this.HasPropertyAndTrue( grid_column, 'isCrud') ){ fieldList.push(field) }
+        }
+
         //Determines if cell value is Null. If any value is empty its false
         // console.log(server_fields)
-        let fchange = function(params) {
-            for (var i=0; i< server_fields.length; i++) {
-                var value = params.data[server_fields[i]]
-                var backup_value = params.data[ field_functions.BackupFieldName(server_fields[i]) ]
-                if (value !== backup_value ) {
-                    params.data[field_functions.is_changed()] = true
-                    return
-                }
+        let fchange = function(rowData) {
+            if (this.IsDeleted(rowData)) {return true}
+            let is_change = false
+            for (var i=0; i< fieldList.length; i++) {
+                let field = fieldList[i]
+                var value = rowData[field]
+                if (value !== this.BackupValue(rowData, field ) ) {is_change = true}
             }
-            params.data[field_functions.is_changed()] = false
-            return
-
+            return is_change
         }
         return fchange
+    }
 
+    BackupValue(rowData, field) {
+        let metacol = rowData[meta_column_name]
+        let backups = metacol['backups']
+        let backup_value  = backups[field]
+        return backup_value
     }
     
-    async IsSaveRow(grid_functions) {
+    IsSaveRow(grid_functions) {
         /*
         Filter passes if the row should be included for saving.
     
@@ -614,11 +656,13 @@ class ColumnDefsInit {
         let fis_save = function (rowData) {
             let save_object = {'crud_type': null, 'incomplete': false, 'error': false, 'is_save': false,
                 'is_warning': false}
-            if (! IsChanged(rowData) ) { return save_object }
             if ( this.IsDeleted(rowData) ) {
                 save_object['crud_type'] = 'delete'
                 return
             }
+
+            if (! IsChanged(rowData) ) { return save_object }
+
             save_object['crud_type'] = CrudType(rowData)
             if (! IsCompleted(rowData)) { 
                 save_object['incomplete'] = true
@@ -727,6 +771,26 @@ class ColumnDefsInit {
         }
         //autocomplete and agrichselector
     }
+
+    HeaderParams(grid) {
+        let headerParams  = {}
+        headerParams['new_sheet'] = false
+        headerParams['add_row']   = true
+        headerParams['save']   = true
+    }
+
+    OrderByParams(grid) {
+        //current and changed
+
+    }
+
+    FilterParams(grid) {
+        //current and changed
+
+    }
+
+
+
     AddLookupValueGetter(grid_column) {
         //mainly for autocomplete and AgGridRichSelector. used for returning 
         //key value.
@@ -737,6 +801,23 @@ class ColumnDefsInit {
         //parse crud routes and instead of query?
 
     }
+    CrudInsteadOf() {}
+    //
+    /*
+    Returns NavBar, Context Menu 
+
+
+
+    */
+
+    //add row
+    //save
+    //quickFilters
+
+
+    NavBar() {}
+
+
     ContextWindow() {}
 
 }

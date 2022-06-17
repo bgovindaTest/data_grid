@@ -69,6 +69,9 @@ function ParseDate (datestr, format) {
     return dx
 }
 
+function ParseBoolean() {}
+function ParseLookup () {}
+
 function TypeCastDate(date_val, format_string) {
     var date_formats = ['YYYY-MM-DD','YYYY-M-DD','YYYY-MM-D','YYYY-M-D', 'MM/DD/YYYY','M/DD/YYYY','MM/D/YYYY','M/D/YYYY']
     var moment_date = moment(date_val, date_formats, true)
@@ -88,5 +91,6 @@ module.exports = {
     'IsInteger': IsInteger,
     'IsFunction': IsFunction,
     'IsDate': IsDate,
-    'IsUndefined': IsUndefined
+    'IsUndefined': IsUndefined,
+    'ParseDate': ParseDate
 }

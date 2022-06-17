@@ -1,0 +1,113 @@
+//stores dataTypes and filter operators and alias
+let valid_operators = {'=': '=', '!=': '!=', 
+    '<>': '<>', '>':'>', '>=': '>=', 
+    '<': '<', '<=': '<=', 
+    'lt': '<', 'le':'<=' , 'gt': '>',
+    'ge': '>=', 'eq': '=', 'neq': '!=',
+    'in':'IN',
+    'not_in': "NOT IN", 
+    'similar': "SIMILAR TO", 'not_similar': "NOT SIMILAR TO",
+    'like': "LIKE",  'not_like': "NOT LIKE", 'ilike': "ILIKE",
+    'not_ilike': "NOT ILIKE",
+    'between': "BETWEEN SYMMETRIC", 'not_between': "NOT BETWEEN SYMMETRIC" , 'is_null': "IS NULL", 
+    'is_not_null': "IS NOT NULL",
+    //create in statements with like and ilike 
+    'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
+    'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
+}
+
+let operatorAlias = {
+    '=': 'Equals', '!=': 'Not Equals', 
+    '<>': 'Not Equal', '>':'Greater Than', '>=': 'Greater or Equal To', 
+    '<': 'Less Than', '<=': 'Less or Equal To', 
+    'lt': 'Less Than', 'le':'Less or Equal To' , 'gt': 'Greater Than',
+    'ge': 'Greater or Equal To', 'eq': 'Equals', 'neq': 'Not Equal',
+    'in':'In',
+    'not_in': "Not In", 
+    'similar': "Similar To", 'not_similar': "Not Similar to",
+    'like': "Contains",  'not_like': "Not Contains", 'ilike': "Contains",
+    'not_ilike': "Not Contains",
+    'between': "Between", 'not_between': "Not Between" , 'is_null': "Is Blank", 
+    'is_not_null': "Not Blank",
+    //create in statements with like and ilike 
+    'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
+    'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL"
+}
+
+let like_in  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in' ]
+let data_classes = ['text', 'number', 'date']
+let c = data_classes
+//data_types and filter class
+//lookups
+let data_types = {
+    'bigint': c[1],
+    'bigserial': c[1],
+    'character': c[0],
+    'varchar': c[0],
+    'text': c[0],
+    'char': c[0],
+    'date': c[2],
+    'int': c[1],
+    'integer': c[1],
+    'double precision': c[1],
+    'money': c[1],
+    'json': c[0]
+}
+
+
+//data operators
+let date_operators   = [
+    '=','!=','>', '>=', 
+    '<','<=', 'between',
+    'not_between', 'is_null',
+    'is_not_null'
+]
+
+let text_operators   = [
+    'ilike', 'not_ilike', 'in', 'not_in',
+    'between', 'not_between', 'is_null',
+    'is_not_null',
+    '=','!='
+]
+
+let number_operators = [
+    '=','!=','>', '>=', 
+    '<','<=', 'in', 'not_in','between', 'not_between',
+    'is_null', 'is_not_null'
+]
+
+function ReturnAlias(operator_name) {
+    if (operatorAlias.hasOwnProperty(operator_name) ) {
+        return operatorAlias[operator_name]
+    }
+    return operator_name
+}
+
+function ReturnDataClass(data_type_name) {
+    //gets data class type from data_type
+    if (data_types.hasOwnProperty(data_type_name)) {
+        return data_types[data_type_name]
+    }
+    return data_classes[0]
+}
+
+//for filters returns default filter type
+function DefaultOperator(data_type_name) {
+    let class_name = ReturnDataClass(data_type_name)
+    if (class_name === 'text') {return 'ilike'}
+    else {return '='}
+}
+
+module.exports = {
+    'valid_operators': valid_operators,
+    'operatorAlias': operatorAlias,
+    'like_in': like_in,
+    'data_classes': data_classes,
+    'data_types': data_types,
+    'date_operators': date_operators,
+    'text_operators': text_operators,
+    'number_operators': number_operators,
+    'ReturnAlias': ReturnAlias,
+    'ReturnDataClass': ReturnDataClass,
+    'DefaultOperator': DefaultOperator
+}

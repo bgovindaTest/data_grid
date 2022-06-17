@@ -7,7 +7,7 @@ main function route?
 
 
 
-grid_func.js
-main_page.js
+grid_func.js: contains main functionality and dynamically generated functions
+main_page.js: 
 sub_page.js
-load_placeholder.js
+load_placeholder.js: for local ui testing.

@@ -219,7 +219,7 @@ on grid ready initialize app?
 
 
 //has axios object in main plugin.
-
+//dev vs prod
 var myMixin = {
 data () {
     return {

@@ -1,4 +1,14 @@
+/*
 //stores dataTypes and filter operators and alias
+main default configuration file
+*/
+
+//name of special columns
+const meta_column_name = '_ag-meta_'
+const meta_delete_undo_name = '_ag-meta-delete-undo_'
+const page_size = 10000
+
+
 let valid_operators = {'=': '=', '!=': '!=', 
     '<>': '<>', '>':'>', '>=': '>=', 
     '<': '<', '<=': '<=', 
@@ -34,11 +44,17 @@ let operatorAlias = {
     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL"
 }
 
-let like_in  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in' ]
+let array_parse_types  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in', 'in', 'not_in' ]
 let data_classes = ['text', 'number', 'date']
 let c = data_classes
 //data_types and filter class
 //lookups
+
+//numbers
+let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
+    'real', 'double precision', 'money', 'numeric', 'float']
+
+
 let data_types = {
     'bigint': c[1],
     'bigserial': c[1],
@@ -76,6 +92,17 @@ let number_operators = [
     'is_null', 'is_not_null'
 ]
 
+//for sorting params
+let orderby_type = ['asc', 'desc'] //do not change
+let sortDisplayName = {'asc': 'Ascending', 'desc': 'Descending'}
+
+//delimiter by regex string. value is display name of delimiter in in filters
+let delimiter_typeName = { '':'Any', //any is space or newline
+    '\n': 'New Line', '\s+': 'Space', ',': "Comma", 
+    ';':"SemiColon"}
+//max filter payload?
+
+
 function ReturnAlias(operator_name) {
     if (operatorAlias.hasOwnProperty(operator_name) ) {
         return operatorAlias[operator_name]
@@ -101,12 +128,17 @@ function DefaultOperator(data_type_name) {
 module.exports = {
     'valid_operators': valid_operators,
     'operatorAlias': operatorAlias,
+    'array_parse_types': array_parse_types,
     'like_in': like_in,
     'data_classes': data_classes,
     'data_types': data_types,
     'date_operators': date_operators,
     'text_operators': text_operators,
     'number_operators': number_operators,
+    'orderby_type': orderby_type,
+    'sortDisplayName': sortDisplayName,
+    'delimiter_typeName': delimiter_typeName,
+
     'ReturnAlias': ReturnAlias,
     'ReturnDataClass': ReturnDataClass,
     'DefaultOperator': DefaultOperator

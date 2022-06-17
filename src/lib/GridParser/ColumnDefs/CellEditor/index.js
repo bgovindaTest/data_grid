@@ -1,7 +1,11 @@
 /*
 Valid cell editors and processing?
 
+needs to match AggridRichSelector
+
 Handles dropdowns and xyz
+
+valueSetter not needed for AggridRichSelector or Autocomplete
 
 grid_init.js is the main module to initialize the app.
 grid_column_rules Input Parameters: These also go in the grid_column_rules. It used to set the how user enters data. Two options are below.
@@ -12,23 +16,27 @@ grid_column_rules Input Parameters: These also go in the grid_column_rules. It u
         mapfunction[key] -> id (or some other value). This process is completed during the save function route that sends
         the cell data to the database. This is often the id for the value to be stored in postgres.
 
-    match_string: default __match_string__. Used as the name of the column to set match string value to. 
-    match_string_function: function (row, match_string_name) 
-        { return //concatenated rows in row[match_string_name]}. This function is run against every row and appends another column labeled
-        as match_string_name. users inputs are compared to the text in the match_string_name in order to guide the autocomplete. The match string
-        object is also passed to the value_setter as select_values so that the value setter can run on copy paste.
-    column_info: json array. Has the header value which must match a value in the selectValues array. init_width is the width to used for the
-        autocomplete table.
-    map_route: if not empty this is the rest route to pull the map data to. This will overwride anythign previously stored in the selectValues placeholder.
-        selectValues can be store statically at each page level when a static drop down is required and no table linking is required.
-    map_params: This is a json object that is sent with the axios call with the map route. It can contain additional parameters for making data pull
-        from server.
+    column_info (columnDef): json array. Has the header value which must match a value in the selectValues array.
+        init_width is the width to used for the autocomplete table.
 
     crud_value: column_name value to send to the server. Often the return value and crud_value are different for example npi maybe stored in the
         cell for the users convience, but the postgres id for that row is sent to the database. 
 
-        The crud_value, return_value and selectValues object are used to create the mapFunction which takes the return_value and uses its as a key
-            against select values to return the crud_value. both the return_value and the crud_value should return unique values.
+    The crud_value, return_value and selectValues object are used to create the mapFunction which takes the return_value and uses its as a key
+        against select values to return the crud_value. both the return_value and the crud_value should return unique values.
+
+    lookupAlias: alias for mapping lookup values to whats in ui
+    selectAlias: alias for mapping ui values to whats in table?
+    key:
+    ui_key:
+    server_key:
+    filters:
+    orderBy:
+    isDropDown: (i.e. only single value or lookup)
+
+    map_params: This is a json object that is sent with the axios call with the map route. It can contain additional parameters for making data pull
+        from server.
+
 
     cellEditorFramework: 'AutocompleteAg'
     cellEditorParams: {
@@ -42,14 +50,11 @@ grid_column_rules Input Parameters: These also go in the grid_column_rules. It u
             {header: "phone", init_width: 150 },
             {header: "website", init_width: 100 }
         ]
-        match_string: (string) default __match_string__
-        match_string_function: function?
-        map_route: string
         map_params: {} 
         crud_value: id
         api_route: ()
         api_type: (get/post)
-        real_time: false
+        real_time: false //if intial pull or needs consistent refresh
         api_name: if drop down loaded initialy?
         map_function: //the map function is place here during initializations
 }

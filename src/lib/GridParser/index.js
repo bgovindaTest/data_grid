@@ -109,6 +109,9 @@ const lodashCloneDeep = require('lodash.clonedeep')
 const meta_column_name = '_ag-meta_'
 const meta_delete_undo_name = '_ag-meta-delete-undo_'
 
+
+//has whole grid object. Any data loading comes from
+//grid_funcs. Vue Components can also have async await
 class ColumnDefsInit {
     //for main loader
     //grid is json object for aggrid

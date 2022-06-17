@@ -1,4 +1,9 @@
 /*
+Main functions for processing crud events.
+
+Creates rowData from server row
+
+
 Process and store OrderBy and FilterParams
 
 ui_fileds
@@ -14,83 +19,176 @@ let where_statements = [
     {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a' },
 ]
 
-Creates Functions for processing
-
 */
-let valid_operators = {'=': '=', '!=': '!=', 
-    '<>': '<>', '>':'>', '>=': '>=', 
-    '<': '<', '<=': '<=', 
-    
-    'lt': '<', 'le':'<=' , 'gt': '>',
-    'ge': '>=', 'eq': '=', 'neq': '!=',
-    'in':'IN',
-    'not_in': "NOT IN", 
-    'similar': "SIMILAR TO", 'not_similar': "NOT SIMILAR TO",
-    'like': "LIKE",  'not_like': "NOT LIKE", 'ilike': "ILIKE",
-    'not_ilike': "NOT ILIKE",
-    'between': "BETWEEN SYMMETRIC", 'not_between': "NOT BETWEEN SYMMETRIC" , 'is_null': "IS NULL", 
-    'is_not_null': "IS NOT NULL",
-    //create in statements with like and ilike 
-    'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
-    'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
+const data_types = require ('../../DataConfig')
+
+
+
+function HeaderName(column_name, headerNames) {
+    //headerNames is key:value pair
+    if( headerNames.hasOwnProperty(column_name)) {return headerNames[column_name]}
+    return column_name
 }
-let like_in  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in' ]
 
+function AddDefaultFilter(column_name, headerNames, filterObject) {
 
+    let x = {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 
+        'value2': null, 'delimiterType': null, 'dataType': null,
+        'headerName': 'column_name' }
+}
 
+function AddDefaultOrderBy(column_name, headerNames, orderByObject) {
 
-
-let sort_type = ['asc', 'desc']
-
-
-let sortDisplayName = {'asc': 'ascending', 'desc': 'descending'}
-
-let text_types = []
-let date_types = []
-
-//between operator
-let date_operators   = [
-    '=','!=','>', '>=', 
-    '<','<=','is_null',
-    'is_not_null', 'between',
-    'not_between'
-]
-
-let text_operators   = [
-    'like', 'not_like', 'in', 'not_in',
-    'between', 'not_between', 'is_null',
-    'is_not_null',
-    '=','!='
-]
-
-let number_operators = [
-    '=','!=','>', '>=', 
-    '<','<=', 'in', 'not_in', 'is_null',
-    'is_not_null', 'between', 'not_between'
-]
-
-function AddDefaultFilter(column_name) {
+    let x = {'column_name': 'col_name_3', 'order_by': 'asc'}
 
 
 }
 
-function AddDefaultOrderBy(column_name) {}
+function RemoveFilter(  filter_array, index )  {}
+function RemoveOrderBy( orderby_array, index ) {}
 
-
+function ClearFilters(filter_array)  { filter_array.length = 0 }
+function ClearOrderBy(orderby_array) { orderby_array.length = 0 }
 
 function DelimiterType () {} //how to split and return value
 
 
-function ProcessFilter ( filterParams ) {
+function FilterCrudCreate ( filterParams ) {
     let current_params = filterParams['current_params']
 }
 
-function ProcessOrderBy (orderbyParams) {
+function OrderByCrudCreate (orderbyParams) {
+
+}
+
+function Pagination (page_num) {}
+
+
+function IgnoreInvalidFilter () {}
+
+function ServerRowToUiRow() {
+    //creates row_data object,
+    //parsed dot assembly?
+    //returns
 
 }
 
 
-//Parse and reject
-//invalid data ignore warning
-//Reject values
-//Warning?
+//inserts
+//updates
+//deletes
+
+
+
+function CrudInsert() {}
+function CrudDelete() {}
+function CrudUpdate() {}
+
+function Insert() {}
+function Update() {}
+function Delete() {}
+
+function CreateGetRouteParams(selectUrl, filterParams, orderByParams ) {
+    /*
+    Pulls data rules and intializes paramters. queryParams is an object that contains the current values
+    from all the modal windows.
+    req_body from client has the following structure
+    req.body['rules'] = [{}] //rules contain informations such as include read only.
+    req.body['where'] = [{}]
+    req.body['order_by'] = [{}]
+    req.body['pagination'] = {}
+    */
+    var req_body = {'where': [], 'order_by': [], 'pagination': {}, 'rules': [{}] }
+    var where = queryParams['where']
+    var order_by = queryParams['order_by']
+    var pagination = queryParams['pagination']
+    this.ParseWhereObject(req_body, where)
+    this.ParseOrderBy(req_body, order_by)
+    this.ParsePagination(req_body, pagination)
+    return req_body
+}
+
+
+function ParsePagination(req_body, pagination) {
+    var lx = parseInt(pagination['limit'])
+    var offset = parseInt(pagination['offset'])
+    if (isNaN(lx) ) {lx = 1000} else if (lx < 10 ) {lx = 10} else if (lx > 5000) {lx = 5000}
+    if (isNaN(offset) ) {offset = 0} else if (offset < 0 ) {offset = 0}
+    var pgx = req_body['pagination']
+    pgx['limit']  = lx
+    pgx['offset'] = offset
+}
+
+function ParseOrderBy(req_body, order_by) {
+    //if column name is empty or sort_by is empty continue
+    var order_by_list = req_body['order_by']
+    for (var i =0; i < order_by.length; i++) {
+        var ox = order_by[i]
+        var cn = ox['variable_name'].trim()
+        var sb = ox['sort_order'].toUpperCase()
+        if (['ASC', 'DESC'].includes(sb) && cn !== "" ) {
+            order_by_list.push({'variable_name': cn, 'sort_order': sb})
+        }
+    }
+}
+
+function ParseWhereObject(req_body, where_list) {
+    /*
+    where_list: contains the where statemenents generated by the modal windows where, order_by and pagination
+    where_list_out: container object for req_body. contains processed where statements to send to the server
+    */
+    var where_list_out = req_body['where']
+    for(var i =0; i< where_list.length; i++) {
+        var where_statement = where_list[i]
+        var filter_active = where_statement['filter_active']
+        if (!filter_active) {continue }
+        var dt = where_statement['data_type']
+        if (dt === 'permissions') {
+            QueryPermissionsParse (where_list_out, where_statement)
+        } else if (dt === 'quick_filter') {
+            QueryQuickFilterParse (where_list_out, where_statement)
+        } else if (dt === 'integer') {
+            QueryNumberParse (where_list_out, where_statement, dt)
+        } else if (dt === 'float') {
+            QueryNumberParse (where_list_out, where_statement, dt)
+        } else if (dt === 'string') {
+            QueryStringParse (where_list_out, where_statement)
+        } else if (dt === 'boolean') {
+            QueryBooleanParse (where_list_out, where_statement, dt)
+        } else if (dt === 'date') {
+            QueryDateParse (where_list_out, where_statement)
+        }
+    }
+}
+
+// //Create Initial Paramters for pagination
+let pagination = {'limit': 5, 'offset': 0}
+
+function PaginationInitialization(pagination_rules) {
+    var pagination = {}
+    if (pagination_rules.hasOwnProperty('offset')) {
+        pagination['offset'] = parseInt(pagination_rules['offset'])
+        if (isNaN(pagination['offset'])) {
+            pagination['offset'] = 0
+        } else { if (pagination['offset'] < 0) { pagination['offset'] = 0 } }
+
+    } else { pagination['offset'] = 0 }
+
+    if (pagination_rules.hasOwnProperty('limit')) {
+        pagination['limit'] = parseInt(pagination_rules['limit'])
+        if (isNaN(pagination['limit'])) {
+            pagination['limit'] = 1000
+        } else { 
+            if (pagination['limit'] < 10) { pagination['limit'] = 10 } 
+            else if ( pagination['limit'] > 5000 ) { pagination['limit'] = 5000 } 
+        }
+    } else { pagination['limit'] = 1000 }
+
+    return pagination
+}
+
+function NextPage() {}
+function PreviousPage() {}
+function PageEnd() {}
+function IsFirstPage() {}
+function ResetPagination() {}

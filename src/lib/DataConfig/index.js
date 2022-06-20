@@ -45,7 +45,12 @@ let operatorAlias = {
     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL"
 }
 
+//determine if string should be split into an array
 let array_parse_types  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in', 'in', 'not_in' ]
+//determine if values should be stored as array length 2. for between not_between
+let between_parse_types  = ['between', 'not_between']
+let null_parse_types = ['is_null', 'is_not_null']
+
 let data_classes = ['text', 'number', 'date']
 let c = data_classes
 //data_types and filter class
@@ -138,6 +143,8 @@ module.exports = {
     'valid_operators': valid_operators,
     'operatorAlias': operatorAlias,
     'array_parse_types': array_parse_types,
+    'between_parse_types': between_parse_types,
+    'null_parse_types': null_parse_types,
     'like_in': like_in,
     'data_classes': data_classes,
     'data_types': data_types,

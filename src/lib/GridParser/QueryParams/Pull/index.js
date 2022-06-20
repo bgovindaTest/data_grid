@@ -125,6 +125,11 @@ function RemoveItemFromArray( array, index ) {
 function ClearFilters(filter_array)  { filter_array.length = 0 }
 function ClearOrderBy(orderby_array) { orderby_array.length = 0 }
 
+function ClearFilterValues(filterRow) { 
+    filterRow['value'] = null
+    filterRow['value2'] = null
+}
+
 function DelimiterType (delimiter_type) {
     //{ '/\s+/':'Any Space'}
     let defaultDelimiter = data_config.defaultDelimiter
@@ -232,17 +237,28 @@ function WhereObject(filter_list) {
     return fout
 }
 
-// let where_statements = [
-//     {'column_name': 'col_name_1', 'operator': '=', 'value':  1 },
-//     {'column_name': 'col_name_2', 'operator': 'is_null', 'value':  "" },
-//     {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a' },
-// ]
+function AppendFilterRow(fout, filterRow) {
+    let fr = {}
+    let operator = filterRow['operator']
+    let value = null
+    if (data_config.array_parse_types.includes(operator)) {
+        let values = ArrayValueParse(filterRow)
+        if (values.length === 0) { return }
+        value = values
+    }
 
+    else if (data_config.between_parse_types.includes(operator)) {
+        let values = BetweenValueParse(filterRow)
+        if (values.length != 2) { return }
+        value = values
+    }
 
-function AppendFilterRow(fout, filter_list) {
-
-
-
+    else if (data_config.null_parse_types.includes(operator)) { value = ""}
+    else { value = String(filterRow['value']).trim() }
+    fr['column_name'] = filterRow['column_name']
+    fr['operator'] = operator
+    fr['value'] = value
+    fout.push(fr)
 }
 
 //log warnings?
@@ -254,7 +270,7 @@ function ArrayValueParse(filterRow) {
     let values = value.split(delim)
     let out_array = []
     for (let i = 0; i < values.length; i++) {
-        if (tcFunc(values[i])) { out_array.push(values[i]) }
+        if (tcFunc(values[i])) { out_array.push(String(values[i]).trim() ) }
     }
     return out_array
 }
@@ -264,19 +280,8 @@ function BetweenValueParse(filterRow) {
     let val2 = filterRow['value2']
     let data_type = filterRow['dataType']
     let tcFunc = GetTypeCheckFunction(data_type)
-    if (tcFunc(val1) && tcFunc(val2) ) { return [val1, val2] }
+    if (tcFunc(val1) && tcFunc(val2) ) { return [String(val1), String(val2)] }
     return []
-}
-
-function SingleValueParse() {
-
-}
-
-
-function IsCorrectType( ) {
-
-
-   
 }
 
 // function TypeCheckFunction(data_type) {
@@ -288,6 +293,3 @@ function GetTypeCheckFunction(data_type) {
     else if (dt === 'boolean') { return type_check.IsBoolean}
     else { return type_check.IsString }
 }
-// }
-//if is_null
-//if Lookup get value?

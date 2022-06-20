@@ -77,11 +77,27 @@ function PreviousPage(page_params) {  ChangePage(-1, page_params )}
 function NextPage(page_params) { ChangePage(1, page_params ) }
 
 //end pagination functions
+function InitializeQueryParams(grid) {
+    //field, column_name, headerName, data_type
+    let x = []
+    let lookupColumns = {}
+    let crudParams = {} //data expected from server
+    //showFilter
+
+}
+
+function IsLookup(column_name, lookupColumns) {
+    if (lookupColumns.hasOwnProperty(column_name)) {return true}
+    return false
+}
+
+function OrderByList(grid) {
+
+}
+
+
 function DefaultFilterInit(column_name, header_name, data_type) {
     let def_operator = data_types.DefaultOperator(data_type_name)
-
-    let data_type = null //need to determine data type
-
     let init_filter = {'column_name': column_name, 'operator': def_operator, 'value':  null, 
         'value2': null, 'delimiterType': null, 'dataType': data_type,
         'headerName': header_name }
@@ -117,25 +133,42 @@ function DelimiterType (delimiter_type) {
     defaultDelimiter
     delimiter_typeName
 
-} //how to split and return value
+} 
+//how to split and return value
 
+//add meta_column in gridFunctions
+function ServerRowToUiRow(queryRowData, IsLookup, IsCrud) {
 
-function FilterCrudCreate ( filterParams ) {
-    let current_params = filterParams['current_params']
+    let rowData = {}
+    let keys = Object.keys(queryRowData)
+    for(let i =0; i < keys.length; i++ ) {
+        let field = keys[i]
+        if (! IsCrud.hasOwnProperty(field) ) {continue}
+        //If IsLookup
+        if (! IsLookup.hasOwnProperty(field) ) {
+            let val = LookupParse(column_name, queryRowData)
+            rowData[field] = val
+        } else { rowData[field] = queryRowData[keys[i].trim()] }
+    }
+    return rowData
 }
 
-function OrderByCrudCreate (orderbyParams) {
-
-}
-
-function ServerRowToUiRow() {
-    //creates row_data object,
-    //parsed dot assembly?
-    //returns
-
-
-    //if lookup create object and join by dot operator
-
+//add functionality for aliases later
+//error if is string. means no match found
+function LookupParse(column_name, queryRowData) {
+    let column_value = {}
+    let keys = Object.keys(queryRowData)
+    let cn_dot = column_name+'.'
+    for(let i =0; i < keys.length; i++ ) {
+        let value = queryRowData[keys[i]]
+        let key = keys[i]
+        if (key.startsWith(cn_dot) ) {
+            let k2 = key.split('.')
+            if (k2.length < 2) {continue}
+            column_value[k2[1].trim() ] = value
+        }
+    }
+    return column_value
 }
 
 
@@ -217,3 +250,11 @@ function ParseWhereObject(req_body, where_list) {
 }
 function IgnoreInvalidFilterValue () {} //remove invalid types. type cast to string.
 function IgnoreInvalidFilterArrayValue() {} //removes invalid types. type cast to string
+
+function FilterCrudCreate ( filterParams ) {
+    let current_params = filterParams['current_params']
+}
+
+function OrderByCrudCreate (orderbyParams) {
+
+}

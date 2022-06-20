@@ -38,6 +38,11 @@ function IsNumber (x) {
     else { return false}
 }
 
+function TextIsNumber(x) {
+    if (String(x).match(/^-?(0|[1-9]\d*)?(\.\d+)?(?<=\d)$/) != null) {return true}
+    else { return false}
+}
+
 function IsArray (x) {
     return Array.isArray(x)    
 }
@@ -91,6 +96,7 @@ module.exports = {
     'IsInteger': IsInteger,
     'IsFunction': IsFunction,
     'IsDate': IsDate,
+    'TextIsNumber': TextIsNumber,
     'IsUndefined': IsUndefined,
     'ParseDate': ParseDate
 }

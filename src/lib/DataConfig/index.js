@@ -99,10 +99,10 @@ let sortDisplayName = {'asc': 'Ascending', 'desc': 'Descending'}
 
 //delimiter by regex string. value is passed to javascript split methods.
 //takes a string or regex expression.
-let delimiter_typeName = { '/\s+/':'Any', //any is space or newline
+let delimiter_typeName = { '/\s+/':'Any Space', //any is space or newline
     '\n': 'New Line', '/ +/': 'Space', ',': "Comma", 
     ';':"SemiColon"}
-let defaultDelimiter = { '/\s+/':'Any'}
+let defaultDelimiter = '/\s+/'
 //gets converted to \;\
 
 //max filter payload?

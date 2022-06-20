@@ -1,5 +1,6 @@
 /*
-Main functions for processing crud events.
+Main functions for processing crud events and sending data back and forth
+between UI and server.
 
 Creates rowData from server row
 
@@ -20,37 +21,102 @@ let where_statements = [
 ]
 
 */
+
+
 const data_types = require ('../../DataConfig')
+const type_check = require('../../TypeCheck')
 
-
-
-function HeaderName(column_name, headerNames) {
-    //headerNames is key:value pair
-    if( headerNames.hasOwnProperty(column_name)) {return headerNames[column_name]}
-    return column_name
+function CreateFilterObject() {
+    let x = {'current': [], 'new': []}
+    //add default filters to current and new
+    return x
 }
 
-function AddDefaultFilter(column_name, headerNames, filterObject) {
-
-    let x = {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 
-        'value2': null, 'delimiterType': null, 'dataType': null,
-        'headerName': 'column_name' }
+function CreateOrderByObject() {
+    let x = {'current': [], 'new': []}
+    //add default filters to current and new
+    return x
 }
 
-function AddDefaultOrderBy(column_name, headerNames, orderByObject) {
-
-    let x = {'column_name': 'col_name_3', 'order_by': 'asc'}
-
-
+function NewQueryReset(filterParams, orderByParams, pageParams ) {
+    //resets query params.
+    ftmp = filterParams['new']
+    otmp = orderByParams['new']
+    filterParams['current'] = ftmp
+    filterParams['new'] = []
+    orderByParams['current'] = otmp
+    orderByParams['new'] = []
+    newPage = PageInit()
+    let keys = Object.keys(newPage)
+    for(let i = 0; i < keys.length; i++) {pageParams[keys[i]] =newPage[keys[i]] }
 }
 
-function RemoveFilter(  filter_array, index )  {}
-function RemoveOrderBy( orderby_array, index ) {}
+
+
+
+
+function PageInit() {
+    let page_size = data_types.page_size
+    let limit  = page_size
+    return {'limit': limit, 'offset': 0, 'page_index': 0, 'page_size': page_size }
+}
+
+
+function ChangePage(i, page_params) {
+    let page_index = page_params['page_index']
+    if(type_check.IsInteger(i) ) {
+        page_index = parseInt(page_index)
+    } 
+    
+    
+    
+    else {page_index = 0 }
+
+    if (page_index < 0) { page_index = 0 }
+    let page_size = page_params['page_size']
+    page_params['limit']  = (1+page_index)*page_size
+    page_params['offset'] = page_index*page_size
+}
+function PreviousPage() {  ChangePage(-1, page_params )}
+function NextPage(page_params) { ChangePage(1, page_params ) }
+function ResetPagination() {}
+
+
+
+function DefaultFilterInit(column_name, header_name, data_type) {
+
+    let def_operator = data_types.DefaultOperator(data_type_name)
+    let init_filter = {'column_name': column_name, 'operator': def_operator, 'value':  null, 
+        'value2': null, 'delimiterType': null, 'dataType': data_type,
+        'headerName': header_name }
+    return init_filter
+}
+
+function DefaultOrderByInit(column_name, header_name) {
+    let init_order = {'column_name': column_name, 'order_by': 'asc', 'headerName': header_name}
+    return init_order
+}
+
+
+function RemoveFilter(  filter_array, index )  { RemoveItemFromArray( filter_array, index) }
+function RemoveOrderBy( orderby_array, index ) { RemoveItemFromArray( orderby_array, index)}
+
+function RemoveItemFromArray( array, index ) {
+    if (index > -1) { array.splice(index, 1) }
+}
 
 function ClearFilters(filter_array)  { filter_array.length = 0 }
 function ClearOrderBy(orderby_array) { orderby_array.length = 0 }
 
-function DelimiterType () {} //how to split and return value
+function DelimiterType (delimiter_type) {
+    if (data_type.delimiter_typeName.hasOwnProperty(delimiter_type)) {
+        let dname = data_type.delimiter_typeName['']
+    }
+
+    defaultDelimiter
+    delimiter_typeName
+
+} //how to split and return value
 
 
 function FilterCrudCreate ( filterParams ) {
@@ -61,7 +127,6 @@ function OrderByCrudCreate (orderbyParams) {
 
 }
 
-function Pagination (page_num) {}
 
 
 function IgnoreInvalidFilter () {}
@@ -71,24 +136,31 @@ function ServerRowToUiRow() {
     //parsed dot assembly?
     //returns
 
+
+    //if lookup create object and join by dot operator
+
 }
 
 
-//inserts
-//updates
-//deletes
+//crud_fields
+//ignore primary_key
+
+function InsertCrud(rowData, ) {}
+function DeleteCrud() {}
+function UpdateCrud() {}
+function AssemblyModifyStatements( crudParamsObject) {
+
+    //upsert or onconflict
+    //set or data?
+    //pk
+    //takes all insert, update and delete statements
+    //and creates final object for batch statements.
+}
+
+function ProcessModifyErrorStatements() {}
 
 
-
-function CrudInsert() {}
-function CrudDelete() {}
-function CrudUpdate() {}
-
-function Insert() {}
-function Update() {}
-function Delete() {}
-
-function CreateGetRouteParams(selectUrl, filterParams, orderByParams ) {
+function CreateGetRouteParams(selectUrl, filterParams, orderByParams, pageParams ) {
     /*
     Pulls data rules and intializes paramters. queryParams is an object that contains the current values
     from all the modal windows.
@@ -98,7 +170,7 @@ function CreateGetRouteParams(selectUrl, filterParams, orderByParams ) {
     req.body['order_by'] = [{}]
     req.body['pagination'] = {}
     */
-    var req_body = {'where': [], 'order_by': [], 'pagination': {}, 'rules': [{}] }
+    var req_body = {'where': [], 'order_by': [], 'pagination': {}}
     var where = queryParams['where']
     var order_by = queryParams['order_by']
     var pagination = queryParams['pagination']
@@ -186,9 +258,3 @@ function PaginationInitialization(pagination_rules) {
 
     return pagination
 }
-
-function NextPage() {}
-function PreviousPage() {}
-function PageEnd() {}
-function IsFirstPage() {}
-function ResetPagination() {}

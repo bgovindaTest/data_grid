@@ -7,6 +7,7 @@ main default configuration file
 const meta_column_name = '_ag-meta_'
 const meta_delete_undo_name = '_ag-meta-delete-undo_'
 const page_size = 10000
+const write_batch_size = 1000
 
 
 let valid_operators = {'=': '=', '!=': '!=', 
@@ -96,10 +97,14 @@ let number_operators = [
 let orderby_type = ['asc', 'desc'] //do not change
 let sortDisplayName = {'asc': 'Ascending', 'desc': 'Descending'}
 
-//delimiter by regex string. value is display name of delimiter in in filters
-let delimiter_typeName = { '':'Any', //any is space or newline
-    '\n': 'New Line', '\s+': 'Space', ',': "Comma", 
+//delimiter by regex string. value is passed to javascript split methods.
+//takes a string or regex expression.
+let delimiter_typeName = { '/\s+/':'Any', //any is space or newline
+    '\n': 'New Line', '/ +/': 'Space', ',': "Comma", 
     ';':"SemiColon"}
+let defaultDelimiter = { '/\s+/':'Any'}
+//gets converted to \;\
+
 //max filter payload?
 
 
@@ -126,6 +131,10 @@ function DefaultOperator(data_type_name) {
 }
 
 module.exports = {
+    'meta_column_name': meta_column_name,
+    'meta_delete_undo_name': meta_delete_undo_name,
+    'page_size': page_size,
+    'write_batch_size': write_batch_size,
     'valid_operators': valid_operators,
     'operatorAlias': operatorAlias,
     'array_parse_types': array_parse_types,
@@ -138,7 +147,7 @@ module.exports = {
     'orderby_type': orderby_type,
     'sortDisplayName': sortDisplayName,
     'delimiter_typeName': delimiter_typeName,
-
+    'defaultDelimiter': defaultDelimiter,
     'ReturnAlias': ReturnAlias,
     'ReturnDataClass': ReturnDataClass,
     'DefaultOperator': DefaultOperator

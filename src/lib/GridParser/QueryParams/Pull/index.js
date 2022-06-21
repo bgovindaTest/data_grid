@@ -1,24 +1,22 @@
 /*
-Responsible for pulling data from server.
+This module is responsible for creating and maintaining the parameters required for 
+pulling data into the main grid.
+
 Filters
 OrderBy
 Pagination
-RowDataProcessing from server
+Get Route parameter assembly.
 
-Main functions for processing crud events and sending data back and forth
-between UI and server.
-
-Creates rowData from server row
+The async request is made in another module
 
 
-Process and store OrderBy and FilterParams
-
-ui_fileds
-
+UI object for filter. value2 is for between and not_between
 {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null, delimiterType: null, dataType: null },
 
 //value2 used for between and not_between
 //otherwise eveything stored in value
+
+let order_by = { 'column_name': xyz, 'order_by': 'asc }
 
 let where_statements = [
     {'column_name': 'col_name_1', 'operator': '=', 'value':  1 },
@@ -32,9 +30,55 @@ let where_statements = [
 const data_config = require ('../../../DataConfig')
 const type_check = require('../../../TypeCheck')
 
-function FilterOrderObjectInit() {
+//end pagination functions
+function InitializeQueryParams(grid) {
+    //field, column_name, headerName, data_type
+    let getParams = FilterOrderByObjectInit(grid)
+    let pageParams = PageInit()
+    getParams['pageParams'] = pageParams
+    return getParams
+}
+
+
+function FilterOrderByObjectInit(grid) {
     //run twice once for filterParams and once for orderByParams
-    return {'current': [], 'new': []}
+    let displayList = []
+    let enforcedFilter = []
+    let defaultSort = []
+    let sortList = []
+    for(let i=0; i < grid.length; i++) {
+        let grid_column = grid[i]
+        let showFilter = grid_column['showFilter'] || false
+        let showSort   = grid_column['showSort'] || false
+        let defaultOrderby = grid_column['defaultOrderby'] || ""
+        let defaultValue = grid_column['defaultValue'] || ""
+        let field = grid_column['field']
+        let headerName = grid_column['headerName'] || grid_column['field']
+
+        if (defaultValue.trim() != "" && !showFilter ) {
+            //enforced filter
+        } else if  ( defaultValue.trim() != "" && showFilter ) {
+            //default filter
+        } else if (showFilter) {
+            //just add to available filters
+        }
+
+        if (showSort) {
+            if (defaultOrderby !== "") {
+                if (defaultOrderby.toLowerCase() === 'asc') {
+                    defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'asc' } )
+                    sortList.push({'headerName': headerName, 'column_name': field } )
+                } else if ( defaultOrderby.toLowerCase() === 'desc' ) {
+                    defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'desc' } )
+                    sortList.push({'headerName': headerName, 'column_name': field } )
+                }
+            } else { sortList.push({'headerName': headerName, 'column_name': field }) }
+        }
+
+    }
+    let filterParams  = {'current': [], 'new': [], 'displayList': [], 'enforcedFilters': []}
+    let orderByParams = {'current': defaultSort, 'new': [], 'orderByList': sortList}
+    return {'filterParams': filterParams, 'orderByParams': orderByParams}
 }
 
 function PageInit() {
@@ -43,7 +87,7 @@ function PageInit() {
     return {'limit': limit, 'offset': 0, 'page_index': 0, 'page_size': page_size }
 }
 
-function NewQueryReset(filterParams, orderByParams, pageParams ) {
+function NewQuerySet(filterParams, orderByParams, pageParams ) {
     //resets query params.
     ftmp = filterParams['new']
     otmp = orderByParams['new']
@@ -61,40 +105,37 @@ function NewQueryReset(filterParams, orderByParams, pageParams ) {
 function ChangePage(i, page_params) {
     let page_index = page_params['page_index']
     if(type_check.IsInteger(i) ) {
-        page_index = parseInt(page_index)
-    } 
-    
-    
-    
-    else {page_index = 0 }
+        page_index = page_index + parseInt(i)
+    } else {page_index = 0 }
 
     if (page_index < 0) { page_index = 0 }
     let page_size = page_params['page_size']
     page_params['limit']  = (1+page_index)*page_size
     page_params['offset'] = page_index*page_size
 }
-function PreviousPage(page_params) {  ChangePage(-1, page_params )}
-function NextPage(page_params) { ChangePage(1, page_params ) }
 
-//end pagination functions
-function InitializeQueryParams(grid) {
-    //field, column_name, headerName, data_type
-    let x = []
-    let lookupColumns = {}
-    let crudParams = {} //data expected from server
-    //showFilter
+//create parameters for query
+function CreateNewQueryParams(filterParams, orderByParams, pageParams ) {
+    NewQuerySet(filterParams, orderByParams, pageParams )
+    let urlParams = GetRouteParams(filterParams['current'], orderByParams['current'], pageParams )
+    return urlParams
+}
 
+function CreatePreviousPageParams(filterParams, orderByParams, pageParams) {  
+    ChangePage(-1, pageParams )
+    let urlParams = GetRouteParams(filterParams['current'], orderByParams['current'], pageParams )
+    return urlParams
+}
+function CreateNextPageParams(filterParams, orderByParams, pageParams) { 
+    ChangePage(1, pageParams ) 
+    let urlParams = GetRouteParams(filterParams['current'], orderByParams['current'], pageParams )
+    return urlParams
 }
 
 function IsLookup(column_name, lookupColumns) {
     if (lookupColumns.hasOwnProperty(column_name)) {return true}
     return false
 }
-
-function OrderByList(grid) {
-
-}
-
 
 function DefaultFilterInit(column_name, header_name, data_type) {
     let def_operator = data_config.DefaultOperator(data_type_name)
@@ -142,12 +183,15 @@ function DelimiterType (delimiter_type) {
 
 //add meta_column in gridFunctions
 function ServerRowToUiRow(queryRowData, IsLookup, IsCrud) {
+    //parses queryRowData into rowData for grid.
 
     let rowData = {}
     let keys = Object.keys(queryRowData)
     for(let i =0; i < keys.length; i++ ) {
         let field = keys[i]
-        if (! IsCrud.hasOwnProperty(field) ) {continue}
+        let isCrud = IsCrud[field] || false
+        if (! isCrud ) {continue}
+        if (isCrud === 'w') {continue}
         //If IsLookup
         if (! IsLookup.hasOwnProperty(field) ) {
             let val = LookupParse(column_name, queryRowData)
@@ -225,6 +269,7 @@ function OrderByObject(order_by) {
 }
 
 
+//Functions below used for processing filter object.
 function WhereObject(filter_list) {
     /*
     where_list: contains the where statemenents generated by the modal windows where, order_by and pagination
@@ -254,7 +299,10 @@ function AppendFilterRow(fout, filterRow) {
     }
 
     else if (data_config.null_parse_types.includes(operator)) { value = ""}
-    else { value = String(filterRow['value']).trim() }
+    else { 
+        //if null?
+        value = String(filterRow['value']).trim() 
+    }
     fr['column_name'] = filterRow['column_name']
     fr['operator'] = operator
     fr['value'] = value

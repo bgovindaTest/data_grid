@@ -41,8 +41,8 @@ validator: function()
 validatorRequiredFields: [] //must all be not null or will not run. returns null in that case
 valueGetterRequiredFields: [] //must all be not null or will not run. returns null in that case
  
-isCrud:   true/false
-editable: true/false {'updat': true/false, 'insert': true/false}
+isCrud:   true/false maybe read/write/? r rw w
+editable: true/false {'update': true/false, 'insert': true/false}
 deleteWarning: string (determines if delete should happen)
 
 dataType:  //used for sorting? need to add time and datetime filters
@@ -168,6 +168,7 @@ class ColumnDefsInit {
             this.DefaultParameters(grid_column)
             this.CellWidth(grid_column)
             this.AddValueSetter(grid_column)
+            this.HeaderName(grid_column)
         }
         this.MetaColumn(grid)
         let fns = this.MetaAuxillaryFunction( grid )
@@ -176,6 +177,13 @@ class ColumnDefsInit {
         //HeaderParams
         return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter,
             'enforcedFilter': enforcedFilter}
+    }
+
+    HeaderName(grid_column) {
+        if (! grid_column.hasOwnProperty('headerName')) {
+            grid_column['headerName'] = grid_column['field']
+        }
+
     }
 
 

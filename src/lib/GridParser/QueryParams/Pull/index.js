@@ -42,8 +42,9 @@ function InitializeQueryParams(grid) {
 
 function FilterOrderByObjectInit(grid) {
     //run twice once for filterParams and once for orderByParams
-    let displayList = []
+    let filterList = []
     let enforcedFilter = []
+    let defaultFilter  = []
     let defaultSort = []
     let sortList = []
     for(let i=0; i < grid.length; i++) {
@@ -52,15 +53,20 @@ function FilterOrderByObjectInit(grid) {
         let showSort   = grid_column['showSort'] || false
         let defaultOrderby = grid_column['defaultOrderby'] || ""
         let defaultValue = grid_column['defaultValue'] || ""
+        let defOperator  = grid_column['defaultOperator'] || "="
         let field = grid_column['field']
         let headerName = grid_column['headerName'] || grid_column['field']
-
+        let dataType = grid_column['dataType'] || 'text'
         if (defaultValue.trim() != "" && !showFilter ) {
             //enforced filter
+            enforcedFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
         } else if  ( defaultValue.trim() != "" && showFilter ) {
             //default filter
+            defaultFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
+            filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
         } else if (showFilter) {
             //just add to available filters
+            filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
         }
 
         if (showSort) {
@@ -76,7 +82,7 @@ function FilterOrderByObjectInit(grid) {
         }
 
     }
-    let filterParams  = {'current': [], 'new': [], 'displayList': [], 'enforcedFilters': []}
+    let filterParams  = {'current': defaultFilter, 'new': [], 'filterList': filterList, 'enforcedFilters': enforcedFilter}
     let orderByParams = {'current': defaultSort, 'new': [], 'orderByList': sortList}
     return {'filterParams': filterParams, 'orderByParams': orderByParams}
 }

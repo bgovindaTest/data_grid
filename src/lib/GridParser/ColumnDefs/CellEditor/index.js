@@ -26,6 +26,9 @@ grid_column_rules Input Parameters: These also go in the grid_column_rules. It u
         against select values to return the crud_value. both the return_value and the crud_value should return unique values.
 
 
+    api_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
+        to extract the selectValues array. 
+        use post or get route?
 
 
 
@@ -53,21 +56,13 @@ Each grid_column_rule has the structure below. A more indepth description is in 
             filters:
             orderBy:
 
-        isDropDown
+        load: app // grid // cell (cell not implemented yet. this would be like realtime)
         let push_key = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
         let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
         let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
 
     }
 
-    api_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
-        to extract the selectValues array. 
-        use post or get route?
-    crud_value:
-
-
-    axios return object
-    { 'error_msg': err_msg, 'is_error': true, 'rows': [], 'table_name': table_name, 'route_name': route_name }
 
 
 
@@ -84,6 +79,14 @@ Each grid_column_rule has the structure below. A more indepth description is in 
         let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
         let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
 
+    pullKey:     //pullAndDisplay same key
+    displayKey:  (this goes into values)
+    pushKey:  //name of columns sent ot the server.
+    api:
+    load: app // grid // cell
+    mapObject: {key: value} takes select value and returns other value for crud
+    row_filter
+
    },
 },
 
@@ -96,9 +99,24 @@ let validEditors = []
 class CustomEditor {
     //for main loader
     //grid is json object for aggrid
+    //allowNull (prepends value?)
     constructor(grid_column) {
         this.grid_column  = grid_column
-    }   
+    }
+    AutoCompleteParams() {}
+    AutoCompleteValueSetter() {}
+    AutoCompleteValueGetter() {}
+    AgRichSelectParams() {}
+
+    SubGridParams() {
+        //grid_name or positions
+
+    } //doesnt store any values.
+
+
+    BooleanValueSetter() {}
+    DateValueSetter() {}
+    NumberValueSetter() {}
 }
 
 
@@ -113,6 +131,12 @@ Custom Value Setters?
 
 */
 
+
+
+//ValueSetters
+
+
+//ValueGetters
 
 
 

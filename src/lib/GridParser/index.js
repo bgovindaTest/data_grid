@@ -14,13 +14,16 @@ Parses grids json object and converts expression syntax into javascript function
         {'name': 'x'
          'help': ""
         'headerParams': {links}
-        'crud_params': //i.e. new row, update, delete, etc read/etc
-            {
+        'crud_params': //i.e. new row, update, delete, etc read/etc create default objects for query params?
+            { 
                 default: ->
                 select:  ->
                 insert:  -> //string or {'route': , 'instead': 'update'}
                 update:  ->
                 delete:  ->
+                upsert_set: []
+                on_contraint:
+                on_conflict:
             }
 
         'columnDef': //agrid info

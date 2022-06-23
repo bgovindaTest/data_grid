@@ -76,6 +76,24 @@ let data_types = {
     'json': c[0]
 }
 
+//data_type default null values i.e. 0, "", {}, null, [], false
+let data_null_types = {
+    'bigint': 0,
+    'bigserial': 0,
+    'character': "",
+    'varchar': "",
+    'text': "",
+    'char': "",
+    'date': "01-01-0001",
+    'int': 0,
+    'integer': 0,
+    'double precision': 0,
+    'money': 0,
+    'array': [],
+    'json': {}
+}
+
+
 
 //data operators
 let date_operators   = [

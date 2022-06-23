@@ -44,19 +44,19 @@ Each grid_column_rule has the structure below. A more indepth description is in 
         values: [] //always object
 
         columnDef: [
-            {header: "id" , init_width: 50},
-            {header: "name", init_width: 50},
-            {header: "username", init_width: 75 },
-            {header: "email", init_width: 200 },
-            {header: "phone", init_width: 150 },
-            {header: "website", init_width: 100 }
+            {header: "id" , field: "id", width: 50},
+            {header: "name", field: "name", width: 50},
+            {header: "username", header: "username", width: 75 },
+            {header: "email", header: "username",  width: 200 },
+            {header: "phone", header: "username",  width: 150 },
+            {header: "website",header: "username", width: 100 }
         ]
         api_route: {route: / /, get/post search_key}
 
             filters:
             orderBy:
 
-        load: app // grid // cell (cell not implemented yet. this would be like realtime)
+        load: app // grid // cell (not implemented. All added at init)
         let push_key = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
         let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
         let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
@@ -67,23 +67,23 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 
 
  cellEditor: 'agRichSelectCellEditor',
+ //parse map object into values array
  allowNull
  cellEditorParams: {
      values: ['Male', 'Female'],
-     is_lookup: 
      
      key is first?
      cellEditorPopup: true,
-        isDropDown
         let push_key = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
         let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
         let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
 
     pullKey:     //pullAndDisplay same key
+    pushKey: 
     displayKey:  (this goes into values)
     pushKey:  //name of columns sent ot the server.
     api:
-    load: app // grid // cell
+    load: app // grid // cell (not implemented. All added at init)
     mapObject: {key: value} takes select value and returns other value for crud
     row_filter
 
@@ -93,31 +93,91 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 
 
 */
+const type_check = require('../../../TypeCheck')
 
-let validEditors = []
 
 class CustomEditor {
     //for main loader
     //grid is json object for aggrid
     //allowNull (prepends value?)
-    constructor(grid_column) {
+
+    //valuesArray created by grid_func mix in?
+    constructor(grid, grid_column, valuesArray) {
         this.grid_column  = grid_column
     }
-    AutoCompleteParams() {}
-    AutoCompleteValueSetter() {}
-    AutoCompleteValueGetter() {}
-    AgRichSelectParams() {}
+    AutoCompleteParams(grid_column, values_object) {
 
-    SubGridParams() {
-        //grid_name or positions
+        let cep = grid_column['cellEditorParams']
+        if (! cep.hasOwnProperty('pushKey')) { cep['pushKey'] = grid_column['field'] }
+        if (! cep.hasOwnProperty('pullKey')) { cep['pullKey'] = 'id' } //pull key is assumed to be the primary key for lookup
+        if (! cep.hasOwnProperty('displayKey')) { cep['pullKey'] = cep['pushKey'] } //pull key is assumed to be the primary key for lookup
+        cep['values'] = values_object
+        let pullKey = cep['pullKey']
+        let displayKey = cep['displayKey']
+        let colSize = 150
+        if (! cep.hasOwnProperty('columnDef') ) {
+            cep['columnDef'] = this.DefaultColumnDef(pullKey, displayKey, colSize)
+        } else if ( type_check.IsArray(cep['columnDef'] ) ) {
+            if (cep['columnDef'].length === 0) {}
 
-    } //doesnt store any values.
+
+        } else if ( type_check.IsNull(cep['columnDef'] ) ) {
+            //get first value from pull and assemble.
+            // IsNull(x) IsObject (x) IsArray (x)
+            cep['columnDef'] = this.DefaultColumnDef(pullKey, displayKey, colSize)
+        }
+        else{ cep['columnDef'] = this.DefaultColumnDef(pullKey, displayKey, colSize) }
+
+    }
+    SetColumnDef( columnDef, columnWidth) {
+        if ( type_check.IsString (columnDef) ) { return {'field':pullKey, "width": columnWidth} }
+    }
+
+    DefaultColumnDef(pullKey, displayKey, columnWidth) {
+        return [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
+    }
+
+    AutoCompleteValueGetter(grid_column) {
+        if (grid_column.hasOwnProperty('valueGetter')) {return}
+        grid_column['valueGetter'] = AutoCompleteValueGetter(grid_column(grid_column['cellEditorParams']['displayKey']))
+    }
+    AgRichSelectParams(grid_column) {
+        //create map object
+        //create values object
+        let cep = grid_column['cellEditorParams']
+        if (! cep.hasOwnProperty('pushKey')) { cep['pushKey'] = grid_column['field'] }
+        if (! cep.hasOwnProperty('pullKey')) { cep['pullKey'] = 'id' } //pull key is assumed to be the primary key for lookup
+    }
+
+    DeleteUndoSelector() {
+        //? defaults?
+    }
 
 
-    BooleanValueSetter() {}
-    DateValueSetter() {}
-    NumberValueSetter() {}
+    SubGridParams(grid, numGrid, grid_column) {
+        let is_subgrid = grid_column['cellEditor'] || ""
+        if (is_subgrid != "subGrid") { return }
+        let subgridPos = grid_column["cellEditorPrams"]['gridPos'] || 0
+        if (subgridPos === 0 || subgridPos > numGrid) {
+            console.log('Subgrid out of bounds')
+            return 
+        }
+    }
+    AddDefaultValueSetter() {}
+    AddDefaultValueGetter() {}
 }
+
+let lookupCellEditors = ["autoComplete", "agSelectCellEditor", "deleteUndoSelector"]
+
+
+function AutoCompleteValueGetter(displayKey) {
+    let fn = function (params) {
+        return params.data[displayKey] || null
+    }
+    return fn
+}
+
+
 
 
 /*
@@ -133,14 +193,74 @@ Custom Value Setters?
 
 
 
-//ValueSetters
-
-
-//ValueGetters
-
-
-
 //     },
 // }
 
-// function CreateCellParams() {}
+
+
+function AddValueSetter(grid_column) {
+    /*
+    Adds value setter to numbers and date. If not correct format return null
+
+    */
+
+    //if lookup skip this step
+
+
+    if (grid_column.hasOwnProperty('valueSetter')) {return}
+    let field = grid_column['field']
+
+    //numbers
+    let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
+    'real', 'double precision', 'money', 'numeric', 'float']
+
+    if (number_types.includes(grid_column['dataType'])) {
+
+        let fn = function (params) {
+            if (! type_check.IsNumber(params.newValue) ) {
+                params.data[field] = null
+                return true
+            }
+            else {
+                params.data[field] = params.newValue
+                return true
+            }
+        }
+        grid_column['valueSetter'] = fn
+        return
+    }
+    //dates and types. Date transform
+    let date_types = ['date', 'timestamp', 'time']
+    if (date_types.includes(grid_column['dataType'])) {
+        let fn = function (params) {
+            if (! type_check.IsDate(params.newValue) ) {
+                params.data[field] = null
+                return true
+            }
+            else {
+                //type cast?
+                params.data[field] = params.newValue
+                return true
+            }
+        }
+        grid_column['valueSetter'] = fn
+        return
+    }
+    //boolean
+    let bool_types = ['bool', 'boolean']
+    if (bool_types.includes(grid_column['dataType'])) {
+        let fn = function (params) {
+            if (! type_check.IsBoolean(params.newValue) ) {
+                params.data[field] = null
+                return true
+            }
+            else {
+                //type cast?
+                params.data[field] = params.newValue
+                return true
+            }
+        }
+        grid_column['valueSetter'] = fn
+        return
+    }
+}

@@ -118,3 +118,6 @@ function AssemblyDeletes( crudParamsObject) {
 
 
 function ProcessModifyErrorStatements() {}
+
+
+function agRichSelectCellEditor() {}

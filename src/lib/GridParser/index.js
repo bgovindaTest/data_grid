@@ -54,6 +54,7 @@ allowNull: true/false
 isRequired: true/false
 ignoreError: true/false (for calculated fields?) allow to pass or skip?
 
+//returnOnIgnoreError: true/false if true use default otherwise
 
 ifNull: 'psql string calls to replace value'
     'default', 'current_timestamp', 'current_time','null',
@@ -155,10 +156,12 @@ class ColumnDefsInit {
             if (grid_column['field'] === meta_delete_undo_name ) { continue }
             //CrudParams
             //NavBar
+            //if supplied by config
             this.ValueTransform(grid_column, 'valueGetter')
             this.ValueTransform(grid_column, 'valueSetter')
             this.ValueTransform(grid_column, 'valueFormatter')
             this.ValueTransform(grid_column, 'toolTip')
+            //add default value setters and getters
             this.IfNull(grid_column)
             this.IsEditable(grid_column)
             this.HideColumns(grid_column)

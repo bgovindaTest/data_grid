@@ -3,8 +3,6 @@
 Valid cell editors and processing?
 
 
-Handles dropdowns and xyz
-
 valueSetter not needed for AggridRichSelector or Autocomplete
 
 grid_init.js is the main module to initialize the app.
@@ -30,10 +28,6 @@ grid_column_rules Input Parameters: These also go in the grid_column_rules. It u
         to extract the selectValues array. 
         use post or get route?
 
-
-
-
-
 This module is responsible for initializing the data parameters and functions required for the autocomplet widget.
 Each grid_column_rule has the structure below. A more indepth description is in ./library/grid_rules.js
   {
@@ -55,8 +49,6 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 
             filters:
             orderBy:
-
-        load: app // grid // cell (not implemented. All added at init)
         let push_key = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
         let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
         let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
@@ -83,7 +75,6 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     displayKey:  (this goes into values)
     pushKey:  //name of columns sent ot the server.
     api:
-    load: app // grid // cell (not implemented. All added at init)
     mapObject: {key: value} takes select value and returns other value for crud
     row_filter
 
@@ -95,6 +86,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 */
 const type_check = require('../../../TypeCheck')
 
+//valuesObject[gridPos][field]
 
 class CustomEditor {
     //for main loader
@@ -102,10 +94,18 @@ class CustomEditor {
     //allowNull (prepends value?)
 
     //valuesArray created by grid_func mix in?
-    constructor(grid, grid_column, valuesArray) {
+    constructor(grid_column, valuesObject) {
         this.grid_column  = grid_column
+        this.valuesObject = valuesObject
     }
-    AutoCompleteParams(grid_column, values_object) {
+    AutoCompleteParams() {
+        /*
+        Initializes the autocomplete editor. columnDefs and 
+        xyz.
+
+        */
+        let grid_column  = this.grid_column
+        let valuesObject = this.valuesObject
 
         let cep = grid_column['cellEditorParams']
         if (! cep.hasOwnProperty('pushKey')) { cep['pushKey'] = grid_column['field'] }
@@ -124,53 +124,81 @@ class CustomEditor {
         } else if ( type_check.IsNull(cep['columnDef'] ) ) {
             //get first value from pull and assemble.
             // IsNull(x) IsObject (x) IsArray (x)
-            cep['columnDef'] = this.DefaultColumnDef(pullKey, displayKey, colSize)
+            cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize)
         }
-        else{ cep['columnDef'] = this.DefaultColumnDef(pullKey, displayKey, colSize) }
-
-    }
-    SetColumnDef( columnDef, columnWidth) {
-        if ( type_check.IsString (columnDef) ) { return {'field':pullKey, "width": columnWidth} }
+        else{ cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize) }
+        this.AutoCompleteValueGetter()
+        //gridvalues object
     }
 
-    DefaultColumnDef(pullKey, displayKey, columnWidth) {
+    AutocompleteDefaultColumnDef(pullKey, displayKey, columnWidth) {
+        //defaults
         return [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
     }
 
-    AutoCompleteValueGetter(grid_column) {
+    AutoCompleteValueGetter() {
+        let grid_column = this.grid_column
         if (grid_column.hasOwnProperty('valueGetter')) {return}
         grid_column['valueGetter'] = AutoCompleteValueGetter(grid_column(grid_column['cellEditorParams']['displayKey']))
     }
-    AgRichSelectParams(grid_column) {
+    AgRichSelectParams() {
         //create map object
         //create values object
+        let grid_column  = this.grid_column
         let cep = grid_column['cellEditorParams']
         if (! cep.hasOwnProperty('pushKey')) { cep['pushKey'] = grid_column['field'] }
         if (! cep.hasOwnProperty('pullKey')) { cep['pullKey'] = 'id' } //pull key is assumed to be the primary key for lookup
+        if (! cep.hasOwnProperty('displayKey')) { cep['displayKey'] = cep['displayKey'] || cep['pushKey'] }
+        let valsParams = this.ValuesAgRichSelectParams()
+        cep['values'] = valsParams['values']
+        cep['mapObject'] = valsParams['mapObject']
+    }
+    ValuesAgRichSelectParams() {
+        //key value
+        //displayKey must be unique. maps to mapsObject.
+        //pushKey is name of key to send
+        //pullKey is name sent by columns lookup
+        let valuesObject = this.valuesObject
+        let values = []
+        let mapObject = {}
+        let displayKey = this.grid_column['cellEditorParams']['displayKey']
+        let pushKey = this.grid_column['cellEditorParams']['pushKey']
+        let pullKey = this.grid_column['cellEditorParams']['pullKey']
+
+        for(let i=0; i<valuesObject.length; i++) {
+            let x = valuesObject[i]
+            let pull_id = x[pullKey]
+            mapObject[displayKey] = {pushKey: String(pull_id)} // {'id: 1} -> {'user_id': 1}
+            values.push(displayKey)
+        }
+        return {'values': values, 'mapObject': mapObject}
     }
 
-    DeleteUndoSelector() {
-        //? defaults?
-    }
+    DeleteUndoSelector() {/*? defaults? */}
 
 
-    SubGridParams(grid, numGrid, grid_column) {
+    SubGridParams(grid_column) {
         let is_subgrid = grid_column['cellEditor'] || ""
         if (is_subgrid != "subGrid") { return }
         let subgridPos = grid_column["cellEditorPrams"]['gridPos'] || 0
-        if (subgridPos === 0 || subgridPos > numGrid) {
+        //make integer.
+        if (subgridPos === 0 ) {
             console.log('Subgrid out of bounds')
             return 
         }
+        //valuesArray
+        //mapObject
     }
-    AddDefaultValueSetter() {}
-    AddDefaultValueGetter() {}
+    AddDefaultValueSetter() {
+        //adds default valueSetter. returns null when type is invalid 
+        let gc = this.grid_column
+        AddValueSetter(gc) 
+    }
+
 }
 
-let lookupCellEditors = ["autoComplete", "agSelectCellEditor", "deleteUndoSelector"]
-
-
 function AutoCompleteValueGetter(displayKey) {
+    //data is object for autocomplete
     let fn = function (params) {
         return params.data[displayKey] || null
     }
@@ -178,33 +206,13 @@ function AutoCompleteValueGetter(displayKey) {
 }
 
 
-
-
-/*
-BooleanSelector.vue
-
-Cell Editor Params for AgRichSe
-'agRichSelectCellEditor'
-
-
-Custom Value Setters?
-
-*/
-
-
-
-//     },
-// }
-
-
-
+let lookupCellEditors = ["autoComplete", "agSelectCellEditor", "deleteUndoSelector"]
 function AddValueSetter(grid_column) {
     /*
-    Adds value setter to numbers and date. If not correct format return null
-
+    Adds value setter to numbers, boolean and date. If not correct format return null
     */
-
-    //if lookup skip this step
+    let ce = grid_column['cellEditor']
+    if (lookupCellEditors.includes(ce)) {return}
 
 
     if (grid_column.hasOwnProperty('valueSetter')) {return}
@@ -264,3 +272,11 @@ function AddValueSetter(grid_column) {
         return
     }
 }
+
+function ReturnGridValuesObject(valuesObject, grid_pos, field_name) {
+    //json array. for autocomplete set directly.
+    //for richselector parse into values and mapObject
+    return valuesObject[grid_pos][field_name] || []
+}
+
+module.exports = {'CustomEditor': CustomEditor, 'ReturnGridValuesObject': ReturnGridValuesObject}

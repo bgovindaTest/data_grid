@@ -87,8 +87,8 @@ function Update(out_data, rowData, updateParams) {
     }
     out_data.push(x)
 
-
 }
+
 function AssemblyInserts( crudParamsObject) {
 
     //upsert or onconflict

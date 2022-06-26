@@ -47,25 +47,29 @@ function ModifyParams(grid) {
 
 }
 
+//columnEditors
+
 function Insert(out_data, rowData, insertParams) {
 
 
     let crud_fields = insertParams['crudFields']
-    let lookups     = insertParams['lookups']
+    let ce          = insertParams['columnEditors']
+    let mo          = insertParams['mapObject']
+    let ap          = insertParams['autoCompleteParams']
     let x = {}
     for(let i =0; i < crud_fields.length; i++) {
         let cf = crud_fields[i]
-        let is_lookup = lookups[cf] || false
-        if (is_lookup) {
-
-        } else {
-
-        }
-
+        if (ce[cf] === 'autoComplete') {
+            let ap2 = ap[cf]
+            AutocompleteParse(rowData, x, cf, ap2['pullKey'], ap2['pushKey'])
+        } else if ( ce[cf] === 'agRichSelectEditor') {
+            agRichSelectCellEditorParse(rowData, outRow, mapObject, field)
+        } else { x[cf] = rowData[cf] || null }
     }
     out_data.push(x)
-
 }
+
+
 function Delete(out_data, rowData, deleteParams) {
     //id only?
     x = {'id': rowData['id']}
@@ -120,4 +124,22 @@ function AssemblyDeletes( crudParamsObject) {
 function ProcessModifyErrorStatements() {}
 
 
-function agRichSelectCellEditor() {}
+function AutocompleteParse(rowData, outRow, field, pullKey, pushKey) {
+    let lookup = rowData[field] || null
+    if (lookup === null) {
+        outRow[pushKey] = null
+        return
+    }
+    let value = lookup[pullKey] || null
+    outRow[pushKey] = value
+    return
+}
+
+
+function agRichSelectCellEditorParse(rowData, outRow, mapObject, field) {
+    let displayValue = rowData[field]
+    //no mapObject. just return flat value.
+
+    let value = mapObject[displayValue] || null
+    outRow[field] = value
+}

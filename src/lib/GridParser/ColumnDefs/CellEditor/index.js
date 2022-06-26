@@ -36,6 +36,9 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     cellEditorFramework: "autoComplete" || cellEditor?
     cellEditorParams: {
         values: [] //always object
+        //not implemented yet.
+        lookupFieldsRowQuery: [] //list of fields
+        lookupFieldsColumnQuery: [] //list of fields
 
         columnDef: [
             {header: "id" , field: "id", width: 50},

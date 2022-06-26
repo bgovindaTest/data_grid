@@ -45,10 +45,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
             {header: "phone", header: "username",  width: 150 },
             {header: "website",header: "username", width: 100 }
         ]
-        api_route: {route: / /, get/post search_key}
-
-            filters:
-            orderBy:
+        api_route: string
         let push_key = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
         let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
         let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
@@ -74,7 +71,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     pushKey: 
     displayKey:  (this goes into values)
     pushKey:  //name of columns sent ot the server.
-    api:
+    api: string
     mapObject: {key: value} takes select value and returns other value for crud
     row_filter
 
@@ -86,7 +83,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 */
 const type_check = require('../../../TypeCheck')
 
-//valuesObject[gridPos][field]
+
 
 class CustomEditor {
     //for main loader
@@ -100,9 +97,8 @@ class CustomEditor {
     }
     AutoCompleteParams() {
         /*
-        Initializes the autocomplete editor. columnDefs and 
-        xyz.
-
+        Initializes the autocomplete editor. columnDefs and values.
+        Data is pulled in grid_funcs
         */
         let grid_column  = this.grid_column
         let valuesObject = this.valuesObject
@@ -116,23 +112,21 @@ class CustomEditor {
         let displayKey = cep['displayKey']
         let colSize = 150
         if (! cep.hasOwnProperty('columnDef') ) {
-            cep['columnDef'] = this.DefaultColumnDef(pullKey, displayKey, colSize)
+            cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize)
         } else if ( type_check.IsArray(cep['columnDef'] ) ) {
-            if (cep['columnDef'].length === 0) {}
-
-
+            if (cep['columnDef'].length === 0) {
+                cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize)
+            }
         } else if ( type_check.IsNull(cep['columnDef'] ) ) {
-            //get first value from pull and assemble.
-            // IsNull(x) IsObject (x) IsArray (x)
             cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize)
         }
         else{ cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize) }
         this.AutoCompleteValueGetter()
-        //gridvalues object
+        if (! cep.hasOwnProperty('values')) {cep['values'] = valuesObject}
     }
 
     AutocompleteDefaultColumnDef(pullKey, displayKey, columnWidth) {
-        //defaults
+        //default columnDef for lookups.
         return [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
     }
 

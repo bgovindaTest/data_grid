@@ -55,6 +55,8 @@ dataType:  //used for sorting? need to add time and datetime filters
 allowNull: true/false
 isRequired: true/false
 ignoreError: true/false (for calculated fields?) allow to pass or skip?
+typeCheckError? if true dont remove invalid data type.
+    //show as error instead?. dont run validation if error.
 
 //returnOnIgnoreError: true/false if true use default otherwise
 

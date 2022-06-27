@@ -67,6 +67,7 @@ class CrudHeaderParams {
             }
         }
         this.AddDefaultRouteAndType('insert')
+        this.AddDefaultPrams('insert')
     }
     DeleteParams()  {
         if (! this.crudParams.hasOwnProperty('delete') ) {
@@ -80,12 +81,13 @@ class CrudHeaderParams {
             }
         }
         this.AddDefaultRouteAndType('delete')
+        this.AddDefaultPrams('delete')
     }
     UpdateParams()  {
         if (! this.crudParams.hasOwnProperty('update') ) {
             this.crudParams['update'] = {
                 'route': this.DefaultRoute('update'),
-                'crudType': 'delete',
+                'crudType': 'update',
                 'on_constraint': "",
                 'on_conflict':   "",
                 'set_fields':    [],
@@ -93,6 +95,8 @@ class CrudHeaderParams {
             }
         }
         this.AddDefaultRouteAndType('update')
+        this.AddDefaultPrams('update')
+
     }
     HeaderParams()  {
         //add information to headerParams
@@ -109,7 +113,6 @@ class CrudHeaderParams {
             this.crudParams['select']['enforcedFilters'] = enforcedFilters
         }
     }
-
     DefaultRoute(crudType) {
         //crudType is insert update or delete
         let base_str = this.defaultRoute
@@ -122,6 +125,14 @@ class CrudHeaderParams {
         crudObject['crudType'] = crudObject['crudType'] || crud_type
         let cx = crudObject['crudType']
         crudObject['route']    = crudObject['route'] || this.DefaultRoute(cx)
+    }
+    AddDefaultPrams(crud_type) {
+        // 'crudType': 'delete',
+        // 'on_constraint': "",
+        // 'on_conflict':   "",
+        // 'set_fields':    [],
+        // 'default_fields':{}
+        // 'set_filters' : []
     }
 }
 

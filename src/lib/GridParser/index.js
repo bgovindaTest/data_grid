@@ -12,27 +12,30 @@ Parses grids json object and converts expression syntax into javascript function
     //first grid is main. others can be called as subgrids
     grids: [
         {'name': 'x'
-         'help': ""
-        'headerParams': {links}
-        'crud_params': //i.e. new row, update, delete, etc read/etc create default objects for query params?
+        'headerParams': {
+            links: [{'name': xxx, 'url': xxx }],
+            help: "",
+            addRow: true
+        }
+        'crudParams': //i.e. new row, update, delete, etc read/etc create default objects for query params?
             { 
                 default: ->
                 select:  ->
                 insert:  -> //string or {'route': 'string', 'doInstead': 'update', 'crudParams': {}}
                 update:  ->
                 delete:  ->
-                upsert_set: [] //for upsert only
-                set: [] //for update will just filter things out from data object
+                upsert_set: [] //for upsert only sent in set object in payload
+                set_filter: [] //for update will just filter things out from data object
                 default_fields: {}
-                on_contraint:
-                on_conflict:
+                on_constraint: ''
+                on_conflict: ''
+                deleteWarning: ''
             }
 
         'columnDef': //agrid info
-        'deleteWarning': ''
         },
         {'name': 'y'
-        'crud_params': //i.e. new row, update, delete, etc read/etc
+        'crudParams': //i.e. new row, update, delete, etc read/etc
         'columnDef': //agrid info
         },
     ]
@@ -809,37 +812,6 @@ class ColumnDefsInit {
         //current and changed
 
     }
-
-
-
-    AddLookupValueGetter(grid_column) {
-        //mainly for autocomplete and AgGridRichSelector. used for returning 
-        //key value.
-        //if not avaialable?
-        // if (options.hasOwnProperty['requiredFields'] ) { requiredFields = options['requiredFields'] }
-    }
-    CrudRoutes() {
-        //parse crud routes and instead of query?
-
-    }
-    CrudInsteadOf() {}
-    //
-    /*
-    Returns NavBar, Context Menu 
-
-
-
-    */
-
-    //add row
-    //save
-    //quickFilters
-
-
-    NavBar() {}
-
-
-    ContextWindow() {}
 
 }
 

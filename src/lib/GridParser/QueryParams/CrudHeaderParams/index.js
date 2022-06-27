@@ -17,7 +17,7 @@ may need to change default behavior
                 upsert_set_fields: [] //for upsert only
                 set_fields: [] //for update will just filter things out from data object
                 default_fields: {}
-                on_contraint:
+                on_constraint:
                 on_conflict:
             }
 
@@ -80,6 +80,7 @@ class CrudHeaderParams {
                 'default_fields':{}
             }
         }
+        //delete warning
         this.AddDefaultRouteAndType('delete')
         this.AddDefaultPrams('delete')
     }
@@ -98,8 +99,15 @@ class CrudHeaderParams {
         this.AddDefaultPrams('update')
 
     }
-    HeaderParams()  {
+    HeaderParams() {
         //add information to headerParams
+        //links
+        //add_row
+        //help
+        let headerParams  = {}
+        headerParams['new_sheet'] = false
+        headerParams['add_row']   = true
+        headerParams['save']   = true
     }
     EnforcedFitlers(enforcedFilters) {
         //enforced filters are added to each query
@@ -127,13 +135,15 @@ class CrudHeaderParams {
         crudObject['route']    = crudObject['route'] || this.DefaultRoute(cx)
     }
     AddDefaultPrams(crud_type) {
-        // 'crudType': 'delete',
-        // 'on_constraint': "",
-        // 'on_conflict':   "",
-        // 'set_fields':    [],
-        // 'default_fields':{}
-        // 'set_filters' : []
+        let crudObject = this.crudParams[crudType]
+        if (! crudObject.hasOwnProperty('on_constraint'))    {crudObject['on_constraint'] = ""}
+        if (! crudObject.hasOwnProperty('on_conflict'))      {crudObject['on_conflict'] = ""}
+        if (! crudObject.hasOwnProperty('set_fields'))       {crudObject['set_fields'] = [] }
+        if (! crudObject.hasOwnProperty('default_fields'))   {crudObject['default_fields'] = {} }
+        if (! crudObject.hasOwnProperty('set_filters'))      {crudObject['set_filters'] = []}
+        if (! crudObject.hasOwnProperty('deleteWarning'))    {crudObject['deleteWarning'] = ""}
     }
+    //ContextWindow
 }
 
 function PathJoin(base, new_path) {

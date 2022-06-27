@@ -244,6 +244,9 @@ data () {
         filterParams: {},
         enforcedFilterParams: {},
 
+        //data ready for save stored here. allows for save to continue
+        toSave: {}
+
     }
 },
 

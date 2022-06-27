@@ -18,10 +18,12 @@ Parses grids json object and converts expression syntax into javascript function
             { 
                 default: ->
                 select:  ->
-                insert:  -> //string or {'route': , 'instead': 'update'}
+                insert:  -> //string or {'route': 'string', 'doInstead': 'update', 'crudParams': {}}
                 update:  ->
                 delete:  ->
-                upsert_set: []
+                upsert_set: [] //for upsert only
+                set: [] //for update will just filter things out from data object
+                default_fields: {}
                 on_contraint:
                 on_conflict:
             }

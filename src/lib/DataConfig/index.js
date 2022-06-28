@@ -72,24 +72,27 @@ let data_types = {
     'date': c[2],
     'int': c[1],
     'integer': c[1],
+    'decimal': c[1],
+    'numeric': c[1],
+    'real': c[1],
     'double precision': c[1],
     'money': c[1],
     'json': c[0]
 }
 
 //data_type default null values i.e. 0, "", {}, null, [], false
-let data_null_types = {
-    'bigint': 0,
-    'bigserial': 0,
+let null_dtype_to_value = {
+    'bigint': '0',
+    'bigserial': '0',
     'character': "",
     'varchar': "",
     'text': "",
     'char': "",
-    'date': "01-01-0001",
-    'int': 0,
-    'integer': 0,
-    'double precision': 0,
-    'money': 0,
+    'date': "01-01-0001", //no spoofing make date required (or current_date)
+    'int': '0',
+    'integer': '0',
+    'double precision': '0',
+    'money': '0',
     'array': [],
     'json': {}
 }
@@ -177,5 +180,6 @@ module.exports = {
     'defaultDelimiter': defaultDelimiter,
     'ReturnAlias': ReturnAlias,
     'ReturnDataClass': ReturnDataClass,
-    'DefaultOperator': DefaultOperator
+    'DefaultOperator': DefaultOperator,
+    'null_dtype_to_value': null_dtype_to_value
 }

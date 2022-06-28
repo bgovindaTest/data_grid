@@ -52,6 +52,8 @@ alias: {'pull': 'push'} //defaults to field
 requiredFields: []
 validatorRequiredFields: [] //must all be not null or will not run. returns null in that case
 valueGetterRequiredFields: [] //must all be not null or will not run. returns null in that case
+requiredFieldsTypeCheck: true //unchangeage
+nullReplace: true
  
 isCrud:   true/false maybe read/write/? r rw w
 editable: true/false {'update': true/false, 'insert': true/false}

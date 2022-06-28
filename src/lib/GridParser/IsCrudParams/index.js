@@ -13,7 +13,7 @@ isChange: field can be modified in the UI. Determines what fields
     are watched for changes. Only rows that have some change detection are
     sent to the server
 
-isCrud: bool
+isCrud: bool or string: rwc  (read write or change)
 editable: boolean or conditional based on row params
 
 
@@ -71,8 +71,8 @@ class CrudInit {
             let cp = {}
             SetCrudDefaults(cp)
             gc['isCrud'] = cp
-        }
-
+        } else { SetCrudDefaults(gc['isCrud']) }
+        //throw error
     }
     IsEditable() {
         let is_edit = this.grid_column['editable'] || false

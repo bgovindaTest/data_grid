@@ -426,7 +426,7 @@ class ColumnDefsInit {
     InitDefaultInsertRow(backups) {
         //Adds default value or null to new rows.
         let fi = function () {
-            let meta_column = { 'row_type': 'insert', 'meta_delete_undo_name': false }
+            let meta_column = { 'crudType': 'insert', 'meta_delete_undo_name': false }
             let field_names = Object.keys(backups)
             let meta_backup = {}
             for (let i = 0; i< field_names.length; i++ ) {
@@ -442,7 +442,7 @@ class ColumnDefsInit {
         //adds rowData pulled from server to rows
         let fu = function (row_data) {
             //row_data is whats stored in server object
-            let meta_column = { 'row_type': 'update', 'meta_delete_undo_name': false }
+            let meta_column = { 'crudType': 'update', 'meta_delete_undo_name': false }
             let field_names = Object.keys(backups)
             let meta_backup = {}
             for (let i = 0; i< field_names.length; i++ ) {

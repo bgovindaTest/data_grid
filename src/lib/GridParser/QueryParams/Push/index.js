@@ -36,11 +36,34 @@ let query_params = [
 
 const data_types = require ('../../DataConfig')
 const type_check = require('../../TypeCheck')
+let meta_column    = data_types['meta_column_name']
+let meta_crud_type = data_types['meta_crud_type']
+let meta_is_delete = data_types['meta_delete_undo_name']
 
+// 'meta_crud_type': meta_crud_type,
+// 'meta_column_name': meta_column_name,
+// 'meta_delete_undo_name': meta_delete_undo_name,
 
 
 //crud_fields
 //ignore primary_key
+function SetCrudData(out_data, rowData, crudParams) {
+    let mc = rowData[meta_column]
+    let crud_type  = mc[meta_crud_type] || "" //from row determines if data pulled form server or added like a new row
+    let is_delete = mc[meta_is_delete]
+    let crudType  = crudParams[crud_type]['crudType'] //allows for change in post processing i.e. update to insert.
+
+    if (is_delete === 'delete') {
+        Delete(out_data, rowData, crudParams['delete'])
+    } else if (crudType === 'insert') { 
+        Insert(out_data, rowData, crudParams['insert'])
+    } else if (crudType === 'update') {
+        Update(out_data, rowData, crudParams['update'])
+    } else {
+        console.log(`invalid crud type ${crudType}`)
+    }
+}
+
 
 function Insert(out_data, rowData, insertParams) {
     /*
@@ -73,14 +96,23 @@ function Delete(out_data, rowData, deleteParams) {
 
 }
 function Update(out_data, rowData, updateParams) {
+    //filters
     //post process
-    let crud_fields = insertParams['crudFields']
-    let ce          = insertParams['columnEditors']
-    let mo          = insertParams['mapObject']
-    let ap          = insertParams['autoCompleteParams']
+    let crud_fields = updateParams['crudFields']
+    let ce          = updateParams['columnEditors']
+    let mo          = updateParams['mapObject']
+    let ap          = updateParams['autoCompleteParams']
+    let set_filter  = updateParams['setFilter']
+    let use_set_filter     = updateParams['useSetFilter'] || false //based on if empty or not
     let x = {'id': rowData['id']}
+    let count = 0
     for(let i =0; i < crud_fields.length; i++) {
         let cf = crud_fields[i]
+        if (use_set_filter) {
+            if (! set_filter.includes(cf)) {continue}
+        }
+        count += 1
+
         if (ce[cf] === 'autoComplete') {
             let ap2 = ap[cf]
             AutocompleteParse(rowData, x, cf, ap2['pullKey'], ap2['pushKey'])
@@ -89,6 +121,9 @@ function Update(out_data, rowData, updateParams) {
             agRichSelectCellEditorParse(rowData, outRow, mapObject, field)
         } else { x[cf] = rowData[cf] || null }
 
+    }
+    if (count == 0) {
+        console.log('all data filtered out')
     }
     out_data.push(x)
 
@@ -124,51 +159,61 @@ let query_params = [
         upsert_set: [] //for upsert only
         set: [] //for update will just filter things out from data object
         default_fields: {}
-        on_contraint:
+        on_constraint:
         on_conflict:
     }
 */
 
 
 
+//creates payload for req body
+function SetReqBody(out_data, crudType, crudParams) {
+    if (crudType === 'delete') {
+        ReqBodyDeletes(out_data, rowData, crudParams['delete'])
+    } else if (crudType === 'insert') { 
+        ReqBodyInserts(out_data, rowData, crudParams['insert'])
+    } else if (crudType === 'update') {
+        ReqBodyUpdates(out_data, rowData, crudParams['update'])
+    } else {
+        console.log(`invalid crud type ${crudType}`)
+    }
 
-function AssemblyInserts( out_data, crudParamsObject) {
+}
+
+function ReqBodyInserts( out_data, insertParamsObject) {
 
     let insert_out_params = {
         'data': out_data,
-        "default_fields": crudParamsObject['default_fields'] || "",
-        "on_conflict":    crudParamsObject['on_conflict'] || "",
-        "on_constraint":  crudParamsObject['on_constraint'] || "",
-        "set_fields":     crudParamsObject['set_fields'] || "",
+        "default_fields": insertParamsObject['default_fields'] || "",
+        "on_conflict":    insertParamsObject['on_conflict'] || "",
+        "on_constraint":  insertParamsObject['on_constraint'] || "",
+        "set_fields":     insertaramsObject['set_fields'] || "",
     }
     //may need to append default values
     return insert_out_params
 }
 
-function AssemblyUpdates( out_data, crudParamsObject) {
+function ReqBodyUpdates( out_data, updateParamsObject) {
 
     let update_out_params = {
         'data': out_data,
-        "default_fields": crudParamsObject['default_fields'] || "",
-        "set_fields":     crudParamsObject['set_fields'] || "",
+        "default_fields": updateParamsObject['default_fields'] || "",
+        "set_fields":     updateParamsObject['set_fields'] || "",
     }
     return update_out_params
 
 }
 
-function AssemblyDeletes( crudParamsObject) {
-    let update_out_params = {
+function ReqBodyDeletes( out_data, deleteParamsObject) {
+    let delete_out_params = {
         'data': out_data,
-        "default_fields": crudParamsObject['default_fields'] || "",
-        "set_fields":     crudParamsObject['set_fields'] || "",
+        "default_fields": deleteParamsObject['default_fields'] || "",
+        "set_fields":     deleteParamsObject['set_fields'] || "",
     }
-    return update_out_params
-
-
+    return delete_out_params
 }
 
-
-function ProcessModifyErrorStatements() {
+function ReqErrorStatements() {
     //count and log errors
 }
 
@@ -199,12 +244,7 @@ function agRichSelectCellEditorParse(rowData, outRow, mapObject, field) {
     outRow[field] = value
 }
 
-function ExtractParams(crudParams) {
-
-
-
-}
-
 module.exports = {
-
+    'SetCrudData': SetCrudData,
+    'SetReqBody':  SetReqBody
 }

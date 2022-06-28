@@ -14,8 +14,8 @@ may need to change default behavior
                 insert:  -> //string or {'route': 'string', 'doInstead': 'update', 'crudParams': {}}
                 update:  ->
                 delete:  ->
-                upsert_set_fields: [] //for upsert only
-                set_fields: [] //for update will just filter things out from data object
+                set_fields: [] //for upsert only
+                set_filters: [] //for update will just filter things out from data object
                 default_fields: {}
                 on_constraint:
                 on_conflict:
@@ -154,7 +154,7 @@ class CrudHeaderParams {
         if (! crudObject.hasOwnProperty('on_conflict'))      {crudObject['on_conflict'] = ""}
         if (! crudObject.hasOwnProperty('set_fields'))       {crudObject['set_fields'] = [] }
         if (! crudObject.hasOwnProperty('default_fields'))   {crudObject['default_fields'] = {} }
-        if (! crudObject.hasOwnProperty('set_filters'))      {crudObject['set_filters'] = []}
+        if (! crudObject.hasOwnProperty('setFilter'))      {crudObject['setFilter'] = []}
         if (! crudObject.hasOwnProperty('deleteWarning'))    {crudObject['deleteWarning'] = ""}
     }
     //ContextWindow

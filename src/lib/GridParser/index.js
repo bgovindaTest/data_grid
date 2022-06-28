@@ -45,13 +45,20 @@ gridOptions.suppressPropertyNamesCheck = true
 
 validator: function()
 
+alias: {'pull': 'push'} //defaults to field
+
+
 //not implemented yet also need try catch console log error.
+requiredFields: []
 validatorRequiredFields: [] //must all be not null or will not run. returns null in that case
 valueGetterRequiredFields: [] //must all be not null or will not run. returns null in that case
  
 isCrud:   true/false maybe read/write/? r rw w
 editable: true/false {'update': true/false, 'insert': true/false}
 deleteWarning: string (determines if delete should happen)
+isFlag: for submit buttons or other functionality not meant to be sent to server.
+    data is editable but doesnt get sent to the server. flags do allow the 
+    row to be registered as a change.
 
 dataType:  //used for sorting? need to add time and datetime filters
 
@@ -59,7 +66,8 @@ allowNull: true/false
 isRequired: true/false
 ignoreError: true/false (for calculated fields?) allow to pass or skip?
 typeCheckError? if true dont remove invalid data type.
-    //show as error instead?. dont run validation if error.
+    //show as error instead?. dont run validation if error. not implemented yet would
+    //also have to add for xyz
 
 //returnOnIgnoreError: true/false if true use default otherwise
 
@@ -74,8 +82,6 @@ defaultOrderby: 'asc/desc' (done by column order in columnDefs)
 defaultFitler: string value
 
 showFilter: default true (if false cant be changed) should hide from filter module
-//need an enforce to prevent clear from working?
-//if false dont allow clear.
 showSort: default true (if false cant be used for sorting)
 
 Responsible for creating valueGetter, valueSetter and valueFormatter
@@ -90,26 +96,11 @@ hide - hides the field
 suppressToolPanel - removes it from the tool panel.
 
 pageParams (rowPrams: for subgrid)\
+    row_params: (available for subgrid )
     globals:
     url_params:
-    row_params: (available for subgrid )
 
 primaryKey: 'default id'
-
-AutoComplete and Aggrid PullDown:
-
-AgGridRichSelect Editor flat data
-staticDropDownKey: 'name of drop down'
-staticDropDown: api or array of objects [{}]
-staticDropDownFilters?
-
-subgrid params (valid names and default)
-
-rowDataDefaults = {
-    'defaultFilter': [] key value? fro row params
-    'defaultValue':  []
-}
-
 */
 const ex = require('./ExpressionParser')
 const cellClassRules = require('./ColumnDefs/CellClassRules')

@@ -81,6 +81,15 @@ Each grid_column_rule has the structure below. A more indepth description is in 
    },
 },
 
+//SubGrid Params here
+AutoComplete and Aggrid PullDown:
+
+subgrid params (valid names and default)
+
+rowDataDefaults = {
+    'defaultFilter': [] key value? fro row params
+    'defaultValue':  []
+}
 
 
 */

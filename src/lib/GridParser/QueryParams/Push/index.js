@@ -168,7 +168,9 @@ function AssemblyDeletes( crudParamsObject) {
 }
 
 
-function ProcessModifyErrorStatements() {}
+function ProcessModifyErrorStatements() {
+    //count and log errors
+}
 
 
 function AutocompleteParse(rowData, outRow, field, pullKey, pushKey) {

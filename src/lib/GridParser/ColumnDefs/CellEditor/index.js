@@ -1,28 +1,12 @@
 /*
+Responsible for creating each columns rules for displaying and formatting the data.
 
 Valid cell editors and processing?
-
-
-valueSetter not needed for AggridRichSelector or Autocomplete
 
 grid_init.js is the main module to initialize the app.
 grid_column_rules Input Parameters: These also go in the grid_column_rules. It used to set the how user enters data. Two options are below.
 
-2.) Autocomplete and Drop Down Widget. The autocomplete widget requires several parameters stored in cellEdtiorParams.
-    selectValues: [{}] is a json array containing the data shown in the drop down and used in the autocomplete
-    return_value: this is value displayed in the cell. Its also used as the key for the mapfunction i.e.
-        mapfunction[key] -> id (or some other value). This process is completed during the save function route that sends
-        the cell data to the database. This is often the id for the value to be stored in postgres.
-
-    column_info (columnDef): json array. Has the header value which must match a value in the selectValues array.
-        init_width is the width to used for the autocomplete table.
-
-    crud_value: column_name value to send to the server. Often the return value and crud_value are different for example npi maybe stored in the
-        cell for the users convience, but the postgres id for that row is sent to the database. 
-
-    The crud_value, return_value and selectValues object are used to create the mapFunction which takes the return_value and uses its as a key
-        against select values to return the crud_value. both the return_value and the crud_value should return unique values.
-
+1.) Autocomplete and Drop Down Widget. The autocomplete widget requires several parameters stored in cellEdtiorParams.
 
     api_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
         to extract the selectValues array. 
@@ -32,13 +16,13 @@ This module is responsible for initializing the data parameters and functions re
 Each grid_column_rule has the structure below. A more indepth description is in ./library/grid_rules.js
   {
     field: 'field_name,
-    data_type: 
+    data_type: for sorting purposes? (maybe requires sortField)
     cellEditorFramework: "autoComplete" || cellEditor?
     cellEditorParams: {
         values: [] //always object
         //not implemented yet.
-        lookupFieldsRowQuery: [] //list of fields
-        lookupFieldsColumnQuery: [] //list of fields
+        lookupFieldsPull: [] //list of fields
+        lookupFieldsDisplay: [ {}] //list of fields
 
         columnDef: [
             {header: "id" , field: "id", width: 50},
@@ -48,49 +32,38 @@ Each grid_column_rule has the structure below. A more indepth description is in 
             {header: "phone", header: "username",  width: 150 },
             {header: "website",header: "username", width: 100 }
         ]
-        api_route: string
-        let push_key = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
-        let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
-        let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
+        api_route: url_string
+        pushKey = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
+        pullKey = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
+        displayKey = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
 
     }
 
+2.) agRichSelectCellEditor
 
-
-
- cellEditor: 'agRichSelectCellEditor',
- //parse map object into values array
- allowNull
- cellEditorParams: {
-     values: ['Male', 'Female'],
-     
-     key is first?
-     cellEditorPopup: true,
-        let push_key = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
-        let pull_key = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
-        let display_key = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
-
-    pullKey:     //pullAndDisplay same key
-    pushKey: 
-    displayKey:  (this goes into values)
-    pushKey:  //name of columns sent ot the server.
-    api: string
+cellEditor: 'agRichSelectCellEditor',
+cellEditorParams: {
+    values: ['Male', 'Female'],
+    allowNull: prepends null value to beginning of values array
+    cellEditorPopup: true,
+    pushKey: =  //defaults to field
+    pullKey: =  //defaults to id //pullAndDisplay same key
+    displayKey: //defaults to id (this goes into values)
+    api: url_string
     mapObject: {key: value} takes select value and returns other value for crud
-    row_filter
-
+        mapObject[rowData['field] ] = {pushKey: pull_id}
    },
 },
 
-//SubGrid Params here
-AutoComplete and Aggrid PullDown:
-
-subgrid params (valid names and default)
-
+3.) subGrid
+subGridPos
 rowDataDefaults = {
     'defaultFilter': [] key value? fro row params
+    'defaultSort': []
+    'enforcedFilters': []
     'defaultValue':  []
 }
-
+rowDataDefaults pulls data from calling row to assemble subgrid
 
 */
 const type_check = require('../../../TypeCheck')
@@ -143,13 +116,18 @@ class CustomEditor {
     }
 
     AutoCompleteValueGetter() {
+        /*
+        Displays the values of paramsObject specified by displayKey
+        */
         let grid_column = this.grid_column
         if (grid_column.hasOwnProperty('valueGetter')) {return}
         grid_column['valueGetter'] = AutoCompleteValueGetter(grid_column(grid_column['cellEditorParams']['displayKey']))
     }
     AgRichSelectParams() {
-        //create map object
-        //create values object
+        /*
+        This creates the values and mapObject for the dropdown 
+
+        */
         let grid_column  = this.grid_column
         let cep = grid_column['cellEditorParams']
         if (! cep.hasOwnProperty('pushKey')) { cep['pushKey'] = grid_column['field'] }
@@ -160,10 +138,16 @@ class CustomEditor {
         cep['mapObject'] = valsParams['mapObject']
     }
     ValuesAgRichSelectParams() {
-        //key value
-        //displayKey must be unique. maps to mapsObject.
-        //pushKey is name of key to send
-        //pullKey is name sent by columns lookup
+        /*
+        Parses values object and returns values for drop down and the map object.
+        The map object 
+         object.
+            //key value
+            //displayKey must be unique. maps to mapsObject.
+            //pushKey is name of key to send
+            //pullKey is name sent by columns lookup
+
+        */
         let valuesObject = this.valuesObject
         let values = []
         let mapObject = {}
@@ -174,7 +158,10 @@ class CustomEditor {
         for(let i=0; i<valuesObject.length; i++) {
             let x = valuesObject[i]
             let pull_id = x[pullKey]
-            mapObject[displayKey] = {pushKey: String(pull_id)} // {'id: 1} -> {'user_id': 1}
+            let y = {}
+            y[pushKey] = String(pull_id)
+
+            mapObject[displayKey] = y // {'id: 1} -> {'user_id': 1}
             values.push(displayKey)
         }
         return {'values': values, 'mapObject': mapObject}
@@ -200,8 +187,8 @@ class CustomEditor {
         let gc = this.grid_column
         AddValueSetter(gc) 
     }
-
 }
+
 
 function AutoCompleteValueGetter(displayKey) {
     //data is object for autocomplete
@@ -284,5 +271,21 @@ function ReturnGridValuesObject(valuesObject, grid_pos, field_name) {
     //for richselector parse into values and mapObject
     return valuesObject[grid_pos][field_name] || []
 }
+
+
+// function SubGridRowDataDefaults(grid_column, rowDataDefaultRules, rowData) {
+//     /*
+//     Adds vales from row to create submodal grid.
+//     rowDataDefaults = {
+//         'defaultFilter': [] key value? fro row params
+//         'defaultSort': []
+//         'enforcedFilters': []
+//         'defaultValue':  []
+//     }
+
+//     */
+//     return
+
+// }
 
 module.exports = {'CustomEditor': CustomEditor, 'ReturnGridValuesObject': ReturnGridValuesObject}

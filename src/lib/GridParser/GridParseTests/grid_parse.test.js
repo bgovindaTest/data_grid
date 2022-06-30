@@ -1,5 +1,5 @@
 const { exp } = require('mathjs')
-const cd = require('./index.js')
+const cd = require('../index.js')
 const cdef = cd.ColumnDefsInit
 
 test('value getter/setter/formatter parser test', () => {
@@ -13,7 +13,7 @@ test('value getter/setter/formatter parser test', () => {
 
     let fn = grid_column['valueGetter']
     let params = {'data': {'test': '1' }}
-    expect(2).toBe(2)
+    expect(fn(params)).toBe(2)
 })
 
 test('value getter/setter/formatter native test', () => {
@@ -187,6 +187,10 @@ test('default filter', () => {
     expect(defaultFilter).toMatchObject(exp)
 })
 
+
+test('enforced and default filter', () => {
+    
+})
 
 //defaultFilter and defaultValue for sub modal field key for submodal
 

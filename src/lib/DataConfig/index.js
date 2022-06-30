@@ -45,6 +45,12 @@ let operatorAlias = {
     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL"
 }
+let cellEditors = {
+    //customEditors have special formatting
+    'customEditors': ['autoComplete', 'dateSelector', 'deleteUndoSelector', 'subGridSelector', 'agRichSelectCellEditor'],
+    'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor' ] //make popupTrue for agLargeTextCellEditor
+}
+
 
 //determine if string should be split into an array
 let array_parse_types  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in', 'in', 'not_in' ]
@@ -52,50 +58,49 @@ let array_parse_types  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in', 
 let between_parse_types  = ['between', 'not_between']
 let null_parse_types = ['is_null', 'is_not_null']
 
-let data_classes = ['text', 'number', 'date']
+let data_classes = ['text', 'number', 'date', 'array', 'object']
 let c = data_classes
 //data_types and filter class
 //lookups
+
+let number_default = '0'
+let text_default   = ''
+let date_default   = ''
 
 //numbers
 let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
     'real', 'double precision', 'money', 'numeric', 'float']
 
+let serial_types = ['serial', 'bigseral']
+let text_types   = ['text', 'character', 'char', 'varchar']
+let date_types   = ['date', 'datetime']
+let object_types = ['array', 'object']
 
-let data_types = {
-    'bigint': c[1],
-    'bigserial': c[1],
-    'character': c[0],
-    'varchar': c[0],
-    'text': c[0],
-    'char': c[0],
-    'date': c[2],
-    'int': c[1],
-    'integer': c[1],
-    'decimal': c[1],
-    'numeric': c[1],
-    'real': c[1],
-    'double precision': c[1],
-    'money': c[1],
-    'json': c[0]
+let data_types = {} //data type class
+let null_conversion = {} //convert null to value based on data type
+for(let i = 0; i<number_types.length; i++) { 
+    data_types[number_types[i]] = c[1]
+    null_conversion[number_types[i]] = number_default
+}
+for(let i = 0; i<text_types.length; i++) { 
+    data_types[text_types[i]] = c[0]
+    null_conversion[text_types[i]] = text_default
 }
 
-//data_type default null values i.e. 0, "", {}, null, [], false
-let null_dtype_to_value = {
-    'bigint': '0',
-    'bigserial': '0',
-    'character': "",
-    'varchar': "",
-    'text': "",
-    'char': "",
-    'date': "01-01-0001", //no spoofing make date required (or current_date)
-    'int': '0',
-    'integer': '0',
-    'double precision': '0',
-    'money': '0',
-    'array': [],
-    'json': {}
+for(let i = 0; i<serial_types.length; i++) { 
+    data_types[serial_types[i]] = c[1]
+    null_conversion[serial_types[i]] = number_default
 }
+
+for(let i = 0; i<date_types.length; i++) { 
+    data_types[date_types[i]] = c[1]
+    null_conversion[date_types[i]] = date_default
+}
+data_types['json'] = c[4]
+data_types['array'] = c[3]
+
+null_conversion['array'] = []
+null_conversion['json']  = {}
 
 
 
@@ -181,5 +186,12 @@ module.exports = {
     'ReturnAlias': ReturnAlias,
     'ReturnDataClass': ReturnDataClass,
     'DefaultOperator': DefaultOperator,
-    'null_dtype_to_value': null_dtype_to_value
+    'null_conversion': null_conversion,
+
+    'number_types': number_types,
+    'serial_types': serial_types,
+    'text_types':   text_types,
+    'date_types':   date_types,
+    'object_types': object_types,
+    'cellEditors': cellEditors
 }

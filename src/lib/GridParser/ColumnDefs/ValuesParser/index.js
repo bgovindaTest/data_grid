@@ -34,8 +34,9 @@ nullReplace: true
     globals: object containing global variables and parameters
 */
 
-const ex = require('./ExpressionParser')
-const type_check = require('../TypeCheck')
+const ex          = require('../../ExpressionParser')
+const type_check  = require('../../../TypeCheck')
+const data_config = require('../../../DataConfig')
 
 class ValuesParaser {
     constructor(grid_column,  globals) {
@@ -44,11 +45,12 @@ class ValuesParaser {
     }
     RunInit() {
         let grid_column = this.grid_column
-        let globals = this.globals
         this.ValueTransform(grid_column, 'valueGetter')
         this.ValueTransform(grid_column, 'valueSetter')
         this.ValueTransform(grid_column, 'valueFormatter')
         this.ValueTransform(grid_column, 'toolTip')
+        this.Validators(grid_column)
+        this.ValueSetter(grid_column)
     }
 
     ValueTransform(grid_column, parameter_name) {
@@ -119,21 +121,28 @@ class ValuesParaser {
         */
 
         if (grid_column.hasOwnProperty('valueSetter')) {return}
+        let custom_editors = data_config['cellEditors']['customEditors']
+        let grid_editor = grid_column['cellEditor'] || ""
+        if (custom_editors.includes(grid_editor)) {return } //ignore custom editors
+
         //if is customEditor return
 
-        
+
         let field = grid_column['field']
 
         //numbers
-        let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
-        'real', 'double precision', 'money', 'numeric', 'float']
-        let date_types = ['date', 'timestamp', 'time']
+        let number_types = data_config.number_types
 
-        if (number_types.includes(grid_column['dataType'])) { grid_column['valueSetter'] = this.NumberSetter(field) }
-        else if (date_types.includes(grid_column['dataType'])) {
+        if (number_types.includes(grid_column['dataType'])) { 
+            grid_column['valueSetter'] = this.NumberSetter(field)
+        } else if ('date' === grid_column['dataType']) {
             grid_column['valueSetter'] = this.DateSetter(field)
+        } else if ('datetime' === grid_column['dataType'] || 'timestamp' === grid_column['dataType'] ) {
+            
+        } else if ('time' === grid_column['dataType'] ) {
+            //hh:mm:ss 19:37:35
         }
-        //use default
+        //timestampe
     }
     //checks if value is right type or returns null
     NumberSetter (field) {

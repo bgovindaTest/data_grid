@@ -30,7 +30,6 @@ function IsFunction(x) {
     else { return false }
 }
 
-
 function IsNumber (x) {
     //https://stackoverflow.com/questions/2811031/decimal-or-numeric-values-in-regular-expression-validation
     if (typeof x == "number") { return true }
@@ -73,7 +72,6 @@ for( let i=0; i< s.length; i++) {
     }
 }
 
-
 function IsDate(x) {
     //only checks for single value. No array conversion
     var date_formats = dateFormats
@@ -91,7 +89,6 @@ function IsTime(x) {
     
 }
 
-
 function IsDateTime(x) {
     let ds  = String(x).trim()
     let dz  = ds.split(/\s+/)
@@ -106,21 +103,12 @@ function IsDateTime(x) {
 // console.log(dateTime.format('YYYY-MM-DD HH:mm'))
 
 
-function ParseDate (datestr, format) {
-    // console.log(datestr, format)
-    let dx = TypeCastDate(datestr, format)
-    // return datestr
-    return dx
-}
-
 let truthy = ['t','true','y','yes','on','1','TRUE']
 let falsey = ['FALSE','f','n','no','off','0']
-function ParseBoolean(bool_val) {
+function TypeCastBoolean(bool_val) {
     if (truthy.includes(bool_val)) {return 'true'}
     if (false.includes(bool_val))  {return 'false'}
     else 'false'
-    //if truthy return true
-    //if falsey return false
 }
 
 function TypeCastDateTime(date_val, time_val) {
@@ -153,7 +141,16 @@ module.exports = {
     'IsInteger': IsInteger,
     'IsFunction': IsFunction,
     'IsDate': IsDate,
+    'IsTime': IsTime,
+    'IsDateTime': IsDateTime,
+
+
     'TextIsNumber': TextIsNumber,
     'IsUndefined': IsUndefined,
-    'ParseDate': ParseDate
+
+    //TypeCast
+    'TypeCastBoolean': TypeCastBoolean,
+    'TypeCastDate': TypeCastDate,
+    'TypeCastTime': TypeCastTime,
+    'TypeCastDateTime': TypeCastDateTime
 }

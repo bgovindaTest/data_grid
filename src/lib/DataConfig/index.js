@@ -47,8 +47,8 @@ let operatorAlias = {
 }
 let cellEditors = {
     //customEditors have special formatting
-    'customEditors': ['autoComplete', 'dateSelector', 'deleteUndoSelector', 'subGridSelector', 'agRichSelectCellEditor'],
-    'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor' ] //make popupTrue for agLargeTextCellEditor
+    'customEditors': ['autoComplete', 'deleteUndoSelector', 'subGridSelector', 'agRichSelectCellEditor'],
+    'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateSelector' ] //make popupTrue for agLargeTextCellEditor
 }
 
 

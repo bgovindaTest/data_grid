@@ -125,6 +125,9 @@ class ValuesParaser {
         if (grid_column.hasOwnProperty('valueSetter')) {return}
         let custom_editors = data_config['cellEditors']['customEditors']
         let grid_editor = grid_column['cellEditor'] || ""
+        let is_editable = grid_column['editable'] || false
+        if (! is_editable) { return }
+        
         /*
         If no cellEditor and editalbe is false or not avaialbe continue
         */
@@ -170,8 +173,7 @@ class ValuesParaser {
                 return true
             }
             else {
-                //type cast?
-                params.data[field] = params.newValue
+                params.data[field] = type_cast.TypeCastDate(params.newValue)
                 return true
             }
         }
@@ -190,10 +192,31 @@ class ValuesParaser {
         }
         return fn
     }
-    TimeSetter() {}
-    DateTimeSetter() {}
+    TimeSetter(field) {
+        let fn = function (params) {
+            if (! type_check.IsDate(params.newValue) ) {
+                params.data[field] = null
+                return true
+            }
+            else {
+                //type cast?
+                params.data[field] = type_cast.TypeCastDate(params.newValue)
+                return true
+            }
+        }
+        return fn
+    }
+    DateTimeSetter(field) {
+        let fn = function (params) {
+            if (! type_check.IsDateTime(params.newValue) ) {
+                params.data[field] = null
+                return true
+            }
+            else {
+                params.data[field] = type_cast.TypeCastDateTime(params.newValue)
+                return true
+            }
+        }
+        return fn
+    }
 }
-// this.ValueTransform(grid_column, 'valueGetter')
-// this.ValueTransform(grid_column, 'valueSetter')
-// this.ValueTransform(grid_column, 'valueFormatter')
-// this.ValueTransform(grid_column, 'toolTip')

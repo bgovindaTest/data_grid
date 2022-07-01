@@ -127,7 +127,7 @@ class ValuesParaser {
         let grid_editor = grid_column['cellEditor'] || ""
         let is_editable = grid_column['editable'] || false
         if (! is_editable) { return }
-        
+
         /*
         If no cellEditor and editalbe is false or not avaialbe continue
         */
@@ -146,9 +146,9 @@ class ValuesParaser {
         } else if ('date' === grid_column['dataType']) {
             grid_column['valueSetter'] = this.DateSetter(field)
         } else if ('datetime' === grid_column['dataType'] || 'timestamp' === grid_column['dataType'] ) {
-            
+            grid_column['valueSetter'] = this.DateTimeSetter(field)
         } else if ('time' === grid_column['dataType'] ) {
-            //hh:mm:ss 19:37:35
+            grid_column['valueSetter'] = this.TimeSetter(field)
         }
         //timestampe
     }
@@ -194,13 +194,13 @@ class ValuesParaser {
     }
     TimeSetter(field) {
         let fn = function (params) {
-            if (! type_check.IsDate(params.newValue) ) {
+            if (! type_check.IsTime(params.newValue) ) {
                 params.data[field] = null
                 return true
             }
             else {
                 //type cast?
-                params.data[field] = type_cast.TypeCastDate(params.newValue)
+                params.data[field] = type_cast.TypeCastTime(params.newValue)
                 return true
             }
         }

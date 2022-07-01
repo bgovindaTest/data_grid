@@ -173,7 +173,7 @@ module.exports = {
     'array_parse_types': array_parse_types,
     'between_parse_types': between_parse_types,
     'null_parse_types': null_parse_types,
-    'like_in': like_in,
+
     'data_classes': data_classes,
     'data_types': data_types,
     'date_operators': date_operators,

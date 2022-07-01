@@ -99,6 +99,9 @@ function IsDateTime(x) {
     return false
 }
 
+
+
+
 // var dateTime = moment(date + ' ' + time, 'DD/MM/YYYY HH:mm');
 // console.log(dateTime.format('YYYY-MM-DD HH:mm'))
 
@@ -127,6 +130,18 @@ function TypeCastTime(time_val) {
     let time_formats = timeFormats
     let moment_time  = moment(time_val, time_formats, true)
     return moment_time.format('HH:MM:SSS')
+}
+
+function TypeCheck(val, data_type) {
+ 
+    IsBoolean(x)
+    IsDateTime(x)
+    IsTime(x)
+    IsNumber
+    IsInteger
+    IsString
+    IsArray
+    IsObject
 }
 
 

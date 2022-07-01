@@ -47,6 +47,7 @@ validator: function()
 
 alias: {'pull': 'push'} //defaults to field
 
+//remove valueSetter if readonly?
 
 //not implemented yet also need try catch console log error.
 requiredFields: []

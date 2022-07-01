@@ -120,9 +120,14 @@ class ValuesParaser {
 
         */
 
+        //if read only. will shouldnt require. valueSetter should never file?
+
         if (grid_column.hasOwnProperty('valueSetter')) {return}
         let custom_editors = data_config['cellEditors']['customEditors']
         let grid_editor = grid_column['cellEditor'] || ""
+        /*
+        If no cellEditor and editalbe is false or not avaialbe continue
+        */
         if (custom_editors.includes(grid_editor)) {return } //ignore custom editors
 
         //if is customEditor return

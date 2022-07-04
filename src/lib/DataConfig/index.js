@@ -163,6 +163,12 @@ function DefaultOperator(data_type_name) {
     else {return '='}
 }
 
+function GridColumnValidDtype(field, data_type) {
+    //used in grid parser checks if correct data_type string
+    //or returns error
+}
+
+
 module.exports = {
     'meta_crud_type': meta_crud_type,
     'meta_column_name': meta_column_name,

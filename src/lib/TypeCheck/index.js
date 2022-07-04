@@ -174,7 +174,11 @@ function NullTypeCast( value, data_type  ) {
     */
 
     if (IsNull(value) || IsUndefined(value) ) {
-        return null_conversion[data_type] || null
+        let x = null_conversion[data_type] || null 
+        if (x === null) {
+            console.error(`value ${value} and data_type ${data_type} did not cast to non null value`)
+        }
+        return x
     } else {
         return value
     }

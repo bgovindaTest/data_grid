@@ -11,3 +11,5 @@ test('create and evaluate function', () => {
     let res = ex.EvaluateFunction(fn, params, globals)
     expect(res).toBe(3)
 })
+
+//null and requires casting

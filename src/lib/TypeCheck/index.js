@@ -7,6 +7,7 @@ const serial_types = data_config['serial_types']
 const text_types   = data_config['text_types']
 const date_types   = data_config['date_types']
 const object_types = data_config['object_types']
+const moment = require('moment')
 
 
 //TypeChecking
@@ -70,14 +71,18 @@ function IsBoolean (x) {
 
 let dateFormats = ['YYYY-MM-DD','YYYY-M-DD','YYYY-MM-D','YYYY-M-D', 'MM/DD/YYYY','M/DD/YYYY','MM/D/YYYY','M/D/YYYY']
 let h = ['HH', 'H']
-let m = ['MM', 'M']
-let s = ['SSS', 'SS', 'S']
+let m = ['mm', 'm', '']
+let s = ['sss', 'ss', 's', '']
 let timeFormats = []
 for( let i=0; i< s.length; i++) {
     for (let j=0; j< m.length ; j++) {
         for(let k=0; k< h.length; k++) {
-            let ts = h[k] +":"+m[j] +":"+s[i]
-            timeFormats.push(ts)
+            let ts = [h[k]]
+            if (m[j] != "") {
+                ts.push(m[j])
+                if (s[i] != "") { ts.push(s[i]) }
+            }
+            timeFormats.push(ts.join(':'))
         }
     }
 }
@@ -93,10 +98,9 @@ function IsDate(x) {
 function IsTime(x) {
     //only checks for single value. No array conversion
     var time_formats = timeFormats
-    var moment_date = moment(x, time_formats, true)
-    if (moment_date.isValid()) { return true } 
+    var moment_time = moment(x, time_formats, true)
+    if (moment_time.isValid()) { return true } 
     else { return false }
-    
 }
 
 function IsDateTime(x) {
@@ -109,13 +113,6 @@ function IsDateTime(x) {
     return false
 }
 
-
-
-
-// var dateTime = moment(date + ' ' + time, 'DD/MM/YYYY HH:mm');
-// console.log(dateTime.format('YYYY-MM-DD HH:mm'))
-
-
 let truthy = ['t','true','y','yes','on','1','TRUE']
 let falsey = ['FALSE','f','n','no','off','0']
 function TypeCastBoolean(bool_val) {
@@ -124,9 +121,15 @@ function TypeCastBoolean(bool_val) {
     else 'false'
 }
 
-function TypeCastDateTime(date_val, time_val) {
+function TypeCastDateTime(date_time_val) {
+    let dz  = date_time_val.split(/\s+/)
+    if (dz.length != 2) {return null}
+    let date_val = dz[0]
+    let time_val = dz[1]
     let ds = TypeCastDate(date_val)
     let ts = TypeCastTime(time_val)
+    if (!IsTime(ts) || !IsDate(ds) ) {return null}
+
     return ds + " " + ts
 }
 

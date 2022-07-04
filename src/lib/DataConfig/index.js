@@ -97,14 +97,16 @@ for(let i = 0; i<serial_types.length; i++) {
 }
 
 for(let i = 0; i<date_types.length; i++) { 
-    data_types[date_types[i]] = c[1]
+    data_types[date_types[i]] = c[2]
     null_conversion[date_types[i]] = date_default
 }
 data_types['json'] = c[4]
+data_types['object'] = c[4]
 data_types['array'] = c[3]
 
 null_conversion['array'] = []
 null_conversion['json']  = {}
+null_conversion['object']  = {}
 
 
 
@@ -147,8 +149,10 @@ let defaultDelimiter = '/\s+/'
 function ReturnOperatorAlias(operator_name) {
     if (operatorAlias.hasOwnProperty(operator_name) ) {
         return operatorAlias[operator_name]
+    } else {
+        console.error(`Invalid operator name ${operator_name}`)
+        return operator_name
     }
-    return operator_name
 }
 
 function ReturnDataClass(data_type_name) {

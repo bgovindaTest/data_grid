@@ -1,3 +1,14 @@
+const data_config = require('../DataConfig')
+const null_conversion = data_config['null_conversion']
+
+const number_types  = data_config['number_types']
+const integer_types = data_config['integer_types']
+const serial_types = data_config['serial_types']
+const text_types   = data_config['text_types']
+const date_types   = data_config['date_types']
+const object_types = data_config['object_types']
+
+
 //TypeChecking
 function IsObject (x) {
     if (typeof x === 'object' && !Array.isArray(x) && x !== null ) { return true }
@@ -110,7 +121,7 @@ let truthy = ['t','true','y','yes','on','1','TRUE']
 let falsey = ['FALSE','f','n','no','off','0']
 function TypeCastBoolean(bool_val) {
     if (truthy.includes(bool_val)) {return 'true'}
-    if (false.includes(bool_val))  {return 'false'}
+    if (falsey.includes(bool_val))  {return 'false'}
     else 'false'
 }
 
@@ -132,18 +143,42 @@ function TypeCastTime(time_val) {
     return moment_time.format('HH:MM:SSS')
 }
 
-function TypeCheck(val, data_type) {
- 
-    IsBoolean(x)
-    IsDateTime(x)
-    IsTime(x)
-    IsNumber
-    IsInteger
-    IsString
-    IsArray
-    IsObject
+function TypeValid(val, data_type) {
+    /*
+    Return true if value is of the right type
+    */
+    if (integer_types.includes(data_type))     { return IsInteger(val) } 
+    else if (number_types.includes(data_type)) { return IsNumber(val) } 
+    else if ( text_types.includes(data_type) ) { return IsString (val) } 
+    else if ( date_types.includes(data_type) ) {
+        if (data_type === 'date') { return IsDate(val) }
+        else if (['datetime','timestamp', 'timestampz'].includes(data_type)  ) {return IsDateTime(val)}
+        else if (data_type === 'time') { return IsTime(val)}
+        else {return false}
+    } else if ( object_types.includes(data_type) ) {
+        if (data_type === 'array') { return IsArray(val)}
+        else if (data_type === 'object') { return IsObject(val)}
+        else { return false }
+
+    } else if ( serial_types.includes(data_type) ) { return IsNumber(val) }
+    else {return false}
 }
 
+function NullTypeCast( value, data_type  ) {
+    /*
+    If null return value for null values. Used as default value
+    If invalid data_type return null
+
+    i.e. if datatype is integer and has null value returns 0.
+    Allows for calculations to proceed. null returned for dates and times.
+    */
+
+    if (IsNull(value) || IsUndefined(value) ) {
+        return null_conversion[data_type] || null
+    } else {
+        return value
+    }
+}
 
 module.exports = {
     'IsObject': IsObject,
@@ -167,5 +202,7 @@ module.exports = {
     'TypeCastBoolean': TypeCastBoolean,
     'TypeCastDate': TypeCastDate,
     'TypeCastTime': TypeCastTime,
-    'TypeCastDateTime': TypeCastDateTime
+    'TypeCastDateTime': TypeCastDateTime,
+    'NullTypeCast': NullTypeCast,
+    'TypeValid': TypeValid
 }

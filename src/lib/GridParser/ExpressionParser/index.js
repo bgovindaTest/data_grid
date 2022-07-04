@@ -38,20 +38,40 @@ function ifnull(x, alt_x) {
 }
 
 
-function lookup(lookup_column, lookup_field, type_cast =null) {
+function lookup(lookup_column, lookup_field) {
     /*
     Returns lookup column is the object stored in the column i.e. {}
     lookup_field is the key.
 
+    may add type casting.
     */
-    if (! type_check.IsObject(lookup_column) ) {return null}
-    let val = lookup_column[lookup_field]
+    if (type_check.IsNull(lookup_column))      { return null}
+    if (! type_check.IsObject(lookup_column) ) { return null}
+    let val = lookup_column[lookup_field] || null
+    return val
+}
 
-    if (!dx.hasOwnProperty(lookup_column)) {return null}
-    let lx = dx[lookup_column]
-    if (! type_check.IsObject(lx ) )   {return null}
-    else if ( !lx.hasOwnProperty[lookup_column_name] ) {return null}
-    return lx[lookup_column_name]
+
+function CreateScopeFunction (params,options, globals) {
+    /*
+    Creates scope object null tranforms
+
+    */
+
+
+    //params_data is params.data from aggrid rows
+    let params_data = params.data
+    let scopex = {}
+    let params_keys = Object.keys(params_data)
+    for (var i=0; i < params_keys.length; i++) {
+        scopex[params_keys[i]] = params_data[ params_keys[i] ]
+    }
+    // console.log(globals)
+    let keys = Object.keys(globals)
+    for (var i=0; i < keys.length; i++) {
+        scopex[keys[i]] = globals[ keys[i] ]
+    }
+    return scopex
 }
 
 

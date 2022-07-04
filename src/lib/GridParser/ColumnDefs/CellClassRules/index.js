@@ -7,6 +7,8 @@ non_editable_pass_style
 non_editable_error_style
 
 class styles are stored in ./assets/cell_survey.scss
+
+need to add pass is null or true
 */
 
 const type_check = require('../../../TypeCheck')
@@ -63,5 +65,17 @@ function NonEditableErrorStyle(is_editable, validator_function) {
         return function (params) {  return !is_editable && !validator_function(params) }
     }
 }
+
+function ValidatorFunctionPass(val) {
+    /*
+    Returns true if validation function passes i.e. returns true
+    or does not run returns null. Null should be returned if missing
+    required fields to run.
+    */
+
+    if (val === true || val === null) {return true}
+    return false
+} 
+
 
 module.exports = {'CellClassRulesInit': CellClassRulesInit}

@@ -70,10 +70,11 @@ let date_default   = ''
 //numbers
 let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
     'real', 'double precision', 'money', 'numeric', 'float']
+let integer_types = ['smallint', 'integer', 'int', 'bigint']
 
-let serial_types = ['serial', 'bigseral']
+let serial_types = ['serial', 'bigseral'] //should be integers
 let text_types   = ['text', 'character', 'char', 'varchar']
-let date_types   = ['date', 'datetime']
+let date_types   = ['date', 'datetime', 'time', 'timestamp', 'timestampz']
 let object_types = ['array', 'object']
 
 let data_types = {} //data type class
@@ -189,6 +190,7 @@ module.exports = {
     'null_conversion': null_conversion,
 
     'number_types': number_types,
+    'integer_types': integer_types,
     'serial_types': serial_types,
     'text_types':   text_types,
     'date_types':   date_types,

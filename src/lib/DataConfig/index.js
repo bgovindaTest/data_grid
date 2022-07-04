@@ -45,11 +45,14 @@ let operatorAlias = {
     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL"
 }
+
 let cellEditors = {
     //customEditors have special formatting
     'customEditors': ['autoComplete', 'deleteUndoSelector', 'subGridSelector', 'agRichSelectCellEditor'],
-    'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateTimeSelector' ] //make popupTrue for agLargeTextCellEditor
+    'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateTimeSelector' ], //make popupTrue for agLargeTextCellEditor
+    'defaultEditor': 'agTextCellEditor'
 }
+
 
 
 //determine if string should be split into an array
@@ -141,7 +144,7 @@ let defaultDelimiter = '/\s+/'
 //max filter payload?
 
 
-function ReturnAlias(operator_name) {
+function ReturnOperatorAlias(operator_name) {
     if (operatorAlias.hasOwnProperty(operator_name) ) {
         return operatorAlias[operator_name]
     }
@@ -153,6 +156,7 @@ function ReturnDataClass(data_type_name) {
     if (data_types.hasOwnProperty(data_type_name)) {
         return data_types[data_type_name]
     }
+    console.error(`Invalid data type for field ${data_type_name} setting to class text`)
     return data_classes[0]
 }
 
@@ -165,8 +169,24 @@ function DefaultOperator(data_type_name) {
 
 function GridColumnValidDtype(field, data_type) {
     //used in grid parser checks if correct data_type string
-    //or returns error
+    if (data_types.hasOwnProperty(data_type) ) {return true}
+    else {
+        console.error(`Invalid data type for field ${field} data_type set to ${data_type}`)
+        return false
+    } 
 }
+
+function GridColumnValidCellEditor(field, cellEditor) {
+    //used in grid parser checks if correct data_type string
+    if (typeof cellEditor === 'undefined') {return true}
+    else if (cellEditors['customEditors'].includes(cellEditor)) {return true}
+    else if (cellEditors['standardEditors'].includes(cellEditor)) {return true}
+    else {
+        console.error(`Invalid cellEditor for field ${field} cellEditor set to ${cellEditor}`)
+        return false
+    }
+}
+
 
 
 module.exports = {
@@ -190,10 +210,13 @@ module.exports = {
     'sortDisplayName': sortDisplayName,
     'delimiter_typeName': delimiter_typeName,
     'defaultDelimiter': defaultDelimiter,
-    'ReturnAlias': ReturnAlias,
+    'ReturnOperatorAlias': ReturnOperatorAlias,
     'ReturnDataClass': ReturnDataClass,
     'DefaultOperator': DefaultOperator,
     'null_conversion': null_conversion,
+    'GridColumnValidDtype': GridColumnValidDtype,
+    'GridColumnValidCellEditor': GridColumnValidCellEditor,
+
 
     'number_types': number_types,
     'integer_types': integer_types,

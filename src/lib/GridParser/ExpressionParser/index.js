@@ -134,7 +134,8 @@ function CreateAggridFunction( expr, globals, options ) {
 
     let mathjs_type_set = null
     if (options.hasOwnProperty['mathjs_type_set'] ) { mathjs_type_set = options['mathjs_type_set'] }
-    let requiredFields = options['requiredFields'] //validatorRequired fields or valueGetterRequired fields passed in options in valueParser
+    //validatorRequired fields or valueGetterRequired fields passed in options in valueParser
+    let requiredFields = options['requiredFields'] || [] 
 
 
     let fx = CreateFunction(expr, mathjs_type_set )
@@ -238,8 +239,8 @@ function DeactivateInsecureFunctions(mathx) {
     mathx.import({
         import: function () { throw new Error('Function import is disabled') },
         createUnit: function () { throw new Error('Function createUnit is disabled') },
-        evaluate: function () { throw new Error('Function evaluate is disabled') },
-        parse: function () { throw new Error('Function parse is disabled') },
+        // evaluate: function () { throw new Error('Function evaluate is disabled') },
+        // parse: function () { throw new Error('Function parse is disabled') },
         simplify: function () { throw new Error('Function simplify is disabled') },
         derivative: function () { throw new Error('Function derivative is disabled') }
       }, { override: true })

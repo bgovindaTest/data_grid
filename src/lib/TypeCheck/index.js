@@ -113,12 +113,22 @@ function IsDateTime(x) {
     return false
 }
 
-let truthy = ['t','true','y','yes','on','1','TRUE']
-let falsey = ['FALSE','f','n','no','off','0']
+let truthy = ['t','true','y','yes','on','1','TRUE', true, 1]
+let falsey = ['FALSE','f','n','no','off','0', 'false', false, 0]
 function TypeCastBoolean(bool_val) {
     if (truthy.includes(bool_val)) {return 'true'}
     if (falsey.includes(bool_val))  {return 'false'}
-    else 'false'
+    return null
+}
+
+function TypeCastNumber(num_val) {
+    if (IsNumber (num_val)) {return num_val}
+    return null
+}
+
+function TypeCastString(val) {
+    if (IsString(val)) {return val}
+    return null
 }
 
 function TypeCastDateTime(date_time_val) {
@@ -126,23 +136,42 @@ function TypeCastDateTime(date_time_val) {
     if (dz.length != 2) {return null}
     let date_val = dz[0]
     let time_val = dz[1]
-    let ds = TypeCastDate(date_val)
-    let ts = TypeCastTime(time_val)
-    if (!IsTime(ts) || !IsDate(ds) ) {return null}
-
-    return ds + " " + ts
+    try {
+        let ds = TypeCastDate(date_val)
+        let ts = TypeCastTime(time_val)
+        if (!IsTime(ts) || !IsDate(ds) ) {return null}
+        return ds + " " + ts
+    } catch {
+        return null
+    }
 }
 
 function TypeCastDate(date_val) {
     let date_formats = dateFormats
-    let moment_date = moment(date_val, date_formats, true)
-    return moment_date.format('YYYY-MM-DD')
+    try {
+        let moment_date = moment(date_val, date_formats, true)
+        if (moment_date.isValid()) {
+            return moment_date.format('YYYY-MM-DD')
+        } else {return null}
+
+    } catch {
+        return null
+    }
+
 }
 
 function TypeCastTime(time_val) {
     let time_formats = timeFormats
-    let moment_time  = moment(time_val, time_formats, true)
-    return moment_time.format('HH:MM:SSS')
+    try {
+        let moment_time  = moment(time_val, time_formats, true)
+        if (moment_time.isValid()) {
+            return moment_time.format('HH:mm:ss')
+        } else {return null }
+
+    } catch {
+        return null
+    }
+
 }
 
 function TypeValid(val, data_type) {
@@ -176,11 +205,11 @@ function NullTypeCast( value, data_type  ) {
     */
 
     if (IsNull(value) || IsUndefined(value) ) {
-        let x = null_conversion[data_type] || null 
-        if (x === null) {
-            console.error(`value ${value} and data_type ${data_type} did not cast to non null value`)
+        if (null_conversion.hasOwnProperty(data_type)) {
+            return null_conversion[data_type]
         }
-        return x
+        console.error(`value ${value} and data_type ${data_type} did not cast to non null value`)
+        return null
     } else {
         return value
     }
@@ -210,5 +239,7 @@ module.exports = {
     'TypeCastTime': TypeCastTime,
     'TypeCastDateTime': TypeCastDateTime,
     'NullTypeCast': NullTypeCast,
-    'TypeValid': TypeValid
+    'TypeValid': TypeValid,
+    'TypeCastNumber': TypeCastNumber,
+    'TypeCastString': TypeCastString
 }

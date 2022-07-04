@@ -81,7 +81,17 @@ test('create aggrid function ', () => {
 })
 
 test('required fields', () => {
+    let grid_column = {'field': 'col1', 'requiredFields' : ['cola', 'colb']}
+    ex.GridColumnRequiredFields(grid_column)
+    let res = grid_column['valueGetterRequiredFields'].length == 2 && grid_column['validatorRequiredFields'].length === 2
+    // console.log(grid_column)
+    expect(res).toBe(true)
+})
 
-    //GridColumnRequiredFields(grid_column)
-
+test('required fields specified', () => {
+    let grid_column = {'field': 'col1', 'validatorRequiredFields' : ['cola', 'colb'], 'valueGetterRequiredFields': ['cola'], }
+    ex.GridColumnRequiredFields(grid_column)
+    let res = grid_column['valueGetterRequiredFields'].length == 1 && grid_column['validatorRequiredFields'].length === 2
+    // console.log(grid_column)
+    expect(res).toBe(true)
 })

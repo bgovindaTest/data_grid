@@ -1,5 +1,14 @@
 const ex = require('./index.js')
 
+/*
+check validation returns boolean or null
+check null type casting still works. check if 
+addition works with string alt value and number type alt value.
+
+check lookups
+check requiredFields
+*/
+
 test('load module', () => { expect(true).toBe(true) })
 
 test('create and evaluate function', () => {

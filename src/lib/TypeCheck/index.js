@@ -32,7 +32,7 @@ function IsNull(x) {
 }
 
 function IsUndefined(x) {
-    if (typeof x === undefined) { return true }
+    if (typeof x === 'undefined') { return true }
     else { return false }
 }
 
@@ -64,8 +64,7 @@ function IsBasicType(x) {
 
 function IsBoolean (x) {
     let bool_values = ['t','true','y','yes','on','1','TRUE', 'FALSE','f','n','no','off','0']
-    if (typeof x == "boolean") { return true }
-    else if (String(x) in bool_values ) {return true}
+    if ( bool_values.includes(String(x) ) ) {return true}
     else { return false}
 }
 

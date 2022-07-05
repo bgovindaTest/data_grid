@@ -1,13 +1,15 @@
 /*
 Creates meta column and auxilarly functions.
 
-//special Information for etc.
-allowNull: true/false
+Must be ran as last function in grid_parser.
+Requires validator to be a function if defined.
+defaultValues: []
+
+addRowData to subgrid values?
+
+deleteUndoColumnParams
 isRequired: true/false
-ignoreError: true/false (for calculated fields?) allow to pass or skip?
-typeCheckError? if true dont remove invalid data type.
-    //show as error instead?. dont run validation if error. not implemented yet would
-    //also have to add for xyz
+ignoreValidator: true/false (for calculated fields?) allow to pass or skip?
 
 Creates Auxillary function for crud operations
 
@@ -22,6 +24,7 @@ class MetaColumnAssembly {
 
     RunInit(grid) {
         this.MetaColumn( grid )
+        this.InitializeDeleteUndoColumn(grid)
         let funcs = this.MetaAuxillaryFunction( grid )
         return funcs
     }
@@ -40,7 +43,7 @@ class MetaColumnAssembly {
         //need overwrites for debugging
         grid.push(mx)
     }
-    
+
     MetaAuxillaryFunction( grid ) {
         /*
         Creates object stored in meta_column. Stores backup and 

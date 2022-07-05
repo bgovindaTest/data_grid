@@ -6,6 +6,10 @@ Valid cell editors and processing?
 grid_init.js is the main module to initialize the app.
 grid_column_rules Input Parameters: These also go in the grid_column_rules. It used to set the how user enters data. Two options are below.
 
+'customEditors': ['autoComplete', 'deleteUndoSelector', 'subGridSelector', 'agRichSelectCellEditor'],
+'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateTimeSelector' ], //make popupTrue for agLargeTextCellEditor
+
+
 1.) Autocomplete and Drop Down Widget. The autocomplete widget requires several parameters stored in cellEdtiorParams.
 
     api_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route

@@ -18,6 +18,8 @@ function CellClassRulesInit( grid_column, is_editable, validator_function ) {
         Assembles cellClassRules based on if is_editable is a function or boolean and
         if validatorFunction is defined
     */
+    if (grid_column.hasOwnProperty('cellClassRules')) { return }
+
     cellClassRules = {}
     if (type_check.IsNull(validator_function) || type_check.IsUndefined(validator_function) ) {
         //no validation function

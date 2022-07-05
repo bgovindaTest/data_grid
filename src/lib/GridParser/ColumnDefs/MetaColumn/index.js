@@ -1,7 +1,13 @@
 /*
 Creates meta column and auxilarly functions.
 
-
+//special Information for etc.
+allowNull: true/false
+isRequired: true/false
+ignoreError: true/false (for calculated fields?) allow to pass or skip?
+typeCheckError? if true dont remove invalid data type.
+    //show as error instead?. dont run validation if error. not implemented yet would
+    //also have to add for xyz
 
 */
 const type_check = require('../TypeCheck')

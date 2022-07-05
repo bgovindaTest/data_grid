@@ -122,7 +122,7 @@ function TypeCastBoolean(bool_val) {
 }
 
 function TypeCastNumber(num_val) {
-    if (IsNumber (num_val)) {return num_val}
+    if (IsNumber (num_val)) {return String(num_val) }
     return null
 }
 

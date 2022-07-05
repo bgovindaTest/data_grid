@@ -29,7 +29,7 @@ const data_config = require('../../../DataConfig')
 
 //extract required fields. set options to correct required fields?
 
-class ValuesParser {
+class ValueParser {
     constructor(grid_column,  globals) {
         this.grid_column = grid_column
         this.globals = globals
@@ -52,6 +52,7 @@ class ValuesParser {
 
         special editors will set if not already defined.
         */
+        let globalx = this.globals
         if (! grid_column.hasOwnProperty(parameter_name)) { return }
         let vt = grid_column[parameter_name]
 
@@ -81,9 +82,8 @@ class ValuesParser {
         //creates validation function for aggrid cell
         if( ! grid_column.hasOwnProperty('validator') ) {return}
         let globalx = this.globals
-        let v = grid_column.hasOwnProperty('validator')
+        let v = grid_column['validator']
         if (type_check.IsFunction(v) ) { return }
-
         if (type_check.IsString(v) ) {
             let expr = grid_column['validator']
             let options = this.OptionsParser(grid_column, 'validator')
@@ -120,9 +120,11 @@ class ValuesParser {
         */
 
         //if use defualt dont add other rules.
-        if (grid_column['valueSetter']['useDefault'] || false ) {
-            delete grid_column['valueSetter']['useDefault']    
-            return
+        if (grid_column.hasOwnProperty('valueSetter')) {
+            if (grid_column['valueSetter']['useDefault'] || false ) {
+                delete grid_column['valueSetter']    
+                return
+            }
         }
 
         //ignore if value setter predefined
@@ -177,7 +179,7 @@ class ValuesParser {
                 return true
             }
             else {
-                params.data[field] = type_cast.TypeCastDate(params.newValue)
+                params.data[field] = type_check.TypeCastDate(params.newValue)
                 return true
             }
         }
@@ -190,7 +192,7 @@ class ValuesParser {
                 return true
             }
             else {
-                params.data[field] = type_cast.TypeCastNumber(params.newValue)
+                params.data[field] = type_check.TypeCastNumber(params.newValue)
                 return true
             }
         }
@@ -204,7 +206,7 @@ class ValuesParser {
             }
             else {
                 //type cast?
-                params.data[field] = type_cast.TypeCastTime(params.newValue)
+                params.data[field] = type_check.TypeCastTime(params.newValue)
                 return true
             }
         }
@@ -217,7 +219,7 @@ class ValuesParser {
                 return true
             }
             else {
-                params.data[field] = type_cast.TypeCastDateTime(params.newValue)
+                params.data[field] = type_check.TypeCastDateTime(params.newValue)
                 return true
             }
         }
@@ -225,4 +227,4 @@ class ValuesParser {
     }
 }
 
-module.exports = {'ValueParser': ValuesParser}
+module.exports = {'ValueParser': ValueParser}

@@ -9,6 +9,8 @@ typeCheckError? if true dont remove invalid data type.
     //show as error instead?. dont run validation if error. not implemented yet would
     //also have to add for xyz
 
+Creates Auxillary function for crud operations
+
 */
 const type_check = require('../TypeCheck')
 const meta_column_name = '_ag-meta_'

@@ -11,7 +11,6 @@ api has fields id, first_name, last_name, full_name
 main query has provider_id.first_name, provider_id.id, provider_id.last_name, provider_id.full_name, provider_id
 
 pullKey: id
-queryKey: provider_id
 pushKey:  provider_id
 displayKey: full_name (must be unique)
 
@@ -21,16 +20,19 @@ Lookup query
 grid will display full name when sent to server
 'id':1 -> 'provider_id': 1
 
+
+field and id expected to reference same values. id from the referenced table and
+field from the query. The value id is renamed to field when pushed to the server.
+
 */
 
 
-function PullPushQueryDisplayKeys( grid_column ) {
+function PullPushDisplayKeys( grid_column ) {
     let field = grid_column['field']
     let cep = grid_column['cellEditorParams']
-    if (! cep.hasOwnProperty('queryKey'))   { cep['queryKey'] = field } //the main query normally name of linked table_id
-    if (! cep.hasOwnProperty('pushKey'))    { cep['pushKey'] = field } //name of field to send to database for wrties
-    if (! cep.hasOwnProperty('pullKey'))    { cep['pullKey'] = id }  //name of id from refernced table
+    if (! cep.hasOwnProperty('pushKey'))    { cep['pushKey'] = field } //name of field to send to database for writes
+    if (! cep.hasOwnProperty('pullKey'))    { cep['pullKey'] = 'id' }  //name of id from refernced table
     if (! cep.hasOwnProperty('displayKey')) { cep['displayKey'] = cep['pushKey'] } //pull key is assumed to be the primary key for lookup
 }
 
-module.exports = PullPushQueryDisplayKeys
+module.exports = PullPushDisplayKeys

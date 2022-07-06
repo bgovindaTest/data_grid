@@ -9,14 +9,10 @@ This module is responsible for initializing the data parameters and functions re
 Each grid_column_rule has the structure below. A more indepth description is in ./library/grid_rules.js
   {
     field: 'field_name,
-    data_type: for sorting purposes? (maybe requires sortField)
+    data_type: dtype of field
     cellEditor: "autoComplete"
     cellEditorParams: {
         values: [] //always object
-        //not implemented yet.
-        lookupFieldsMainQuery: [ {} ] //list of fields
-        lookupFieldsColumn: [ {}] //list of fields
-
         columnDef: [
             {header: "id" , field: "id", width: 50},
             {header: "name", field: "name", width: 50},
@@ -36,10 +32,11 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 
     }
 
-//renaming?
-mainQueryFieldNames to grid [
-    {'server_field_name': 'ui_field_name'}
-]
+pushKey gets converted into pullKey naming when reading from server. All other fields added to object
+based on . operator.
+
+i.e provider_id -> id
+provider_id.first_name -> name
 
 */
 
@@ -47,17 +44,13 @@ const type_check   = require('../../../TypeCheck')
 const pushPullInit = require('./pushPullDisplay')
 
 
-class CustomEditor {
-    //for main loader
-    //grid is json object for aggrid
-    //allowNull (prepends value?)
-
-    //valuesArray created by grid_func mix in?
+class AutocompleteParams {
     constructor(grid_column, valuesObject) {
         this.grid_column  = grid_column
-        this.valuesObject = valuesObject
+        this.valuesObject = valuesObject || []
+        this.defaultColumnWidth = 150
     }
-    AutoCompleteParams() {
+    AutoCompleteParamsInit() {
         /*
         Initializes the autocomplete editor. columnDefs and values.
         Data is pulled in grid_funcs
@@ -70,28 +63,40 @@ class CustomEditor {
 
 
     DefaultParameters() {
+        /*
+        Adds default cellEditorParams
+        */
+
         let grid_column  = this.grid_column
         let valuesObject = this.valuesObject
         let cep = grid_column['cellEditorParams']
-        let colSize = 150
 
-        if (! cep.hasOwnProperty('columnDef') ) {
-            cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize)
-        } else if ( type_check.IsArray(cep['columnDef'] ) ) {
+        if (! cep.hasOwnProperty('columnDef') ) { this.AutocompleteDefaultColumnDef() } 
+        else if ( type_check.IsArray(cep['columnDef'] ) ) {
             if (cep['columnDef'].length === 0) {
-                cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize)
+                this.AutocompleteDefaultColumnDef()
             }
         } else if ( type_check.IsNull(cep['columnDef'] ) ) {
-            cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize)
+            this.AutocompleteDefaultColumnDef()
         }
-        else{ cep['columnDef'] = this.AutocompleteDefaultColumnDef(pullKey, displayKey, colSize) }
-        if (! cep.hasOwnProperty('values')) {cep['values'] = valuesObject}
+        else{ this.AutocompleteDefaultColumnDef() }
 
+        if (! cep.hasOwnProperty('values')) {
+            if (! type_check.IsArray(valuesObject)) {
+                let field = grid_column['field']
+                console.error(`${field} values object is not a json array`)
+                cep['values'] = []
+            } else { cep['values'] = valuesObject }
+        }
     }
 
     AutocompleteDefaultColumnDef(pullKey, displayKey, columnWidth) {
         //default columnDef for lookups.
-        return [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
+        let cep = this.grid_column['cellEditorParams']
+        let pullKey    = cep['pullKey']
+        let displayKey = cep['displayKey']
+        let columnWidth = this.defaultColumnWidth
+        cep['columnDef'] = [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
     }
 
     ValueGetter(grid_column) {
@@ -112,9 +117,6 @@ class CustomEditor {
         grid_column['valueGetter'] = fn
     }
 
-
-
-
 }
 
-module.exports = {'CustomEditor': CustomEditor, 'ReturnGridValuesObject': ReturnGridValuesObject}
+module.exports = AutocompleteParams

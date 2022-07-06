@@ -21,6 +21,19 @@ globals: object containing global variables and parameters
 
 
 useDefault: true
+
+column and row level validation
+Specify the formula that you want to use to validate the data in this column 
+when new items are saved to this list. The formula must evaluate to TRUE for validation to pass.
+Example: If your column is called "Company Name" a valid formula would be [Company Name]="My Company".
+
+Learn more about proper syntax for formulas.
+
+ 	Formula: 
+ 	 
+Type descriptive text that explains what is needed for this column's value to be considered valid.
+
+
 */
 
 const ex          = require('../../ExpressionParser')

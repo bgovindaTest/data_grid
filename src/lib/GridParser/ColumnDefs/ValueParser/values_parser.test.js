@@ -101,6 +101,10 @@ test('validator requiredField', () => {
 })
 
 // //required field
+
+
+// select colA, 0 < ifnull(colA,0) + colB < 2 as validator from x
+
 test('values getter and validator requireField', () => {
     let options = {'valueGetter': 'ifnull( colA, 0) +1', 'validator': ' 0 < ifnull(colA,0) + colB < 2'  , 'dataType': 'real', 
         'requiredFields': ['colA'], 'validatorRequiredFields': ['colA', 'colB'] }

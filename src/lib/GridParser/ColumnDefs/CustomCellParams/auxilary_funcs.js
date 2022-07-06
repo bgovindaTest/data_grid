@@ -35,4 +35,14 @@ function PullPushDisplayKeys( grid_column ) {
     if (! cep.hasOwnProperty('displayKey')) { cep['displayKey'] = cep['pushKey'] } //pull key is assumed to be the primary key for lookup
 }
 
-module.exports = PullPushDisplayKeys
+function CellEditorParamsCheck(grid_column) {
+    //if cellEditorParams missing add placeholder and log error
+    if (! grid_column.hasOwnProperty('cellEditorParams')) {
+        console.error(`cellEditorParams missing for ${grid_column['field']}`)
+        grid_column['cellEditorParams'] = {}
+    }
+}
+
+
+
+module.exports = {'PullPushDisplayKeys': PullPushDisplayKeys, 'CellEditorParamsCheck': CellEditorParamsCheck }

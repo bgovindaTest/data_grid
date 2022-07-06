@@ -6,6 +6,7 @@ Parses grids json object and converts expression syntax into javascript function
     '__init_params__':  {},
     '__url_params__': {},
     '__drop_downs__': {},
+    '__valuesObject__': [{}] //array is grid position object key is field and value is values to be passed.
     '__is_read_only__':  true/false (do the have modification permssions)
         //if no force editable to false
 

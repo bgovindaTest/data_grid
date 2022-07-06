@@ -12,7 +12,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     data_type: dtype of field
     cellEditor: "autoComplete"
     cellEditorParams: {
-        values: [] //always object
+        values: [{}] //always object
         columnDef: [
             {header: "id" , field: "id", width: 50},
             {header: "name", field: "name", width: 50},
@@ -41,13 +41,15 @@ provider_id.first_name -> name
 */
 
 const type_check   = require('../../../TypeCheck')
-const pushPullInit = require('./pushPullDisplay')
+const auxFuncs = require('./auxilary_funcs')
+const PushPullInit = auxFuncs['PullPushDisplayKeys']
+const CellEditorParamsCheck = auxFuncs['CellEditorParamsCheck']
 
 
 class AutocompleteParams {
     constructor(grid_column, valuesObject) {
         this.grid_column  = grid_column
-        this.valuesObject = valuesObject || []
+        this.valuesObject = valuesObject
         this.defaultColumnWidth = 150
     }
     AutoCompleteParamsInit() {
@@ -56,9 +58,10 @@ class AutocompleteParams {
         Data is pulled in grid_funcs
         */
         let grid_column  = this.grid_column
-        pushPullInit(grid_column)
+        PushPullInit(grid_column)
         this.DefaultParameters()
         this.ValueGetter()
+        grid_column['cellEditorPopup'] = true
     }
 
 
@@ -68,7 +71,8 @@ class AutocompleteParams {
         */
 
         let grid_column  = this.grid_column
-        let valuesObject = this.valuesObject
+        //check if missing cellEditorParams
+        CellEditorParamsCheck(grid_column)
         let cep = grid_column['cellEditorParams']
 
         if (! cep.hasOwnProperty('columnDef') ) { this.AutocompleteDefaultColumnDef() } 
@@ -80,14 +84,8 @@ class AutocompleteParams {
             this.AutocompleteDefaultColumnDef()
         }
         else{ this.AutocompleteDefaultColumnDef() }
+        this.CopyAndStringifyValuesObject()
 
-        if (! cep.hasOwnProperty('values')) {
-            if (! type_check.IsArray(valuesObject)) {
-                let field = grid_column['field']
-                console.error(`${field} values object is not a json array`)
-                cep['values'] = []
-            } else { cep['values'] = valuesObject }
-        }
     }
 
     AutocompleteDefaultColumnDef(pullKey, displayKey, columnWidth) {
@@ -116,6 +114,52 @@ class AutocompleteParams {
         }
         grid_column['valueGetter'] = fn
     }
+    CopyAndStringifyValuesObject() {
+        /*
+        Parses values object and returns values for drop down and the map object.
+        The map object 
+         object.
+            //key value
+            //displayKey must be unique. maps to mapsObject.
+            //pushKey is name of key to send
+            //pullKey is name sent by columns lookup
+        */
+        let valuesObject = this.valuesObject
+        let values = []
+        let cep = this.grid_column['cellEditorParams']
+
+        if (! type_check.IsArray(valuesObject)) {
+            let field = grid_column['field']
+            console.error(`${field} values object is not a json array`)
+            cep['values'] = []
+            return
+        }
+
+
+
+        if (valuesObject.length > 0) {
+            if (! type_check.IsObject(valuesObject[i]) ) {
+                let field = this.grid_column['field']
+                console.error(`${field} values is not a json object returning empty object`)
+                return values
+            }
+        }
+
+        for(let i=0; i<valuesObject.length; i++) {
+            let x = valuesObject[i]
+            //typecheck
+            let keys = Object.keys(x)
+            let y = {}
+            for(let j =0; j<keys.length; j++) {
+                y[keys[i]] = String(x[keys[i]])
+            }
+            values.push(y)
+        }
+        cep['values'] = values
+    }
+
+
+
 
 }
 

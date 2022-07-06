@@ -63,6 +63,14 @@ function IsBasicType(x) {
     else { return false }
 }
 
+function IsJsonArray(x) {
+    if (! IsArray(x)) { return false }
+    if (x.length === 0) {return true}
+    let ox = x[0]
+    if (! IsObject(ox) ) { return false }
+    else {return true}
+}
+
 function IsBoolean (x) {
     let bool_values = ['t','true','y','yes','on','1','TRUE', 'FALSE','f','n','no','off','0']
     if ( bool_values.includes(String(x) ) ) {return true}
@@ -228,7 +236,7 @@ module.exports = {
     'IsDate': IsDate,
     'IsTime': IsTime,
     'IsDateTime': IsDateTime,
-
+    'IsJsonArray': IsJsonArray,
 
     'TextIsNumber': TextIsNumber,
     'IsUndefined': IsUndefined,

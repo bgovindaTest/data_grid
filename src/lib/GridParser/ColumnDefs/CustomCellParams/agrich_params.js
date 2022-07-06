@@ -1,12 +1,14 @@
 /*
+1.) agRichSelectCellEditor
+valuesObject gets passed into initializer
 
-2.) agRichSelectCellEditor
 
 cellEditor: 'agRichSelectCellEditor',
+cellEditorPopup: true,
+isLookup: true,
 cellEditorParams: {
     values: ['Male', 'Female'],
     allowNull: prepends null value to beginning of values array
-    cellEditorPopup: true,
     pushKey: =  //defaults to field
     pullKey: =  //defaults to id //pullAndDisplay same key
     displayKey: //defaults to id (this goes into values)
@@ -19,10 +21,13 @@ cellEditorParams: {
 */
 
 const type_check = require('../../../TypeCheck')
-const pushPullInit = require('./pushPullDisplay')
+const auxFuncs = require('./auxilary_funcs')
+const PushPullInit = auxFuncs['PullPushDisplayKeys']
+const CellEditorParamsCheck = auxFuncs['CellEditorParamsCheck']
 
 
-class CustomEditor {
+
+class AgRichParams {
     //for main loader
     //grid is json object for aggrid
     //allowNull (prepends value?)
@@ -35,16 +40,61 @@ class CustomEditor {
 
     AgRichSelectParams() {
         /*
-        This creates the values and mapObject for the dropdown 
-
+            This creates the values and mapObject for the dropdown
         */
         let grid_column  = this.grid_column
-        pushPullInit(grid_column)
-        let valsParams = this.ValuesAgRichSelectParams()
-        cep['values'] = valsParams['values']
-        cep['mapObject'] = valsParams['mapObject']
+        PushPullInit(grid_column)
+        CellEditorParamsCheck(grid_column)
+        grid_column['cellEditorPopup'] = true
+        if (grid_column['isLookup'] || false ) {
+            //if not hardcoded.
+            let valsParams = this.ValuesAndMapObject()
+            cep['values'] = valsParams['values']
+            cep['mapObject'] = valsParams['mapObject']
+            grid_column['isLookup'] = true
+
+
+        } else {
+            this.ValuesDropDown()
+            grid_column['isLookup'] = false
+        }
+
     }
-    ValuesAgRichSelectParams() {
+    ValuesDropDown() {
+        let values = []
+        let valuesObject = this.valuesObject
+        let displayKey = this.grid_column['cellEditorParams']['displayKey']
+        let pushKey = this.grid_column['cellEditorParams']['pushKey']
+        let pullKey = this.grid_column['cellEditorParams']['pullKey']
+
+        if (type_check.IsJson(valuesObject) ) {
+            if (this.grid_column['cellEditorParams']['allowNull'] || false ) { values.push(null) }
+            for(let i=0; i<valuesObject.length; i++) {
+                let x = valuesObject[i]
+                let dk = x[displayKey]
+                let pull_id = x[pullKey]
+                let y = {}
+                y[pushKey] = String(pull_id)
+                mapObject[dk] = y // {'id: 1} -> {'user_id': 1}
+                values.push(dk)
+            }
+        } else if ( type_check.IsArray(valuesObject) ) {
+            if (this.grid_column['cellEditorParams']['allowNull'] || false ) { values.push(null) }
+            for(let i=0; i<valuesObject.length; i++) {
+                let x = valuesObject[i]
+                let dk = x[displayKey]
+                values.push(dk)
+            }
+        }
+        let cep = this.grid_column['cellEditorParams']
+        cep['values']    =  values
+        cep['mapObject'] =  mapObject
+
+    }
+
+
+
+    ValuesAndMapObject() {
         /*
         Parses values object and returns values for drop down and the map object.
         The map object 
@@ -70,14 +120,16 @@ class CustomEditor {
 
         for(let i=0; i<valuesObject.length; i++) {
             let x = valuesObject[i]
+            let dk = x[displayKey]
             let pull_id = x[pullKey]
             let y = {}
             y[pushKey] = String(pull_id)
-
-            mapObject[displayKey] = y // {'id: 1} -> {'user_id': 1}
-            values.push(displayKey)
+            mapObject[dk] = y // {'id: 1} -> {'user_id': 1}
+            values.push(dk)
         }
-        return {'values': values, 'mapObject': mapObject}
+        let cep = this.grid_column['cellEditorParams']
+        cep['values']    =  values
+        cep['mapObject'] =  mapObject
     }
 
 }
@@ -85,4 +137,4 @@ class CustomEditor {
 
 
 
-module.exports = {'CustomEditor': CustomEditor}
+module.exports = AgRichParams

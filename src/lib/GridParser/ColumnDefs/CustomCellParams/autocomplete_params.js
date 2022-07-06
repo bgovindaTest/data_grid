@@ -3,8 +3,6 @@ Responsible for creating each columns rules for displaying and formatting the da
 
 1.) Autocomplete and Drop Down Widget. The autocomplete widget requires several parameters stored in cellEdtiorParams.
 
-    api_route: 
-
 This module is responsible for initializing the data parameters and functions required for the autocomplet widget.
 Each grid_column_rule has the structure below. A more indepth description is in ./library/grid_rules.js
   {

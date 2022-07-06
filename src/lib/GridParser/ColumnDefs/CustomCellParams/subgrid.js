@@ -1,111 +1,95 @@
 /*
 Responsible for creating each columns rules for displaying and formatting the data.
+3.) subGrid is last cellEditor to be initialized
 
 Valid cell editors and processing?
 
 This module is responsible for initializing the data parameters and functions required for the autocomplet widget.
 Each grid_column_rule has the structure below. A more indepth description is in ./library/grid_rules.js
-  {
+
     field: 'field_name,
-    data_type: for sorting purposes? (maybe requires sortField)
+    //not sortable
+
     cellEditor: "subGrid"
     cellEditorParams: {
         subGridPos: 0
-    }
-
-
-3.) subGrid
-subGridPos
-rowDataDefaults = {
-    'defaultFilter': [] key value? fro row params
-    'defaultSort': []
-    'enforcedFilters': []
-    'defaultValue':  []
-}
-rowDataDefaults pulls data from calling row to assemble subgrid
-
+        name: ''
+        rowDataDefaults = {
+            'defaultFilter': {}
+            'defaultSort': []
+            'enforcedFilters': {}
+            'defaultValue':  {}
+        }
 */
 const type_check = require('../../../TypeCheck')
 
-
-// columnDefs: [
-//     {
-//         cellEditor: 'agLargeTextCellEditor', 'agTextCellEditor'
-//         cellEditorPopup: true,
-//         cellEditorParams: {
-//             maxLength: 100,
-//             rows: 10,
-//             cols: 50
-//         }
-//         // ...other props
-//     }
-// ]
-
-
-class CustomEditor {
-    //for main loader
-    //grid is json object for aggrid
-    //allowNull (prepends value?)
-
-    //valuesArray created by grid_func mix in?
-    constructor(grid_column, valuesObject) {
+class SubGrid {
+    constructor(grid_column) {
         this.grid_column  = grid_column
-        this.valuesObject = valuesObject
     }
 
     SubGridParams(grid_column) {
         let is_subgrid = grid_column['cellEditor'] || ""
         if (is_subgrid != "subGrid") { return }
         let subgridPos = grid_column["cellEditorPrams"]['gridPos'] || 0
+        grid_column["cellEditorParams"]['field'] = grid_column['field']
         //make integer.
-        if (subgridPos === 0 ) {
-            console.log('Subgrid out of bounds')
-            return 
+        if (subgridPos === 0 || subgridPos > this.grid.length ) {
+            console.error('Subgrid out of bounds should not be main grid')
         }
-        //valuesArray
-        //mapObject
+
     }
-    SubGridRowDataDefaults(grid_column, rowDataDefaultRules, rowData) {
+
+
+    SubGridDefaults(rowData) {
         /*
         Converts everyting to uniform object inorder to set static fields.
 
+        //returns a function
 
         Adds vales from row to create submodal grid.
         rowDataDefaults = {
-            'defaultFilter': [] key value? fro row params
-            'defaultSort': []
-            'enforcedFilters': []
-            'defaultValue':  []
-        }
 
+        }
         */
-        return
+        let cep = this.grid_column['cellEditorParams']
+        let rdf = cep['rowDataDefaults']
+        let df  = rdf['defaultFilter' ] || {}
+        let ef  = rdf['enforcedFilter'] || {}
+        let dv  = rdf['defaultValue']   || {}
+        let defaultSort  = rdf['defaultSort']    || []
+        let defaultFilter    = this.DefaultObject(df, rowData)
+        let enforcedFilter   = this.DefaultObject(ef, rowData)
+        let defaultValue     = this.DefaultObject(dv, rowData)
+
+        return {'defaultSort': defaultSort, 'defaultFilter': defaultFilter,
+            'enforcedFilter': enforcedFilter, 'defaultValue':  defaultValue}
 
     }
+    // MergeDefaults(grid_defualts, sub_grid_defaults) {}
+    DefaultObject(dx,rowData) {
+        let def_obx = {} //field_name: value
+        let keys = Object.keys(dx)
+        for (let i =0; i <keys.length; i++ ) {
+            let cn = keys[i]
+            let val = dx[cn]
+            if (type_check.IsObject(val) ) {
+                if (val.hasOwnProperty('lookupKey')) {
+                    let lookupKey = val['lookupKey']
+                    let field = val['field']
+                    def_obx[cn] =  rowData[ field ][lookupKey]
 
+                } else {
+                    let field = val['field']
+                    def_obx[cn] =  rowData[field]
+                }
+            }
+            else { def_obx[cn] = val }
+        }
 
-
+    }
 }
 
 
 
-
-
-
-
-// function SubGridRowDataDefaults(grid_column, rowDataDefaultRules, rowData) {
-//     /*
-//     Adds vales from row to create submodal grid.
-//     rowDataDefaults = {
-//         'defaultFilter': [] key value? fro row params
-//         'defaultSort': []
-//         'enforcedFilters': []
-//         'defaultValue':  []
-//     }
-
-//     */
-//     return
-
-// }
-
-module.exports = {'CustomEditor': CustomEditor, 'ReturnGridValuesObject': ReturnGridValuesObject}
+module.exports = {'SubGrid': SubGrid}

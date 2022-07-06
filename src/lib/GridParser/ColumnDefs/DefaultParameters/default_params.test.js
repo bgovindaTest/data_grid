@@ -1,0 +1,6 @@
+/*
+Test default parameter initialization
+for main grid load and subgrid load
+    subgrid load has access to main row data for
+    setting defaults
+*/

@@ -1,3 +1,8 @@
+//prepends delete/undo column to grid
+const data_config = require('../../../DataConfig')
+const meta_delete_undo_name = data_config['meta_delete_undo_name']
+
+
 function InitializeDeleteUndoColumn(grid) {
     /*
     Used to add delete/undo button to grid. Handles intialization parameters if provided.
@@ -17,7 +22,12 @@ function InitializeDeleteUndoColumn(grid) {
     du_column['showFilter'] = false
 
     //hide button if all false dont show
-    if (du_column.hasOwnProperty('allowAction') ) { if (du_column['allowAction'] === false) {return} }
+    if (du_column.hasOwnProperty('allowAction') ) { 
+        if (du_column['allowAction'] === false) {
+            du_column['hide'] = true
+            return
+        } 
+    }
     //defaultParameters
     let headerName = 'GridAction'
     let defaultCellEditorParams = {
@@ -45,3 +55,5 @@ function InitializeDeleteUndoColumn(grid) {
     //typechecks
     if (!du_defined) { grid.unshift(du_column) }
 }
+
+module.exports = InitializeDeleteUndoColumn

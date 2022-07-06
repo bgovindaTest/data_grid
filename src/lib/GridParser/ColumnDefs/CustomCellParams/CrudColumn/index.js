@@ -16,7 +16,7 @@ Creates Auxillary function for crud operations
 */
 const type_check = require('../TypeCheck')
 const meta_column_name = '_ag-meta_'
-const meta_delete_undo_name = '_ag-meta-delete-undo_'
+const meta_delete_undo_name = '_ag-meta-delete-undo_' //'_ag-meta-insert-delete-update-undo_'
 
 
 class MetaColumnAssembly {

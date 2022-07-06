@@ -37,7 +37,6 @@ class SubGrid {
         if (subgridPos === 0 || subgridPos > this.grid.length ) {
             console.error('Subgrid out of bounds should not be main grid')
         }
-
     }
 
 

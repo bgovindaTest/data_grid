@@ -34,23 +34,7 @@ class MetaColumnAssembly {
         let funcs = this.MetaAuxillaryFunction( grid )
         return funcs
     }
-
-
-    MetaColumn( grid ) {
-        /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
-        let mx = {
-            'field': meta_column_name,
-            'editable': false,
-            'hide': true,
-            'suppressToolPanel': true,
-            'showSort': false,
-            'showFilter': false
-        }
-        //need overwrites for debugging
-        grid.push(mx)
-    }
-
-    MetaAuxillaryFunction( grid ) {
+    CreateAuxilaryFunction( grid ) {
         /*
         Creates object stored in meta_column. Stores backup and 
     
@@ -64,29 +48,28 @@ class MetaColumnAssembly {
     
         //is_crud
         //need to add column for delete
-        let backups = this.CreateMetaBackupColumn(grid)
-        let fupdate = this.InitDefaultUpdateRow(backups) //for rows created from querying the database
-        let finsert = this.InitDefaultInsertRow(backups) //for newly added rows via add row or new_sheet
-        let fundo   = this.UndoRow(backups) //function to reset row based on backup values
-        let fdel    = this.DeleteRow()
-        let ferror  = this.RowHasError(grid) //combines all validations functions
-        let fwarn   = this.RowHasWarning(grid) //validations with ignored error
-        let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
-        let fchange = this.RowIsChanged(grid)  //different from backup fields
-        let grid_functions =  {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
-            'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
-        let fis_save = this.IsSaveRow(grid_functions)
-        grid_functions['fis_save'] = fis_save
-        grid_functions['deleteWarning'] = ""
+        let gf = {}
+
+        let backups      = this.CreateBackupColumn(grid)
+        gf['update']     = this.InitDefaultUpdateRow(backups) //for rows created from querying the database
+        gf['insert']     = this.InitDefaultInsertRow(backups) //for newly added rows via add row or new_sheet
+        gf['undo']       = this.UndoRow(backups) //function to reset row based on backup values
+        gf['del']        = this.DeleteRow()
+        gf['error']      = this.RowHasError(grid) //combines all validations functions
+        gf['warn']       = this.RowHasWarning(grid) //validations with ignored error
+        gf['complete']   = this.RowIsComplete(grid) //all required fields and not empty
+        gf['change']     = this.RowIsChanged(grid)  //different from backup fields
+        gf['save']       = this.IsSaveRow(grid_functions)
+        gf['deleteWarning'] = ""
         if (grid.hasOwnProperty('deleteWarning') ) {
             //displays on save to warn of possible rejected deletes
-            grid_functions['deleteWarning'] = grid['deleteWarning']
+            gf['deleteWarning'] = grid['deleteWarning']
         }
         return grid_functions
     }
     
     //meta functions for creating and reseting rows
-    CreateMetaBackupColumn( grid ) {
+    CreatBackupColumn( grid ) {
         //parse grid and creates backups object.
         let backups = {}
         for(let i=0; i < grid.length; i++) {

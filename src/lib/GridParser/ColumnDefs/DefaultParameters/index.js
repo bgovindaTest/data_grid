@@ -1,4 +1,7 @@
 /*
+Explicitly set all defaultValues.
+
+
 Parses grids json object and converts expression syntax into javascript functions. 
 
     'qparams_prefix':"",
@@ -45,6 +48,11 @@ showSort: default true (if false cant be used for sorting)
 
 hide - hides the field
 suppressToolPanel - removes it from the tool panel.
+
+if (grid_column.hasOwnProperty ('ignoreError') ) { ignoreError[field] = grid_column['ignoreError'] }
+if (grid_column.hasOwnProperty( 'isRequired') )  { isRequired[field] = grid_column['isRequired'] }
+if (grid_column.hasOwnProperty( 'allowNull') )   { allowNull[field] = grid_column['allowNull'] }
+
 
 */
 

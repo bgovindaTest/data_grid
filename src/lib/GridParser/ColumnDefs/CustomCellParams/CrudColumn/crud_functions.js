@@ -22,7 +22,6 @@ Creates Auxillary function for crud operations
 */
 const type_check = require('../TypeCheck')
 const meta_column_name = '_ag-meta_'
-const meta_delete_undo_name = '_ag-meta-delete-undo_' //'_ag-meta-insert-delete-update-undo_'
 
 
 class MetaColumnAssembly {
@@ -51,8 +50,8 @@ class MetaColumnAssembly {
         let gf = {}
 
         let backups      = this.CreateBackupColumn(grid)
-        gf['update']     = this.InitDefaultUpdateRow(backups) //for rows created from querying the database
-        gf['insert']     = this.InitDefaultInsertRow(backups) //for newly added rows via add row or new_sheet
+        gf['update']     = this.InitUpdateRow(backups) //for rows created from querying the database
+        gf['insert']     = this.InitInsertRow(backups) //for newly added rows via add row or new_sheet
         gf['undo']       = this.UndoRow(backups) //function to reset row based on backup values
         gf['del']        = this.DeleteRow()
         gf['error']      = this.RowHasError(grid) //combines all validations functions
@@ -67,9 +66,9 @@ class MetaColumnAssembly {
         }
         return grid_functions
     }
-    
+
     //meta functions for creating and reseting rows
-    CreatBackupColumn( grid ) {
+    CreatUpdateBackupColumn( grid ) {
         //parse grid and creates backups object.
         let backups = {}
         for(let i=0; i < grid.length; i++) {
@@ -84,8 +83,38 @@ class MetaColumnAssembly {
         }
         return backups
     }
-    
-    InitDefaultInsertRow(defaultValues) {
+    //meta functions for creating and reseting rows
+    CreatInsertBackupColumn( grid ) {
+        //parse grid and creates backups object.
+        let backups = {}
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            if (! grid_column.hasOwnProperty('isCrud') ) {continue}
+            let field_name = grid_column['field']
+            let default_value = null
+            if (grid_column.hasOwnProperty('defaultValue')) {
+                default_value = grid_column['defaultValue'].value || null
+            }
+            backups[field_name] = default_value
+        }
+        return backups
+    }
+
+
+
+    ReturnBackupValue(rowData, field) {
+        /*
+        Backup object is stored in CrudColumn
+
+        */
+        let metacol = rowData[meta_column_name]
+        let backups = metacol['backups']
+        let backup_value  = backups[field]
+        return backup_value
+    }
+
+
+    InitInsertRow(defaultValues) {
         /*
             Adds default values to rows. or null
             default values or null
@@ -106,7 +135,7 @@ class MetaColumnAssembly {
         }
         return fi
     }
-    InitDefaultUpdateRow(backups) {
+    InitUpdateRow(backups) {
         //adds rowData pulled from server to rows
         let fu = function (row_data) {
             //row_data is whats stored in server object
@@ -309,12 +338,7 @@ class MetaColumnAssembly {
         return fchange
     }
     
-    BackupValue(rowData, field) {
-        let metacol = rowData[meta_column_name]
-        let backups = metacol['backups']
-        let backup_value  = backups[field]
-        return backup_value
-    }
+
     
     IsSaveRow(grid_functions) {
         /*

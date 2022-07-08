@@ -3,7 +3,7 @@ const data_config = require('../../../DataConfig')
 const meta_delete_undo_name = data_config['meta_delete_undo_name']
 
 
-function InitializeDeleteUndoColumn(grid) {
+function ColumnColumnInit(grid) {
     /*
     Used to add delete/undo button to grid. Handles intialization parameters if provided.
     Sets paramaters on when to show the delete/undo options.
@@ -60,4 +60,4 @@ function InitializeDeleteUndoColumn(grid) {
     grid.unshift(du_column)
 }
 
-module.exports = InitializeDeleteUndoColumn
+module.exports = ColumnColumnInit

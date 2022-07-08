@@ -228,6 +228,49 @@ function ServerRowToUiRow(queryRowData, IsLookup, IsCrud) {
     return rowData
 }
 
+function ColumnLookupFields(serverRowData) {
+    /*
+    Converts xyz to xyz. .operator is special
+    if field has . assumes base string is field and lookup field is after
+
+
+    */
+    let fields = Object.keys(serverRowData)
+    let lookups = {}
+    let rowData = {}
+    for(let i =0; i< fields.length; i++ ) {
+        let fx = fields[i]
+        if (fx.includes('.')) {
+            let fk = fx.split(".")[0]
+            lookups[fk] = {}
+        }
+        rowData[fx] = serverRowData[fx]
+    }
+    for(let i =0; i < fields.length; i++ ) {
+        if (fx.includes('.')) {
+            let fk = fx.split(".")[0]
+            let lk = fx.split(".")[1]
+            lookups[fk][lk] = rowData[fk]
+        } else if (lookups.hasOwnProperty(fx) ) {
+            lookups[fx][fx] = rowData[fx]
+        }
+    }
+    for(let i =0; i < fields.length; i++ ) {
+        if (fx.includes('.')) {
+            let fk = fx.split(".")[0]
+            let lk = fx.split(".")[1]
+            lookups[fk][lk] = rowData[fk]
+        } else if (lookups.hasOwnProperty(fx) ) {
+            lookups[fx][fx] = rowData[fx]
+        }
+    }
+    let lks = Object.keys(lookups)
+    for(let i =0; i< lks.length; i++) { rowData[lks[i]] = lookups[lks[i]] }
+    return rowData
+}
+
+
+
 //add functionality for aliases later
 //error if is string. means no match found
 function LookupParse(column_name, queryRowData) {

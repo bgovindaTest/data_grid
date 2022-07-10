@@ -5,7 +5,7 @@ main default configuration file
 
 //name of special columns
 const meta_column_name = '_ag-meta_'
-const meta_delete_undo_name = '_ag-meta-delete-undo_'
+const meta_delete_undo_name = '_ag-meta-delete-undo_' //meta column_params
 const meta_crud_type = 'crudType'
 const page_size = 10000
 const write_batch_size = 1000

@@ -38,7 +38,7 @@ ifNull: 'psql string calls to replace value'
     //if actual value?
     {'value': 'xyz', 'cmd': postgres_command}
 
-defaultValue: {'value': 'string', 'type': '', 'key': '', 'field': '', ifNullSet: true/false }
+defaultValue: {'value': 'string', 'dataType': '', 'key': '', ifNullSet: true/false, 'useKey': false } key for object or array
 defaultOrderby: 'asc/desc' (done by column order in columnDefs)
 defaultFitler: string value
 
@@ -74,7 +74,7 @@ class ColumnDefsInit {
         this.rowParams = rowParams || {}
     }
 
-    RunSubGridInit(grid, rowParams) {
+    SubGridDefaultParams(grid, rowParams) {
         //add rowParams?
 
         //Copy grid
@@ -105,20 +105,14 @@ class ColumnDefsInit {
             this.IfNull(grid_column)
             this.IsEditable(grid_column)
             this.HideColumns(grid_column)
-            this.DefaultOrderBy(grid_column,defaultOrderBy)
-            this.DefaultFilter(grid_column,defaultFilter, enforcedFilter)
+            //  Added by QueryParams/Pull 
+            // this.DefaultOrderBy(grid_column,defaultOrderBy)
+            // this.DefaultFilter(grid_column,defaultFilter, enforcedFilter)
             this.DefaultValue(grid_column)
             this.DefaultParameters(grid_column)
             this.CellWidth(grid_column)
             this.HeaderName(grid_column)
         }
-        this.MetaColumn(grid)
-        let fns = this.MetaAuxillaryFunction( grid )
-        //filterParams
-        //SortByParams
-        //HeaderParams
-        return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter,
-            'enforcedFilter': enforcedFilter}
     }
 
     HeaderName(grid_column) {
@@ -130,6 +124,9 @@ class ColumnDefsInit {
 
 
     DefaultValue(grid_column) {
+
+        // defaultValue: {'value': 'string', 'dataType': '', 'key': '', 'field': '', ifNullSet: true/false }
+
         // if string or boolean or null?
         // need to make changes for linked object.
         if (! grid_column.hasOwnProperty('defaultValue') ) {return}
@@ -144,32 +141,9 @@ class ColumnDefsInit {
             grid_column['defaultValue'] = {'value': x, 'type': 'object'}
         }
     }
-    DefaultOrderBy(grid_column, defaultOrderBy) {
-        if (! grid_column.hasOwnProperty('defaultOrderBy') ) {return}
-        let order_by = String(grid_column['defaultOrderBy']).toLowerCase()
-        let field = grid_column['field']
-        if (['asc','desc'].includes(order_by)) {
-            defaultOrderBy.push({'field': field, 'order_by': order_by})
-        } else { defaultOrderBy.push({'field': field, 'order_by': 'asc'}) }
-    }
-    DefaultFilter(grid_column, defaultFilter, enforcedFilter) {
-        //appends default filter information.
-        let is_filter   = grid_column.hasOwnProperty('defaultFilter')
-        let show_filter = grid_column['showFilter'] || false
-        if (! is_filter ) {return}
-        if (show_filter) {
-            let x = grid_column['defaultFilter']
-            if (! x.hasOwnProperty['field'] ) { x['field'] = grid_column['field'] }
-            defaultFilter.push(x)
-        } else {
-            let x = grid_column['defaultFilter']
-            if (! x.hasOwnProperty['field'] ) { x['field'] = grid_column['field'] }
-            enforcedFilter.push(x)
-        }
 
 
 
-    }
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
         //editable and isCrud permissions

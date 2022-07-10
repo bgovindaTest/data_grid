@@ -45,17 +45,47 @@ test('undo row function', () => {
     expect(rowData).toMatchObject(exp)
 })
 
+test('delete row function', () => {
+    let x = new cf()
+    let rowData = { a: 1, '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1} } }
+    let f = x.DeleteRow()
+    f(rowData)
+    let exp = { a: 1,'_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1 } } }
+    expect(rowData).toMatchObject(exp)
+} )
+
+test('undo delete row function', () => {
+    let x = new cf()
+    let rowData = { a: 1, '_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1} } }
+    let f = x.DeleteUndoRow()
+    f(rowData)
+    let exp = { a: 1,'_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1 } } }
+    expect(rowData).toMatchObject(exp)
+} )
+
+test('is row changed', () => {
+    let x = new cf()
 
 
-DeleteRow() 
-DeleteUndoRow() 
 
-//before crud operations.
-IsRowChanged()
-IsRowComplete() 
-IsRowEmpty() 
-IsRowDeleted()
-IsRowWarning()
-IsRowError()
-CrudType()
-CrudStatus()
+    //ExtractCrudConditions(grid)
+    let rowData = { a: 1, '_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1} } }
+    let f = x.IsRowChanged()
+    let is_not_change = f(rowData)
+    rowData['a'] = 4
+    let is_change = f(rowData)
+    expect(is_change && ! is_not_changed).toBe(true)
+} )
+
+
+// ExtractCrudConditions(grid)
+
+// //before crud operations.
+// IsRowChanged()
+// IsRowComplete() 
+// IsRowEmpty() 
+// IsRowDeleted()
+// IsRowWarning()
+// IsRowError()
+// CrudType()
+// CrudStatus()

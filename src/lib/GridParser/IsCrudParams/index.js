@@ -45,9 +45,9 @@ class CrudInit {
         //parseString
         if (type_check.IsString(is_crud) ) {
             gc['isCrud'] = CreateCrudObject(false,false,false)
-            if (is_crud.include('r') ) { gc['isCrud']['isPull'] = true } 
-            else if (is_crud.includes('w') ) { gc['isCrud']['isPush'] = true }
-            else if (is_crud.includes('c') ) { gc['isCrud']['isChange'] = true }
+            if (is_crud.includes('r') ) { gc['isCrud']['isPull'] = true } 
+            if (is_crud.includes('w') ) { gc['isCrud']['isPush'] = true }
+            if (is_crud.includes('c') ) { gc['isCrud']['isChange'] = true }
             SetCrudDefaults(gc['isCrud'])
         } //parse object
         else if (! type_check.IsObject(is_crud) ) { 
@@ -72,6 +72,7 @@ class CrudInit {
         return false
     }
     NullDefault() {
+        let is_crud = this.grid_column['isCrud'] || null
         if (type_check.IsNull(is_crud)) { 
             gc['isCrud'] = CreateCrudObject(false,false,false)
             return
@@ -79,7 +80,8 @@ class CrudInit {
     }
     BooleanDefault() {
         //Editable Default
-        if (type_check.IsBool(is_crud)) {
+        let is_crud = this.grid_column['isCrud'] || null
+        if (type_check.IsBoolean(is_crud)) {
             let is_edit = this.is_edit
             if (is_crud === true) {
                 gc['isCrud'] = CreateCrudObject(true, true, is_edit)

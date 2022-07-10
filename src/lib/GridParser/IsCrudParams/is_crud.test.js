@@ -13,21 +13,26 @@ test('crud defaults editable', () => {
     let grid_column = {'field': 'A', 'editable': true}
     let x = new cp(grid_column)
     x.RunInit()
+    let crud_params = grid_column['isCrud']
+    let exp = { isPull: true, isPush: true, isChange: true }
 
-    // {
-    //     field: 'A',
-    //     editable: true,
-    //     isCrud: { isPull: true, isPush: true, isChange: true }
-    // }
-
-    console.log(grid_column)
-    expect(true).toBe(true)
-    // expect(rowData).toMatchObject(exp)
+    expect(crud_params).toMatchObject(exp)
 })
 
-// test('crud defaults not editable', () => {
-//     let grid_column = {'field': 'A', 'editable': true}
-//     let x = new cp(grid_column)
+test('crud rw', () => {
+    let grid_column = {'field': 'A', 'editable': false, 'isCrud': 'rw' }
+    let x = new cp(grid_column)
+    x.RunInit()
+    let crud_params = grid_column['isCrud']
+    let exp = { isPull: true, isPush: true, isChange: false }
+    expect(crud_params).toMatchObject(exp)
+})
 
-//     // expect(rowData).toMatchObject(exp)
-// })
+test('crud object', () => {
+    let grid_column = {'field': 'A', 'editable': true, 'isCrud': {'isChange': true, 'isPull': false, 'isPush': false} }
+    let x = new cp(grid_column)
+    x.RunInit()
+    let crud_params = grid_column['isCrud']
+    let exp = { isPull: false, isPush: false, isChange: true }
+    expect(crud_params).toMatchObject(exp)
+})

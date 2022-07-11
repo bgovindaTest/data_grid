@@ -1,57 +1,54 @@
 /*
-Explicitly set all defaultValues.
+Explicitly set all default values for headerName, ag grid column formattings
+and validation parameters.
 
 
-
-
-
-
-headerName
-defaultValue: {'value': 'string', 'dataType': '', 'key': '', ifNullSet: true/false, 'useKey': false } key for object or array
-defaultOrderby: 'asc/desc' (done by column order in columnDefs)
-defaultFitler: string value
-
+Creates default value object. This is used to set default values in new rows and
+replace null values if needed.
+defaultValue: {'value': 'string', 'dataType': '',  ifNullSet: true/false } key for object or array
 
 */
 
-const type_check = require('../TypeCheck')
-const meta_column_name = '_ag-meta_'
+const type_check  = require('../../../TypeCheck')
+const data_config = require('../../../DataConfig')
+const meta_column_name = data_config['meta_column_name']
+const lodashCloneDeep = require('lodash.clonedeep')
 
-
+//need to deep copy objects
+// let grid = lodashCloneDeep(this.grid)
+// where is IfNull parameter handled?
 //has whole grid object. Any data loading comes from
 //grid_funcs. Vue Components can also have async await
 class DefaultParams {
-    //for main loader
-    //grid is json object for aggrid
+
     constructor(grid) { this.grid  = grid }
 
-
-
-
-
     DefaultParamsInit() {
-        //grid_name or position
-        //this.RunGridInit()
-        //returns gridConfiguration
-        //for MainGrid
-        //make copy?
-        //grid = JSON.parse(JSON.stringify(food)) for deep copy
-
-        for(let i=0; i < grid.length; i++) {
-            let grid_column = grid[i]
+        /*
+        Main function for initializing default values for main grid
+        */
+        for(let i=0; i < this.grid.length; i++) {
+            let grid_column = this.grid[i]
             if (grid_column['field'] === meta_column_name ) { continue }
-            this.IfNull(grid_column)
-            this.IsEditable(grid_column)
-            this.HideColumns(grid_column)
             this.DefaultValue(grid_column)
             this.DefaultParameters(grid_column)
-            this.CellWidth(grid_column)
             this.HeaderName(grid_column)
         }
     }
 
     SubGridDefaultParamsInit(rowData, rowDataDefaults) {
-        this.DefaultParamsInit()
+        /*
+        Main function for initializing default values for sub grid
+
+        Order of operations.
+        Run DefaultParamsInit
+        Then run cellEditorParams init
+        then run SubGridDefaults
+
+        rowData if from the row that calls the subGrid
+        rowDataDefaults is from the subGrid columnDefs
+
+        */
         this.SubGridDefaults( rowData, rowDataDefaults )
     }
 
@@ -108,16 +105,12 @@ class DefaultParams {
         if (! grid_column.hasOwnProperty('editable') )   { grid_column['editable'] = false }
         if (! grid_column.hasOwnProperty('hide') )       { grid_column['hide'] = false }
         // ifNull: 'psql string calls to replace value'
-        this.IfNull(grid_column)
+        // this.IfNull(grid_column)
     }
     SubGridDefaults( rowData, rowDataDefaults ) {
         /*
         rowDataDefaults = {
-            'defaultFilter': {} key value? fro row params
-            'defaultSort': []
-            'enforcedFilters': {}
-            'defaultValues':  {}
-            {subGridKey: {rowKey: , paramsKeys:  ifNullSet: boolean  } } 
+            'defaultValues':  {subGridKey: {rowKey: , paramsKeys:  ifNullSet: boolean  } } 
         }
         */
         let gridDefaultValues = {}
@@ -149,7 +142,6 @@ class DefaultParams {
             dx['dataType'] = dataType
             subgrid['defaultValue'] = dx
         }
-        //loop though subgrid fields and add defaultData
     }
 
 
@@ -159,4 +151,4 @@ class DefaultParams {
 }
 
 
-module.exports = {'ColumnDefsInit': ColumnDefsInit}
+module.exports = DefaultParams

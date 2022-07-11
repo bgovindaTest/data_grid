@@ -14,7 +14,12 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     cellEditorParams: {
         subGridPos: 0
         onSaveMainRefresh: true/false
-        name: ''
+        row_name: { 'field': , 'paramsKey': }
+        pre_name: ''  for concatenations before name
+        post_name: '' for concatenations after name
+        subGridName: 'string' if empty assemble from pre_name + row_name + post_name
+
+
         rowDataDefaults = {
             //generated from rowData
             'defaultFilter': {}

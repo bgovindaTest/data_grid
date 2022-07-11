@@ -83,7 +83,9 @@ ifNull: 'psql string calls to replace value'
 //field determines which data to get from params.data in aggrid. key is if its an object.
 defaultValue: {'value': 'string', 'type': '', 'key': '', 'field': '' } handle raw value or replacement from row params?
 defaultOrderby: 'asc/desc' (done by column order in columnDefs)
-defaultFitler: string value
+defaultFilter: {  }
+
+
 
 showFilter: default true (if false cant be changed) should hide from filter module
 showSort: default true (if false cant be used for sorting)

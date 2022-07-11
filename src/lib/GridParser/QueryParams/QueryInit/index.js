@@ -7,8 +7,11 @@ showSort
 Should run after
 defaultParameters
 
-*/
+{'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null}
 
+*/
+const type_check  = require('../../../TypeCheck')
+const data_config = require('../../../DataConfig')
 
 class QueryParams {
     constructor (grid) { this.grid = grid }
@@ -61,43 +64,66 @@ class QueryParams {
         let sortList = []
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
-            let showFilter = grid_column['showFilter'] || false
-            let showSort   = grid_column['showSort'] || false
-            let defaultOrderby = grid_column['defaultOrderby'] || ""
-            let defaultValue = grid_column['defaultFilter'] || ""
-            let defOperator  = grid_column['defaultOperator'] || "="
-            let field = grid_column['field']
-            let headerName = grid_column['headerName'] || grid_column['field']
-            let dataType = grid_column['dataType'] || 'text'
-            if (defaultValue.trim() != "" && !showFilter ) {
-                //enforced filter
-                enforcedFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
-            } else if  ( defaultValue.trim() != "" && showFilter ) {
-                //default filter
-                defaultFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
-                filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
-            } else if (showFilter) {
-                //just add to available filters
-                filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
-            }
-    
-            if (showSort) {
-                if (defaultOrderby !== "") {
-                    if (defaultOrderby.toLowerCase() === 'asc') {
-                        defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'asc' } )
-                        sortList.push({'headerName': headerName, 'column_name': field } )
-                    } else if ( defaultOrderby.toLowerCase() === 'desc' ) {
-                        defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'desc' } )
-                        sortList.push({'headerName': headerName, 'column_name': field } )
-                    }
-                } else { sortList.push({'headerName': headerName, 'column_name': field }) }
-            }
-    
+            this.QueryModalDisplayInit(grid_column)
+            this.AddFilter(grid_column, defaultFilter, enforcedFilter)
+            this.AddOrderBy(grid_column, defaultSort, sortList)    
         }
         let filterParams  = {'current': defaultFilter, 'new': [], 'filterList': filterList, 'enforcedFilters': enforcedFilter}
         let orderByParams = {'current': defaultSort, 'new': [], 'orderByList': sortList}
         return {'filterParams': filterParams, 'orderByParams': orderByParams}
     }
+    QueryModalDisplayInit(grid_column) {
+        grid_column['showFilter'] = grid_column['showFilter'] || false
+        grid_column['showSort'] = grid_column['showSort'] || false
+
+
+    }
+
+    AddFilter(grid_column, defaultFilter, enforcedFilter) {
+        let defaultValue = grid_column['defaultFilter'] || ""
+        let showFilter   = grid_column['showFilter']
+        let defOperator  = grid_column['defaultOperator'] || "="
+        let headerName = grid_column['headerName'] || grid_column['field']
+        let dataType = grid_column['dataType'] || 'text'
+        let field = grid_column['field']
+        if (defaultValue.trim() != "" && !showFilter ) {
+            //enforced filter
+            enforcedFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
+        } else if  ( defaultValue.trim() != "" && showFilter ) {
+            //default filter
+            defaultFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
+            filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
+        } else if (showFilter) {
+            //just add to available filters
+            filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
+        }
+    }
+
+    AddOrderBy() {
+        let showFilter = grid_column['showFilter'] || false
+        let showSort   = grid_column['showSort'] || false
+        let defaultOrderby = grid_column['defaultOrderby'] || ""
+        let defaultValue = grid_column['defaultFilter'] || ""
+        let defOperator  = grid_column['defaultOperator'] || "="
+        let field = grid_column['field']
+        let headerName = grid_column['headerName'] || grid_column['field']
+        let dataType = grid_column['dataType'] || 'text'
+
+        if (showSort) {
+            if (defaultOrderby !== "") {
+                if (defaultOrderby.toLowerCase() === 'asc') {
+                    defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'asc' } )
+                    sortList.push({'headerName': headerName, 'column_name': field } )
+                } else if ( defaultOrderby.toLowerCase() === 'desc' ) {
+                    defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'desc' } )
+                    sortList.push({'headerName': headerName, 'column_name': field } )
+                }
+            } else { sortList.push({'headerName': headerName, 'column_name': field }) }
+        }
+
+    }
+
+
     PageInit() {
         let page_size = data_config.page_size
         let limit  = page_size
@@ -107,7 +133,7 @@ class QueryParams {
     SubGridDefaultFilter( rowData, rowFilterDefaults ) {
         /*
         rowDataDefaults = {
-            'defaultValues':  {subGridKey: {rowKey: , paramsKeys:  ifNullSet: boolean  } } 
+            defaultFilter: {subGridKey: {rowKey: , operator: ,rowKey2:   } } 
         }
         */
         let gridDefaultValues = {}

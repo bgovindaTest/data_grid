@@ -16,15 +16,20 @@ Each grid_column_rule has the structure below. A more indepth description is in 
         onSaveMainRefresh: true/false
         name: ''
         rowDataDefaults = {
+            //generated from rowData
             'defaultFilter': {}
-            'defaultSort': []
-            'enforcedFilters': {}
             'defaultValue':  {}
         }
         defaultValues: {subGridKey: {rowKey: , paramsKeys:    } } 
             if paramsKey exists assumbes rowData field is object or array.
             other wise just return value direclty from array. Should clone if 
             object so child cant change value.
+
+        defaultFilter: {subGridKey: {rowKey: , operator: ,rowKey2:   } } 
+            if paramsKey exists assumbes rowData field is object or array.
+            other wise just return value direclty from array. Should clone if 
+            object so child cant change value.
+
 
 */
 const type_check = require('../../../TypeCheck')

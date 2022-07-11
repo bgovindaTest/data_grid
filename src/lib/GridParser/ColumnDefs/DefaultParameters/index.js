@@ -2,117 +2,57 @@
 Explicitly set all defaultValues.
 
 
-Parses grids json object and converts expression syntax into javascript functions. 
-
-    'qparams_prefix':"",
-    'url_prefix':"",
-    '__init_params__':  {},
-    '__url_params__': {},
-    '__drop_downs__': {},
-    '__valuesObject__': [{}] //array is grid position object key is field and value is values to be passed.
-    '__is_read_only__':  true/false (do the have modification permssions)
-        //if no force editable to false
-    '__is_test__': 
 
 
 
 
-gridOptions.suppressPropertyNamesCheck = true
-
-validator: function()
-
-alias: {'pull': 'push'} //defaults to field
-
-//remove valueSetter if readonly?
-
-//not implemented yet also need try catch console log error.
-requiredFields: []
-validatorRequiredFields: [] //must all be not null or will not run. returns null in that case
-valueGetterRequiredFields: [] //must all be not null or will not run. returns null in that case
-requiredFieldsTypeCheck: true //unchangeage 
-
-ifNull: 'psql string calls to replace value'
-    'default', 'current_timestamp', 'current_time','null',
-    'current_date', 'localtime', 'localtimestamp', ""
-
-    //if actual value?
-    {'value': 'xyz', 'cmd': postgres_command}
-
+headerName
 defaultValue: {'value': 'string', 'dataType': '', 'key': '', ifNullSet: true/false, 'useKey': false } key for object or array
 defaultOrderby: 'asc/desc' (done by column order in columnDefs)
 defaultFitler: string value
-
-showFilter: default true (if false cant be changed) should hide from filter module
-showSort: default true (if false cant be used for sorting)
-
-
-hide - hides the field
-suppressToolPanel - removes it from the tool panel.
-
-if (grid_column.hasOwnProperty ('ignoreError') ) { ignoreError[field] = grid_column['ignoreError'] }
-if (grid_column.hasOwnProperty( 'isRequired') )  { isRequired[field] = grid_column['isRequired'] }
-if (grid_column.hasOwnProperty( 'allowNull') )   { allowNull[field] = grid_column['allowNull'] }
 
 
 */
 
 const type_check = require('../TypeCheck')
 const meta_column_name = '_ag-meta_'
-const meta_delete_undo_name = '_ag-meta-delete-undo_'
 
 
 //has whole grid object. Any data loading comes from
 //grid_funcs. Vue Components can also have async await
-class ColumnDefsInit {
+class DefaultParams {
     //for main loader
     //grid is json object for aggrid
-    constructor(grid, pageParams, rowParams) {
-        this.grid  = grid
-        this.globals   = pageParams.globals || {}
-        this.dropDowns = pageParams.dropDowns || {}
-        this.urlParams = pageParams.urlParams || {}
-        this.rowParams = rowParams || {}
-    }
+    constructor(grid) { this.grid  = grid }
 
-    SubGridDefaultParams(grid, rowParams) {
-        //add rowParams?
 
-        //Copy grid
-        //Add default values from rowData
-        //this.RunGridInit()
-        //return
-    }
-    SubGridInit() {
+
+
+
+    DefaultParamsInit() {
         //grid_name or position
         //this.RunGridInit()
         //returns gridConfiguration
-    }
-    GridInit() {
         //for MainGrid
         //make copy?
         //grid = JSON.parse(JSON.stringify(food)) for deep copy
-        let grid = lodashCloneDeep(this.grid) //messes up column order probably?
-        let defaultOrderBy  = []  //name value?
-        let defaultFilter  = [] //name operator value
-        let enforcedFilter = []
 
-        //prepend delete_undo column
-        InitializeDeleteUndoColumn(grid)
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
-            if (grid_column['field'] === meta_delete_undo_name ) { continue }
-
+            if (grid_column['field'] === meta_column_name ) { continue }
             this.IfNull(grid_column)
             this.IsEditable(grid_column)
             this.HideColumns(grid_column)
-            //  Added by QueryParams/Pull 
-            // this.DefaultOrderBy(grid_column,defaultOrderBy)
-            // this.DefaultFilter(grid_column,defaultFilter, enforcedFilter)
             this.DefaultValue(grid_column)
             this.DefaultParameters(grid_column)
             this.CellWidth(grid_column)
             this.HeaderName(grid_column)
         }
+    }
+
+    SubGridDefaultParamsInit(rowData, rowDataDefaults) {
+        this.DefaultParamsInit()
+        this.SubGridDefaults( rowData, rowDataDefaults )
     }
 
     HeaderName(grid_column) {
@@ -124,110 +64,99 @@ class ColumnDefsInit {
 
 
     DefaultValue(grid_column) {
+        /*
+            Adds default object to gridColumn
+            value is default value to be used when creating new row or changing value before save
+            ifNullSet if true will change null to default value on save
+            defaultValue: {'value': 'string', 'dataType': '',  ifNullSet: true/false }
 
-        // defaultValue: {'value': 'string', 'dataType': '', 'key': '', 'field': '', ifNullSet: true/false }
-
-        // if string or boolean or null?
-        // need to make changes for linked object.
-        if (! grid_column.hasOwnProperty('defaultValue') ) {return}
+        */
+        if (! grid_column.hasOwnProperty('defaultValue') ) {
+            grid_column['defaultValue'] = {'value': null, 'dataType': this.DataType(grid_column), 'ifNullSet': false}
+            return
+        }
         let x = grid_column['defaultValue']
         if (type_check.IsNull(x) ) {
-            grid_column['defaultValue'] = {'value': null, 'type': 'string'}
+            grid_column['defaultValue'] = {'value': null, 'dataType': this.DataType(grid_column), 'ifNullSet': false}
         }
         else if (type_check.IsBasicType(x)  ) {
-            grid_column['defaultValue'] = {'value': String(x), 'type': 'string'}
+            grid_column['defaultValue'] = {'value': String(x), 'dataType': this.DataType(grid_column), 'ifNullSet': false}
         }
-        else {
-            grid_column['defaultValue'] = {'value': x, 'type': 'object'}
+        else if (type_check.IsArray(x)) {
+                grid_column['defaultValue'] = {'value': x, 'dataType': this.DataType(grid_column), 'ifNullSet': false}
+        } else if (type_check.IsObject(x)) {
+                
+        } else {
+            grid_column['defaultValue'] = {'value': null, 'dataType': this.DataType(grid_column), 'ifNullSet': false}
         }
+
     }
 
-
+    DataType(grid_column) {
+        let data_type = grid_column['dataType'] || 'text'
+        return data_type
+    }
 
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
         //editable and isCrud permissions
-        if (grid_column.hasOwnProperty('editable')) {
-            if (! grid_column.hasOwnProperty('isCrud')) {grid_column['isCrud'] = true}
-            if (! grid_column.hasOwnProperty('isRequired')) { grid_column['isRequired']  = false }
-            if (! grid_column.hasOwnProperty('ignoreError')) { grid_column['ignoreError'] = false }
-            if (! grid_column.hasOwnProperty('allowNull')) { grid_column['allowNull'] = true }
-        } else { 
-            if (! grid_column.hasOwnProperty('isCrud')) {grid_column['isCrud'] = false} 
-            if (! grid_column.hasOwnProperty('isRequired')) { grid_column['isRequired'] = false }
-            if (! grid_column.hasOwnProperty('ignoreError')) { grid_column['ignoreError'] = false }
-            if (! grid_column.hasOwnProperty('allowNull')) { grid_column['allowNull'] = true }
-        }
-        if (! grid_column.hasOwnProperty('dataType')) {grid_column['dataType'] = 'text'}
-        if (! grid_column.hasOwnProperty('width'))   { grid_column['width'] = 500 }
+
+        if (! grid_column.hasOwnProperty('isRequired'))  { grid_column['isRequired']  = false }
+        if (! grid_column.hasOwnProperty('ignoreError')) { grid_column['ignoreError'] = false }
+        if (! grid_column.hasOwnProperty('dataType'))    { grid_column['dataType'] = 'text'}
+        if (! grid_column.hasOwnProperty('width'))       { grid_column['width'] = 500 }
+        if (! grid_column.hasOwnProperty('editable') )   { grid_column['editable'] = false }
+        if (! grid_column.hasOwnProperty('hide') )       { grid_column['hide'] = false }
         // ifNull: 'psql string calls to replace value'
         this.IfNull(grid_column)
     }
-    //defaulValueIfNull
+    SubGridDefaults( rowData, rowDataDefaults ) {
+        /*
+        rowDataDefaults = {
+            'defaultFilter': {} key value? fro row params
+            'defaultSort': []
+            'enforcedFilters': {}
+            'defaultValues':  {}
+            {subGridKey: {rowKey: , paramsKeys:  ifNullSet: boolean  } } 
+        }
+        */
+        let gridDefaultValues = {}
+        let subgrid = this.grid
 
-
-
-    HideColumns (grid_column) {
-        if (grid_column.hasOwnProperty('hide') ) { return } 
-        else { grid_column['hide'] = false }
+        let subGridFields = Object.keys(rowDataDefaults)
+        for (let i =0; i < subGridFields.length; i++ ) {
+            let sgx    = subGridFields[i]
+            let rowKey = sgx['rowKey']
+            dx = {}
+            if (sgx.hasOwnProperty('paramsKey') ) {
+                let pkey  = sgx['paramsKey']
+                let value = rowData[rowKey][pkey]
+                dx['value'] = value
+                dx['ifNullSet'] = sgx['ifNullSet'] || false
+                gridDefaultValues[sgx] = dx
+            } else {
+                let value = rowData[rowKey]
+                dx['value'] = value
+                dx['ifNullSet'] = sgx['ifNullSet'] || false
+                gridDefaultValues[sgx] = dx
+            }
+        }
+        for (let i =0; i < subgrid.length; i++ ) {
+            let field = subgrid['field']
+            if (! gridDefaultValues.hasOwnProperty(field) ) { continue }
+            let dataType = this.DataType(grid_column)
+            let dx = gridDefaultValues[field]
+            dx['dataType'] = dataType
+            subgrid['defaultValue'] = dx
+        }
+        //loop though subgrid fields and add defaultData
     }
-    IsEditable (grid_column) {
-        //may have read write params that need to be processed in the future
-        //if new row vs quried row. will decide from metadata?
-        if (grid_column.hasOwnProperty('editable') ) { return } 
-        else { grid_column['editable'] = false }
-    }
 
 
-    IfNull(grid_column) {
-        //verify valid if null replacement value
-        if (! grid_column.hasOwnProperty('ifNull') ) { grid_column['ifNull'] = 'null' }
-        let default_values = [
-            /*
-            These are default values that can be direclty entered into crud operations. These
-            */
-            'default', 'current_timestamp', 'current_time','null',
-            'current_date', 'localtime', 'localtimestamp', ""
-        ]
-        let if_null = grid_column['ifNull']
-        if (! default_values.includes(if_null) ) { grid_column['ifNull'] = 'null' }
-    }
+
+
+
 }
-
-// SubGridRowDataDefaults(grid, grid_column, rowData) {
-//     /*
-//     Converts everyting to uniform object inorder to set static fields.
-
-//     //returns a function
-
-//     Adds vales from row to create submodal grid.
-//     rowDataDefaults = {
-//         'defaultFilter': {} key value? fro row params
-//         'defaultSort': []
-//         'enforcedFilters': {}
-//         'defaultValue':  {}
-//     }
-
-//     */
-//     return
-
-// }
-// }
-
-// function AutoCompleteMapper( ) {
-
-// }
-
-// function DropDownMapper( ) {
-
-// }
-
-
-
-
-
-
-
 
 
 module.exports = {'ColumnDefsInit': ColumnDefsInit}

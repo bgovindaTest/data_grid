@@ -80,24 +80,43 @@ class QueryParams {
     }
 
     AddFilter(grid_column, defaultFilter, enforcedFilter) {
-        let defaultValue = grid_column['defaultFilter'] || ""
+        let dFV = this.CreateFilterValue(grid_column)
+        //if value doesnt exists ignore defaultFilter
+        let defaultValue = defaultFilterValue.value
         let showFilter   = grid_column['showFilter']
+        if (defaultValue.trim() != "" && !showFilter ) { enforcedFilter.push(dFV) } 
+        else if  ( defaultValue.trim() != "" && showFilter ) {
+            defaultFilter.push(dFV)
+            filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['dataType'] })
+        } else if (showFilter) {
+            filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['column_name'] })
+        }
+    }
+    CreateFilterValue(  grid_column ) {
+        //{'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null}
+        let defValue = grid_column['defaultFilter']
         let defOperator  = grid_column['defaultOperator'] || "="
         let headerName = grid_column['headerName'] || grid_column['field']
         let dataType = grid_column['dataType'] || 'text'
         let field = grid_column['field']
-        if (defaultValue.trim() != "" && !showFilter ) {
-            //enforced filter
-            enforcedFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
-        } else if  ( defaultValue.trim() != "" && showFilter ) {
-            //default filter
-            defaultFilter.push({'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': defOperator, 'value':  defaultValue })
-            filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
-        } else if (showFilter) {
-            //just add to available filters
-            filterList.push({'headerName': headerName, 'column_name': field, 'dataType': dataType })
+
+
+        if (type_check.IsBasicType(defValue) ) {
+            let x = {'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': '='}
+            if (type_check.IsNull(defValue) ) { x['value'] = defValue
+            } else { x['value'] = String(defValue) }
+            return x
         }
+        if (! defValue.hasOwnProperty('')) {}
+        if (! defValue.hasOwnProperty('')) {}
+        if (! defValue.hasOwnProperty('')) {}
+        if (! defValue.hasOwnProperty('')) {}
+        //check valid operator
+
+
+
     }
+
 
     AddOrderBy() {
         let showFilter = grid_column['showFilter'] || false

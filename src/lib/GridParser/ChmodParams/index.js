@@ -1,7 +1,7 @@
 /*
-Sets parameters for isCrud. This determines 
+Sets parameters for chmod. This determines 
 
-isCrud: {
+chmodParams: {
     isPull: bool,
     isPush: bool,
     isChange: bool,
@@ -16,27 +16,33 @@ isChange: field can be modified in the UI. Determines what fields
 isCrud: bool or string: rwc  (read write or change)
 editable: boolean or conditional based on row params
 
+chmod mod is a unix command for setting permissions for read/write/execute
+here
+r: isPull   (expects data from server)
+w: isPush   (sends data to server)
+x: isChange (if value changed the row is marked as modified and data is sent on save)
 
 */
 const type_check = require('../../TypeCheck')
 
 //IsBoolean
 //IsObject (x)
+//chmodParams
 
 
 
-class CrudInit {
+class ChmodParams {
     constructor (grid_column) {
         this.grid_column = grid_column
         this.is_edit   = false
     }
-    RunInit() {
+    ChmodParamsInit() {
         this.IsEditable()
         this.SetCrud()
     }
     SetCrud() {
         let gc = this.grid_column
-        let is_crud = gc['isCrud'] || null
+        let is_crud = gc['chmodParams'] || null
         if (this.EditableDefault()) { return }
         else if (this.NullDefault() ) {return }
         else if (this.BooleanDefault() ) { return  }
@@ -44,17 +50,17 @@ class CrudInit {
 
         //parseString
         if (type_check.IsString(is_crud) ) {
-            gc['isCrud'] = CreateCrudObject(false,false,false)
-            if (is_crud.includes('r') ) { gc['isCrud']['isPull'] = true } 
-            if (is_crud.includes('w') ) { gc['isCrud']['isPush'] = true }
-            if (is_crud.includes('c') ) { gc['isCrud']['isChange'] = true }
-            SetCrudDefaults(gc['isCrud'])
+            gc['chmodParams'] = CreateCrudObject(false,false,false)
+            if (is_crud.includes('r') ) { gc['chmodParams']['isPull'] = true } 
+            if (is_crud.includes('w') ) { gc['chmodParams']['isPush'] = true }
+            if (is_crud.includes('c') ) { gc['chmodParams']['isChange'] = true }
+            SetCrudDefaults(gc['chmodParams'])
         } //parse object
         else if (! type_check.IsObject(is_crud) ) { 
             let cp = {}
             SetCrudDefaults(cp)
-            gc['isCrud'] = cp
-        } else { SetCrudDefaults(gc['isCrud']) }
+            gc['chmodParams'] = cp
+        } else { SetCrudDefaults(gc['chmodParams']) }
         //throw error
     }
     IsEditable() {
@@ -64,31 +70,31 @@ class CrudInit {
         this.is_edit = true
     }
     EditableDefault( ) {
-        let is_crud = this.grid_column['isCrud'] || null
+        let is_crud = this.grid_column['chmodParams'] || null
         if (is_crud === null && this.is_edit) { 
-            this.grid_column['isCrud'] = CreateCrudObject(true, true, true)
+            this.grid_column['chmodParams'] = CreateCrudObject(true, true, true)
             return true
         }
         return false
     }
     NullDefault() {
-        let is_crud = this.grid_column['isCrud'] || null
+        let is_crud = this.grid_column['chmodParams'] || null
         if (type_check.IsNull(is_crud)) { 
-            gc['isCrud'] = CreateCrudObject(false,false,false)
+            gc['chmodParams'] = CreateCrudObject(false,false,false)
             return
         }
     }
     BooleanDefault() {
         //Editable Default
-        let is_crud = this.grid_column['isCrud'] || null
+        let is_crud = this.grid_column['chmodParams'] || null
         if (type_check.IsBoolean(is_crud)) {
             let is_edit = this.is_edit
             if (is_crud === true) {
-                gc['isCrud'] = CreateCrudObject(true, true, is_edit)
+                gc['chmodParams'] = CreateCrudObject(true, true, is_edit)
                 //read and write true
             } else {
                 //read and write are false
-                gc['isCrud'] = CreateCrudObject(false, false, is_edit)
+                gc['chmodParams'] = CreateCrudObject(false, false, is_edit)
             }
             return
         }   
@@ -114,4 +120,4 @@ function SetCrudDefaults(crudParams) {
 }
 
 
-module.exports = CrudInit
+module.exports = ChmodParams

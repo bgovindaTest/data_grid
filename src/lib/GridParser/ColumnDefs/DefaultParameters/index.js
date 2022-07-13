@@ -109,7 +109,7 @@ class DefaultParams {
 
     DefaultParameters(grid_column) {
         /* Add default condtions to column */
-        //editable and isCrud permissions
+        //editable and chmodParams permissions
 
         if (! grid_column.hasOwnProperty('isRequired'))  { grid_column['isRequired']  = false }
         if (! grid_column.hasOwnProperty('ignoreError')) { grid_column['ignoreError'] = false }

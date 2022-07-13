@@ -18,7 +18,7 @@ Parses grids json object and converts expression syntax into javascript function
             help: "",
             addRow: true
         }
-        'crudParams': //i.e. new row, update, delete, etc read/etc create default objects for query params?
+        'queryParams': //i.e. new row, update, delete, etc read/etc create default objects for query params?
             { 
                 default: ->
                 select:  ->

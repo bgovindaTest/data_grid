@@ -1,11 +1,14 @@
 /*
 Initializes parameters for pulling and pushing data
-
-filter, sortList and pagination. 
-showFilter: boolean
-showSort: boolean
 Should run after
 defaultParameters
+
+filterList, sortList and pagination. 
+showFilter: boolean
+showSort: boolean
+enforcedFilters
+defaultFilter
+defaultSort
 
 {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null}
 

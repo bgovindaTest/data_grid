@@ -15,21 +15,14 @@ function SetDefaults(grid) {
 }
 
 
+
 test('import query_init', () => {
+    let grid = [{'field': 'A', 'editable': true}]
+    SetDefaults(grid)
+    let x = new qp(grid)
+    let y =x.QueryParamsInit()
     expect(true).toBe(true)
 })
-
-
-// test('import query_init', () => {
-//     let grid = [{'field': 'A', 'editable': true}]
-//     SetDefaults(grid)
-//     let x = new qp(grid)
-//     let y =x.QueryParamsInit()
-//     console.log(grid)
-//     console.log(y)
-//     expect(true).toBe(true)
-//     // expect(crud_params).toMatchObject(exp)
-// })
 
 test('filter assembly', () => {
     let grid = [
@@ -109,24 +102,42 @@ test('sort assembly', () => {
     expect(res).toMatchObject(expected)
 })
 
-// test('filter assembly', () => {
-//     let grid = [{'field': 'A', 'editable': true, 'defaultFilter': true}]
-//     SetDefaults(grid)
-//     let x = new qp(grid)
-//     let y =x.QueryParamsInit()
-//     console.log(y['filterParams']['current'])
-//     console.log(y['filterParams']['filterList'])
-//     expect(true).toBe(true)
-//     // expect(crud_params).toMatchObject(exp)
-// })
-
-// test('sort assembly', () => {
-//     let grid = [{'field': 'A', 'editable': true, 'defaultFilter': true}]
-//     SetDefaults(grid)
-//     let x = new qp(grid)
-//     let y =x.QueryParamsInit()
-//     console.log(y['filterParams']['current'])
-//     console.log(y['filterParams']['filterList'])
-//     expect(true).toBe(true)
-//     // expect(crud_params).toMatchObject(exp)
-// })
+test('subgrid filter assembly', () => {
+    let grid = [{'field': 'a', 'editable': true,  'showFilter': false},
+        {'field': 'b', 'editable': true,  'showFilter':  true}
+    ]
+    SetDefaults(grid)
+    let x = new qp(grid)
+    let rowData = {'x': {'value':'X'}, 'y': 'Y'}
+    //{subGridKey: {rowKey: , operator: ,rowKey2:   }
+    let rowFilterDefaults = {'a': {'rowKey': 'x', 'paramsKey': 'value'}, 'b': {'rowKey': 'y'}}
+    let y =x.SubGridQueryParamsInit(rowData, rowFilterDefaults )
+    let result = {
+        'current': y['filterParams']['current'],
+        'filterList': y['filterParams']['filterList'],
+        'enforcedFilters': y['filterParams']['enforcedFilters'],
+        'new': y['filterParams']['new']
+    }
+    let expected = {
+        'current': [
+            { value: 'Y', delimiterType: null, column_name: 'b', operator: '=',
+              value2: null, dataType: 'text', headerName: 'B'
+            }
+        ],
+        'filterList': [ { headerName: 'B', column_name: 'b', dataType: 'text' } ],
+        'new': [],
+        'enforcedFilters':  
+        [
+            {
+              value: 'X',
+              delimiterType: null,
+              column_name: 'a',
+              operator: '=',
+              value2: null,
+              dataType: 'text',
+              headerName: 'A'
+            }
+          ]
+    }
+    expect(result).toMatchObject(expected)
+})

@@ -109,7 +109,7 @@ class QueryParams {
         } else {
             let showFilter   = grid_column['showFilter']
             if (showFilter) {
-                filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['column_name'] })
+                filterList.push({'headerName': grid_column['headerName'], 'column_name': grid_column['column_name'], 'dataType': grid_column['dataType'] })
             }
         }
 
@@ -213,14 +213,15 @@ class QueryParams {
             let rfVals   = rowFilterDefaults[sgKey] //{rowKey: , operator: ,rowKey2: , paramsKey: , paramsKey2:, delimiterType: null,  }
             let rowDataKey = rfVals['rowKey']
             let val1 = rowData[rowDataKey]
-            defVals = {}
+            let defVals = {}
             if (rfVals.hasOwnProperty('paramsKey') )     { val1 = val1[rfVals['paramsKey']] }
+            defVals['value'] = val1
             defVals['delimiterType'] = rfVals['delimiterType'] || null
             defVals['column_name']   = sgKey
             defVals['operator']      = rfVals['operator'] || '='
             defVals['value2']        = null
 
-            if (!sgx.hasOwnProperty('rowKey2') ) { 
+            if (!rfVals.hasOwnProperty('rowKey2') ) { 
                 gridDefaultValues[sgKey] = defVals
                 continue
             }
@@ -229,15 +230,16 @@ class QueryParams {
 
             if (rfVals.hasOwnProperty('paramsKey') ) { val2 = val2[rfVals['paramsKey2']] }
             defVals['value2'] = val2
-            gridDefaultValues[sgx] = gridDefaultValues
+            gridDefaultValues[sgKey] = defVals
         }
         for (let i =0; i < subgrid.length; i++ ) {
-            let field = subgrid['field']
+            let grid_column = subgrid[i]
+            let field = grid_column['field']
             if (! gridDefaultValues.hasOwnProperty(field) ) { continue }
-            let dataType = this.DataType(grid_column)
+            let dataType = grid_column['dataType']
             let dx = gridDefaultValues[field]
             dx['dataType'] = dataType
-            subgrid['defaultFilter'] = dx
+            subgrid[i]['defaultFilter'] = dx
         }
     }
 

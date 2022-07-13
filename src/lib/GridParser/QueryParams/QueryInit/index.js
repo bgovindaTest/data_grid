@@ -75,10 +75,7 @@ class QueryParams {
         /*
             Adds default values for showFilter and showSort.
         */
-        // console.log(grid_column)
         let showFilter = grid_column['showFilter']
-        console.log(showFilter)
-        console.log( type_check.IsBoolean(showFilter) )
         if (! type_check.IsBoolean(showFilter) ) {
             if (grid_column.hasOwnProperty('defaultFilter') ) { grid_column['showFilter'] =  true } 
             else {  grid_column['showFilter'] = false } 
@@ -89,7 +86,6 @@ class QueryParams {
             if (grid_column.hasOwnProperty('defaultSort') ) { grid_column['showSort'] = true } 
             else { grid_column['showSort'] = false }
         }
-        // console.log(grid_column)
     }
 
     AddFilter(grid_column, filterList, defaultFilter, enforcedFilter) {
@@ -129,11 +125,14 @@ class QueryParams {
         */
         let defValue = grid_column['defaultFilter'] //basic type or object above
         let defOperator  = grid_column['defaultOperator'] || "="
-        let headerName = grid_column['headerName'] || grid_column['field']
+        let headerName = grid_column['headerName']  || grid_column['field']
         let dataType = grid_column['dataType'] || 'text'
         let field = grid_column['field']
 
-        if (! data_config.valid_operators.hasOwnProperty(defOperator)) { defOperator = '=' }
+        if (! data_config.valid_operators.hasOwnProperty(defOperator))     { defOperator = '=' }
+        if (  data_config.between_parse_types.hasOwnProperty(defOperator)) { defOperator = '=' }
+
+
         if (type_check.IsBasicType(defValue) ) {
             let x = {'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': '=', 'value': String(defValue),
                 'value2': null, delimiterType: null }
@@ -143,12 +142,15 @@ class QueryParams {
         //is object syntax
         defValue['column_name'] = field
         defValue['dataType']    = dataType
-        if (! defValue.hasOwnProperty('value2')) {defValue['value2'] = null}
-        if (! defValue.hasOwnProperty('operator')) {defValue['operator'] = '='}
-        if (! defValue.hasOwnProperty('value')) {defValue['value'] = null }
-        if (! defValue.hasOwnProperty('delimiterType')) {defValue['delimiterType'] = null}
+        if (! defValue.hasOwnProperty('headerName')) { defValue['headerName'] = headerName}
+        if (! defValue.hasOwnProperty('value2'))     { defValue['value2'] = null}
+        if (! defValue.hasOwnProperty('operator'))   { defValue['operator'] = '='}
+        if (! defValue.hasOwnProperty('value'))      { defValue['value'] = null }
+        if (! defValue.hasOwnProperty('delimiterType')) { defValue['delimiterType'] = null}
+        if (! data_config.valid_operators.hasOwnProperty( defValue['operator'])) { defValue['operator'] = '=' }
+
         //check valid operator
-        if (between_parse_types.hasOwnProperty(defOperator)) {
+        if (data_config.between_parse_types.hasOwnProperty(defOperator)) {
             let v1 = defValue['value']
             let v2 = defValue['value2']
             if (type_check.IsNull(v1) || type_check.IsNull(v2) ) { defValue['operator'] = '=' }
@@ -157,23 +159,25 @@ class QueryParams {
     }
 
     //(grid_column, sortList , defaultSort,   enforcedSort)
-    AddOrderBy(grid_column, sortList, defaultSort) {
+    AddOrderBy(grid_column, sortList, defaultSortList) {
         /*
             Adds sortList for modal window and initialized order by
             defaultSort: 'asc'/'desc'
         */
         let showSort   = grid_column['showSort']
-        let defaultOrderby = grid_column['defaultOrderby'] || ""
+        let defaultSort = grid_column['defaultSort'] || ""
         let field = grid_column['field']
         let headerName = grid_column['headerName'] || grid_column['field']
 
         if (showSort) {
-            if (defaultOrderby !== "") {
-                if (defaultOrderby.toLowerCase() === 'asc') {
-                    defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'asc' } )
+            if (defaultSort !== "") {
+                if (defaultSort.toLowerCase() === 'asc') {
+                    defaultSortList.push({'headerName': headerName, 'column_name': field, 'order_by': 'asc' } )
                     sortList.push({'headerName': headerName, 'column_name': field } )
-                } else if ( defaultOrderby.toLowerCase() === 'desc' ) {
-                    defaultSort.push({'headerName': headerName, 'column_name': field, 'order_by': 'desc' } )
+                } else if ( defaultSort.toLowerCase() === 'desc' ) {
+                    defaultSortList.push({'headerName': headerName, 'column_name': field, 'order_by': 'desc' } )
+                    sortList.push({'headerName': headerName, 'column_name': field } )
+                } else {
                     sortList.push({'headerName': headerName, 'column_name': field } )
                 }
             } else { sortList.push({'headerName': headerName, 'column_name': field }) }

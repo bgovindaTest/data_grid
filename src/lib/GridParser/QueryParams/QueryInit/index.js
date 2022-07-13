@@ -12,6 +12,27 @@ defaultParameters
 */
 const type_check  = require('../../../TypeCheck')
 const data_config = require('../../../DataConfig')
+const { between_parse_types } = require('../../../DataConfig')
+
+// valid_operators = {'=': '=', '!=': '!=', 
+//     '<>': '<>', '>':'>', '>=': '>=', 
+//     '<': '<', '<=': '<=', 
+//     'lt': '<', 'le':'<=' , 'gt': '>',
+//     'ge': '>=', 'eq': '=', 'neq': '!=',
+//     'in':'IN',
+//     'not_in': "NOT IN", 
+//     'similar': "SIMILAR TO", 'not_similar': "NOT SIMILAR TO",
+//     'like': "LIKE",  'not_like': "NOT LIKE", 'ilike': "ILIKE",
+//     'not_ilike': "NOT ILIKE",
+//     'between': "BETWEEN SYMMETRIC", 'not_between': "NOT BETWEEN SYMMETRIC" , 'is_null': "IS NULL", 
+//     'is_not_null': "IS NOT NULL",
+//     //create in statements with like and ilike 
+//     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
+//     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
+// }
+
+// between_parse_types
+
 
 class QueryParams {
     constructor (grid) { this.grid = grid }
@@ -93,26 +114,39 @@ class QueryParams {
         }
     }
     CreateFilterValue(  grid_column ) {
-        //{'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null}
-        let defValue = grid_column['defaultFilter']
+        //column_name comes from field
+        //{'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null, delimiterType: null, dataType: null }
+        //only require { 'operator': '!=', 'value':  'a', 'value2': null }
+        let defValue = grid_column['defaultFilter'] //basic type or object above
         let defOperator  = grid_column['defaultOperator'] || "="
         let headerName = grid_column['headerName'] || grid_column['field']
         let dataType = grid_column['dataType'] || 'text'
         let field = grid_column['field']
 
+        if (! data_config.valid_operators.hasOwnProperty(defOperator)) { defOperator = '=' }
+
+
 
         if (type_check.IsBasicType(defValue) ) {
-            let x = {'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': '='}
-            if (type_check.IsNull(defValue) ) { x['value'] = defValue
-            } else { x['value'] = String(defValue) }
+            let x = {'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': '=', 'value': String(defValue),
+                'value2': null, delimiterType: null }
+            if (type_check.IsNull(defValue) ) { x['value'] = defValue }
             return x
         }
-        if (! defValue.hasOwnProperty('')) {}
-        if (! defValue.hasOwnProperty('')) {}
-        if (! defValue.hasOwnProperty('')) {}
-        if (! defValue.hasOwnProperty('')) {}
+        //is object syntax
+        defValue['column_name'] = field
+        defValue['dataType']    = dataType
+        if (! defValue.hasOwnProperty('value2')) {defValue['value2'] = null}
+        if (! defValue.hasOwnProperty('operator')) {defValue['operator'] = '='}
+        if (! defValue.hasOwnProperty('value')) {defValue['value'] = null }
+        if (! defValue.hasOwnProperty('delimiterType')) {defValue['delimiterType'] = null}
         //check valid operator
-
+        if (between_parse_types.hasOwnProperty(defOperator)) {
+            let v1 = defValue['value']
+            let v2 = defValue['value2']
+            if (type_check.IsNull(v1) || type_check.IsNull(v2) ) { defValue['operator'] = '=' }
+        }
+        return defValue
 
 
     }
@@ -182,7 +216,6 @@ class QueryParams {
         }
     }
 
-
-
-
 }
+
+module.exports = QueryParams

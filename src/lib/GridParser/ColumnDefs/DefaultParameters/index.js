@@ -7,6 +7,19 @@ Creates default value object. This is used to set default values in new rows and
 replace null values if needed.
 defaultValue: {'value': 'string', 'dataType': '',  ifNullSet: true/false } key for object or array
 
+
+// add conditions for row height
+// for row height
+// <ag-grid-vue
+//     :getRowHeight="getRowHeight"
+//     /* other grid options ... 
+//     </ag-grid-vue>
+
+//     this.getRowHeight = params => params.node.group ? 50 : 20;
+
+// add conditions for is editable //insert only or update only?
+// add conditions parser?
+
 */
 
 const type_check  = require('../../../TypeCheck')

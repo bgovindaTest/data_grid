@@ -127,7 +127,7 @@ test('number type cast', () => {
     let x =tc.TypeCastNumber('1')
     let y =tc.TypeCastNumber(23.2)
     let z =tc.TypeCastNumber('aas')
-    expect(x==='1' && y===23.2 && z ===null ).toBe(true)
+    expect(x==='1' && y==='23.2' && z ===null ).toBe(true)
 })
 
 test('string type cast', () => {

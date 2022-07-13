@@ -72,7 +72,7 @@ function IsJsonArray(x) {
 }
 
 function IsBoolean (x) {
-    let bool_values = ['t','true','y','yes','on','1','TRUE', 'FALSE','f','n','no','off','0']
+    let bool_values = ['t','true','y','yes','on','1','TRUE', 'FALSE','f','false','n','no','off','0']
     if ( bool_values.includes(String(x) ) ) {return true}
     else { return false}
 }

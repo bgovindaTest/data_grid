@@ -2,8 +2,8 @@
 Initializes parameters for pulling and pushing data
 
 filter, sortList and pagination. 
-showFilter
-showSort
+showFilter: boolean
+showSort: boolean
 Should run after
 defaultParameters
 
@@ -12,26 +12,7 @@ defaultParameters
 */
 const type_check  = require('../../../TypeCheck')
 const data_config = require('../../../DataConfig')
-const { between_parse_types } = require('../../../DataConfig')
 
-// valid_operators = {'=': '=', '!=': '!=', 
-//     '<>': '<>', '>':'>', '>=': '>=', 
-//     '<': '<', '<=': '<=', 
-//     'lt': '<', 'le':'<=' , 'gt': '>',
-//     'ge': '>=', 'eq': '=', 'neq': '!=',
-//     'in':'IN',
-//     'not_in': "NOT IN", 
-//     'similar': "SIMILAR TO", 'not_similar': "NOT SIMILAR TO",
-//     'like': "LIKE",  'not_like': "NOT LIKE", 'ilike': "ILIKE",
-//     'not_ilike': "NOT ILIKE",
-//     'between': "BETWEEN SYMMETRIC", 'not_between': "NOT BETWEEN SYMMETRIC" , 'is_null': "IS NULL", 
-//     'is_not_null': "IS NOT NULL",
-//     //create in statements with like and ilike 
-//     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
-//     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
-// }
-
-// between_parse_types
 
 
 class QueryParams {
@@ -70,12 +51,9 @@ class QueryParams {
 
     FilterOrderByObjectInit() {
         /*
-            //run twice once for filterParams and once for orderByParams
-
-
+            Creates filters and sort objects for queries. Parses grid object for
+            default parameters for filtering and sorting.
         */
-
-
         let grid = this.grid
 
         let filterList = []
@@ -86,37 +64,69 @@ class QueryParams {
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             this.QueryModalDisplayInit(grid_column)
-            this.AddFilter(grid_column, defaultFilter, enforcedFilter)
-            this.AddOrderBy(grid_column, defaultSort, sortList)    
+            this.AddFilter(grid_column, filterList, defaultFilter, enforcedFilter)
+            this.AddOrderBy(grid_column, sortList , defaultSort)    
         }
         let filterParams  = {'current': defaultFilter, 'new': [], 'filterList': filterList, 'enforcedFilters': enforcedFilter}
-        let orderByParams = {'current': defaultSort, 'new': [], 'orderByList': sortList}
+        let orderByParams = {'current': defaultSort,   'new': [], 'orderByList': sortList,  }
         return {'filterParams': filterParams, 'orderByParams': orderByParams}
     }
     QueryModalDisplayInit(grid_column) {
-        grid_column['showFilter'] = grid_column['showFilter'] || false
-        grid_column['showSort'] = grid_column['showSort'] || false
+        /*
+            Adds default values for showFilter and showSort.
+        */
+        // console.log(grid_column)
+        let showFilter = grid_column['showFilter']
+        console.log(showFilter)
+        console.log( type_check.IsBoolean(showFilter) )
+        if (! type_check.IsBoolean(showFilter) ) {
+            if (grid_column.hasOwnProperty('defaultFilter') ) { grid_column['showFilter'] =  true } 
+            else {  grid_column['showFilter'] = false } 
+        }
 
-
+        let showSort = grid_column['showSort']
+        if (! type_check.IsBoolean(showSort)) {
+            if (grid_column.hasOwnProperty('defaultSort') ) { grid_column['showSort'] = true } 
+            else { grid_column['showSort'] = false }
+        }
+        // console.log(grid_column)
     }
 
-    AddFilter(grid_column, defaultFilter, enforcedFilter) {
-        let dFV = this.CreateFilterValue(grid_column)
-        //if value doesnt exists ignore defaultFilter
-        let defaultValue = defaultFilterValue.value
-        let showFilter   = grid_column['showFilter']
-        if (defaultValue.trim() != "" && !showFilter ) { enforcedFilter.push(dFV) } 
-        else if  ( defaultValue.trim() != "" && showFilter ) {
-            defaultFilter.push(dFV)
-            filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['dataType'] })
-        } else if (showFilter) {
-            filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['column_name'] })
+    AddFilter(grid_column, filterList, defaultFilter, enforcedFilter) {
+        /*
+
+
+
+            //if value doesnt exists ignore defaultFilter
+        */
+        if (grid_column.hasOwnProperty('defaultFilter') ) {
+            let dFV = this.CreateFilterValue(grid_column)
+            let showFilter   = grid_column['showFilter']
+            // console.log(showFilter)
+            if (!showFilter ) { enforcedFilter.push(dFV) }
+            else if  ( showFilter ) {
+                defaultFilter.push(dFV)
+                filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['dataType'] })
+            } else if (showFilter) {
+                filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['column_name'] })
+            }
+        } else {
+            let showFilter   = grid_column['showFilter']
+            if (showFilter) {
+                filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['column_name'] })
+            }
         }
+
+
     }
     CreateFilterValue(  grid_column ) {
-        //column_name comes from field
-        //{'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null, delimiterType: null, dataType: null }
-        //only require { 'operator': '!=', 'value':  'a', 'value2': null }
+        /*
+
+
+            //column_name comes from field
+            //{'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null, delimiterType: null, dataType: null }
+            //only require { 'operator': '!=', 'value':  'a', 'value2': null }
+        */
         let defValue = grid_column['defaultFilter'] //basic type or object above
         let defOperator  = grid_column['defaultOperator'] || "="
         let headerName = grid_column['headerName'] || grid_column['field']
@@ -124,9 +134,6 @@ class QueryParams {
         let field = grid_column['field']
 
         if (! data_config.valid_operators.hasOwnProperty(defOperator)) { defOperator = '=' }
-
-
-
         if (type_check.IsBasicType(defValue) ) {
             let x = {'headerName': headerName, 'column_name': field, 'dataType': dataType, 'operator': '=', 'value': String(defValue),
                 'value2': null, delimiterType: null }
@@ -147,20 +154,18 @@ class QueryParams {
             if (type_check.IsNull(v1) || type_check.IsNull(v2) ) { defValue['operator'] = '=' }
         }
         return defValue
-
-
     }
 
-
-    AddOrderBy() {
-        let showFilter = grid_column['showFilter'] || false
-        let showSort   = grid_column['showSort'] || false
+    //(grid_column, sortList , defaultSort,   enforcedSort)
+    AddOrderBy(grid_column, sortList, defaultSort) {
+        /*
+            Adds sortList for modal window and initialized order by
+            defaultSort: 'asc'/'desc'
+        */
+        let showSort   = grid_column['showSort']
         let defaultOrderby = grid_column['defaultOrderby'] || ""
-        let defaultValue = grid_column['defaultFilter'] || ""
-        let defOperator  = grid_column['defaultOperator'] || "="
         let field = grid_column['field']
         let headerName = grid_column['headerName'] || grid_column['field']
-        let dataType = grid_column['dataType'] || 'text'
 
         if (showSort) {
             if (defaultOrderby !== "") {
@@ -185,26 +190,42 @@ class QueryParams {
 
     SubGridDefaultFilter( rowData, rowFilterDefaults ) {
         /*
-        rowDataDefaults = {
-            defaultFilter: {subGridKey: {rowKey: , operator: ,rowKey2:   } } 
-        }
+            Takes rowData values and adds to defaultFilter value.
+
+            rowDataDefaults = {
+                defaultFilter: {subGridKey: {rowKey: , operator: ,rowKey2: , paramsKey: , paramsKey2:, delimiterType: null,  } } 
+            }
+
+            //dataType added in CreateFilterValue
+            {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null, delimiterType: null, dataType: null }
+
         */
         let gridDefaultValues = {}
         let subgrid = this.grid
 
         let subGridFields = Object.keys(rowFilterDefaults)
         for (let i =0; i < subGridFields.length; i++ ) {
-            let sgx    = subGridFields[i]
-            let rowKey = sgx['rowKey']
-            dx = {}
-            if (sgx.hasOwnProperty('paramsKey') ) {
-                let pkey  = sgx['paramsKey']
-                let value = rowData[rowKey][pkey]
-                gridDefaultValues[sgx] = String(value)
-            } else {
-                let value = rowData[rowKey]
-                gridDefaultValues[sgx] = String(value)
+            let sgKey    = subGridFields[i] //subGridKey
+            let rfVals   = rowFilterDefaults[sgKey] //{rowKey: , operator: ,rowKey2: , paramsKey: , paramsKey2:, delimiterType: null,  }
+            let rowDataKey = rfVals['rowKey']
+            let val1 = rowData[rowDataKey]
+            defVals = {}
+            if (rfVals.hasOwnProperty('paramsKey') )     { val1 = val1[rfVals['paramsKey']] }
+            defVals['delimiterType'] = rfVals['delimiterType'] || null
+            defVals['column_name']   = sgKey
+            defVals['operator']      = rfVals['operator'] || '='
+            defVals['value2']        = null
+
+            if (!sgx.hasOwnProperty('rowKey2') ) { 
+                gridDefaultValues[sgKey] = defVals
+                continue
             }
+            let rowDataKey2 = rfVals['rowKey2']
+            let val2 = rowData[rowDataKey2]
+
+            if (rfVals.hasOwnProperty('paramsKey') ) { val2 = val2[rfVals['paramsKey2']] }
+            defVals['value2'] = val2
+            gridDefaultValues[sgx] = gridDefaultValues
         }
         for (let i =0; i < subgrid.length; i++ ) {
             let field = subgrid['field']

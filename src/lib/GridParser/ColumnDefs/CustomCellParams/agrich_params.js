@@ -38,7 +38,7 @@ class AgRichParams {
         this.valuesObject = valuesObject
     }
 
-    AgRichSelectParams() {
+    AgRichSelectParamsInit() {
         /*
             This creates the values and mapObject for the dropdown
         */

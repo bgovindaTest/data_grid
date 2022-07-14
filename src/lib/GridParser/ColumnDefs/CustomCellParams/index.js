@@ -3,13 +3,8 @@ Responsible for creating each columns rules for displaying and formatting the da
 
 grid: json array of the grid
 grid_column:
-valuesObject: the json array object for autocomplete and richselector.
-*/
+valuesObject: the json array object for autocomplete and richselector with field
 
-//import crud column
-const crudColumn = require('./CrudColumn')
-const data_config = require('../../../DataConfig')
-const DateTimeParams = require('./date_time')
 // let cellEditors = {
 //     //customEditors have special formatting
 //     'customEditors':    ['autoComplete',  'subGridSelector', 'agRichSelectCellEditor'],
@@ -17,48 +12,52 @@ const DateTimeParams = require('./date_time')
 //     'defaultEditor': 'agTextCellEditor'
 // }
 
+*/
+
+//import crud column
+const crudColumn = require('./CrudColumn')
+const data_config = require('../../../DataConfig')
+const DateTimeParams = require('./date_time')
+const AutoCompleteParams = require('./autocomplete_params')
+const LargeTextParams = require('./largeText')
+const AgRichParams = require('./agrich_params')
+const SubGrid      = require('./subgrid')
+
 class CustomCellParams {
     //for main loader
     //grid is json object for aggrid
-    //allowNull (prepends value?)
 
     //valuesArray created by grid_func mix in?
-    constructor(grid, gridValuesObject) { //gridValuesObject = valuesObject[position_index]
-        this.grid         = grid
-        this.valuesObject = valuesObject
+    constructor(gridColumn, gridColumnValuesObject) { //gridValuesObject = valuesObject[position_index][field]
+        this.grid_column         = gridColumn
+        this.valuesObject        = gridColumnValuesOjbect
     }
     RunInit() {
-
-        for(let i=0; i < this.grid.length; i++) {
-            let cE = this.grid_column['cellEditor'] || "agTextCellEditor"
-            if (cE === "agTextCellEditor") { return }
-            else if ( cE  === "autoComplete" ) {
-                this.AutoCompleteParams()
-            } else if (cE === 'agLargeTextCellEditor') {
-                AgLargeTextParams()
-            } else if (cE === "agRichSelectCellEditor") {
-                AgRichSelectParams() 
-            } else if (cE === "dateTimeSelector") {
-                DateTimeParams()
-            } else if (cE === "subGridSelector") {
-                this.SubGridParams()
-            } else if (cE === "meta c") {
-                continue
-            }
-
-
-
+        let grid_column  = this.grid_column
+        let valuesObject = this.valuesObject
+        let field = this.grid_column['field']
+        let cE = this.grid_column['cellEditor'] || "agTextCellEditor"
+        if (cE === "agTextCellEditor") { return }
+        else if ( cE  === "autoComplete" ) {
+            let x = new AutocompleteParams(grid_column, valuesObject)
+            x.AutoCompleteParamsInit()
+        } else if (cE === 'agLargeTextCellEditor') {
+            let x = new LargeTextParams(grid_column)
+            x.LargeTextInit()
+        } else if (cE === "agRichSelectCellEditor") {
+            let x = new AgRichParams(grid_column, valuesObject)
+            x.AgRichSelectParamsInit() 
+        } else if (cE === "dateTimeSelector") {
+            let x = new DateTimeParams(grid_column)
+        } else if (cE === "subGridSelector") {
+            let x = new SubGrid()
+            //run init  this.SubGridParams()
+        } else if (cE === data_config.meta_column_name) {
+            return
+        } else {
+            console.error(`invalid cellEditor ${cE} for field ${field}`)
         }
     }
-
-
-
-
 }
-
-
-
-
-
 
 module.exports = {'CustomCellParams': CustomCellParams}

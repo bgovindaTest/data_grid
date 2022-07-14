@@ -143,6 +143,15 @@ let delimiter_typeName = { '/\s+/':'Any Space', //any is space or newline
 let defaultDelimiter = '/\s+/'
 //gets converted to \;\
 
+//postgres commands to replace null values
+let if_null_types = [
+    /*
+    These are default values that can be direclty entered into crud operations. These
+    */
+    'default', 'current_timestamp', 'current_time','null',
+    'current_date', 'localtime', 'localtimestamp', ""
+]
+
 function ReturnDelimiterType(delimiterType) {
     if (delimiter_typeName.hasOwnProperty(delimiterType)) {
         return delimiterType
@@ -236,5 +245,6 @@ module.exports = {
     'text_types':   text_types,
     'date_types':   date_types,
     'object_types': object_types,
-    'cellEditors': cellEditors
+    'cellEditors': cellEditors,
+    'if_null_types': if_null_types
 }

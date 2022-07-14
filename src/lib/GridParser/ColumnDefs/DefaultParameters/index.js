@@ -1,6 +1,6 @@
 /*
 Explicitly set all default values for headerName, ag grid column formattings
-and validation parameters.
+and validation parameters and ifNull
 
 
 Creates default value object. This is used to set default values in new rows and
@@ -25,10 +25,8 @@ defaultValue: {'value': 'string', 'dataType': '',  ifNullSet: true/false } key f
 const type_check  = require('../../../TypeCheck')
 const data_config = require('../../../DataConfig')
 const meta_column_name = data_config['meta_column_name']
-const lodashCloneDeep = require('lodash.clonedeep')
 
 //need to deep copy objects
-// let grid = lodashCloneDeep(this.grid)
 // where is IfNull parameter handled?
 //has whole grid object. Any data loading comes from
 //grid_funcs. Vue Components can also have async await
@@ -43,8 +41,8 @@ class DefaultParams {
         for(let i=0; i < this.grid.length; i++) {
             let grid_column = this.grid[i]
             if (grid_column['field'] === meta_column_name ) { continue }
-            this.DefaultValue(grid_column)
             this.DefaultParameters(grid_column)
+            this.DefaultValue(grid_column)
             this.HeaderName(grid_column)
         }
     }
@@ -62,7 +60,14 @@ class DefaultParams {
         rowDataDefaults is from the subGrid columnDefs
 
         */
-        this.SubGridDefaults( rowData, rowDataDefaults )
+        for(let i=0; i < this.grid.length; i++) {
+            let grid_column = this.grid[i]
+            if (grid_column['field'] === meta_column_name ) { continue }
+            this.DefaultParameters(grid_column)
+            this.SubGridDefaultsValues( rowData, rowDataDefaults )
+            this.DefaultValue(grid_column)
+            this.HeaderName(grid_column)
+        }
     }
 
     HeaderName(grid_column) {
@@ -95,11 +100,14 @@ class DefaultParams {
         else if (type_check.IsArray(x)) {
                 grid_column['defaultValue'] = {'value': x, 'dataType': this.DataType(grid_column), 'ifNullSet': false}
         } else if (type_check.IsObject(x)) {
+            //add parameters to defaultValues Object
+            if (! x.hasOwnProperty('value'))       { grid_column['value']  = null }
+            if (! x.hasOwnProperty('ifNullSet'))   { x['ifNullSet'] = false }
+            if (! x.hasOwnProperty('dataType'))    { x['dataType'] = grid_column['dataType']}
                 
         } else {
             grid_column['defaultValue'] = {'value': null, 'dataType': this.DataType(grid_column), 'ifNullSet': false}
         }
-
     }
 
     DataType(grid_column) {
@@ -117,12 +125,24 @@ class DefaultParams {
         if (! grid_column.hasOwnProperty('width'))       { grid_column['width'] = 500 }
         if (! grid_column.hasOwnProperty('editable') )   { grid_column['editable'] = false }
         if (! grid_column.hasOwnProperty('hide') )       { grid_column['hide'] = false }
-        // ifNull: 'psql string calls to replace value'
-        // this.IfNull(grid_column)
+        this.IfNull(grid_column)
     }
-    //ifNull verify valid null string and replace if not.
+    IfNull(grid_column) {
+        /*
+            raw postgres string to replace null values with.
+        */
+        let if_null_value = grid_column['ifNull'] || null
+        if (if_null_value===null || if_null_value === 'null') { grid_column['ifNull'] = 'null' }
+        if (!data_config.if_null_types.includes(if_null_value) ) {
+            let field = grid_column['field']
+            console.error(`invalid ifNull type for ${field}`)
+            grid_column['ifNull'] = 'null'
+        }
+    }
 
-    SubGridDefaults( rowData, rowDataDefaults ) {
+    //ifNull verify valid null string and replace if not.
+    //runs defaultParameters, SubGridDefaultValues, DefaultValues,
+    SubGridDefaultValues( rowData, rowDataDefaults ) {
         /*
         rowDataDefaults = {
             'defaultValues':  {subGridKey: {rowKey: , paramsKeys:  ifNullSet: boolean  } } 
@@ -158,11 +178,6 @@ class DefaultParams {
             subgrid['defaultValue'] = dx
         }
     }
-
-
-
-
-
 }
 
 

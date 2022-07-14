@@ -1,32 +1,34 @@
-const { exp } = require('mathjs')
-const cd = require('../index.js')
-const cdef = cd.ColumnDefsInit
+const gp = require('./index.js')
+const lodashCloneDeep = require('lodash.clonedeep')
 
-test('value getter/setter/formatter parser test', () => {
-    //creates a function
-    let x = new cdef({},{}, {})
-    let grid_column = {
-        'field': 'test',
-        'valueGetter': 'test + 1'
+function SetDefaults(grid) {
+    for (let i =0; i< grid.length; i++) {
+        let grid_column = grid[i]
+        if (!grid_column.hasOwnProperty('headerName') ) {grid_column['headerName'] = grid_column['field'].toUpperCase()}
+        if (!grid_column.hasOwnProperty('dataType')   ) {grid_column['dataType']   = 'text'}
     }
-    x.ValueTransform(grid_column, 'valueGetter')
+}
 
-    let fn = grid_column['valueGetter']
-    let params = {'data': {'test': '1' }}
-    expect(fn(params)).toBe(2)
+const test_grid = [
+  {'field': 'a', 'editable': true, 'defaultFilter': true, 'showFilter': false, 'showSort': true, 'validator': 'a < 1'},
+  {'field': 'b', 'editable': true, 'defaultFilter': 'a',  'showFilter':  true, 'showSort': true},
+]
+
+
+test('new query set', () => {
+  let grid = lodashCloneDeep(test_grid)
+  let x = new qp(grid)
+  let y =x.QueryParamsInit()
+
+  qmf.NewQuerySet,
+  expect(result).toMatchObject(expect_result)
 })
 
-test('value getter/setter/formatter native test', () => {
-    //replaces valueGetter with native unprocessed string
-    let x = new cdef({},{}, {})
-    let grid_column = {
-        'field': 'test',
-        'valueGetterNative': 'test + 1'
-    }
-    x.ValueTransform(grid_column, 'valueGetter')
-    let sx = grid_column['valueGetter']
-    expect(sx).toBe('test + 1')
-})
+
+
+
+
+
 
 test('ifNull', () => {
     let x = new cdef({},{}, {})
@@ -51,21 +53,7 @@ test('ifNull default', () => {
     expect(sx).toBe('default')
 })
 
-//meta columns
-test('add meta_column default', () => {
-    let grid = [
-        {
-            'field': 'test',
-            'ifNull': 'default',
-            'isCrud': true
-        }
-    ]
 
-    let x = new cdef({},{}, {})
-
-    x.MetaColumn( grid )
-    expect(grid[1]['field']).toBe('_ag-meta_')
-})
 
 test('initialize delete/undo button', () => {
     //prepends delete/undo
@@ -81,21 +69,7 @@ test('initialize delete/undo button', () => {
     expect(true).toBe(true)
 })
 
-test('validator initialization', () => {
-    //prepends delete/undo
-    let grid_column =
-        {
-            'field': 'test',
-            'ifNull': 'default',
-            'isCrud': true,
-            'validator': 'test > 1'
-        }
-    let x = new cdef({},{}, {})
-    x.Validators(grid_column)
-    let fn = grid_column['validator']
-    let params = {'data': {'test': -2} }
-    expect(fn(params)).toBe(false)
-})
+
 
 test('cellClassRules intialized with validator', () => {
     //prepends delete/undo
@@ -192,50 +166,3 @@ test('enforced and default filter', () => {
     
 })
 
-//defaultFilter and defaultValue for sub modal field key for submodal
-
-// this.DefaultFilter(grid_column,defaultFilter)
-// this.DefaultValue(grid_column)
-// enforce fitler
-
-
-
-// this.CellWidth(grid_column)
-
-// this.CellEditorParams(grid_column)
-// RunGridInit()
-// this.IsEditable(grid_column)
-// this.HideColumns(grid_column)
-
-// test('RunGridInit', () => {
-
-//     //check everything matches?
-//     let grid = [
-//         {
-//             'field': 'test',
-//             'ifNull': 'default',
-//             'isCrud': true
-//         }
-//     ]
-
-//     let x = new cdef({},{}, {})
-
-//     x.MetaColumn( grid )
-//     console.log(grid[1])
-//     console.log(grid[1].defaultInsertValue.toString())
-//     console.log(grid[1].defaultUpdateValue.toString())
-
-//     let mx = {
-//         'field': meta_column_name,
-//         'editable': false,
-//         'hide': true,
-//         'suppressToolPanel': true,
-//         'defaultInsertValue': fi, //should be a function creates backups. and how row was added.
-//         'defaultUpdateValue': fu, //
-//         'showSort': false,
-//         'showFilter': false
-//     }
-
-
-//     expect(true).toBe(true)
-// })

@@ -170,3 +170,16 @@ test('subgrid filter assembly', () => {
     }
     expect(result).toMatchObject(expected)
 })
+
+test('page object', () => {
+    let grid = [{'field': 'a', 'editable': true, 'defaultSort': 'asc', 'showSort': true },
+        {'field': 'b', 'editable': true, 'defaultSort': 'desc', 'showSort': true },
+        {'field': 'c', 'editable': true,  'showSort': false }
+    ]
+    SetDefaults(grid)
+    let x = new qp(grid)
+    let y =x.QueryParamsInit()
+    let expected = { 'pageParams': { limit: 10000, offset: 0, page_index: 0, page_size: 10000 } }
+    let res = {'pageParams': y['pageParams']}
+    expect(res).toMatchObject(expected)
+})

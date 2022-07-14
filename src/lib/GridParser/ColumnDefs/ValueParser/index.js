@@ -8,7 +8,7 @@ valueSetter: (optional) (grid_rules_object). Need to add for date column?
 valueFormatter: blah
 toolTip: explains column on hover
 validator: expression or function. determines if value is valid or not.
-
+editable: expression or boolean or funciton
 
 
 //not implemented yet also need try catch console log error.

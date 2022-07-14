@@ -1,5 +1,6 @@
 const qp = require('../../GridParser/QueryParams')
 const qmf    = require('./index.js')
+const lodashCloneDeep = require('lodash.clonedeep')
 
 function SetDefaults(grid) {
     for (let i =0; i< grid.length; i++) {
@@ -9,75 +10,28 @@ function SetDefaults(grid) {
     }
 }
 
-
-test('filter assembly', () => {
-    let grid = [
-        {'field': 'a', 'editable': true, 'defaultFilter': true, 'showFilter': false},
-        {'field': 'b', 'editable': true, 'defaultFilter': 'a',  'showFilter':  true},
-        {'field': 'c', 'editable': true, 'defaultFilter': {'value': 'a', 'value2': 'b', 'operator': 'between'},  'showFilter':  true}
-    ]
-    SetDefaults(grid)
-    let x = new qp(grid)
-    let y =x.QueryParamsInit()
-    let result = {
-        'current': y['filterParams']['current'],
-        'filterList': y['filterParams']['filterList'],
-        'enforcedFilters': y['filterParams']['enforcedFilters'],
-        'new': y['filterParams']['new']
-    }
-    let expect_result = {
-        'current':     [
-            {
-              headerName: 'B',
-              column_name: 'b',
-              dataType: 'text',
-              operator: '=',
-              value: 'a',
-              value2: null,
-              delimiterType: null
-            },
-            {
-              value: 'a',
-              value2: 'b',
-              operator: 'between',
-              column_name: 'c',
-              dataType: 'text',
-              headerName: 'C',
-              delimiterType: null
-            }
-          ],
-        'filterList': [ { headerName: 'B', column_name: 'b', dataType: 'text' },
-            { headerName: 'C', column_name: 'c', dataType: 'text' }
-        ],
-        'new': [
-            {
-                headerName: 'B',
-                column_name: 'b',
-                dataType: 'text',
-                operator: '=',
-                value: 'a',
-                value2: null,
-                delimiterType: null
-              },
-              {
-                value: 'a',
-                value2: 'b',
-                operator: 'between',
-                column_name: 'c',
-                dataType: 'text',
-                headerName: 'C',
-                delimiterType: null
-              }
+const test_grid = SetDefaults([
+  {'field': 'a', 'editable': true, 'defaultFilter': true, 'showFilter': false, 'showSort': true},
+  {'field': 'b', 'editable': true, 'defaultFilter': 'a',  'showFilter':  true, 'showSort': true},
+])
 
 
+test('new query set', () => {
+  let grid = lodashCloneDeep(test_grid)
+  let x = new qp(grid)
+  let y =x.QueryParamsInit()
 
-        ],
-        'enforcedFilters': [
-            {
-              headerName: 'A', column_name: 'a', dataType: 'text', operator: '=',
-              value: 'true', value2: null, delimiterType: null
-            }
-          ]
-    }
-    expect(result).toMatchObject(expect_result)
+  qmf.NewQuerySet,
+  expect(result).toMatchObject(expect_result)
 })
+
+// qmf.NewQuerySet,
+// qmf.ChangePage,
+// qmf.DefaultFilterInit,
+// qmf.ClearFilterValue,
+// qmf.DefaultOrderByInit,
+// qmf.OrderByDisplayList,
+// qmf.RemoveFilterOrderBy,
+// qmf.ClearFilterOrderBy,
+// qmf.ClearFilterValues,
+// qmf.SetDelimiterType,

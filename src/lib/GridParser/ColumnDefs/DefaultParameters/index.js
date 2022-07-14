@@ -55,7 +55,7 @@ class DefaultParams {
 
         Order of operations.
         Run DefaultParamsInit
-        Then run cellEditorParams init
+        Then run cellEditorParams init why??
         then run SubGridDefaults
 
         rowData if from the row that calls the subGrid
@@ -120,6 +120,8 @@ class DefaultParams {
         // ifNull: 'psql string calls to replace value'
         // this.IfNull(grid_column)
     }
+    //ifNull verify valid null string and replace if not.
+
     SubGridDefaults( rowData, rowDataDefaults ) {
         /*
         rowDataDefaults = {

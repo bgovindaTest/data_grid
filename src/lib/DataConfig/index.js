@@ -143,6 +143,14 @@ let delimiter_typeName = { '/\s+/':'Any Space', //any is space or newline
 let defaultDelimiter = '/\s+/'
 //gets converted to \;\
 
+function ReturnDelimiterType(delimiterType) {
+    if (delimiter_typeName.hasOwnProperty(delimiterType)) {
+        return delimiterType
+    }
+    if (delimiterType === null) { return defaultDelimiter }
+    else { return defaultDelimiter}
+}
+
 //max filter payload?
 
 
@@ -220,7 +228,7 @@ module.exports = {
     'null_conversion': null_conversion,
     'GridColumnValidDtype': GridColumnValidDtype,
     'GridColumnValidCellEditor': GridColumnValidCellEditor,
-
+    'ReturnDelimiterType': ReturnDelimiterType,
 
     'number_types': number_types,
     'integer_types': integer_types,

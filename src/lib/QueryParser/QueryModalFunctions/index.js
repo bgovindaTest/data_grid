@@ -12,6 +12,7 @@ let orderByParams = {'current': defaultSort,   'new': [], 'orderByList': sortLis
 
 const data_config = require ('../../../DataConfig')
 const type_check = require('../../../TypeCheck')
+const lodashCloneDeep = require('lodash.clonedeep')
 
 /*
 Copies parameters in new filter and order by object and sets it to current.
@@ -23,14 +24,13 @@ function NewQuerySet(filterParams, orderByParams, pageParams ) {
     //resets query params.
     ftmp = filterParams['new']
     otmp = orderByParams['new']
-    filterParams['current'] = ftmp
-    filterParams['new'] = []
-    orderByParams['current'] = otmp
-    orderByParams['new'] = []
+    filterParams['current']  = lodashCloneDeep(ftmp)
+    orderByParams['current'] = lodashCloneDeep(otmp)
     newPage = PageInit()
     let keys = Object.keys(newPage)
     for(let i = 0; i < keys.length; i++) {pageParams[keys[i]] =newPage[keys[i]] }
 }
+
 
 /*
 Updates pagination index and value of limit.
@@ -76,26 +76,32 @@ function DefaultOrderByInit(column_name, header_name) {
 function OrderByDisplayList( new_list, full_list ) {
     let display_list = []
     for (let i =0; i < full_list.length; i++) {
-        let cnf = full_list[i]['column_name']
-        //
+        let cni = full_list[i]['column_name']
+        let column_used = false
+        for (let j=0; j < new_list.length; j++) {
+            let cnj = new_list[j]['column_name']
+            if (cni === cnj) {
+                column_used = true
+                break
+            }
+        }
+        if (! column_used) {display_list.push(full_list[i])} 
     }
-
-
+    return display_list
 }
 
 
 //removes object from array. Used when filter is deleted.
 function RemoveFilterOrderBy(  filter_orderby_array, index )  { 
     if (index > -1) { filter_orderby_array.splice(index, 1) }
-    RemoveItemFromArray( filter_array, index) 
 }
 
-//
+//removes all values from array
 function ClearFilterOrderBy(filter_orderby_array)  { filter_orderby_array.length = 0 }
 
-
+//resets filterRow to default
 function ClearFilterValues(filterRow) {
-
+    let data_type_name = filterRow['dataType']
     let def_operator = data_config.DefaultOperator(data_type_name)
     filterRow['value'] = null
     filterRow['value2'] = null
@@ -103,19 +109,21 @@ function ClearFilterValues(filterRow) {
     filterRow['operator'] = def_operator
 }
 
-function DelimiterList( ) {}
-
+//sets delimiter in filter
 function SetDelimiterType (filterRow, delimiter_type) {
     //{ '/\s+/':'Any Space'}
-    let defaultDelimiter = data_config.defaultDelimiter
-    if (data_type.delimiter_typeName.hasOwnProperty(delimiter_type)) {
-        return delimiter_type
-    }
-    return defaultDelimiter
-} 
-//how to split and return value
+    filterRow['delimiterType'] = data_config.ReturnDelimiterType(delimiter_type)
+}
 
-
-
-
-
+module.exports = {
+    "NewQuerySet": NewQuerySet,
+    "ChangePage": ChangePage,
+    "DefaultFilterInit": DefaultFilterInit,
+    "ClearFilterValue": ClearFilterValue,
+    "DefaultOrderByInit": DefaultOrderByInit,
+    "OrderByDisplayList": OrderByDisplayList,
+    "RemoveFilterOrderBy": RemoveFilterOrderBy,
+    "ClearFilterOrderBy": ClearFilterOrderBy,
+    "ClearFilterValues": ClearFilterValues,
+    "SetDelimiterType": SetDelimiterType,
+}

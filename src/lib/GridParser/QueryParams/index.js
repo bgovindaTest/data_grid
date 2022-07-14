@@ -13,9 +13,9 @@ defaultSort
 {'column_name': 'col_name_3', 'operator': '!=', 'value':  'a', 'value2': null}
 
 */
-const type_check  = require('../../../TypeCheck')
-const data_config = require('../../../DataConfig')
-
+const type_check  = require('../../TypeCheck')
+const data_config = require('../../DataConfig')
+const lodashCloneDeep = require('lodash.clonedeep')
 
 
 class QueryParams {
@@ -70,8 +70,8 @@ class QueryParams {
             this.AddFilter(grid_column, filterList, defaultFilter, enforcedFilter)
             this.AddOrderBy(grid_column, sortList , defaultSort)    
         }
-        let filterParams  = {'current': defaultFilter, 'new': [], 'filterList': filterList, 'enforcedFilters': enforcedFilter}
-        let orderByParams = {'current': defaultSort,   'new': [], 'orderByList': sortList,  }
+        let filterParams  = {'current': defaultFilter, 'new': lodashCloneDeep(defaultFilter), 'filterList': filterList, 'enforcedFilters': enforcedFilter}
+        let orderByParams = {'current': defaultSort,   'new': lodashCloneDeep(defaultSort), 'orderByList': sortList,  }
         return {'filterParams': filterParams, 'orderByParams': orderByParams}
     }
     QueryModalDisplayInit(grid_column) {

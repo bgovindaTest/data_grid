@@ -63,7 +63,29 @@ test('filter assembly', () => {
         'filterList': [ { headerName: 'B', column_name: 'b', dataType: 'text' },
             { headerName: 'C', column_name: 'c', dataType: 'text' }
         ],
-        'new': [],
+        'new': [
+            {
+                headerName: 'B',
+                column_name: 'b',
+                dataType: 'text',
+                operator: '=',
+                value: 'a',
+                value2: null,
+                delimiterType: null
+              },
+              {
+                value: 'a',
+                value2: 'b',
+                operator: 'between',
+                column_name: 'c',
+                dataType: 'text',
+                headerName: 'C',
+                delimiterType: null
+              }
+
+
+
+        ],
         'enforcedFilters': [
             {
               headerName: 'A', column_name: 'a', dataType: 'text', operator: '=',
@@ -96,7 +118,10 @@ test('sort assembly', () => {
             { headerName: 'A', column_name: 'a', order_by: 'asc' },
             { headerName: 'B', column_name: 'b', order_by: 'desc' }
           ],
-        'new': []
+        'new': [
+            { headerName: 'A', column_name: 'a', order_by: 'asc' },
+            { headerName: 'B', column_name: 'b', order_by: 'desc' }            
+        ]
     }
 
     expect(res).toMatchObject(expected)
@@ -125,7 +150,11 @@ test('subgrid filter assembly', () => {
             }
         ],
         'filterList': [ { headerName: 'B', column_name: 'b', dataType: 'text' } ],
-        'new': [],
+        'new': [
+            { value: 'Y', delimiterType: null, column_name: 'b', operator: '=',
+              value2: null, dataType: 'text', headerName: 'B'
+            }
+        ],
         'enforcedFilters':  
         [
             {

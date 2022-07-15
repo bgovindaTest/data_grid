@@ -56,6 +56,8 @@ class ValueParser {
         this.ValueTransform(grid_column, 'toolTip')
         this.Validators(grid_column)
         this.ValueSetter(grid_column)
+        this.ValueTransformEditable(grid_column)
+
     }
 
     ValueTransform(grid_column, parameter_name) {
@@ -91,6 +93,21 @@ class ValueParser {
             console.log(`value transform error ${field} ${pn} ${expx}`)
         }
     }
+    ValueTransformEditable(grid_column) {
+        //creates function for editable if using expression syntax
+        let parameter_name = 'editable'
+        let globalx = this.globals
+        if (! grid_column.hasOwnProperty(parameter_name)) { return }
+        let vt = grid_column[parameter_name]
+        if (type_check.IsBoolean(vt)) {return}
+        else if (type_check.IsFunction(vt) ) { return }
+        else if (type_check.IsString(vt) ) {
+            let expr = grid_column[parameter_name]
+            let options = this.OptionsParser(grid_column, parameter_name)
+            grid_column[parameter_name] = ex.CreateAggridFunction(expr, globalx, options)
+        } 
+    }
+
     Validators(grid_column) {
         //creates validation function for aggrid cell
         if( ! grid_column.hasOwnProperty('validator') ) {return}
@@ -240,4 +257,4 @@ class ValueParser {
     }
 }
 
-module.exports = {'ValueParser': ValueParser}
+module.exports = ValueParser

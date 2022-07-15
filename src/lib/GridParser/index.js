@@ -106,7 +106,7 @@ Parses grids json object and converts expression syntax into javascript function
 
 */
 const dfp   = require('./ColumnDefs/DefaultParameters')
-// const vp    = require('./ColumnDefs/ValueParser')
+const ValueParser  = require('./ColumnDefs/ValueParser')
 // const ccr   = require('./ColumnDefs/CellClassRules')
 // const ccp   = require('./ColumnDefs/CustomCellParams')
 // const crudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
@@ -161,8 +161,10 @@ class ColumnDefsInit {
             let tmp = null
             tmp = new ChmodParams(grid_column)
             tmp.ChmodParamsInit()
+            tmp = new ValueParser(grid_column, {}) //{} is for depricated globals object
+            tmp.RunInit()
 
-            
+
             // let x = new dfp(grid_column)
             // x.DefaultParamsInit()
             //chmod params

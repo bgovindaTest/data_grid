@@ -212,7 +212,6 @@ function GridColumnValidCellEditor(field, cellEditor) {
 module.exports = {
     'meta_crud_type': meta_crud_type,
     'meta_column_name': meta_column_name,
-    'meta_delete_undo_name': meta_delete_undo_name,
     'page_size': page_size,
     'write_batch_size': write_batch_size,
     'valid_operators': valid_operators,

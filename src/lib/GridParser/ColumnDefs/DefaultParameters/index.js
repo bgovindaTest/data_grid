@@ -64,7 +64,8 @@ class DefaultParams {
             let grid_column = this.grid[i]
             if (grid_column['field'] === meta_column_name ) { continue }
             this.DefaultParameters(grid_column)
-            this.SubGridDefaultsValues( rowData, rowDataDefaults )
+            let rowDataDefaultValues = rowDataDefaults['defaultValues']
+            this.SubGridDefaultsValues( rowData, rowDataDefaultValues )
             this.DefaultValue(grid_column)
             this.HeaderName(grid_column)
         }
@@ -133,7 +134,7 @@ class DefaultParams {
         */
         let if_null_value = grid_column['ifNull'] || null
         if (if_null_value===null || if_null_value === 'null') { grid_column['ifNull'] = 'null' }
-        if (!data_config.if_null_types.includes(if_null_value) ) {
+        else if (!data_config.if_null_types.includes(if_null_value) ) {
             let field = grid_column['field']
             console.error(`invalid ifNull type for ${field}`)
             grid_column['ifNull'] = 'null'

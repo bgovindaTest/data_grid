@@ -89,6 +89,16 @@ Parses grids json object and converts expression syntax into javascript function
             hide - hides the field
             suppressToolPanel - removes it from the tool panel.
             primaryKey: 'default id not implemented'
+
+            crudColumn: {
+                addButton: adds plus button to row. set values that should be copied
+                    check if insert tracks position or need to use Array.indexOf(searchElement, fromIndex)
+                    determine when button should be present. Also what fields should be copied. and what
+                    the crudType should be
+                removeButton: adds remove maybe cancel icon to crudColumn. For rows that
+                    dont have a delete option.
+
+            }
         }
     }
     ]
@@ -96,12 +106,12 @@ Parses grids json object and converts expression syntax into javascript function
 
 */
 const dfp   = require('./ColumnDefs/DefaultParameters')
-const vp    = require('./ColumnDefs/ValueParser')
-const ccr   = require('./ColumnDefs/CellClassRules')
-const ccp   = require('./ColumnDefs/CustomCellParams')
-const crudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
-const qfp   = require('./UIQueryFuncParams')
-const chmod = require('./ChmodParams')
+// const vp    = require('./ColumnDefs/ValueParser')
+// const ccr   = require('./ColumnDefs/CellClassRules')
+// const ccp   = require('./ColumnDefs/CustomCellParams')
+// const crudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
+// const qfp   = require('./UIQueryFuncParams')
+// const chmod = require('./ChmodParams')
 
 const lodashCloneDeep = require('lodash.clonedeep')
 
@@ -117,11 +127,9 @@ class ColumnDefsInit {
         this.gridColumnDefs  = gridColumnDefs
         this.valuesObject    = valuesObject
         this.gidPos          = gridPos
-        this.urlParams = pageParams.urlParams || {}
-        this.rowParams = rowParams || {}
     }
 
-    RunSubGridInit(rowParams) {
+    RunSubGridColumnsInit(rowParams) {
         //add rowParams?
 
         //Copy grid
@@ -130,7 +138,7 @@ class ColumnDefsInit {
         //return
     }
 
-    RunGridInit() {
+    RunGridColumnsInit() {
         /*
             Order of function calls is important do not change
 
@@ -141,15 +149,15 @@ class ColumnDefsInit {
         //for MainGrid
         //make copy?
         //grid = JSON.parse(JSON.stringify(food)) for deep copy
-        let grid = lodashCloneDeep(this.grid) //messes up column order probably?
+        let grid = lodashCloneDeep(this.gridColumnDefs) //messes up column order probably?
+        let x = new dfp(grid)
+        x.DefaultParamsInit()
 
-        //prepend delete_undo column
-        InitializeDeleteUndoColumn(grid)
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
 
-            let x = new dfp(grid_column)
-            x.DefaultParamsInit()
+            // let x = new dfp(grid_column)
+            // x.DefaultParamsInit()
             //chmod params
             // For parsing valueSetter, valueGetter, valueFormatter, validator. Default assumes expression string.
             //valueParser
@@ -159,9 +167,7 @@ class ColumnDefsInit {
         //crudMetaColumn also creates auxilary functions. 
         //initialze query params
         //auxilary functions
-
-        return {'grid': grid, 'defaultSortBy': defaultSortBy, 'defaultFilter': defaultFilter,
-            'enforcedFilter': enforcedFilter}
+        return grid
     }
 
 
@@ -217,4 +223,4 @@ class ColumnDefsInit {
 
 }
 
-module.exports = {'ColumnDefsInit': ColumnDefsInit}
+module.exports = ColumnDefsInit

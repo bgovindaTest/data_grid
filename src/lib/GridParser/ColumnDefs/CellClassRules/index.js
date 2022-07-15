@@ -13,11 +13,13 @@ need to add pass is null or true
 
 const type_check = require('../../../TypeCheck')
 
-function CellClassRulesInit( grid_column, is_editable, validator_function ) {
+function CellClassRulesInit( grid_column) {
     /*
         Assembles cellClassRules based on if is_editable is a function or boolean and
         if validatorFunction is defined
     */
+    let is_editable = grid_column['editable']
+    let validator_function = grid_column['validator'] || null
     if (grid_column.hasOwnProperty('cellClassRules')) { return }
 
     cellClassRules = {}
@@ -29,9 +31,16 @@ function CellClassRulesInit( grid_column, is_editable, validator_function ) {
         }
         else if (type_check.IsBoolean(is_editable)) {
             if (is_editable) {
-                cellClassRules['editable_pass_style'] = params => true}
-            } else { cellClassRules['non_editable_pass_style'] = params => true }
-    } else {
+                cellClassRules['editable_pass_style'] = params => true
+            }
+            else { 
+                cellClassRules['non_editable_pass_style'] = params => true 
+            }
+        }
+    } 
+    
+    
+    else {
 
         cellClassRules['editable_pass_style']       = EditablePassStyle(is_editable, validator_function)
         cellClassRules['editable_error_style']      = EditableErrorStyle(is_editable, validator_function)
@@ -86,4 +95,4 @@ function ValidatorPass(val) {
 } 
 
 
-module.exports = {'CellClassRulesInit': CellClassRulesInit}
+module.exports = CellClassRulesInit

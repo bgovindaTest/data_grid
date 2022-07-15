@@ -1,4 +1,4 @@
-const cr = require('./index.js')
+const CellClassRulesInit = require('./index.js')
 
 /*
 check validation returns boolean or null
@@ -23,7 +23,7 @@ let vfx = function (params) {return false}
 let etx = function (params) {return true}
 let efx = function (params) {return false}
 
-function gc() { return {'field': 'colA'} }
+function gc(is_editable, validator_function) { return {'field': 'colA', 'editable': is_editable, 'validator': validator_function} }
 
 function CalcCr(grid_column) {
     let bool_list = []
@@ -37,63 +37,62 @@ function CalcCr(grid_column) {
 }
 
 test('is editable boolean without validation', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, true, null)
+    let grid_column = gc(true, null)
+    CellClassRulesInit(grid_column)
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([true, false, false, false])
-
 })
 
 test('not editable boolean without validation', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, false, null)
+    let grid_column = gc(false, null)
+    CellClassRulesInit(grid_column, false, null)
+
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([false, false, true, false])
 })
 
 
 test('is editable function without validation', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, etx, null)
+    let grid_column = gc(etx, null)
+    CellClassRulesInit(grid_column)
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([true, false, false, false])
 })
 
 test('not editable function without validation', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, efx, null)
+    let grid_column = gc(efx, null)
+    CellClassRulesInit(grid_column)
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([false, false, true, false])
 })
 
 
-// //with validaiton function
+// // //with validaiton function
 test('is editable boolean with validation true', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, true, vtx)
+    let grid_column = gc(true, vtx)
+    CellClassRulesInit(grid_column)
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([true, false, false, false])
 })
 
-// //with validaiton function
+// // //with validaiton function
 test('is editable boolean with validation false', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, true, vfx)
+    let grid_column = gc(true, vfx)
+    CellClassRulesInit(grid_column)
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([false, true, false, false])
 })
 
-
 test('not editable boolean with validation false', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, false, vfx)
+    let grid_column = gc(false, vfx)
+    CellClassRulesInit(grid_column)
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([false, false, false, true])
 })
 
 test('not editable boolean with validation true', () => {
-    let grid_column = gc()
-    cr.CellClassRulesInit(grid_column, false, vtx)
+    let grid_column = gc(false, vtx)
+    CellClassRulesInit(grid_column)
     let res = CalcCr(grid_column)
     expect(res).toMatchObject([false, false, true, false])
 })

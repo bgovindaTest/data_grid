@@ -107,7 +107,7 @@ Parses grids json object and converts expression syntax into javascript function
 */
 const dfp   = require('./ColumnDefs/DefaultParameters')
 const ValueParser  = require('./ColumnDefs/ValueParser')
-// const ccr   = require('./ColumnDefs/CellClassRules')
+const CellClassRulesInit   = require('./ColumnDefs/CellClassRules')
 // const ccp   = require('./ColumnDefs/CustomCellParams')
 // const crudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
 // const qfp   = require('./UIQueryFuncParams')
@@ -164,7 +164,7 @@ class ColumnDefsInit {
             tmp = new ValueParser(grid_column, {}) //{} is for depricated globals object
             tmp.RunInit()
 
-
+            CellClassRulesInit(grid_column)
             // let x = new dfp(grid_column)
             // x.DefaultParamsInit()
             //chmod params

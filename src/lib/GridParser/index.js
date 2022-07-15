@@ -111,9 +111,10 @@ const dfp   = require('./ColumnDefs/DefaultParameters')
 // const ccp   = require('./ColumnDefs/CustomCellParams')
 // const crudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
 // const qfp   = require('./UIQueryFuncParams')
-// const chmod = require('./ChmodParams')
+const ChmodParams = require('./ChmodParams')
 
 const lodashCloneDeep = require('lodash.clonedeep')
+
 
 
 
@@ -156,6 +157,12 @@ class ColumnDefsInit {
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
 
+
+            let tmp = null
+            tmp = new ChmodParams(grid_column)
+            tmp.ChmodParamsInit()
+
+            
             // let x = new dfp(grid_column)
             // x.DefaultParamsInit()
             //chmod params

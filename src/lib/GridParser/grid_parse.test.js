@@ -6,6 +6,7 @@ test('gridParserTest', () => {
     const test_grid = [
         {'field': 'a', 'dataType': 'numeric',  'editable': true, 'defaultFilter': true, 'showFilter': false, 'showSort': true},
         {'field': 'b', 'editable': true, 'defaultValue': 'a'},
+        {'field': 'c',  'valueGetter': 'a +1', 'validator': 'a + 1 > 0'}
     ]
 
     let x = new gp(test_grid,[], 0)

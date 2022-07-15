@@ -70,6 +70,7 @@ class ChmodParams {
         this.is_edit = true
     }
     EditableDefault( ) {
+        let gc = this.grid_column
         let is_crud = this.grid_column['chmodParams'] || null
         if (is_crud === null && this.is_edit) { 
             this.grid_column['chmodParams'] = CreateCrudObject(true, true, true)
@@ -78,6 +79,7 @@ class ChmodParams {
         return false
     }
     NullDefault() {
+        let gc = this.grid_column
         let is_crud = this.grid_column['chmodParams'] || null
         if (type_check.IsNull(is_crud)) { 
             gc['chmodParams'] = CreateCrudObject(false,false,false)
@@ -86,6 +88,7 @@ class ChmodParams {
     }
     BooleanDefault() {
         //Editable Default
+        let gc = this.grid_column
         let is_crud = this.grid_column['chmodParams'] || null
         if (type_check.IsBoolean(is_crud)) {
             let is_edit = this.is_edit

@@ -1,5 +1,8 @@
 /*
-Sets configurations for date time picker.
+Sets configurations for date time picker. The configuration used is dependant on the
+date type. valid types are date, time, datetime or timestamp
+default date is date
+
 parseDate is handled by valueSetter
 // {
 //   altInput: true,
@@ -42,28 +45,34 @@ class DateTimeParams {
     this.grid_column = grid_column
   }
   DateTimeInit() {
+    this.SetDefaults()
     let data_type = this.grid_column['dataType']
-    if (data_type === 'date') { this.DateConfig()
-    } else if (data_type === 'time') { this.TimeConfig() } 
+    if (data_type === 'date') { this.DateConfig()} 
+    else if (data_type === 'time') { this.TimeConfig() } 
     else { this.DateTimeConfig() }
   }
   DateConfig() {
     let cep = this.grid_column['cellEditorParams']
     if (!cep['dateFormat']) {cep['dateFormat'] = 'YYYY-MM-DD'}
   }
+
+  DateTimeConfig() {
+    let cep = this.grid_column['cellEditorParams']
+    if (!cep['dateFormat']) {cep['dateFormat'] = 'YYYY-MM-DD HH:MM:SSS'}
+  }
   TimeConfig() {
     let cep = this.grid_column['cellEditorParams']
     if (!cep['dateFormat']) {cep['dateFormat'] = 'HH:MM:SSS'}
     this.SetTimeDefault()
     if (!cep['noCalendar']) {cep['noCalendar'] = true}
+  }
 
-  }
-  DateTimeConfig() {
-    let cep = this.grid_column['cellEditorParams']
-    if (!cep['dateFormat']) {cep['dateFormat'] = 'YYYY-MM-DD HH:MM:SSS'}
-  }
+
   SetDefaults() {
     let cep = this.grid_column['cellEditorParams']
+    if (! this.grid_column.hasOwnProperty('dataType') ) {
+      this.grid_column['dataType'] = 'date'
+    }
     if (!cep['allowInput']) {cep['allowInput'] = true}
   }
   SetTimeDefault() {

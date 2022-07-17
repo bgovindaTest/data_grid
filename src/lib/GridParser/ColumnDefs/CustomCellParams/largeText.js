@@ -1,6 +1,9 @@
+/*
+For large text set width and height when editing
+
 // columnDefs: [
 //     {
-//         cellEditor: 'agLargeTextCellEditor', 'agTextCellEditor'
+//         cellEditor: 'agLargeTextCellEditor'
 //         cellEditorPopup: true,
 //         cellEditorParams: {
 //             maxLength: 100,
@@ -9,6 +12,11 @@
 //         }
 //     }
 // ]
+
+*/
+
+
+
 const type_check = require('../../../TypeCheck')
 
 class LargeTextParams {

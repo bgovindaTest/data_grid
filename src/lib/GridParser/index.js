@@ -10,6 +10,7 @@ Parses grids json object and converts expression syntax into javascript function
     '__is_read_only__':  true/false (do the have modification permssions)
         //if no force editable to false
 
+
     gridOptions: {
         suppressPropertyNamesCheck = true
     }
@@ -19,6 +20,7 @@ Parses grids json object and converts expression syntax into javascript function
     //first grid is main. others can be called as subgrids
     grids: [
     {
+        rowHeights: { column_name add to metaColumn} //should be sent from main query. 
         navHeaderParams: {
             name: 'x'
             links: [{'name': xxx, 'url': xxx }],

@@ -14,7 +14,7 @@ const DateTimeParams     = require('./date_time')
 const LargeTextParams    = require('./largeText')
 const LinkParams         = require('./links')
 const SubGridParams      = require('./subgrid')
-// const AutoCompleteParams = require('./autocomplete_params')
+const AutoCompleteParams = require('./autocomplete_params')
 
 function AddDefualtParams(grid) {
     let x = new DefaultParameters(grid)
@@ -131,15 +131,39 @@ function AddDefualtParams(grid) {
 //     expect(expected).toBe(res)
 // })
 
-test('subgrid params', () => {
+// test('subgrid params', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'text',  'editable': true, 'cellEditor': 'subGridSelectorEditor',
+//         'cellEditorParams': {'subGridPos': 2}},
+//     ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new SubGridParams(grid_column)
+//     y.SubGridParamsInit()
+//     let expected = { subGridPos: 2, pre_name: '', post_name: '', subGridName: 'a' }
+//     expect(grid_column['cellEditorParams']).toMatchObject(expected)
+// })
+
+test('autocomplete params with lookup', () => {
     let grid = [
-        {'field': 'a', 'dataType': 'text',  'editable': true, 'cellEditor': 'subGridSelectorEditor',
-        'cellEditorParams': {'subGridPos': 2}},
+        {'field': 'a', 'dataType': 'text',  'editable': true, 'cellEditor': 'autoCompleteEditor'},
     ]
+    let valuesObject = [{'id': 1, 'a': 'a1'}, {'id': 2, 'a': 'a2'} ]
     AddDefualtParams(grid)
     let grid_column = grid[0]
-    y = new SubGridParams(grid_column)
-    y.SubGridParamsInit()
+    y = new AutoCompleteParams(grid_column, valuesObject)
+    y.AutoCompleteParamsInit()
+    // console.log(grid_column['cellEditorParams'])
+    // console.log(grid_column['valueSetter'])
+    // console.log(grid_column['valueGetter'])
+    // let expected = {
+    //     pushKey: 'a',
+    //     pullKey: 'id',
+    //     displayKey: 'a',
+    //     values: [ 'a1', 'a2' ],
+    //     mapObject: { a1: { id: '1', a: 'a1' }, a2: { id: '2', a: 'a2' } }
+    // }
+    // expect(grid_column['cellEditorParams']).toMatchObject(expected)
     console.log(grid_column)
     expect(true).toBe(true)
 })

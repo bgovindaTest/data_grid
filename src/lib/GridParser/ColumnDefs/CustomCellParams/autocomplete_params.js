@@ -9,6 +9,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     field: 'field_name,
     data_type: dtype of field
     cellEditor: "autoComplete"
+    validator: if_not object
     cellEditorParams: {
         values: [{}] //always object
         columnDef: [
@@ -26,7 +27,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 
         pushKey = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
         pullKey = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
-        displayKey = grid_column["cellEditorPrams"]['displayKey'] //defaults to id
+        displayKey = grid_column["cellEditorPrams"]['displayKey'] //defaults to id also is the return key?
 
     }
 
@@ -59,7 +60,9 @@ class AutoCompleteParams {
         PushPullInit(grid_column)
         this.DefaultParameters()
         this.ValueGetter()
+        this.ValueSetter()
         grid_column['cellEditorPopup'] = true
+        grid_column['ignoreError'] = false
     }
 
 
@@ -83,10 +86,20 @@ class AutoCompleteParams {
         }
         else{ this.AutocompleteDefaultColumnDef() }
         this.CopyAndStringifyValuesObject()
-
+        this.CreateMapObject()
+    }
+    CreateMapObject() {
+        let values = this.grid_column['cellEditorParams']['values']
+        let mapObject   = {}
+        let displayKey = this.grid_column['cellEditorParams']['displayKey']
+        for (let i =0; i < values.length; i++) {
+            let dk = values[i][displayKey]
+            mapObject[dk] = values[i]
+        }
+        this.grid_column['cellEditorParams']['mapObject'] = mapObject
     }
 
-    AutocompleteDefaultColumnDef(pullKey, displayKey, columnWidth) {
+    AutocompleteDefaultColumnDef() {
         //default columnDef for lookups.
         let cep = this.grid_column['cellEditorParams']
         let pullKey    = cep['pullKey']
@@ -99,10 +112,9 @@ class AutoCompleteParams {
             cep['columnDef'] = [{'field': displayKey, "width": columnWidth}]
         }
         //add pushKey?
-
     }
 
-    ValueGetter(grid_column) {
+    ValueGetter() {
         //data is object for autocomplete
         let grid_column = this.grid_column
         if (grid_column.hasOwnProperty('valueGetter')) {return}
@@ -119,6 +131,8 @@ class AutoCompleteParams {
         }
         grid_column['valueGetter'] = fn
     }
+
+
     CopyAndStringifyValuesObject() {
         /*
         Parses values object and returns values for drop down and the map object.
@@ -141,7 +155,7 @@ class AutoCompleteParams {
         }
 
         if (valuesObject.length > 0) {
-            if (! type_check.IsObject(valuesObject[i]) ) {
+            if (! type_check.IsObject(valuesObject[1]) ) {
                 let field = this.grid_column['field']
                 console.error(`${field} values is not a json object returning empty object`)
                 return values
@@ -150,20 +164,105 @@ class AutoCompleteParams {
 
         for(let i=0; i<valuesObject.length; i++) {
             let x = valuesObject[i]
-            //typecheck
             let keys = Object.keys(x)
             let y = {}
             for(let j =0; j<keys.length; j++) {
-                y[keys[i]] = String(x[keys[i]])
+                y[keys[j]] = String(x[keys[j]])
             }
             values.push(y)
         }
         cep['values'] = values
     }
+    ValueSetter() {
+        // this.grid_column['cellEditorParams']['mapObject'] = mapObject
+        this.grid_column['valueSetter'] = this.ValueAutocompleteSetter()
+    }
+
+    Validator() {
+        //must be object or null. if string means no match found and is error
+        let field = this.grid_column['field']
+        this.grid_column['validator'] = function (params) {
+            let nv = params.data[field]
+            if (type_check.IsNull(nv) || type_check.IsUndefined(nv)) {return true}
+            else if (type_check.IsObject(nv)) {return true}
+            else {return false}
+        }
+    }
+
+    ValueAutocompleteSetter() {
+        /*
+        The setter is used for the autocomplete widget. If copy and paste is used it will search against the selectValues
+        to try to find the correct row. If no or multiple rows are returned in will return the key_values otherwise it will
+        return the return value. If entering in through the autocomplete widget it will return the key_value directly which should
+        be available in the
+        
+        params: object sent from aggrid
+        mapObject: map function takes the key_value and returns corresponding row for autocomplete
+        selectValues: json array contains values used in autocomplete. Used to search against for newValues if it is not an available
+            key for the map_object
+        column_match_string: the column created in selectValues. It should have a concatenations of all the columns and its what the key_value
+            will search against when not found in the map_object
+        columnName: name of the params.data[columnName] where key_value will be saved
+        return_value: if the search is used to try to match the key_value to row in selectValues. If only one is found this will be the
+            column value thats returned.
+        */
+
+        // type_check
+        let field        = this.grid_column['field']
+        let mapObject    = this.grid_column['cellEditorParams']['mapObject']
+        let selectValues = this.grid_column['cellEditorParams']['values']
+
+        const fn = function (params) {
+            let nv = params.newValue
+            if (typeof nv === 'undefined') { return false }
+            if (nv === params.oldValue) {return false}   
+            if (nv === null) {
+                params.data[field] = null
+                return true 
+            }
+            if (type_check.IsObject(nv) ) {
+                params.data[field] = nv
+                return true
+            }
+            if (! type_check.IsString(nv) ) {
+                params.data[field] = null
+                return true
+            }
 
 
+            if (mapObject.hasOwnProperty(nv)) {
+                params.data[field] = mapObject[nv]
+                return true
+            }
 
 
+            var key_value = nv
+
+            //Try search
+            var mx = String(key_value).toLowerCase()
+            var mx_array = mx.split(/[\s,]+/)
+            var lookup_list = selectValues.filter((row) => {
+                var match_string = row[column_match_string]
+                var i = 0;
+                for( i in mx_array) {
+                    if (match_string.indexOf(mx_array[i]) < 0) {return false}
+                }
+                return true
+            })
+            if (lookup_list.length===1) {
+                params.data[field] = lookup_list[0]
+                return true
+            }
+            if (key_value.trim() === "") {
+                params.data[field] = null
+                return true
+            }
+        
+            params.data[columnName] = key_value
+            return true
+        }
+        return fn
+    }
 }
 
 module.exports = AutoCompleteParams

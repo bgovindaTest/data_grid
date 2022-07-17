@@ -175,6 +175,8 @@ class ColumnDefsInit {
             tmp = new ValueParser(grid_column, {}) //{} is for depricated globals object
             tmp.RunInit()
 
+            //CustomCellParams
+
             CellClassRulesInit(grid_column)
 
             //cellEditorParams

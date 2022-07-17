@@ -335,7 +335,7 @@ class CrudColumnFunctions {
     ExtractCrudConditions(grid) {
         /*
             List values that are required for change detection and/or cant be null
-            ignoreValidator: true/false (for calculated fields?) allow to pass or skip?
+            ignoreError: true/false for validators allow to pass or skip?
             valueGetter:
             validator
         */
@@ -363,20 +363,18 @@ class CrudColumnFunctions {
 
             if (grid_column.hasOwnProperty('validator') ) {
                 let vg = grid_column['validator']
-                let ignoreValidator = false
+                let ignoreE = false
                 if (grid_column.hasOwnProperty('ignoreError')) {
-                    let ix = ignoreValidator
-                    if (type_check.IsBoolean(ix) ) {ignoreValidator = ix}
+                    let tmpIgnoreE = grid_column['ignoreError']
+                    if (type_check.IsBoolean(tmpIgnoreE) ) {ignoreE = tmpIgnoreE}
                 }
-                validators[field] = {'validator': vg, 'ignoreValidator': ignoreValidator}
-
+                validators[field] = vg
+                ignoreError[field] = ignoreE
             }
         }
         this.SetCloneFields(grid)
         this.crud_conditions = {'change_fields': change_fields, 'required_fields': required_fields, 
-            'validators': validators, 'valueGetter': valueGetters, 
-            
-            'ignoreValidator': ignoreValidator}
+            'validators': validators, 'valueGetter': valueGetters, 'ignoreError': ignoreError}
     }
     SetCloneFields(grid) {
         this.cloneOnCopy = []

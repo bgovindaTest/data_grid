@@ -3,6 +3,8 @@ emit undo event on click?
 //adds delete and undo column
 
 cell renderor
+
+may require emitter for 
 -->
 
 
@@ -43,5 +45,17 @@ export default {
    }
 
 }
+
+// function removeSelected() {
+//   const selectedRowNodes = gridOptions.api.getSelectedNodes();
+//   const selectedIds = selectedRowNodes.map(function (rowNode) {
+//     return rowNode.id;
+//   });
+//   immutableStore = immutableStore.filter(function (dataItem) {
+//     return selectedIds.indexOf(dataItem.symbol) < 0;
+//   });
+//   gridOptions.api.setRowData(immutableStore);
+// }
+
 
 </script>

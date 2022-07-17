@@ -29,6 +29,7 @@ field from the query. The value id is renamed to field when pushed to the server
 
 function PullPushDisplayKeys( grid_column ) {
     let field = grid_column['field']
+    CellEditorParamsCheck(grid_column)
     let cep = grid_column['cellEditorParams']
     if (! cep.hasOwnProperty('pushKey'))    { cep['pushKey'] = field } //name of field to send to database for writes
     if (! cep.hasOwnProperty('pullKey'))    { cep['pullKey'] = 'id' }  //name of id from refernced table
@@ -38,7 +39,6 @@ function PullPushDisplayKeys( grid_column ) {
 function CellEditorParamsCheck(grid_column) {
     //if cellEditorParams missing add placeholder and log error
     if (! grid_column.hasOwnProperty('cellEditorParams')) {
-        console.error(`cellEditorParams missing for ${grid_column['field']}`)
         grid_column['cellEditorParams'] = {}
     }
 }

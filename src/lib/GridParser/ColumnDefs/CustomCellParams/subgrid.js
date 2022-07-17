@@ -39,7 +39,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
 */
 const type_check = require('../../../TypeCheck')
 
-class SubGrid {
+class SubGridParams {
     constructor(grid_column) {
         this.grid_column  = grid_column
     }
@@ -101,10 +101,31 @@ class SubGrid {
             }
             else { def_obx[cn] = val }
         }
+    }
+    SubGridNameFunction( ) {
+        //creates function that returns subgrid name
 
+        // row_name: { 'field': , 'paramsKey': }
+        // pre_name: ''  for concatenations before name
+        // post_name: '' for concatenations after name
+        // subGridName: 'string' if empty assemble from pre_name + row_name + post_name
+
+    }
+    SetDefaults() {
+        //remove parameters not needed. passes cellRenderer function direclty
+        this.grid_column['isRequired']  = false
+        this.grid_column['ignoreError'] = true 
+        this.grid_column['dataType'] = 'text'
+        this.grid_column['editable'] = false 
+        this.grid_column['hide'] = false
+        let chmodParams = {}
+        chmodParams['isPull']   = false  
+        chmodParams['isPush']   = false
+        chmodParams['isChange'] = false
+        this.grid_column['chmodParams'] = chmodParams
     }
 }
 
 
 
-module.exports = SubGrid
+module.exports = SubGridParams

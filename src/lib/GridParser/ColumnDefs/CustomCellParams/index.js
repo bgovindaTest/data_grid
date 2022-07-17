@@ -5,12 +5,13 @@ grid: json array of the grid
 grid_column:
 valuesObject: the json array object for autocomplete and richselector with field
 
-// let cellEditors = {
-//     //customEditors have special formatting
-//     'customEditors':    ['autoComplete',  'subGridSelector', 'agRichSelectCellEditor'],
-//     'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateTimeSelector' ], //make popupTrue for agLargeTextCellEditor
-//     'defaultEditor': 'agTextCellEditor'
-// }
+let cellEditors = {
+    //customEditors have special formatting
+    //crudSelector is for metacolumn params, delete, undo and add?
+    'customEditors':    ['autoCompleteEditor', 'crudSelectEditor', 'subGridSelectorEditor', 'agRichSelectCellEditor'],
+    'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateTimeEditor' ], //make popupTrue for agLargeTextCellEditor
+    'defaultEditor': 'agTextCellEditor'
+}
 
 */
 

@@ -44,7 +44,7 @@ const PushPullInit = auxFuncs['PullPushDisplayKeys']
 const CellEditorParamsCheck = auxFuncs['CellEditorParamsCheck']
 
 
-class AutocompleteParams {
+class AutoCompleteParams {
     constructor(grid_column, valuesObject) {
         this.grid_column  = grid_column
         this.valuesObject = valuesObject
@@ -166,4 +166,4 @@ class AutocompleteParams {
 
 }
 
-module.exports = AutocompleteParams
+module.exports = AutoCompleteParams

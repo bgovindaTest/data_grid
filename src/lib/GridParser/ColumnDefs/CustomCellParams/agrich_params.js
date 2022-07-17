@@ -48,14 +48,13 @@ class AgRichParams {
         */
         let grid_column  = this.grid_column
         PushPullInit(grid_column)
-        CellEditorParamsCheck(grid_column)
+
         grid_column['cellEditorPopup'] = true
         let isLookup = grid_column['isLookup'] || false
 
         if (isLookup ) {
-            let valsParams = this.ValuesAndMapObject()
-            cep['values'] = valsParams['values']
-            cep['mapObject'] = valsParams['mapObject']
+            let cep = grid_column['cellEditorParams']
+            this.ValuesAndMapObject()
             grid_column['isLookup'] = true
             this.ValueGetter( grid_column, cep['mapObject']  )
             this.ValueSetter( grid_column, cep['mapObject']  )
@@ -83,8 +82,6 @@ class AgRichParams {
             for(let i=0; i<valuesObject.length; i++) {
                 let x = valuesObject[i]
                 let dk = x[displayKey]
-                
-                mapObject[dk] = valuesObject[i] // {'id: 1} -> {'user_id': 1} y[pushKey] = String(pull_id)
                 values.push(dk)
             }
         } else if ( type_check.IsArray(valuesObject) ) {
@@ -97,7 +94,7 @@ class AgRichParams {
         }
         let cep = this.grid_column['cellEditorParams']
         cep['values']    =  values
-        cep['mapObject'] =  mapObject
+        cep['mapObject'] =  {}
 
     }
 

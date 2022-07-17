@@ -1,7 +1,20 @@
-//prepends delete/undo column to grid
+/*
+crudColumn: {
+    addButton: adds plus button to row. set values that should be copied
+        check if insert tracks position or need to use Array.indexOf(searchElement, fromIndex)
+        determine when button should be present. Also what fields should be copied. and what
+        the crudType should be
+    removeButton: adds remove maybe cancel icon to crudColumn. For rows that
+        dont have a delete option.
+
+}
+prepends delete/undo column to grid
+*/
+
 const data_config = require('../../../../DataConfig')
 const type_check = require('../../../../TypeCheck')
 const meta_column_name = data_config['meta_column_name']
+const DefaultParams = require('../../DefaultParameters')
 
 
 function CrudColumnInit(grid) {
@@ -25,6 +38,7 @@ function CrudColumnInit(grid) {
             break
         }
     }
+    du_column['field'] = meta_column_name
 
     let defaultCellEditorParams = {
         "allowDelete": {'update': true,  'insert': false}, //shows delete for pulled data only (has precedence)
@@ -49,8 +63,10 @@ function CrudColumnInit(grid) {
 
 function SetDefaults(grid_column) {
     let du_column = grid_column
-    du_column['showSort']   = false
-    du_column['showFilter'] = false
+    du_column['showSort']    = false
+    du_column['showFilter']  = false
+    du_column['isRequired']  = false
+    du_column['ignoreError'] = true
 
     //hide button if all false dont show
     if (du_column.hasOwnProperty('allowAction') ) { 
@@ -66,7 +82,10 @@ function SetDefaults(grid_column) {
     let headerName = 'GridAction'
     if (!du_column.hasOwnProperty('headerName') ) { du_column['headerName'] = headerName }        
     if (du_column.hasOwnProperty('cellEditor') ) { du_column['cellEditor'] = 'crudSelectEditor' } 
-
+    let tmp = new DefaultParams([])
+    tmp.DefaultParameters(du_column)
+    tmp.DefaultValue(du_column)
+    du_column['chmodParams'] = CreateCrudObject(false, false, true)
 }
 
 function SetParameters(actionName, cellEditorParams, defaultCellEditorParams ) {
@@ -88,6 +107,13 @@ function SetFalse () {
     return {'update': false,  'insert': false}
 }
 
+function CreateCrudObject(isPull, isPush, isChange) {
+    return {
+        'isPull':   isPull,
+        'isPush':   isPush,
+        'isChange': isChange,
+    }
+}
 
 
 module.exports = CrudColumnInit

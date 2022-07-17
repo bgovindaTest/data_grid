@@ -1,5 +1,4 @@
-const vp = require('./index.js')
-const ValueParser = vp['ValueParser']
+const ValueParser = require('./index.js')
 
 function gc(options) {
     let grid_column = {'field': 'colA'}
@@ -14,7 +13,7 @@ test('values getter', () => {
     let options = {'valueGetter': 'colA +1', 'valueSetter': {'useDefault':true} }
     let grid_column = gc(options)
     let x = new ValueParser(grid_column, {})
-    x.RunInit()
+    x.ValueParserInit()
     expect(grid_column.hasOwnProperty('valueSetter')).toBe(false)
 })
 
@@ -22,7 +21,7 @@ test('values getter', () => {
     let options = {'valueGetter': 'ifnull( colA, 0) +1', 'validator': ' 0 < ifnull(colA,0) < 2'  , 'dataType': 'real', 'editable': true }
     let grid_column = gc(options)
     let vpx = new ValueParser(grid_column, {})
-    vpx.RunInit()
+    vpx.ValueParserInit()
     let fx = grid_column['valueGetter']
     let fv = grid_column['validator']
     let fs = grid_column['valueSetter']
@@ -41,7 +40,7 @@ test('values date', () => {
     let options = {'dataType': 'date', 'editable': true }
     let grid_column = gc(options)
     let vpx = new ValueParser(grid_column, {})
-    vpx.RunInit()
+    vpx.ValueParserInit()
     let fs = grid_column['valueSetter']
     let p1 = {'data':{'colA': null}, 'newValue': '5/5/2021'}
     let p2 = {'data':{'colA': null}, 'newValue': '25/5/2021'}
@@ -57,7 +56,7 @@ test('values time', () => {
     let options = {'dataType': 'time', 'editable': true }
     let grid_column = gc(options)
     let vpx = new ValueParser(grid_column, {})
-    vpx.RunInit()
+    vpx.ValueParserInit()
     let fs = grid_column['valueSetter']
     let p1 = {'data':{'colA': null}, 'newValue': '5:5'}
     let p2 = {'data':{'colA': null}, 'newValue': '1:1:1'}
@@ -73,7 +72,7 @@ test('valuesGetter required field', () => {
     let options = {'valueGetter': 'ifnull( colA, 0) +1', 'dataType': 'real', 'valueGetterRequiredFields': ['colA'] }
     let grid_column = gc(options)
     let vpx = new ValueParser(grid_column, {})
-    vpx.RunInit()
+    vpx.ValueParserInit()
     let fx = grid_column['valueGetter']
     let p1 = {'data':{'colA': null}}
     let p2 = {'data':{'colA': '1'}}
@@ -88,7 +87,7 @@ test('validator requiredField', () => {
     let options = {'validator': ' 0 < ifnull(colA,0) < 2'  , 'dataType': 'real', 'validatorRequiredFields': ['colA'] }
     let grid_column = gc(options)
     let vpx = new ValueParser(grid_column, {})
-    vpx.RunInit()
+    vpx.ValueParserInit()
     let fv = grid_column['validator']
     let p1 = {'data':{'colA': '5'}}
     let p2 = {'data':{'colA': '1'}}
@@ -110,7 +109,7 @@ test('values getter and validator requireField', () => {
         'requiredFields': ['colA'], 'validatorRequiredFields': ['colA', 'colB'] }
     let grid_column = gc(options)
     let vpx = new ValueParser(grid_column, {})
-    vpx.RunInit()
+    vpx.ValueParserInit()
     let fx = grid_column['valueGetter']
     let fv = grid_column['validator']
     let p1 = {'data':{'colA': '0', 'colB': null}}

@@ -14,23 +14,22 @@ ignoreValidator: true/false (for calculated fields?) allow to pass or skip?
 Creates Auxillary function for crud operations
 
 */
-const type_check  = require('../../../../TypeCheck')
-const crud_column = require('./crud_column')
+const CrudColumnInit   = require('./crud_column')
+const CrudColumnFunctions = require('./crud_functions')
 
 class MetaColumnAssembly {
     constructor() {}
 
-    RunInit(grid) {
-        this.MetaColumn( grid )
-        this.InitializeDeleteUndoColumn(grid)
-        let funcs = this.MetaAuxillaryFunction( grid )
+    MetaColumnInit(grid) {
+        this.CrudColumn( grid )
+        let funcs = this.CreateAuxillaryFunction( grid )
         return funcs
     }
 
 
     CrudColumn( grid ) {
         /*Adds meta column to columnDefs. responsible for handling meta data and types like backups*/
-        crud_column.CrudColumnInit(grid)
+        CrudColumnInit(grid)
     }
 
     CreateAuxillaryFunction( grid ) {
@@ -44,31 +43,11 @@ class MetaColumnAssembly {
             // pages config.
             // let backups = {'backups': {}, 'row_type': '' }
         */
-    
-        //is_crud
-        //need to add column for delete
-        let backups = this.CreateMetaBackupColumn(grid)
-        let fupdate = this.InitDefaultUpdateRow(backups) //for rows created from querying the database
-        let finsert = this.InitDefaultInsertRow(backups) //for newly added rows via add row or new_sheet
-        let fundo   = this.UndoRow(backups) //function to reset row based on backup values
-        let fdel    = this.DeleteRow()
-        let ferror  = this.RowHasError(grid) //combines all validations functions
-        let fwarn   = this.RowHasWarning(grid) //validations with ignored error
-        let fcomp   = this.RowIsComplete(grid) //all required fields and not empty
-        let fchange = this.RowIsChanged(grid)  //different from backup fields
-        let grid_functions =  {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
-            'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange, 'fwarn': fwarn }
-        let fis_save = this.IsSaveRow(grid_functions)
-        grid_functions['fis_save'] = fis_save
-        grid_functions['deleteWarning'] = ""
-        if (grid.hasOwnProperty('deleteWarning') ) {
-            //displays on save to warn of possible rejected deletes
-            grid_functions['deleteWarning'] = grid['deleteWarning']
-        }
+        let tmp = new CrudColumnFunctions()
+        let grid_functions = tmp.CreateAuxilaryFunction( grid )
         return grid_functions
     }
-
-
 }
 
+module.exports = MetaColumnAssembly
 

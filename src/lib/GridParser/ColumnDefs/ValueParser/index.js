@@ -47,7 +47,7 @@ class ValueParser {
         this.grid_column = grid_column
         this.globals = globals
     }
-    RunInit() {
+    ValueParserInit() {
         let grid_column = this.grid_column
         this.SetRequiredFields(grid_column)
         this.ValueTransform(grid_column, 'valueGetter')

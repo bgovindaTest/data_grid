@@ -109,12 +109,13 @@ Parses grids json object and converts expression syntax into javascript function
 
 
 */
-const dfp   = require('./ColumnDefs/DefaultParameters')
+const DefaultParameters   = require('./ColumnDefs/DefaultParameters')
 const ValueParser  = require('./ColumnDefs/ValueParser')
 const CellClassRulesInit   = require('./ColumnDefs/CellClassRules')
-// const ccp   = require('./ColumnDefs/CustomCellParams')
-// const crudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
-// const qfp   = require('./UIQueryFuncParams')
+const CustomCellParams     = require('./ColumnDefs/CustomCellParams')
+const UiQueryFuncParams   = require('./UIQueryFuncParams')
+const CrudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
+
 const ChmodParams = require('./ChmodParams')
 
 const lodashCloneDeep = require('lodash.clonedeep')
@@ -155,38 +156,33 @@ class ColumnDefsInit {
 
 
         */
-
-
-        //for MainGrid
-        //make copy?
-        //grid = JSON.parse(JSON.stringify(food)) for deep copy
-        let grid = lodashCloneDeep(this.gridColumnDefs) //messes up column order probably?
-        let x = new dfp(grid)
+        //messes up column order probably. may need to preempty add column order
+        let grid = lodashCloneDeep(this.gridColumnDefs)
+        let x = new DefaultParameters(grid)
         x.DefaultParamsInit()
 
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
+            let field       = grid_column['field']
 
             //valuesObject[field]
-
             let tmp = null
             tmp = new ChmodParams(grid_column)
             tmp.ChmodParamsInit()
             tmp = new ValueParser(grid_column, {}) //{} is for depricated globals object
-            tmp.RunInit()
-
-            //CustomCellParams
-
+            tmp.ValueParserInit()
+            let gridColumnValuesObject = this.valuesObject[field] || []
+            tmp = new CustomCellParams(grid_column, gridColumnValuesObject)
             CellClassRulesInit(grid_column)
-
-            //cellEditorParams
         }
-        //UiQueryFuncParams
-        // const crudColumn = require('./CrudColumn')
-        //crudMetaColumn also creates auxilary functions. 
-        //initialze query params
-        //auxilary functions
-        return grid
+        let tmp = new UiQueryFuncParams(grid)
+        let query_params = tmp.QueryParamsInit()
+
+        //adds metacolumn and creates auxilary functions
+        // tmp = new CrudMetaColumn()
+        let gridFunctions = {}
+        // gridFunctions = tmp.MetaColumnInit(grid)
+        return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
     }
 
     SubGridNameFunction( ) {

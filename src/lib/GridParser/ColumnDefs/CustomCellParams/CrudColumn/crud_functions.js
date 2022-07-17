@@ -30,11 +30,11 @@ class CrudColumnFunctions {
         this.cloneOnCopy     = null 
     }
 
-    RunInit(grid) {
-        this.DefaultValuesParse( grid )
-        let funcs = this.CreateAuxilaryFunction(grid)
-        return funcs
-    }
+    // RunInit(grid) {
+    //     this.DefaultValuesParse( grid )
+    //     let funcs = this.CreateAuxilaryFunction(grid)
+    //     return funcs
+    // }
     CreateAuxilaryFunction( grid ) {
         /*
         Creates object stored in meta_column. Stores backup and 
@@ -50,12 +50,13 @@ class CrudColumnFunctions {
         //is_crud
         //need to add column for delete
         let gf = {}
+        this.DefaultValues(grid)
         let defaultValues  = this.defaultValues
         this.ExtractCrudConditions(grid)
         gf['Insert']       = this.InitInsertRow(defaultValues) //for newly added rows via add row or new_sheet
         gf['CopyRow']      = this.CopyRowInit()
         gf['Update']       = this.InitUpdateRow() //for rows created from querying the database
-        gf['Undo']         = this.UndoRow(backups) //function to reset row based on backup values
+        gf['Undo']         = this.UndoRow() //function to reset row based on backup values
         gf['Delete']       = this.DeleteRow()
         gf['UndoDelete']   = this.DeleteUndoRow()
         //grid_changes before saving
@@ -65,6 +66,19 @@ class CrudColumnFunctions {
         gf['deleteWarning'] = grid['deleteWarning']
         return gf
     }
+
+    DefaultValues( grid ) {
+        //get default values from grid columns
+        let defValue = {}
+        for (let i =0; i<grid.length; i++ ) {
+            let grid_column = grid[i]
+            let defaultValue = grid_column['defaultValue']
+            let field = grid_column['field']
+            defValue[field] = defaultValue
+        }
+        this.defaultValues = defValue
+    }
+
 
     InsertRowInit(defaultValues) {
         /*
@@ -295,7 +309,7 @@ class CrudColumnFunctions {
         const IsCompleted     = this.IsRowComplete()
         const IsError         = this.IsRowError()
         const IsEmpty         = this.IsRowEmpty()
-        const IsWarning       = this.IsRowEmpty()
+        const IsWarning       = this.IsRowWarning()
         const IsCrudType      = this.CrudType()
     
         return function (rowData) {
@@ -329,13 +343,17 @@ class CrudColumnFunctions {
         let required_fields = []
         let validators   = {}
         let valueGetters = {}
+        let ignoreError  = {}
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             let field = grid_column['field']
             let is_crud = grid_column['chmodParams']
+
             if (is_crud['isChange']) { change_fields.push(field) }
             if (grid_column['isRequired']) {required_fields.push(field)}
-            if (!grid_column['isRequired'] && is_crud['isChange']) {continue}
+
+
+            //if (!grid_column['isRequired'] && is_crud['isChange']) {continue}
             if (grid_column.hasOwnProperty('valueGetter') ) {
                 let vg = grid_column['valueGetter']
                 if (type_check.IsFunction(vg)) {
@@ -346,7 +364,7 @@ class CrudColumnFunctions {
             if (grid_column.hasOwnProperty('validator') ) {
                 let vg = grid_column['validator']
                 let ignoreValidator = false
-                if (grid_column.hasOwnProperty('ignoreValidator')) {
+                if (grid_column.hasOwnProperty('ignoreError')) {
                     let ix = ignoreValidator
                     if (type_check.IsBoolean(ix) ) {ignoreValidator = ix}
                 }
@@ -356,7 +374,9 @@ class CrudColumnFunctions {
         }
         this.SetCloneFields(grid)
         this.crud_conditions = {'change_fields': change_fields, 'required_fields': required_fields, 
-            'validators': validators, 'ignoreValidator': ignoreValidator}
+            'validators': validators, 'valueGetter': valueGetters, 
+            
+            'ignoreValidator': ignoreValidator}
     }
     SetCloneFields(grid) {
         this.cloneOnCopy = []

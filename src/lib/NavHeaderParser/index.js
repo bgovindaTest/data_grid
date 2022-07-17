@@ -20,3 +20,5 @@ function HeaderParams(grid) {
     headerParams['add_row']   = true
     headerParams['save']   = true
 }
+
+module.exports = HeaderParams

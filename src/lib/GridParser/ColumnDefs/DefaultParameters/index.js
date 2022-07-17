@@ -126,6 +126,9 @@ class DefaultParams {
         if (! grid_column.hasOwnProperty('width'))       { grid_column['width'] = 500 }
         if (! grid_column.hasOwnProperty('editable') )   { grid_column['editable'] = false }
         if (! grid_column.hasOwnProperty('hide') )       { grid_column['hide'] = false }
+        if (! grid_column.hasOwnProperty('cloneOnCopy') ){ grid_column['cloneOnCopy'] = false }
+        //cloneOnCopy if true add fields values to new row else set as null
+
         this.IfNull(grid_column)
     }
     IfNull(grid_column) {

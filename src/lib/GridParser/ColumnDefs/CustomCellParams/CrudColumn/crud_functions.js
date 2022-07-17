@@ -26,7 +26,8 @@ class CrudColumnFunctions {
     constructor() {
         this.crud_conditions = null
         this.defaultValues   = null
-        this.copyRowNullField = null // all write fields except enforced?
+        //cloneOnCopy if true add fields values to new row else set as null
+        this.cloneOnCopy     = null 
     }
 
     RunInit(grid) {
@@ -52,11 +53,12 @@ class CrudColumnFunctions {
         let defaultValues  = this.defaultValues
         this.ExtractCrudConditions(grid)
         gf['Insert']       = this.InitInsertRow(defaultValues) //for newly added rows via add row or new_sheet
+        gf['CopyRow']      = this.CopyRowInit()
         gf['Update']       = this.InitUpdateRow() //for rows created from querying the database
         gf['Undo']         = this.UndoRow(backups) //function to reset row based on backup values
-        gf['Delete']          = this.DeleteRow()
-        gf['UndoDelete']         = this.DeleteUndoRow()
-        //grid_changes
+        gf['Delete']       = this.DeleteRow()
+        gf['UndoDelete']   = this.DeleteUndoRow()
+        //grid_changes before saving
         gf['CrudStatus']   = this.CrudStatus()
 
         //delete_warning
@@ -100,26 +102,40 @@ class CrudColumnFunctions {
     }
 
     CopyRowInit() {
-        //crudType
-        //is_delete, allow_delete
-        //lodashCloneDeep
-        //setNull
-        let setNulls = this.copyRowNullField
+        /*
+        Row level addition. Used to copy lookups rows for quickly adding rows
+        that come from several refernce tables.
+            //crudType
+            //is_delete, allow_delete
+            //lodashCloneDeep
+            //setNull
+        */
+        let meta_column = { 'crudType': 'insert', 'is_delete': false }
+        let setCopy = this.cloneOnCopy
         let frow_copy = function (params) {
             let initRowData = params.data
-            let newRow = lodashCloneDeep(initRowData)
-            for (let i =0; i< setNulls.length; i++) {
-                let field = setNulls[i]
-                if (newRow.hasOwnProperty[field]) {
-                    newRow[field] = null
-                }
+            let keys = Object.keys(initRowData)
+            let newRowData = {}
+            newRowData[meta_column_name] = meta_column
+            for (let i =0; i< keys.length; i++) {
+                let field = keys[i]
+                if (field === meta_column_name) {continue}
+                if (setCopy.includes(field) ) {
+                    //lodashCloneDeep
+                    let val = params.data[field]
+                    if (type_check.IsObject(val) || type_check.IsArray(val) ) {
+                        newRowData[field] = lodashCloneDeep(val)
+                    } else if (type_check.IsUndefined(val)) {
+                        newRowData[field] = null
+                    } 
+                    else { newRowData[field] = val }
+                } else { newRowData[field] = null }
             }
+            meta_column['backup'] = lodashCloneDeep(newRowData)
             return newRow
         }
         return frow_copy
-
     }
-
 
     UpdateRowInit() {
         /*
@@ -221,11 +237,7 @@ class CrudColumnFunctions {
             let is_delete  = rowData[meta_column_name]['is_delete']
             return is_delete
         }
-        
-
     }
-
-
 
     IsRowWarning() {
 
@@ -306,13 +318,6 @@ class CrudColumnFunctions {
         }
     }
 
-
-
-
-
-
-
-
     ExtractCrudConditions(grid) {
         /*
             List values that are required for change detection and/or cant be null
@@ -327,7 +332,7 @@ class CrudColumnFunctions {
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             let field = grid_column['field']
-            let is_crud = grid_column['isCrud']
+            let is_crud = grid_column['chmodParams']
             if (is_crud['isChange']) { change_fields.push(field) }
             if (grid_column['isRequired']) {required_fields.push(field)}
             if (!grid_column['isRequired'] && is_crud['isChange']) {continue}
@@ -348,11 +353,20 @@ class CrudColumnFunctions {
                 validators[field] = {'validator': vg, 'ignoreValidator': ignoreValidator}
 
             }
-
-
         }
+        this.SetCloneFields(grid)
         this.crud_conditions = {'change_fields': change_fields, 'required_fields': required_fields, 
             'validators': validators, 'ignoreValidator': ignoreValidator}
+    }
+    SetCloneFields(grid) {
+        this.cloneOnCopy = []
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            let field = grid_column['field']
+            if (grid_column['cloneOnCopy'] || false) {
+                this.cloneOnCopy.push(field)
+            }
+        }
     }
 }
 

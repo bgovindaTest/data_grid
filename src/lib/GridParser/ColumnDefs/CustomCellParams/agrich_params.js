@@ -138,12 +138,15 @@ class AgRichParams {
     MapObjectFields( values_row ) {
         /*
             Filters and adds rows to match main query structure.
-            may add later.
+            may add later. stringifies values
         */
-        return values_row
-
-        //mapObjectLookupFields
-
+        let svalues = {}
+        let keys = Object.keys(values_row) 
+        for (let i = 0; i < keys.length; i++) {
+            let field = keys[i]
+            svalues[field] = String(values_row[field])
+        }
+        return svalues
     }
 
 
@@ -192,6 +195,16 @@ class AgRichParams {
             return params.data[field][displayKey] || null
         }
         grid_column['valueGetter'] = fn
+    }
+    CheckRequiredFields( valuesObject) {
+        let displayKey = this.grid_column['cellEditorParams']['displayKey']
+        let pushKey = this.grid_column['cellEditorParams']['pushKey']
+        let pullKey = this.grid_column['cellEditorParams']['pullKey']
+        //if not error
+
+
+
+
     }
 }
 

@@ -92,7 +92,14 @@ class AutocompleteParams {
         let pullKey    = cep['pullKey']
         let displayKey = cep['displayKey']
         let columnWidth = this.defaultColumnWidth
-        cep['columnDef'] = [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
+        //if different values
+        if (displayKey !== pullKey) {
+            cep['columnDef'] = [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
+        } else {
+            cep['columnDef'] = [{'field': displayKey, "width": columnWidth}]
+        }
+        //add pushKey?
+
     }
 
     ValueGetter(grid_column) {
@@ -132,8 +139,6 @@ class AutocompleteParams {
             cep['values'] = []
             return
         }
-
-
 
         if (valuesObject.length > 0) {
             if (! type_check.IsObject(valuesObject[i]) ) {

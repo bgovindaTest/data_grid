@@ -36,8 +36,9 @@ enableTime
 
 parseDates not needed handled by valueSetter.
 */
-const type_check  = require('../../../TypeCheck')
 const data_config = require('../../../DataConfig')
+const auxFuncs = require('./auxilary_funcs')
+const CellEditorParamsCheck = auxFuncs['CellEditorParamsCheck']
 
 
 class DateTimeParams {
@@ -45,11 +46,21 @@ class DateTimeParams {
     this.grid_column = grid_column
   }
   DateTimeInit() {
+    let gc = this.grid_column
+    CellEditorParamsCheck(gc)
     this.SetDefaults()
+
     let data_type = this.grid_column['dataType']
     if (data_type === 'date') { this.DateConfig()} 
     else if (data_type === 'time') { this.TimeConfig() } 
-    else { this.DateTimeConfig() }
+    else { 
+      if (!data_config.date_types.includes(data_type) ) {
+        let field = this.grid_column['field']
+        console.error(`${field} has invalid date/time type of ${data_type}`)
+        data_type = 'timestamp'
+      }
+      this.DateTimeConfig() 
+    }
   }
   DateConfig() {
     let cep = this.grid_column['cellEditorParams']
@@ -76,6 +87,7 @@ class DateTimeParams {
     if (!cep['allowInput']) {cep['allowInput'] = true}
   }
   SetTimeDefault() {
+    let cep = this.grid_column['cellEditorParams']
     if (!cep['enableTime']) {cep['enableTime'] = true}
     if (!cep['enableSeconds']) {cep['enableSeconds'] = true}
   }

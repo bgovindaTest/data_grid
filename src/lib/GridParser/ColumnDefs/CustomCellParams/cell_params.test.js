@@ -21,78 +21,89 @@ function AddDefualtParams(grid) {
     x.DefaultParamsInit()
 }
 
-test('agrich params no lookup', () => {
-    let grid = [
-        {'field': 'a', 'dataType': 'numeric',  'editable': true, 'cellEditor': 'agRichSelectCellEditor'},
-    ]
-    let valuesObject = [{'id': 1, 'a': 'a1'}, {'id': 2, 'a': 'a2'} ]
-    AddDefualtParams(grid)
-    let grid_column = grid[0]
-    y = new AgRichParams(grid_column, valuesObject)
-    y.AgRichSelectParamsInit()
-    let expected = 
-        {
-            pushKey: 'a',
-            pullKey: 'id',
-            displayKey: 'a',
-            values: [ 'a1', 'a2' ],
-            mapObject: {}
-        }
-    expect(expected).toMatchObject(grid_column['cellEditorParams'])
-})
+// test('agrich params no lookup', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'numeric',  'editable': true, 'cellEditor': 'agRichSelectCellEditor'},
+//     ]
+//     let valuesObject = [{'id': 1, 'a': 'a1'}, {'id': 2, 'a': 'a2'} ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new AgRichParams(grid_column, valuesObject)
+//     y.AgRichSelectParamsInit()
+//     let expected = 
+//         {
+//             pushKey: 'a',
+//             pullKey: 'id',
+//             displayKey: 'a',
+//             values: [ 'a1', 'a2' ],
+//             mapObject: {}
+//         }
+//     expect(expected).toMatchObject(grid_column['cellEditorParams'])
+// })
 
-test('agrich params with lookup', () => {
-    let grid = [
-        {'field': 'a', 'dataType': 'numeric',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
-    ]
-    let valuesObject = [{'id': 1, 'a': 'a1'}, {'id': 2, 'a': 'a2'} ]
-    AddDefualtParams(grid)
-    let grid_column = grid[0]
-    y = new AgRichParams(grid_column, valuesObject)
-    y.AgRichSelectParamsInit()
-    // console.log(grid_column['cellEditorParams'])
-    // console.log(grid_column['valueSetter'])
-    // console.log(grid_column['valueGetter'])
-    let expected = {
-        pushKey: 'a',
-        pullKey: 'id',
-        displayKey: 'a',
-        values: [ 'a1', 'a2' ],
-        mapObject: { a1: { id: '1', a: 'a1' }, a2: { id: '2', a: 'a2' } }
-    }
-    expect(grid_column['cellEditorParams']).toMatchObject(expected)
-})
+// test('agrich params with lookup', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'numeric',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
+//     ]
+//     let valuesObject = [{'id': 1, 'a': 'a1'}, {'id': 2, 'a': 'a2'} ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new AgRichParams(grid_column, valuesObject)
+//     y.AgRichSelectParamsInit()
+//     // console.log(grid_column['cellEditorParams'])
+//     // console.log(grid_column['valueSetter'])
+//     // console.log(grid_column['valueGetter'])
+//     let expected = {
+//         pushKey: 'a',
+//         pullKey: 'id',
+//         displayKey: 'a',
+//         values: [ 'a1', 'a2' ],
+//         mapObject: { a1: { id: '1', a: 'a1' }, a2: { id: '2', a: 'a2' } }
+//     }
+//     expect(grid_column['cellEditorParams']).toMatchObject(expected)
+// })
 
-test('datetime params with date', () => {
-    let grid = [
-        {'field': 'a', 'dataType': 'date',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
-    ]
-    let valuesObject = [{'id': 1, 'a': 'a1'}, {'id': 2, 'a': 'a2'} ]
-    AddDefualtParams(grid)
-    let grid_column = grid[0]
-    y = new AgRichParams(grid_column, valuesObject)
-    y.AgRichSelectParamsInit()
-    // console.log(grid_column)
-    console.log(grid_column['cellEditorParams'])
-    console.log(grid_column['valueSetter'])
-    console.log(grid_column['valueGetter'])
+// test('datetime params with date', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'date',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
+//     ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new DateTimeParams(grid_column)
+//     y.DateTimeInit()
+//     let expected = { allowInput: true, dateFormat: 'YYYY-MM-DD' }
+//     expect(grid_column['cellEditorParams']).toMatchObject(expected)
+// })
 
-    //check dataType
+// test('datetime params with datetime', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'datetime',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
+//     ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new DateTimeParams(grid_column)
+//     y.DateTimeInit()
+//     let expected = { allowInput: true, dateFormat: 'YYYY-MM-DD HH:MM:SSS' }
+//     expect(grid_column['cellEditorParams']).toMatchObject(expected)
+// })
 
-    // {
-    //     pushKey: 'a',
-    //     pullKey: 'id',
-    //     displayKey: 'a',
-    //     values: [ 'a1', 'a2' ],
-    //     mapObject: {}
-    //   }
-  
-
-
-    expect(true).toBe(true)
-})
-
-
+// test('datetime params with time', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'time',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
+//     ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new DateTimeParams(grid_column)
+//     y.DateTimeInit()
+//     let expected = {
+//         allowInput: true,
+//         dateFormat: 'HH:MM:SSS',
+//         enableTime: true,
+//         enableSeconds: true,
+//         noCalendar: true
+//     }
+//     expect(grid_column['cellEditorParams']).toMatchObject(expected)
+// })
 
 
 //agrich params

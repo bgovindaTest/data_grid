@@ -26,6 +26,7 @@ class CrudColumnFunctions {
     constructor() {
         this.crud_conditions = null
         this.defaultValues   = null
+        this.copyRowNullField = null // all write fields except enforced?
     }
 
     RunInit(grid) {
@@ -96,6 +97,27 @@ class CrudColumnFunctions {
 
     ReturnDefaultValue(defaultValues, field) {
         return defaultValues[field].value || null
+    }
+
+    CopyRowInit() {
+        //crudType
+        //is_delete, allow_delete
+        //lodashCloneDeep
+        //setNull
+        let setNulls = this.copyRowNullField
+        let frow_copy = function (params) {
+            let initRowData = params.data
+            let newRow = lodashCloneDeep(initRowData)
+            for (let i =0; i< setNulls.length; i++) {
+                let field = setNulls[i]
+                if (newRow.hasOwnProperty[field]) {
+                    newRow[field] = null
+                }
+            }
+            return newRow
+        }
+        return frow_copy
+
     }
 
 

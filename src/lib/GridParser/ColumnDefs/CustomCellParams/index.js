@@ -15,7 +15,6 @@ valuesObject: the json array object for autocomplete and richselector with field
 */
 
 //import crud column
-const crudColumn = require('./CrudColumn')
 const data_config = require('../../../DataConfig')
 const DateTimeParams = require('./date_time')
 const AutoCompleteParams = require('./autocomplete_params')
@@ -39,7 +38,7 @@ class CustomCellParams {
         let cE = this.grid_column['cellEditor'] || "agTextCellEditor"
         if (cE === "agTextCellEditor") { return }
         else if ( cE  === "autoComplete" ) {
-            let x = new AutocompleteParams(grid_column, valuesObject)
+            let x = new AutoCompleteParams(grid_column, valuesObject)
             x.AutoCompleteParamsInit()
         } else if (cE === 'agLargeTextCellEditor') {
             let x = new LargeTextParams(grid_column)
@@ -50,14 +49,15 @@ class CustomCellParams {
         } else if (cE === "dateTimeSelector") {
             let x = new DateTimeParams(grid_column)
         } else if (cE === "subGridSelector") {
-            let x = new SubGrid()
-            //run init  this.SubGridParams()
+            let x = new SubGrid(grid_column)
+            x.SubGridParamsInit()
         } else if (cE === data_config.meta_column_name) {
             return
         } else {
             console.error(`invalid cellEditor ${cE} for field ${field}`)
+            grid_column['cellEditor'] = "agTextCellEditor"
         }
     }
 }
 
-module.exports = {'CustomCellParams': CustomCellParams}
+module.exports = CustomCellParams

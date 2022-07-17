@@ -44,7 +44,7 @@ class SubGrid {
         this.grid_column  = grid_column
     }
 
-    SubGridParams(grid_column) {
+    SubGridParamsInit(grid_column) {
         let is_subgrid = grid_column['cellEditor'] || ""
         if (is_subgrid != "subGrid") { return }
         let subgridPos = grid_column["cellEditorPrams"]['gridPos'] || 0
@@ -107,4 +107,4 @@ class SubGrid {
 
 
 
-module.exports = {'SubGrid': SubGrid}
+module.exports = SubGrid

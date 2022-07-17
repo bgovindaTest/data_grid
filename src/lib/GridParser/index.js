@@ -1,6 +1,8 @@
 /*
 Parses grids json object and converts expression syntax into javascript functions. 
 
+    All Lookup objects must have id field.
+
     'qparams_prefix':"",
     'url_prefix':"",
     '__url_params__': {},
@@ -124,14 +126,19 @@ const lodashCloneDeep = require('lodash.clonedeep')
 class ColumnDefsInit {
     //for main loader
     //grid is json object for aggrid
-    constructor(gridColumnDefs, valuesObject, gridPos) {
+    constructor(gridColumnDefs, valuesObject) {
         this.gridColumnDefs  = gridColumnDefs
         this.valuesObject    = valuesObject
-        this.gidPos          = gridPos
     }
 
     RunSubGridColumnsInit(rowParams) {
         //add rowParams?
+        //add SubGridDefaultValues
+        //add DefaultValues
+        //for loop
+
+        //add subgrid row fitlers
+        //crud modal
 
         //Copy grid
         //Add default values from rowData
@@ -157,6 +164,7 @@ class ColumnDefsInit {
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
 
+            //valuesObject[field]
 
             let tmp = null
             tmp = new ChmodParams(grid_column)
@@ -165,14 +173,11 @@ class ColumnDefsInit {
             tmp.RunInit()
 
             CellClassRulesInit(grid_column)
-            // let x = new dfp(grid_column)
-            // x.DefaultParamsInit()
-            //chmod params
-            // For parsing valueSetter, valueGetter, valueFormatter, validator. Default assumes expression string.
-            //valueParser
+
             //cellEditorParams
-            //cellClassRules
         }
+        //UiQueryFuncParams
+        // const crudColumn = require('./CrudColumn')
         //crudMetaColumn also creates auxilary functions. 
         //initialze query params
         //auxilary functions

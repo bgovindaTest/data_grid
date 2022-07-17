@@ -13,10 +13,6 @@ showSort:   false
 editable: false
 chmodParams: 'r'
 cellRenderer: "links"
-cellRendererParams: {
-    urlPath: string,
-    urlName: string
-}
 
 //stored as objects by default?
 To add later
@@ -31,7 +27,7 @@ class LinkParams {
     constructor (grid_column) {
         this.grid_column = grid_column
     }
-    RunInit() {
+    LinkInit() {
         //add cell render
         this.SetDefaults() 
         this.grid_column['cellRenderer'] = function (params) {

@@ -14,7 +14,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     cellEditorParams: {
         subGridPos: 0
         onSaveMainRefresh: true/false
-        row_name: { 'field': , 'paramsKey': }
+        row_name: { 'field': , 'paramsKey': } is optional passes info of row as subgrid name
         pre_name: ''  for concatenations before name
         post_name: '' for concatenations after name
         subGridName: 'string' if empty assemble from pre_name + row_name + post_name
@@ -33,26 +33,30 @@ Each grid_column_rule has the structure below. A more indepth description is in 
         defaultFilter: {subGridKey: {rowKey: , operator: ,rowKey2:   } } 
             if paramsKey exists assumbes rowData field is object or array.
             other wise just return value direclty from array. Should clone if 
-            object so child cant change value.
+            object so child cant change value. Enforced filters are determined
+            based on subGrid showFilter option
 
 
 */
-const type_check = require('../../../TypeCheck')
+const auxFuncs = require('./auxilary_funcs')
+const CellEditorParamsCheck = auxFuncs['CellEditorParamsCheck']
+
 
 class SubGridParams {
     constructor(grid_column) {
         this.grid_column  = grid_column
     }
 
-    SubGridParamsInit(grid_column) {
-        let is_subgrid = grid_column['cellEditor'] || ""
-        if (is_subgrid != "subGrid") { return }
-        let subgridPos = grid_column["cellEditorPrams"]['gridPos'] || 0
-        grid_column["cellEditorParams"]['field'] = grid_column['field']
-        //make integer.
-        if (subgridPos === 0 || subgridPos > this.grid.length ) {
-            console.error('Subgrid out of bounds should not be main grid')
+    SubGridParamsInit() {
+        let grid_column = this.grid_column
+        CellEditorParamsCheck(grid_column)
+        let ce = grid_column['cellEditorParams']
+        if (! ce.hasOwnProperty('subGridPos')) {
+            let field = grid_column['field']
+            console.error(`missing subGridPos for ${field} setting to 1`)
+            ce['subGridPos'] = 1
         }
+        this.SetDefaults()
     }
 
 
@@ -70,47 +74,17 @@ class SubGridParams {
         let cep = this.grid_column['cellEditorParams']
         let rdf = cep['rowDataDefaults']
         let df  = rdf['defaultFilter' ] || {}
-        let ef  = rdf['enforcedFilter'] || {}
         let dv  = rdf['defaultValue']   || {}
         let defaultSort  = rdf['defaultSort']    || []
         let defaultFilter    = this.DefaultObject(df, rowData)
-        let enforcedFilter   = this.DefaultObject(ef, rowData)
         let defaultValue     = this.DefaultObject(dv, rowData)
 
         return {'defaultSort': defaultSort, 'defaultFilter': defaultFilter,
-            'enforcedFilter': enforcedFilter, 'defaultValue':  defaultValue}
+                'defaultValue':  defaultValue}
 
     }
-    // MergeDefaults(grid_defualts, sub_grid_defaults) {}
-    DefaultObject(dx,rowData) {
-        let def_obx = {} //field_name: value
-        let keys = Object.keys(dx)
-        for (let i =0; i <keys.length; i++ ) {
-            let cn = keys[i]
-            let val = dx[cn]
-            if (type_check.IsObject(val) ) {
-                if (val.hasOwnProperty('lookupKey')) {
-                    let lookupKey = val['lookupKey']
-                    let field = val['field']
-                    def_obx[cn] =  rowData[ field ][lookupKey]
 
-                } else {
-                    let field = val['field']
-                    def_obx[cn] =  rowData[field]
-                }
-            }
-            else { def_obx[cn] = val }
-        }
-    }
-    SubGridNameFunction( ) {
-        //creates function that returns subgrid name
 
-        // row_name: { 'field': , 'paramsKey': }
-        // pre_name: ''  for concatenations before name
-        // post_name: '' for concatenations after name
-        // subGridName: 'string' if empty assemble from pre_name + row_name + post_name
-
-    }
     SetDefaults() {
         //remove parameters not needed. passes cellRenderer function direclty
         this.grid_column['isRequired']  = false
@@ -123,6 +97,16 @@ class SubGridParams {
         chmodParams['isPush']   = false
         chmodParams['isChange'] = false
         this.grid_column['chmodParams'] = chmodParams
+
+        let cep = this.grid_column['cellEditorParams']
+        let field = this.grid_column['field']
+        if (! cep.hasOwnProperty('pre_name')) { cep['pre_name'] ="" }
+        if (! cep.hasOwnProperty('post_name')) { cep['post_name'] ="" }
+        if (! cep.hasOwnProperty('row_name') ) {
+            if (! cep.hasOwnProperty('subGridName')) {
+                cep['subGridName'] = String(field)
+            }
+        }
     }
 }
 

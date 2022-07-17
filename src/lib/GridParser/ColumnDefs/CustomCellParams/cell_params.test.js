@@ -65,7 +65,7 @@ function AddDefualtParams(grid) {
 
 // test('datetime params with date', () => {
 //     let grid = [
-//         {'field': 'a', 'dataType': 'date',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
+//         {'field': 'a', 'dataType': 'date',  'editable': true, 'cellEditor': 'dateTimeEditor', 'isLookup': true},
 //     ]
 //     AddDefualtParams(grid)
 //     let grid_column = grid[0]
@@ -77,7 +77,7 @@ function AddDefualtParams(grid) {
 
 // test('datetime params with datetime', () => {
 //     let grid = [
-//         {'field': 'a', 'dataType': 'datetime',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
+//         {'field': 'a', 'dataType': 'datetime',  'editable': true, 'cellEditor': 'dateTimeEditor', 'isLookup': true},
 //     ]
 //     AddDefualtParams(grid)
 //     let grid_column = grid[0]
@@ -89,7 +89,7 @@ function AddDefualtParams(grid) {
 
 // test('datetime params with time', () => {
 //     let grid = [
-//         {'field': 'a', 'dataType': 'time',  'editable': true, 'cellEditor': 'agRichSelectCellEditor', 'isLookup': true},
+//         {'field': 'a', 'dataType': 'time',  'editable': true, 'cellEditor': 'dateTimeEditor', 'isLookup': true},
 //     ]
 //     AddDefualtParams(grid)
 //     let grid_column = grid[0]
@@ -104,6 +104,46 @@ function AddDefualtParams(grid) {
 //     }
 //     expect(grid_column['cellEditorParams']).toMatchObject(expected)
 // })
+
+// test('largeText params', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'text',  'editable': true, 'cellEditor': 'agLargeTextCellEditor'},
+//     ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new LargeTextParams(grid_column)
+//     y.LargeTextInit()
+//     let expected = { maxLength: 100, rows: 10, cols: 50 }
+//     expect(grid_column['cellEditorParams']).toMatchObject(expected)
+// })
+
+// test('links params', () => {
+//     let grid = [
+//         {'field': 'a', 'dataType': 'text',  'editable': true, 'cellEditor': 'agLargeTextCellEditor'},
+//     ]
+//     AddDefualtParams(grid)
+//     let grid_column = grid[0]
+//     y = new LinkParams(grid_column)
+//     y.LinkInit()
+//     let params = {'value': {'urlName': 'linkName', 'urlPath': 'linkPath'}}
+//     let res = grid_column['cellRenderer'](params)
+//     let expected = `<a href="linkPath" target="_blank" rel="noopener">'+ linkName+'</a>`
+//     expect(expected).toBe(res)
+// })
+
+test('subgrid params', () => {
+    let grid = [
+        {'field': 'a', 'dataType': 'text',  'editable': true, 'cellEditor': 'subGridSelectorEditor',
+        'cellEditorParams': {'subGridPos': 2}},
+    ]
+    AddDefualtParams(grid)
+    let grid_column = grid[0]
+    y = new SubGridParams(grid_column)
+    y.SubGridParamsInit()
+    console.log(grid_column)
+    expect(true).toBe(true)
+})
+
 
 
 //agrich params

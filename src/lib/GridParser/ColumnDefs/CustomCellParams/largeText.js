@@ -15,9 +15,8 @@ For large text set width and height when editing
 
 */
 
-
-
-const type_check = require('../../../TypeCheck')
+const auxFuncs = require('./auxilary_funcs')
+const CellEditorParamsCheck = auxFuncs['CellEditorParamsCheck']
 
 class LargeTextParams {
     constructor (grid_column) {
@@ -28,15 +27,17 @@ class LargeTextParams {
         let rows = 10
         let cols = 50
         if (! this.grid_column.hasOwnProperty('cellEditorParams')) {
-            let cep = this.grid_column['cellEditorParams']
+            let cep =  {} 
             cep['maxLength'] = maxLength
             cep['rows'] = rows
             cep['cols'] = cols
-        } 
-        let cep = this.grid_column['cellEditorParams']
-        if (!cep.hasOwnProperty('maxLength') ) { cep['maxLength'] = maxLength }
-        if (!cep.hasOwnProperty('rows') ) { cep['rows'] = rows }
-        if (!cep.hasOwnProperty('cols') ) { cep['cols'] = cols }
+            this.grid_column['cellEditorParams'] = cep
+        } else {
+            let cep = this.grid_column['cellEditorParams']
+            if (!cep.hasOwnProperty('maxLength') ) { cep['maxLength'] = maxLength }
+            if (!cep.hasOwnProperty('rows') ) { cep['rows'] = rows }
+            if (!cep.hasOwnProperty('cols') ) { cep['cols'] = cols }
+        }
     }
 }
 

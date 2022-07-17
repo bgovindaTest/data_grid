@@ -146,6 +146,7 @@ class ColumnDefsInit {
         //Add default values from rowData
         //this.RunGridInit()
         //return
+        //GetName of subgrid to display
     }
 
     RunGridColumnsInit() {
@@ -186,56 +187,15 @@ class ColumnDefsInit {
         return grid
     }
 
+    SubGridNameFunction( ) {
+        //creates function that returns subgrid name
 
+        // row_name: { 'field': , 'paramsKey': }
+        // pre_name: ''  for concatenations before name
+        // post_name: '' for concatenations after name
+        // subGridName: 'string' if empty assemble from pre_name + row_name + post_name
 
-    // RunGridInit() {
-    //     /*
-    //         Order of function calls is important do not change
-
-
-    //     */
-
-
-    //     //for MainGrid
-    //     //make copy?
-    //     //grid = JSON.parse(JSON.stringify(food)) for deep copy
-    //     let grid = lodashCloneDeep(this.grid) //messes up column order probably?
-
-    //     //prepend delete_undo column
-    //     InitializeDeleteUndoColumn(grid)
-    //     for(let i=0; i < grid.length; i++) {
-    //         let grid_column = grid[i]
-    //         if (grid_column['field'] === meta_delete_undo_name ) { continue }
-    //         //CrudParams
-    //         //NavBar
-    //         //if supplied by config
-    //         this.ValueTransform(grid_column, 'valueGetter')
-    //         this.ValueTransform(grid_column, 'valueSetter')
-    //         this.ValueTransform(grid_column, 'valueFormatter')
-    //         this.ValueTransform(grid_column, 'toolTip')
-    //         //add default value setters and getters
-    //         this.IfNull(grid_column)
-    //         this.IsEditable(grid_column)
-    //         this.HideColumns(grid_column)
-    //         this.Validators(grid_column)
-    //         this.CellClassRules(grid_column)
-    //         this.CellEditorParams(grid_column)
-    //         this.DefaultOrderBy(grid_column,defaultOrderBy)
-    //         this.DefaultFilter(grid_column,defaultFilter, enforcedFilter)
-    //         this.DefaultValue(grid_column)
-    //         this.DefaultParameters(grid_column)
-    //         this.CellWidth(grid_column)
-    //         this.AddValueSetter(grid_column)
-    //         this.HeaderName(grid_column)
-    //     }
-    //     //auxilary functions
-
-
-
-
-
-
-
+    }
 
 }
 

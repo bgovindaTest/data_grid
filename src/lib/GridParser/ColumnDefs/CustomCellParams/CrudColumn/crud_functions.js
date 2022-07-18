@@ -53,9 +53,9 @@ class CrudColumnFunctions {
         this.DefaultValues(grid)
         let defaultValues  = this.defaultValues
         this.ExtractCrudConditions(grid)
-        gf['Insert']       = this.InitInsertRow(defaultValues) //for newly added rows via add row or new_sheet
+        gf['Insert']       = this.InsertRowInit(defaultValues) //for newly added rows via add row or new_sheet
         gf['CopyRow']      = this.CopyRowInit()
-        gf['Update']       = this.InitUpdateRow() //for rows created from querying the database
+        gf['Update']       = this.UpdateRowInit() //for rows created from querying the database
         gf['Undo']         = this.UndoRow() //function to reset row based on backup values
         gf['Delete']       = this.DeleteRow()
         gf['UndoDelete']   = this.DeleteUndoRow()
@@ -63,7 +63,7 @@ class CrudColumnFunctions {
         gf['CrudStatus']   = this.CrudStatus()
 
         //delete_warning
-        gf['deleteWarning'] = grid['deleteWarning']
+        gf['deleteWarning'] = grid['deleteWarning'] || ""
         return gf
     }
 
@@ -183,11 +183,12 @@ class CrudColumnFunctions {
     }
     DeleteRow() {
         //sets delete to true
-        return function (rowData) { rowData[meta_column_name]['is_delete'] = true }
+        let DeleteRow = function (rowData) { rowData[meta_column_name]['is_delete'] = true }
+        return DeleteRow
     }
     DeleteUndoRow() {
         //sets delete to false
-        return function (rowData) { rowData[meta_column_name]['is_delete'] = false }
+        return function DeleteUndoRow (rowData) { rowData[meta_column_name]['is_delete'] = false }
     }
 
 
@@ -196,7 +197,7 @@ class CrudColumnFunctions {
         //Determines if cell value is Null. If any value is empty its false
         //console.log(server_fields)
         let change_fields = this.crud_conditions['change_fields']
-        return function(rowData) {
+        return function IsChanged (rowData) {
             if (rowData[meta_column_name]['is_deleted']) {return true}
             let backup = rowData[meta_column_name]['backup']
             for (var i=0; i< change_fields.length; i++) {
@@ -212,7 +213,7 @@ class CrudColumnFunctions {
         let required_fields = this.crud_conditions['required_fields']
         let valueGetters    = this.crud_conditions['valueGetters']
         //IsComplete returns false if empty
-        return function(rowData) {
+        return function IsComplete(rowData) {
             for (var i=0; i< required_fields.length; i++) {
                 let field = required_fields[i]
                 let value = null
@@ -229,7 +230,7 @@ class CrudColumnFunctions {
         //checks if all null change fields are null
         let change_fields = this.crud_conditions['change_fields']
         let valueGetters  = this.crud_conditions['valueGetters']
-        return function(rowData) {
+        return function IsEmpty (rowData) {
 
             let is_empty = true
             for (var i=0; i< change_fields.length; i++) {
@@ -253,11 +254,12 @@ class CrudColumnFunctions {
 
     IsRowDeleted() {
         //check if deleted
-        return function (rowData) {
+        let IsDeleted = function (rowData) {
             if (! rowData.hasOwnProperty(meta_column_name)) {return false}
             let is_delete  = rowData[meta_column_name]['is_delete']
             return is_delete
         }
+        return IsDeleted
     }
 
     IsRowWarning() {
@@ -272,7 +274,7 @@ class CrudColumnFunctions {
             let igE = ignoreErrors[field]
             if (igE) {warn_fields.push(field)}
         }
-        return function(rowData) {
+        return function IsWarning (rowData) {
             for (var i=0; i< warn_fields.length; i++) {
                 let field = warn_fields[i]
                 let vf = validators[field]
@@ -293,7 +295,7 @@ class CrudColumnFunctions {
             let igE = ignoreErrors[field]
             if (!igE) {error_fields.push(field)}
         }
-        return function(rowData) {
+        return function IsError (rowData) {
             for (var i=0; i< error_fields.length; i++) {
                 let field = error_fields[i]
                 let vf    = validators[field]
@@ -333,7 +335,7 @@ class CrudColumnFunctions {
         const IsWarning       = this.IsRowWarning()
         const IsCrudType      = this.CrudType()
     
-        return function (rowData) {
+        return function CrudStatus (rowData) {
             let crud_status = {'crudType': null, 'is_complete': false, 'is_error': false, 'is_save': false,
                 'is_warning': false, 'is_delete': false, 'is_empty': false, 'is_changed': false}
 

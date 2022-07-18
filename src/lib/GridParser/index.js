@@ -195,9 +195,9 @@ class ColumnDefsInit {
         let query_params = tmp.QueryParamsInit()
 
         //adds metacolumn and creates auxilary functions
-        // tmp = new CrudMetaColumn()
-        let gridFunctions = {}
-        // gridFunctions = tmp.MetaColumnInit(grid)
+        tmp = new CrudMetaColumn()
+        // let gridFunctions = {}
+        let gridFunctions = tmp.MetaColumnInit(grid)
         return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
     }
 }

@@ -116,7 +116,6 @@ test('is row complete', () => {
     let cx1 = comp (rowData ) //true 
     rowData['a'] = null
     let cx2 = comp(rowData) //false
-    console.log(cx1, cx2)
     expect(cx1 && ! cx2).toBe(true)
 } )
 
@@ -222,7 +221,3 @@ test('crud status', () => {
     }
     expect(res2).toMatchObject(cx2)
 } )
-
-
-
-// CrudStatus()

@@ -136,11 +136,13 @@ class ColumnDefsInit {
 
     RunSubGridColumnsInit(rowData, rowParams) {
         /*
-        Same as main but adds rowData as parameters
+            Same as main but adds rowData as parameters
+            Order of function calls is important do not change. Initializes columnDefs
+            for sub grid
         */
         let grid = lodashCloneDeep(this.gridColumnDefs)
         let x = new DefaultParameters(grid)
-        let rowDataDefaults = rowParams['defaultValues']
+        let rowDataDefaults = rowParams['defaultValues'] || {}
         SubGridDefaultParamsInit(rowData, rowDataDefaults)
 
         for(let i=0; i < grid.length; i++) {
@@ -156,13 +158,12 @@ class ColumnDefsInit {
             CellClassRulesInit(grid_column)
         }
         let tmp = new UiQueryFuncParams(grid)
-        let rowFilterDefaults = rowParams['defaultFilters']
+        let rowFilterDefaults = rowParams['defaultFilters'] || {}
         let query_params = tmp.SubGridQueryParamsInit(rowData, rowFilterDefaults )
 
         //adds metacolumn and creates auxilary functions
-        // tmp = new CrudMetaColumn()
-        let gridFunctions = {}
-        // gridFunctions = tmp.MetaColumnInit(grid)
+        tmp = new CrudMetaColumn()
+        let gridFunctions = tmp.MetaColumnInit(grid)
         return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
 
 
@@ -170,9 +171,8 @@ class ColumnDefsInit {
 
     RunGridColumnsInit() {
         /*
-            Order of function calls is important do not change
-
-
+            Order of function calls is important do not change. Initializes columnDefs
+            for main grid
         */
         //messes up column order probably. may need to preempty add column order
         let grid = lodashCloneDeep(this.gridColumnDefs)
@@ -196,7 +196,6 @@ class ColumnDefsInit {
 
         //adds metacolumn and creates auxilary functions
         tmp = new CrudMetaColumn()
-        // let gridFunctions = {}
         let gridFunctions = tmp.MetaColumnInit(grid)
         return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
     }

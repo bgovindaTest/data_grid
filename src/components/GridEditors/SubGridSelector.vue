@@ -36,6 +36,7 @@ export default {
 
    methods: {
        LaunchModal() {
+           //emitter?
            this.row_data.meta.modal1 = true;
            console.log(this.row_data)
        }

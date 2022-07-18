@@ -1,3 +1,13 @@
 creates mixins object from libary
 for crud and grid operations.
 main function route?
+
+
+
+
+
+
+grid_func.js: contains main functionality and dynamically generated functions
+main_page.js: 
+sub_page.js
+load_placeholder.js: for local ui testing.

@@ -33,6 +33,7 @@ test('displays message', () => {
     }
   })
   console.log(wrapper.vm.hello() )
+  console.log(wrapper.vm.msg )
   // console.log(wrapper.hello() )
   // Assert the rendered text of the component
   expect(wrapper.text()).toContain('Hello world')

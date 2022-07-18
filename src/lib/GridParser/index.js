@@ -134,20 +134,38 @@ class ColumnDefsInit {
         this.valuesObject    = valuesObject
     }
 
-    RunSubGridColumnsInit(rowParams) {
-        //add rowParams?
-        //add SubGridDefaultValues
-        //add DefaultValues
-        //for loop
+    RunSubGridColumnsInit(rowData, rowParams) {
+        /*
+        Same as main but adds rowData as parameters
+        */
+        let grid = lodashCloneDeep(this.gridColumnDefs)
+        let x = new DefaultParameters(grid)
+        let rowDataDefaults = rowParams['defaultValues']
+        SubGridDefaultParamsInit(rowData, rowDataDefaults)
 
-        //add subgrid row fitlers
-        //crud modal
+        for(let i=0; i < grid.length; i++) {
+            let grid_column = grid[i]
+            let field       = grid_column['field']
+            let tmp = null
+            tmp = new ChmodParams(grid_column)
+            tmp.ChmodParamsInit()
+            tmp = new ValueParser(grid_column, {}) //{} is for depricated globals object
+            tmp.ValueParserInit()
+            let gridColumnValuesObject = this.valuesObject[field] || []
+            tmp = new CustomCellParams(grid_column, gridColumnValuesObject)
+            CellClassRulesInit(grid_column)
+        }
+        let tmp = new UiQueryFuncParams(grid)
+        let rowFilterDefaults = rowParams['defaultFilters']
+        let query_params = tmp.SubGridQueryParamsInit(rowData, rowFilterDefaults )
 
-        //Copy grid
-        //Add default values from rowData
-        //this.RunGridInit()
-        //return
-        //GetName of subgrid to display
+        //adds metacolumn and creates auxilary functions
+        // tmp = new CrudMetaColumn()
+        let gridFunctions = {}
+        // gridFunctions = tmp.MetaColumnInit(grid)
+        return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+
+
     }
 
     RunGridColumnsInit() {
@@ -164,8 +182,6 @@ class ColumnDefsInit {
         for(let i=0; i < grid.length; i++) {
             let grid_column = grid[i]
             let field       = grid_column['field']
-
-            //valuesObject[field]
             let tmp = null
             tmp = new ChmodParams(grid_column)
             tmp.ChmodParamsInit()
@@ -184,17 +200,6 @@ class ColumnDefsInit {
         // gridFunctions = tmp.MetaColumnInit(grid)
         return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
     }
-
-    SubGridNameFunction( ) {
-        //creates function that returns subgrid name
-
-        // row_name: { 'field': , 'paramsKey': }
-        // pre_name: ''  for concatenations before name
-        // post_name: '' for concatenations after name
-        // subGridName: 'string' if empty assemble from pre_name + row_name + post_name
-
-    }
-
 }
 
 module.exports = ColumnDefsInit

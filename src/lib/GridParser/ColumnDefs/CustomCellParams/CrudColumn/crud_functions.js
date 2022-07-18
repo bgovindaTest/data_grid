@@ -210,10 +210,11 @@ class CrudColumnFunctions {
 
     IsRowComplete() {
         let required_fields = this.crud_conditions['required_fields']
+        let valueGetters    = this.crud_conditions['valueGetters']
         //IsComplete returns false if empty
         return function(rowData) {
             for (var i=0; i< required_fields.length; i++) {
-                let field = fieldList[i]
+                let field = required_fields[i]
                 let value = null
                 if (valueGetters.hasOwnProperty(field)) {
                     let fx = valueGetters[field]
@@ -229,6 +230,8 @@ class CrudColumnFunctions {
         let change_fields = this.crud_conditions['change_fields']
         let valueGetters  = this.crud_conditions['valueGetters']
         return function(rowData) {
+
+            let is_empty = true
             for (var i=0; i< change_fields.length; i++) {
                 let field = change_fields[i]
                 let value = null
@@ -237,10 +240,14 @@ class CrudColumnFunctions {
                     value = fx({'data':rowData})
                 } else { value = rowData[field] }
 
+                if (type_check.IsUndefined(value)) {value = null}
 
-                if (! type_check.IsNull(value) || !type_check.IsUndefined(value) ) { return false }
+                if ( ! type_check.IsNull(value)   ) {
+                    is_empty = false
+                    break
+                }
             }
-            return true
+            return is_empty
         }
     }
 
@@ -256,30 +263,44 @@ class CrudColumnFunctions {
     IsRowWarning() {
 
         //checks if all null change fields are null
-        let change_fields = this.crud_conditions['change_fields']
-        let validators    = this.crud_conditions['valueGetters']
+        let ignoreErrors = this.crud_conditions['ignoreError']
+        let validators    = this.crud_conditions['validators']
+        let ex = Object.keys(ignoreErrors)
+        let warn_fields = []
+        for (let i =0; i<ex.length; i++) {
+            let field = ex[i]
+            let igE = ignoreErrors[field]
+            if (igE) {warn_fields.push(field)}
+        }
         return function(rowData) {
-            for (var i=0; i< change_fields.length; i++) {
-                let field = change_fields[i]
-                var value = rowData[field]
-                if (! type_check.IsNull(value) || !type_check.IsUndefined(value) ) { return false }
+            for (var i=0; i< warn_fields.length; i++) {
+                let field = warn_fields[i]
+                let vf = validators[field]
+                //if not valid
+                if (! vf({'data': rowData}) )  {return true}
             }
-            return true
+            return false
         }
     }
     IsRowError() {
-
         //checks if all null change fields are null
-        let change_fields = this.crud_conditions['change_fields']
-        let validators    = this.crud_conditions['valueGetters']
-
+        let ignoreErrors = this.crud_conditions['ignoreError']
+        let validators    = this.crud_conditions['validators']
+        let ex = Object.keys(ignoreErrors)
+        let error_fields = []
+        for (let i =0; i<ex.length; i++) {
+            let field = ex[i]
+            let igE = ignoreErrors[field]
+            if (!igE) {error_fields.push(field)}
+        }
         return function(rowData) {
-            for (var i=0; i< change_fields.length; i++) {
-                let field = change_fields[i]
-                var value = rowData[field]
-                if (! type_check.IsNull(value) || !type_check.IsUndefined(value) ) { return false }
+            for (var i=0; i< error_fields.length; i++) {
+                let field = error_fields[i]
+                let vf    = validators[field]
+                //if not valid
+                if (! vf({'data': rowData}) )  {return true}
             }
-            return true
+            return false
         }
     }
 
@@ -374,7 +395,7 @@ class CrudColumnFunctions {
         }
         this.SetCloneFields(grid)
         this.crud_conditions = {'change_fields': change_fields, 'required_fields': required_fields, 
-            'validators': validators, 'valueGetter': valueGetters, 'ignoreError': ignoreError}
+            'validators': validators, 'valueGetters': valueGetters, 'ignoreError': ignoreError}
     }
     SetCloneFields(grid) {
         this.cloneOnCopy = []

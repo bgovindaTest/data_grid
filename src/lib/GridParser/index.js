@@ -41,7 +41,6 @@ Parses grids json object and converts expression syntax into javascript function
                 default_fields: {}
                 on_constraint: ''
                 on_conflict: ''
-                deleteWarning: ''
         }
 
         'columnDef':
@@ -66,7 +65,7 @@ Parses grids json object and converts expression syntax into javascript function
 
             nullReplace: true
             editable: true/false {'update': true/false, 'insert': true/false}
-            deleteWarning: string (determines if delete should happen)
+            deleteWarning: string (determines if delete should happen) crudColumn assembles into overal string
             isFlag: for submit buttons or other functionality not meant to be sent to server.
                 data is editable but doesnt get sent to the server. flags do allow the 
                 row to be registered as a change.

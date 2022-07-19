@@ -51,6 +51,11 @@ let where_statements = [
 const data_config = require ('../../../DataConfig')
 const type_check = require('../../../TypeCheck')
 
+let PullMixin = {
+
+}
+
+
 
 function NewQuerySet(filterParams, orderByParams, pageParams ) {
     //resets query params.
@@ -64,7 +69,6 @@ function NewQuerySet(filterParams, orderByParams, pageParams ) {
     let keys = Object.keys(newPage)
     for(let i = 0; i < keys.length; i++) {pageParams[keys[i]] =newPage[keys[i]] }
 }
-
 
 //pagination functions
 function ChangePage(i, page_params) {
@@ -102,49 +106,7 @@ function IsLookup(column_name, lookupColumns) {
     return false
 }
 
-function DefaultFilterInit(column_name, header_name, data_type) {
-    let def_operator = data_config.DefaultOperator(data_type_name)
-    let init_filter = {'column_name': column_name, 'operator': def_operator, 'value':  null, 
-        'value2': null, 'delimiterType': null, 'dataType': data_type,
-        'headerName': header_name }
-    return init_filter
-}
-
-function ClearFilterValue( filterObjectRow ) {
-    filterObjectRow['value']  = null
-    filterObjectRow['value2'] = null
-}
-
-function DefaultOrderByInit(column_name, header_name) {
-    let init_order = {'column_name': column_name, 'order_by': 'asc', 'headerName': header_name}
-    return init_order
-}
-
-
-function RemoveFilter(  filter_array, index )  { RemoveItemFromArray( filter_array, index) }
-function RemoveOrderBy( orderby_array, index ) { RemoveItemFromArray( orderby_array, index)}
-
-function RemoveItemFromArray( array, index ) {
-    if (index > -1) { array.splice(index, 1) }
-}
-
-function ClearFilters(filter_array)  { filter_array.length = 0 }
-function ClearOrderBy(orderby_array) { orderby_array.length = 0 }
-
-function ClearFilterValues(filterRow) { 
-    filterRow['value'] = null
-    filterRow['value2'] = null
-}
-
-function DelimiterType (delimiter_type) {
-    //{ '/\s+/':'Any Space'}
-    let defaultDelimiter = data_config.defaultDelimiter
-    if (data_type.delimiter_typeName.hasOwnProperty(delimiter_type)) {
-        return delimiter_type
-    }
-    return defaultDelimiter
-} 
-//how to split and return value
+function PullData() {}
 
 //add meta_column in gridFunctions
 function ServerRowToUiRow(queryRowData, IsLookup, IsCrud) {
@@ -289,6 +251,29 @@ function WhereObject(filter_list) {
     }
     return fout
 }
+
+
+// EnforcedFitlers(enforcedFilters) {
+//     //enforced filters are added to each query
+//     //if has enforcedFilters by default extend
+//     if (typeCheck.IsArray(this.crudParams['select']['enforcedFilters'] ) ) {
+//         let ef = this.crudParams['select']['enforcedFilters']
+//         for(let i =0; i< enforcedFilters.length; i++) {
+//             ef.push(enforcedFilters[i])
+//         }
+//     } else {
+//         this.crudParams['select']['enforcedFilters'] = enforcedFilters
+//     }
+// }
+
+
+
+//TypeChecks
+
+
+
+
+
 
 function AppendFilterRow(fout, filterRow) {
     let fr = {}

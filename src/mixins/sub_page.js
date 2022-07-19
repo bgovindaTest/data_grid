@@ -19,6 +19,7 @@ var myMixin = {
         //subset of main json object?
         subPageConfig: null,
         mainRowParams: null, //passed from calling row
+        //pageParams: //pased from main page
         //main_grid_params
     }
 

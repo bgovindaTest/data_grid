@@ -23,7 +23,7 @@ filterParams = {
 */
 const data_config         = require('../../lib/DataConfig')
 const array_parse_types   = data_config.array_parse_types
-const between_parse_type  = data_config.between_parse_type
+const between_parse_type  = data_config.between_parse_types
 const null_parse_types    = data_config.null_parse_types
 const delimiter_typeName  = data_config.delimiter_typeName
 const ReturnDataClass     = data_config.ReturnDataClass
@@ -59,8 +59,9 @@ var filterMixin = {
     beforeMount() {
         let nf = this.newFilterList
         for(let i =0; i< nf.length; i++ ) {
-            if (nf['delimiterType'] === null) {
-                nf['delimiterType'] = ReturnDelimiterType( filter_row['dataType'] || null )
+            let nfi = nf[i]
+            if (nfi['delimiterType'] === null) {
+                nfi['delimiterType'] = ReturnDelimiterType( nfi['dataType'] || null )
             }
         }
     },
@@ -134,7 +135,7 @@ var filterMixin = {
             let data_class = ReturnDataClass(data_type)
             let show_delimiter = false
             if (data_config.boolean_types.includes(data_type)) {htmlInput = 'selector'}
-            if (array_parse_types.includes(operator)) {
+            else if (array_parse_types.includes(operator)) {
                 htmlInput  = 'area'
                 show_delimiter = true
             }
@@ -153,7 +154,7 @@ var filterMixin = {
             this.newFilterList.push(
                 {'headerName': filter_row['headerName'], 'column_name': filter_row['column_name'], 
                     'delimiterType': delimiterType, 'operator': ox, 'value': null,
-                    'value2': null 
+                    'value2': null, 'dataType': filter_row['dataType'] 
                 }
             )
         },

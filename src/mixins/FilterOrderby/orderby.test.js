@@ -12,8 +12,7 @@ import orderByMix from './orderby.js'
 
 // The component to test
 const OrderByComponent = {
-  template: '<p>{{ msg }}</p>',
-  props: ['msg'],
+  template: '<div></div>',
   mixins: [orderByMix]
 }
 

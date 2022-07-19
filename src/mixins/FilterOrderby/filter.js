@@ -1,10 +1,6 @@
 /*
-This module stores the information needed to select the order at which rows will be returned from the server. 
-
-The possible column fields are stored in the columnSortNames array. The user selected values are stored in the
-order_by object. This information is parsed by get_route_params on RunQuery.
-
-
+This module controls the functions for filters.vue. 
+This module creates the information needed to select which rows will be returned from the server. 
 
 let filterParams  = {'current': defaultFilter, 'new': lodashCloneDeep(defaultFilter), 'filterList': filterList, 'enforcedFilters': enforcedFilter}
 
@@ -21,6 +17,8 @@ filterParams = {
         }
     ]
 }
+
+<filterMixin :filterList="filterParams.filterList" :newFilterList="filterParams.new" />
 
 */
 const data_config         = require('../../lib/DataConfig')
@@ -58,6 +56,16 @@ var filterMixin = {
             //required: true
         }
     },
+    beforeMount() {
+        let nf = this.newFilterList
+        for(let i =0; i< nf.length; i++ ) {
+            if (nf['delimiterType'] === null) {
+                nf['delimiterType'] = ReturnDelimiterType( filter_row['dataType'] || null )
+            }
+        }
+    },
+
+
     computed: {
         DelimiterList() {
             /*
@@ -77,7 +85,34 @@ var filterMixin = {
         NumberOperators()  { return CreateList (data_config.number_operators) },
         TextOperators()    { return CreateList (data_config.text_operators)   },
         DateOperators()    { return CreateList (data_config.date_operators)   },
-        BooleanOperators() { return CreateList (data_config.boolean_operators)}
+        BooleanOperators() { return CreateList (data_config.boolean_operators)},
+        DisplayList () {
+            /*
+                Loops through all options available for sorting that are not
+                currently in use and returns the remainder alphabetically.
+
+            */
+            let displayList = []
+            for (let i =0; i < this.filterList.length; i++ ) {
+                let headerI     = this.filterList[i]['headerName']
+                let column_name = this.filterList[i]['column_name']
+                let dataType    = this.filterList[i]['dataType']
+                let x = {'headerName': headerI, 'column_name': column_name, 'dataType': dataType}
+                displayList.push(x)
+            }
+            let sortedDisplayList = displayList.sort( (function(a, b){
+                    let nameA = a.headerName.toLowerCase() 
+                    let nameB = b.headerName.toLowerCase();
+                    if (nameA < nameB) { return -1 }//sort string ascending
+                    if (nameA > nameB) { return 1}
+                    return 0; //default return value (no sorting)
+                })
+            )
+            for (let i=0; i <sortedDisplayList.length; i++) {sortedDisplayList[i]['index'] = i} 
+            return sortedDisplayList
+        }
+
+
     },
     methods: {
         OperatorsList(data_type) {
@@ -89,30 +124,27 @@ var filterMixin = {
             //add options for other types later
             else { return this.TextOperators }
         },
-        InputFieldDataType(data_type) {
-            //use picker or regular input field
-            if (data_config.date_types.includes(data_type) ) {
-                return data_type //date time datetime timestamp timestampz
-            } else if ( data_config.boolean_types.includes(data_type) ) {
-                return data_type
-            } else {return 'text'}
-        },
-        InputFieldType(operator) {
+        InputFieldParams(data_type, operator) {
             /*
             Which input type to display single box. text area boolean drop down
-            etc. 
+            etc. Controls widgets in filter bar.
 
             */
-
-            if (array_parse_types.includes(operator)) {return 'textarea'}
-            else if (null_parse_types.includes(operator)) {return 'null'}
-            else if (between_parse_type.includes(operator)) {return 'between'}
-            //for boolean
-            //else if (between_parse_type.includes(operator)) {return 'between'}
-            else { return 'text' }
+            let htmlInput  = 'input'
+            let data_class = ReturnDataClass(data_type)
+            let show_delimiter = false
+            if (data_config.boolean_types.includes(data_type)) {htmlInput = 'selector'}
+            if (array_parse_types.includes(operator)) {
+                htmlInput  = 'area'
+                show_delimiter = true
+            }
+            else if (null_parse_types.includes(operator))   {htmlInput  = 'null'}  
+            else if (between_parse_type.includes(operator)) {htmlInput  = 'two_input'}
+            else { htmlInput  = 'input' }
+            let params = {'htmlInput': htmlInput, 'dataClass': data_class,
+                'show_delimiter': show_delimiter, 'dataType': data_type}
+            return params
         },
-
-
         AddRow(index) {
             let filter_row = this.filterList[index]
             let delimiterType = ReturnDelimiterType( filter_row['dataType'] || null )
@@ -125,6 +157,10 @@ var filterMixin = {
                 }
             )
         },
+        OperatorName(operator) {
+            //returns name for operator i.e. equals instead of ==
+            return ReturnOperatorAlias(operator)
+        },
         ClearRows() {
             //remove all filters
             this.newFilterList.length = 0
@@ -135,9 +171,6 @@ var filterMixin = {
             fx['value']  = null
             fx['value2'] = null
         },
-
-
-
         DeleteRow(index) {
             //removes object from array at the given position
             if (this.newFilterList.length <= 0 ) { return  }

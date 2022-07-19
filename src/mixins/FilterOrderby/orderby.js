@@ -6,19 +6,21 @@ order_by object. This information is parsed by get_route_params on RunQuery.
 
 orderByParams
 
-let filterParams  = {'current': defaultFilter, 'new': lodashCloneDeep(defaultFilter), 'filterList': filterList, 'enforcedFilters': enforcedFilter}
 let orderByParams = {'current': defaultSort,   'new': lodashCloneDeep(defaultSort), 'orderByList': sortList,  }
-return {'filterParams': filterParams, 'orderByParams': orderByParams}
 
 
-    { headerName: 'A', column_name: 'a' },
-  {'column_name': "a", "column_order": "" }
+    orderByList: [
+        { headerName: 'A', 'column_name': 'a' },
+        { headerName: 'B', 'column_name': 'b' }
+    ]
 
     'new': [
         { headerName: 'A', column_name: 'a', order_by: 'asc' },
-        { headerName: 'B', column_name: 'b', order_by: 'desc' }
     ],
 
+
+
+<orderByMixin :orderByList="orderByParams.orderByList" :newOrderByList="orderByParams.new" />
 
 */
 // //for sorting params
@@ -36,13 +38,13 @@ var orderByMixin = {
             //jsonArray
             //full list of options to orderBy
             type: Object,
-            //required: true
+            required: true
         },
         newOrderByList: {
             //jsonArray
             //list of orderBy paramters for next query run.
             type: Object,
-            //required: true
+            required: true
         }
     },
     computed: {

@@ -21,6 +21,11 @@ return {'filterParams': filterParams, 'orderByParams': orderByParams}
 
 
 */
+// //for sorting params
+// let orderby_type = ['asc', 'desc'] //do not change
+// let sortDisplayName = {'asc': 'Ascending', 'desc': 'Descending'}
+
+
 var orderByMixin = {
     data() { 
         return { 'order_options': ['asc', 'desc'] }

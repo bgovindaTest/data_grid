@@ -38,17 +38,6 @@ function InitData() {
     return orderByParams
 }
 
-
-// orderByList: {
-//     //jsonArray
-//     //full list of options to orderBy
-//     type: Object,
-//     //required: true
-// },
-// newOrderByList: {
-
-
-
 test('displays list', () => {
   // mount() returns a wrapped Vue component we can interact with
   let orderByParams = InitData()

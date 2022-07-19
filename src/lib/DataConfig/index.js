@@ -61,14 +61,15 @@ let array_parse_types  = ['like_in', 'not_like_in', 'ilike_in', 'not_ilike_in', 
 let between_parse_types  = ['between', 'not_between']
 let null_parse_types = ['is_null', 'is_not_null']
 
-let data_classes = ['text', 'number', 'date', 'array', 'object']
+let data_classes = ['text', 'number', 'date', 'array', 'object','boolean']
 let c = data_classes
 //data_types and filter class
 //lookups
 
-let number_default = '0'
-let text_default   = ''
-let date_default   = ''
+let number_default  = '0'
+let text_default    = ''
+let date_default    = ''
+let boolean_default = 'false'
 
 //numbers
 let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
@@ -79,6 +80,7 @@ let serial_types = ['serial', 'bigseral'] //should be integers
 let text_types   = ['text', 'character', 'char', 'varchar']
 let date_types   = ['date', 'datetime', 'time', 'timestamp', 'timestampz']
 let object_types = ['array', 'object']
+let boolean_types   = ['bool', 'boolean']
 
 let data_types = {} //data type class
 let null_conversion = {} //convert null to value based on data type
@@ -100,6 +102,14 @@ for(let i = 0; i<date_types.length; i++) {
     data_types[date_types[i]] = c[2]
     null_conversion[date_types[i]] = date_default
 }
+
+for(let i = 0; i<boolean_types.length; i++) { 
+    data_types[boolean_types[i]] = c[5]
+    null_conversion[date_types[i]] = boolean_default
+}
+
+
+
 data_types['json'] = c[4]
 data_types['object'] = c[4]
 data_types['array'] = c[3]
@@ -130,6 +140,8 @@ let number_operators = [
     '<','<=', 'in', 'not_in','between', 'not_between',
     'is_null', 'is_not_null'
 ]
+
+let boolean_operators = ['=','!=', 'is_null', 'is_not_null']
 
 //for sorting params
 let orderby_type = ['asc', 'desc'] //do not change
@@ -226,6 +238,7 @@ module.exports = {
     'date_operators': date_operators,
     'text_operators': text_operators,
     'number_operators': number_operators,
+    'boolean_operators': boolean_operators,
     'orderby_type': orderby_type,
     'sortDisplayName': sortDisplayName,
     'delimiter_typeName': delimiter_typeName,
@@ -238,6 +251,7 @@ module.exports = {
     'GridColumnValidCellEditor': GridColumnValidCellEditor,
     'ReturnDelimiterType': ReturnDelimiterType,
 
+    'boolean_types': boolean_types,
     'number_types': number_types,
     'integer_types': integer_types,
     'serial_types': serial_types,

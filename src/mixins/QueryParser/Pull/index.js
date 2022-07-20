@@ -48,65 +48,139 @@ let where_statements = [
 */
 
 
-const data_config = require ('../../../DataConfig')
-const type_check = require('../../../TypeCheck')
+const data_config  = require ('../../../DataConfig')
+const type_check   = require('../../../TypeCheck')
+const chmodFunc    = require('../../../lib/chmodFunc')
 
-let PullMixin = {
+class Pull {
+    /*
+        filterParams, orderByParams and pageParams is initialized
+        by GridParser/index.js
+    */
+    constructor (grid, filterParams, orderByParams, pageParams) {
+        this.columnDefs    = grid
+        this.filterParams  = filterParams
+        this.orderByParams = orderByParams
+        this.PageParams    = pageParams
+        this.pullFields    = []
+    }
+
+    PullParamsInit( ) {
+        let columnDefs = this.columnDefs
+        for (let i =0; i < columnDefs.length; i++ ) {
+            let grid_column = columnDefs[i]
+            let field       = grid_column['field']
+            if (! chmodFunc.IsPull( grid_column['chmodParams']  ) ) {continue}
+            this.pullFields.push(field)
+        }
+    }
+
+
+    //create parameters for query
+    NewQueryParams() {
+        this.NewQuerySet( )
+        let urlParams = this.GetRouteParams()
+        return urlParams
+    }
+
+
+    PreviousPageParams() {  
+        this.ChangePage(-1)
+        let urlParams = this.GetRouteParams()
+        return urlParams
+    }
+    NextPageParams() { 
+        this.ChangePage( 1 ) 
+        let urlParams = this.GetRouteParams( )
+        return urlParams
+    }
+
+
+
+    NewQuerySet() {
+        //resets query params.
+        ftmp = this.filterParams['new']
+        otmp = this.orderByParams['new']
+        this.filterParams['current'] = ftmp
+        this.filterParams['new'] = []
+        this.orderByParams['current'] = otmp
+        this.orderByParams['new'] = []
+        newPage = PageInit()
+        let keys = Object.keys(newPage)
+        for(let i = 0; i < keys.length; i++) {this.pageParams[keys[i]] =newPage[keys[i]] }
+    }
+
+
+    //pagination functions
+    ChangePage(i) {
+        let page_params = this.PageParams
+        let page_index  = page_params['page_index']
+        if(type_check.IsInteger(i) ) {
+            page_index = page_index + parseInt(i)
+        } else {page_index = 0 }
+
+        if (page_index < 0) { page_index = 0 }
+        let page_size = page_params['page_size']
+        page_params['limit']  = (1+page_index)*page_size
+        page_params['offset'] = page_index*page_size
+    }
+
+    GetRouteParams(filterParams, orderByParams, pageParams ) {
+        /*
+        Pulls data rules and intializes paramters. queryParams is an object that contains the current values
+        from all the modal windows.
+        req_body from client has the following structure
+        req.body['where'] = [{}]
+        req.body['order_by'] = [{}]
+        req.body['pagination'] = {}
+        */
+        let req_body = {}
+        req_body['where']      = WhereObject()
+        req_body['order_by']   = this.OrderByObject()
+        let pgx                = this.PaginationObject()
+        req_body['limit']      = pgx['limit'] 
+        req_body['offset']     = pgx['offset'] 
+        return req_body
+    }
+
+    OrderByObject() {
+        //if column name is empty or sort_by is empty continue
+        let order_by = this.orderByParams['current']
+        let order_by_list = []
+        for (let i =0; i < order_by.length; i++) {
+            let ox = order_by[i]
+            let cn = ox['column_name']
+            let sb = ox['order_by'].toLowerCase()
+            if (['asc', 'desc'].includes(sb) && cn !== "" ) {
+                order_by_list.push({'column_name': cn, 'order_by': sb})
+            }
+        }
+        return order_by_list
+    }
+    PaginationObject() {
+        let pagination = this.pageParams
+        var lx = parseInt(pagination['limit'])
+        var offset = parseInt(pagination['offset'])
+        if (isNaN(lx) ) {lx = data_config.page_size}
+        if (lx < 0) {lx = data_config.page_size}
+        if (isNaN(offset) ) {offset = 0}
+        if (offset < 0 ) {offset = 0}
+        var pgx = {}
+        pgx['limit']  = String(lx)
+        pgx['offset'] = String(offset)
+        return pgx
+    }
+
+    ToRowData(queryRowData, IsLookup, IsCrud) {
+        //
+        this.pullFields.push(field)
+
+    }
+
 
 }
 
 
-
-function NewQuerySet(filterParams, orderByParams, pageParams ) {
-    //resets query params.
-    ftmp = filterParams['new']
-    otmp = orderByParams['new']
-    filterParams['current'] = ftmp
-    filterParams['new'] = []
-    orderByParams['current'] = otmp
-    orderByParams['new'] = []
-    newPage = PageInit()
-    let keys = Object.keys(newPage)
-    for(let i = 0; i < keys.length; i++) {pageParams[keys[i]] =newPage[keys[i]] }
-}
-
-//pagination functions
-function ChangePage(i, page_params) {
-    let page_index = page_params['page_index']
-    if(type_check.IsInteger(i) ) {
-        page_index = page_index + parseInt(i)
-    } else {page_index = 0 }
-
-    if (page_index < 0) { page_index = 0 }
-    let page_size = page_params['page_size']
-    page_params['limit']  = (1+page_index)*page_size
-    page_params['offset'] = page_index*page_size
-}
-
-//create parameters for query
-function CreateNewQueryParams(filterParams, orderByParams, pageParams ) {
-    NewQuerySet(filterParams, orderByParams, pageParams )
-    let urlParams = GetRouteParams(filterParams['current'], orderByParams['current'], pageParams )
-    return urlParams
-}
-
-function CreatePreviousPageParams(filterParams, orderByParams, pageParams) {  
-    ChangePage(-1, pageParams )
-    let urlParams = GetRouteParams(filterParams['current'], orderByParams['current'], pageParams )
-    return urlParams
-}
-function CreateNextPageParams(filterParams, orderByParams, pageParams) { 
-    ChangePage(1, pageParams ) 
-    let urlParams = GetRouteParams(filterParams['current'], orderByParams['current'], pageParams )
-    return urlParams
-}
-
-function IsLookup(column_name, lookupColumns) {
-    if (lookupColumns.hasOwnProperty(column_name)) {return true}
-    return false
-}
-
-function PullData() {}
 
 //add meta_column in gridFunctions
 function ServerRowToUiRow(queryRowData, IsLookup, IsCrud) {
@@ -194,50 +268,6 @@ function LookupParse(column_name, queryRowData) {
 //ignore primary_key
 
 
-function GetRouteParams(filterParams, orderByParams, pageParams ) {
-    /*
-    Pulls data rules and intializes paramters. queryParams is an object that contains the current values
-    from all the modal windows.
-    req_body from client has the following structure
-    req.body['where'] = [{}]
-    req.body['order_by'] = [{}]
-    req.body['pagination'] = {}
-    */
-    let req_body = {}
-    req_body['where']      = WhereObject(filterParams)
-    req_body['order_by']   = OrderByObject(orderByParams)
-    req_body['pagination'] = PaginationObject(pageParams)
-    return req_body
-}
-
-
-function PaginationObject(pagination) {
-    var lx = parseInt(pagination['limit'])
-    var offset = parseInt(pagination['offset'])
-    if (isNaN(lx) ) {lx = data_config.page_size}
-    if (lx < 0) {lx = data_config.page_size}
-    if (isNaN(offset) ) {offset = 0}
-    if (offset < 0 ) {offset = 0}
-    var pgx = {}
-    pgx['limit']  = String(lx)
-    pgx['offset'] = String(offset)
-    return pgx
-}
-
-function OrderByObject(order_by) {
-    //if column name is empty or sort_by is empty continue
-    let order_by_list = []
-    for (let i =0; i < order_by.length; i++) {
-        let ox = order_by[i]
-        let cn = ox['column_name']
-        let sb = ox['order_by'].toLowerCase()
-        if (['ASC', 'DESC'].includes(sb) && cn !== "" ) {
-            order_by_list.push({'column_name': cn, 'order_by': sb})
-        }
-    }
-    return order_by_list
-}
-
 
 //Functions below used for processing filter object.
 function WhereObject(filter_list) {
@@ -246,39 +276,23 @@ function WhereObject(filter_list) {
     where_list_out: container object for req_body. contains processed where statements to send to the server
     */
     let fout = []
+    //enforcedFilters
     for(var i =0; i< filter_list.length; i++) {
+        AppendFilterRow(fout, filter_list)
+    }
+    for(let i =0; i< filter_list.length; i++) {
         AppendFilterRow(fout, filter_list)
     }
     return fout
 }
 
 
-// EnforcedFitlers(enforcedFilters) {
-//     //enforced filters are added to each query
-//     //if has enforcedFilters by default extend
-//     if (typeCheck.IsArray(this.crudParams['select']['enforcedFilters'] ) ) {
-//         let ef = this.crudParams['select']['enforcedFilters']
-//         for(let i =0; i< enforcedFilters.length; i++) {
-//             ef.push(enforcedFilters[i])
-//         }
-//     } else {
-//         this.crudParams['select']['enforcedFilters'] = enforcedFilters
-//     }
-// }
-
-
-
-//TypeChecks
-
-
-
-
-
 
 function AppendFilterRow(fout, filterRow) {
     let fr = {}
     let operator = filterRow['operator']
-    let value = null
+    let value  = null
+    let value2 = null
     if (data_config.array_parse_types.includes(operator)) {
         let values = ArrayValueParse(filterRow)
         if (values.length === 0) { return }
@@ -297,8 +311,9 @@ function AppendFilterRow(fout, filterRow) {
         value = String(filterRow['value']).trim() 
     }
     fr['column_name'] = filterRow['column_name']
-    fr['operator'] = operator
-    fr['value'] = value
+    fr['operator']    = operator
+    fr['value']       = value
+    fr['value2']      = value2
     fout.push(fr)
 }
 
@@ -329,8 +344,12 @@ function BetweenValueParse(filterRow) {
 function GetTypeCheckFunction(data_type) {
     let dc = data_config.ReturnDataClass(data_type)
     if (dc === 'number') { return type_check.IsNumber}
-    else if (dt === 'date') {return type_check.IsDate} 
-    else if (dt === 'string') { return type_check.IsString} 
-    else if (dt === 'boolean') { return type_check.IsBoolean}
+    else if (dc === 'date')  {
+        if (['datetime', 'timestamp', 'timestampz'].includes(data_type)) { return type_check.IsDateTime } 
+        else if (data_type === 'time') { return type_check.IsTime }
+        else {return type_check.IsDate}
+    }
+    else if (data_type === 'string') { return type_check.IsString} 
+    else if (data_type === 'boolean') { return type_check.IsBoolean}
     else { return type_check.IsString }
 }

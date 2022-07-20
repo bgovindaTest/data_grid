@@ -50,7 +50,9 @@ let cellEditors = {
     //crudSelector is for metacolumn params, delete, undo and add?
     'customEditors':    ['autoCompleteEditor', 'crudSelectEditor', 'subGridSelectorEditor', 'agRichSelectCellEditor'],
     'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateTimeEditor' ], //make popupTrue for agLargeTextCellEditor
-    'defaultEditor': 'agTextCellEditor'
+    'defaultEditor': 'agTextCellEditor',
+    //data is in an object instead of a base value
+    'lookupEditors': ['autoCompleteEditor', 'agRichSelectCellEditor']
 }
 
 

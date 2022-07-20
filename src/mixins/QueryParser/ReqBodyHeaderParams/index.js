@@ -9,7 +9,7 @@ may need to change default behavior
 
         'crudParams': //i.e. new row, update, delete, etc read/etc create default objects for query params?
             { 
-                default: ->
+                default_route: ->
                 select:  ->
                 insert:  -> //string or {'route': 'string', 'doInstead': 'update', 'crudParams': {}}
                 update:  ->
@@ -22,26 +22,27 @@ may need to change default behavior
                 on_conflict:
             }
 
+columnDefs =
+    [{'field': x, 'ifNull': 'null'}, {'field': y, 'ifNull': 'null'} ]
 if null no crud allowed
 */
 
-const type_check = require('../../../TypeCheck')
-
 class ReqBodyParams {
-    constructor (crudParams, grid) { 
-        this.grid       = grid
-        this.crudParams = crudParams}
+    constructor (crudParams, columnDefs) { 
+        this.crudParams = crudParams
+        this.columnDefs = columnDefs
+    }
 
     //ContextWindow
     //ErrorHandling
-    DefaultFields(grid) {
+    DefaultFields() {
         /*
             Extract if null parameters
         */
-        let grid = this.grid
+        let columnDefs = this.columnDefs
         let default_fields = {}
-        for(let i=0; i<grid.length; i++) {
-            let grid_column = grid[i]
+        for(let i=0; i< columnDefs.length; i++) {
+            let grid_column = columnDefs[i]
             let field = grid_column['field']
             default_fields[field] = grid_column['ifNull'] || 'null'
         }
@@ -60,9 +61,12 @@ class ReqBodyParams {
             let crudType = crudTypes[i]
             if (! this.crudParams.hasOwnProperty(crudType) ) {
                 this.crudParams[crudType] = { 'crudType': crudType }
+            } else {
+                if (! this.crudParams[crudType].hasOwnProperty(['crudType']) ) {
+                    this.crudParams[crudType]['crudType'] = crudType
+                }
             }
-            if (crudType === 'select') { this.ClearInvalidParameters(this.crudParams[crudType]) }
-            else { this.DefaultModifyPrams(this.crudParams[crudType]) }
+            this.DefaultModifyPrams(this.crudParams[crudType])
             this.crudParams[crudType]['default_fields'] = default_fields
         }
     }
@@ -79,11 +83,10 @@ class ReqBodyParams {
             Creates default params object for insert/update/delete
         */
         let defaultParms = this.crudParams
-        if (! xCrudParams.hasOwnProperty('route'))            {xCrudParams['route']          = DefaultRoute(xCrudParams['crudType'])}
+        if (! xCrudParams.hasOwnProperty('route'))            {xCrudParams['route']          = this.DefaultRoute(xCrudParams['crudType'])}
         if (! xCrudParams.hasOwnProperty('on_constraint'))    {xCrudParams['on_constraint']  = defaultParms['on_constraint'] || ""}
         if (! xCrudParams.hasOwnProperty('on_conflict'))      {xCrudParams['on_conflict']    = defaultParms['on_conflict'] || ""}
         if (! xCrudParams.hasOwnProperty('set_fields'))       {xCrudParams['set_fields']     = defaultParms['set_fields'] || [] }
-        if (! xCrudParams.hasOwnProperty('default_fields'))   {xCrudParams['default_fields'] = defaultParms['default_fields'] || {} }
         if (! xCrudParams.hasOwnProperty('set_filters'))      {xCrudParams['set_filters']    = defaultParms['set_filters'] || []}
         this.ClearInvalidParameters(xCrudParams)
     }
@@ -97,21 +100,21 @@ class ReqBodyParams {
             xCrudParams['on_constraint']  = ""
             xCrudParams['on_conflict']    = ""
             xCrudParams['set_fields']     = [] 
-            xCrudParams['default_fields'] = {}
             xCrudParams['set_filters']    = []
         } else if (crudType === 'update') {
             xCrudParams['on_constraint']  = ""
             xCrudParams['on_conflict']    = ""
             xCrudParams['set_fields']     = [] 
-        } else if (crudType === 'insert') {
-            xCrudParams['default_fields'] = defaultParms['default_fields'] || {}
-        }
+        } 
     }
 
     DefaultRoute(crudType) {
         //for generic assembly
         //crudType is insert update or delete
-        let base_str = this.defaultRoute
+        let base_str = this.crudParams['default_route'] || ""
+        if (base_str === "") {
+            console.error('default route is not defined in crudParams')
+        }
         return PathJoin(base_str, crudType)
     }
 

@@ -22,6 +22,7 @@ const AutoCompleteParams = require('./autocomplete_params')
 const LargeTextParams = require('./largeText')
 const AgRichParams = require('./agrich_params')
 const SubGrid      = require('./subgrid')
+const Links        = require('./links')
 
 class CustomCellParams {
     //for main loader
@@ -37,6 +38,8 @@ class CustomCellParams {
         let valuesObject = this.valuesObject
         let field = this.grid_column['field']
         let cE = this.grid_column['cellEditor'] || "agTextCellEditor"
+        let cR = this.grid_column['cellRenderer'] || ""
+
         if (cE === "agTextCellEditor") { return }
         else if ( cE  === "autoCompleteEditor" ) {
             let x = new AutoCompleteParams(grid_column, valuesObject)
@@ -55,7 +58,11 @@ class CustomCellParams {
             x.SubGridParamsInit()
         } else if (cE === 'crudSelectEditor' || field === data_config.meta_column_name) {
             return
-        } else {
+        } else if (cR === "LinksRenderer") {
+            let x = new Links(grid_column)
+            x.LinkInit()
+        }
+        else {
             console.error(`invalid cellEditor ${cE} for field ${field}`)
             grid_column['cellEditor'] = "agTextCellEditor"
         }

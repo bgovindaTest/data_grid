@@ -46,7 +46,25 @@ class CrudColumnFunctions {
             // pages config.
             // let backups = {'backups': {}, 'row_type': '' }
         */
-    
+
+        //for copy
+        //https://stackoverflow.com/questions/36419195/how-can-i-get-the-index-from-a-json-object-with-value
+        // var data = [{"name":"placeHolder","section":"right"},{"name":"Overview","section":"left"},
+        //{"name":"ByFunction","section":"left"},{"name":"Time","section":"left"},{"name":"allFit","section":"left"},
+        //{"name":"allbMatches","section":"left"},{"name":"allOffers","section":"left"},{"name":"allInterests","section":"left"},
+        //{"name":"allResponses","section":"left"},{"name":"divChanged","section":"right"}];
+        // var index = -1;
+        // var val = "allInterests"
+        // var filteredObj = data.find(function(item, i){
+        //   if(item.name === val){
+        //     index = i;
+        //     return i;
+        //   }
+        // });
+        
+        // console.log(index, filteredObj);
+
+
         //is_crud
         //need to add column for delete
         let gf = {}

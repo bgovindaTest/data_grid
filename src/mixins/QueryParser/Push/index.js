@@ -25,9 +25,11 @@ let query_params = [
 // pullKey: =  //defaults to id //pullAndDisplay same key
 // displayKey: //defaults to id (this goes into values)
 
+valueGetters
+
 */
 
-
+const type_check  = require('../../../lib/TypeCheck')
 const data_config  = require ('../../DataConfig')
 const meta_column  = data_config['meta_column_name']
 const chmodFunc    = require('../../../lib/chmodFunc')
@@ -39,6 +41,7 @@ class Push {
         this.grid             = grid
         this.pushFieldParams  = []
         this.pushLookupParams = {}
+        this.pushValueGetters = {}
     }
     PushParamsInit( ) {
         let columnDefs = this.grid
@@ -48,8 +51,12 @@ class Push {
             let field       = grid_column['field']
             if (! chmodFunc.IsPush( grid_column['chmodParams']  ) ) {continue}
             let ce = grid_column['cellEditor']
+            let vg = grid_column['valueGetter'] || null
             if (le.includes(ce) ) {
                 this.pushLookupParams[field] = {'pullKey': grid_column['pullKey'], 'pushKey': grid_column['pushKey']}
+                this.pushFieldParams.push(field)
+            } else if (type_check.IsFunction(vg) ) {
+                this.pushValueGetters[field] = vg
                 this.pushFieldParams.push(field)
             } else { this.pushFieldParams.push(field) }
         }
@@ -102,7 +109,12 @@ class Push {
                 x[pushKey] = rowData[pullKey]
                 rowDataOut.push(x)
     
-            } else {
+            } else if (this.pushValueGetters.hasOwnProperty(field)) {
+                let valueGetter = this.pushValueGetters[field]
+                let val = valueGetter({'data': rowData })
+                rowDataOut.push( val  )
+            }
+            else {
                 //default_values if available
                 x[field] = rowData[field]
                 rowDataOut.push(x)
@@ -130,9 +142,6 @@ class Push {
         reqBody['data'] = data 
     }
     //error handling?
-    // function ReqErrorStatements() {
-    //     //count and log errors
-    // }
 }
 
 module.exports = {

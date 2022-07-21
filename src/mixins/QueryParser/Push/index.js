@@ -26,11 +26,13 @@ class Push {
         for (let i =0; i < columnDefs.length; i++ ) {
             let grid_column = columnDefs[i]
             let field       = grid_column['field']
+            if (field === meta_column) { continue }
             if (! chmodFunc.IsPush( grid_column['chmodParams']  ) ) {continue}
             let ce = grid_column['cellEditor']
             let vg = grid_column['valueGetter'] || null
             if (le.includes(ce) ) {
-                this.pushLookupParams[field] = {'pullKey': grid_column['pullKey'], 'pushKey': grid_column['pushKey']}
+                let cep = grid_column['cellEditorParams']
+                this.pushLookupParams[field] = {'pullKey': cep['pullKey'], 'pushKey': cep['pushKey']}
                 this.pushFieldParams.push(field)
             } else if (type_check.IsFunction(vg) ) {
                 this.pushValueGetters[field] = vg

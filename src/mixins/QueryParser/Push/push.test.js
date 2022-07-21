@@ -7,9 +7,9 @@ const px = require('./index.js')
 
 function ReturnColumnDefs() {
     let columnDefs = [
-        // {'field': 'a', 'editable': true, 'dataType': 'numeric'},
-        // {'field': 'b', 'editable': true, 'defaultValue': {'value': '21', 'dataType': 'numeric', 'ifNullSet': true}},
-        // {'field': 'c', 'chmodParams': 'w', 'valueGetter': 'a +1', 'validator': 'a + 1 > 0'},
+        {'field': 'a', 'editable': true, 'dataType': 'numeric'},
+        {'field': 'b', 'editable': true, 'defaultValue': {'value': '21', 'dataType': 'numeric', 'ifNullSet': true}},
+        {'field': 'c', 'chmodParams': 'w', 'valueGetter': 'a +1', 'validator': 'a + 1 > 0'},
         {'field': 'd', 'editable': true, 'cellEditor': 'autoCompleteEditor' },
     ]
     return columnDefs
@@ -41,9 +41,13 @@ test('pushParams Init', () => {
     let x = new gp(columnDefs,{}, 0)
     let grid = x.RunGridColumnsInit()
     let pxv  = new px(grid['columnDef'])
-    // pxv.PushParamsInit()
-    // console.log(pxv)
-    console.log(grid['columnDef'][1])
+    pxv.PushParamsInit()
+    console.log(pxv)
+    // pushFieldParams: [ 'a', 'b', 'c', 'd' ],
+    // pushLookupParams: { d: { pullKey: 'id', pushKey: 'd' } },
+    // pushValueGetters: { c: [Function: fn] }
+
+
     expect(true).toBe(true)
 })
 

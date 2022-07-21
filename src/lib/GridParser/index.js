@@ -150,10 +150,13 @@ class ColumnDefsInit {
             let tmp = null
             tmp = new ChmodParams(grid_column)
             tmp.ChmodParamsInit()
+    
+
             tmp = new ValueParser(grid_column, {}) //{} is for depricated globals object
             tmp.ValueParserInit()
             let gridColumnValuesObject = this.valuesObject[field] || []
             tmp = new CustomCellParams(grid_column, gridColumnValuesObject)
+            tmp.CustomCellParamsInit()
             CellClassRulesInit(grid_column)
         }
         let tmp = new UiQueryFuncParams(grid)
@@ -188,6 +191,7 @@ class ColumnDefsInit {
             tmp.ValueParserInit()
             let gridColumnValuesObject = this.valuesObject[field] || []
             tmp = new CustomCellParams(grid_column, gridColumnValuesObject)
+            tmp.CustomCellParamsInit()
             CellClassRulesInit(grid_column)
         }
         let tmp = new UiQueryFuncParams(grid)

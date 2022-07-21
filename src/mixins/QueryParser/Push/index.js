@@ -1,50 +1,27 @@
 /*
-Main functions for processing crud events and sending data back and forth
-between UI and server.
+Main functions for converting and mapping data in rowData and assembling
+it into a data object to be sent to the server.
 
-Creates rowData from server row
+This module is called an ran by the grid_func.js mixin
 
-//called in grid_funcs mixins inorder to use 
-//async await
-Process and store OrderBy and FilterParams
-
-ui_fileds
-
-need array of set fields for upsert?
-
-let query_params = [
-    Array of objects. Contains information for crud operations.
-    Operation order is not preserved.
-    {
-        "crud_type": "", //only needed for save route 
-        "data": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
-    }
-]
-
-// pushKey: =  //defaults to field
-// pullKey: =  //defaults to id //pullAndDisplay same key
-// displayKey: //defaults to id (this goes into values)
-
-valueGetters
-
+//default values
 */
-
-const type_check  = require('../../../lib/TypeCheck')
-const data_config  = require ('../../DataConfig')
-const meta_column  = data_config['meta_column_name']
-const chmodFunc    = require('../../../lib/chmodFunc')
+const type_check      = require('../../../lib/TypeCheck')
+const data_config     = require ('../../../lib/DataConfig')
+const meta_column     = data_config['meta_column_name']
+const chmodFunc       = require('../../../lib/chmodFunc')
 const lodashCloneDeep = require('lodash.clonedeep')
 
 
 class Push {
-    constructor(grid) {
-        this.grid             = grid
+    constructor(columnDefs) {
+        this.columnDefs             = columnDefs
         this.pushFieldParams  = []
         this.pushLookupParams = {}
         this.pushValueGetters = {}
     }
     PushParamsInit( ) {
-        let columnDefs = this.grid
+        let columnDefs = this.columnDefs
         let le = data_config.cellEditors.lookupEditors
         for (let i =0; i < columnDefs.length; i++ ) {
             let grid_column = columnDefs[i]
@@ -62,30 +39,15 @@ class Push {
         }
     }
     CreateRowDataOut(rowData, reqBody) {
+        //main function to create rowData object to be sent to the server for saving
         let cx =this.CrudType(rowData, reqBody)
         let rd =this.MapRowData(rowData, cx['crudType'], cx['set_filters'] )
         return rd
     }
-
-
-
-
     MapRowData(rowData, crudType, set_filters) {
         /*
-            Parses rowData fields that are lookups and and pushes other
-            data to rowDataOut
-
-        //  [metaColumnCrudType][crudType]
-        if (crudType === 'delete') {
-            Delete(out_data, rowData, crudParams['delete'])
-        } else if (crudType === 'insert') { 
-            Insert(out_data, rowData, crudParams['insert'])
-        } else if (crudType === 'update') {
-            Update(out_data, rowData, crudParams['update'])
-        } else {
-            console.log(`invalid crud type ${crudType}`)
-        }
-
+            Parses rowData fields that are lookups, valueGetters and and pushes other
+            data to rowDataOut. crudType determines how rowDataOut is assembled.
 
             // pushKey: =  //defaults to field
             // pullKey: =  //defaults to id //pullAndDisplay same key
@@ -124,6 +86,12 @@ class Push {
     }
 
     CrudType(rowData, reqBody) {
+        /*
+        Creates crudType object rowData meta column as the default crud behavior i.e
+        insert for new rows, update for pulled and delete for delete.
+
+        reqBody allows for an instead of quer to be set. It stored in reqBody[uiCrudType][crudType]
+        */
         let mc = rowData[meta_column]
         let crud_type  = mc[meta_crud_type]
         let is_delete = mc[meta_is_delete]
@@ -134,17 +102,16 @@ class Push {
         }
     }
     CreatePushPayload(reqBodyParams, uiCrudType, data ) {
-        //need to get the instead of query
-        //also get the route
-        //remove
+        /*
+        Creates main object to be sent to the server. Also returns
+        the route to send the payload
+        */
         let reqBody = lodashCloneDeep( reqBodyParams[uiCrudType] )
         let route   = reqBody['route']
-        reqBody['data'] = data 
+        reqBody['data'] = data
+        return {'reqBody': reqBody, 'route': route} 
     }
     //error handling?
 }
 
-module.exports = {
-    'SetCrudData': SetCrudData,
-    'SetReqBody':  SetReqBody
-}
+module.exports = Push

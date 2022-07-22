@@ -71,7 +71,10 @@ class Push {
             // displayKey: //defaults to id (this goes into values)
         */
         let rowDataOut = {}
-        if (crudType === 'delete') { return rowDataOut.push({'id': rowData['id']}) }
+        if (crudType === 'delete') { 
+            rowDataOut['id'] = String(rowData['id'] || '-1' )
+            return rowDataOut
+        }
 
         for (let i =0; i < this.pushFieldParams.length; i++ ) {
             let field = this.pushFieldParams[i]
@@ -101,12 +104,16 @@ class Push {
         return rowDataOut
     }
     AddValueToRow(field, rowDataOut, value ) {
+        //All values in rowDataOut should be string unless null
         if (value === null) {
             if (this.defaultValues.hasOwnProperty(field)) {
-                rowDataOut[field] = this.defaultValues[field]
+                let dfv = this.defaultValues[field]
+                if (dfv != null) { rowDataOut[field] = String(this.defaultValues[field]) }
+                else { rowDataOut[field] = dfv } //is null 
+                
             } else { rowDataOut[field] = value }
         } else {
-            rowDataOut[field] = value
+            rowDataOut[field] = String(value)
         }
     }
 

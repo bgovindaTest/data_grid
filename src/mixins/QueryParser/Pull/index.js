@@ -59,46 +59,81 @@ class Pull {
         filterParams, orderByParams and pageParams is initialized
         by GridParser/index.js
     */
-    constructor (grid, insertFunction, filterParams, orderByParams, pageParams) {
-        this.columnDefs     = grid
+    constructor (columnDefs, filterParams, orderByParams, pageParams) {
+        this.columnDefs     = columnDefs
         this.filterParams   = filterParams
         this.orderByParams  = orderByParams
-        this.PageParams     = pageParams
-        this.insertFunction = insertFunction
+        this.pageParams     = pageParams
         this.pullFields     = []
-        this.lookupFiled    = []
+        this.lookupFields   = []
         //id generator?
     }
 
+    // this.pushFieldParams  = []
+    // this.pushLookupParams = {}
     PullParamsInit( ) {
-        let columnDefs = this.columnDefs
-        let le = []
-        for(let i =0; i < data_config.cellEditors.lookupEditors.length; i++ ) {
-            le.push(data_config.cellEditors.lookupEditors)
-        }
-        //
-        // else if (cE === 'crudSelectEditor' || field === data_config.meta_column_name) {
-        //     return
-        // } else if (cR === "LinksRenderer") {
-        //     let x = new Links(grid_column)
-        //     x.LinkInit()
-        // }        
-        
-        'crudSelectEditor'
-        le.push()
+        /*
 
+
+        */
+        let columnDefs = this.columnDefs
+        let le = data_config.cellEditors.lookupEditors
         for (let i =0; i < columnDefs.length; i++ ) {
             let grid_column = columnDefs[i]
             let field       = grid_column['field']
+            if (field === meta_column) { continue }
             if (! chmodFunc.IsPull( grid_column['chmodParams']  ) ) {continue}
-            this.pullFields.push(field)
+            let ce = grid_column['cellEditor']
+            if (le.includes(ce) ) {
+                this.lookupFields.push(field)
+                this.pullFields.push(field)
+            } else { this.pullFields.push(field) }
         }
+        this.pullFields.push(meta_column_name)
+        this.lookupFields.push(meta_column_name)
     }
 
-    ToRowData(queryRowData, IsLookup, IsCrud) {
-        //
-        this.pullFields.push(field)
+    ToRowData(queryRowData) {
+        /*
+        loops throug queryRowData and returns rowData. Checks if fields are lookups and 
+        assembles them into an object 
+        rowData is then passed to grid_functions update_row function
 
+        queryRowData: {'field1': value, 'field1.subField': value}
+        */
+        let rowData = {}
+        let lookupMapData = {}
+        for(let i =0; i < this.pullFields.length; i++) {
+            let field = this.pullFields[i]
+            rowData[field] = null
+            lookupMapData[field] = {}
+        }
+        let qKeys = Object.keys(queryRowData)
+        for(let i =0; i < qKeys.length; i++ ) {
+            let qKey = qKeys[i]
+            if (this.lookupFields.includes(qkey) ) {
+                //if xyz else if
+                lookupMapData[field][qKey] = String(queryRowData[qKey])
+                continue
+            }
+            if (qKey.includes('.')) {
+                let keyx        = qKey.split('.')
+                let fieldKey    = keyx[0].trim()
+                let subFieldKey = keyx[1].trim() 
+                if (fieldKey === "" || subFieldKey === "")   { continue }
+                if (! this.lookupFields.includes(fieldKey) ) { continue }
+                lookupMapData[fieldKey][subFieldKey] = String( queryRowData[qKey] )
+                continue
+            }
+            if (this.pullFields.includes(qKey) ) {rowData[qKey] = String( queryRowData[qKey] )  }
+        }
+        for(let i =0; i< this.lookupFields.length; i++) {
+            let field = this.lookupFields[i]
+            if (Object.keys(lookupMapData[field]).length > 0) {
+                rowData[field] = lookupMapData[field]
+            }
+        }
+        return rowData
     }
 
     //create parameters for query
@@ -377,3 +412,4 @@ function LookupParse(column_name, queryRowData) {
 
 //crud_fields
 //ignore primary_key
+//{'column_name': 'col_name_1', 'operator': '=', 'value':  1 },

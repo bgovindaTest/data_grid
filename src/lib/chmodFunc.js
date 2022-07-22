@@ -6,12 +6,12 @@ pushed from server.
 module.exports = {
     IsPull(chmodParams) {
         if (! chmodParams.hasOwnProperty('isPull'))  {return false}
-        if (  chmodParams.hasOwnProperty('isPull'))  {return true}
+        if (  chmodParams['isPull'])  {return true}
         return false
     },
     IsPush(chmodParams) {
         if (! chmodParams.hasOwnProperty('isPush'))  {return false}
-        if (  chmodParams.hasOwnProperty('isPush'))  {return true}
+        if (  chmodParams['isPush'] )  {return true}
         return false
     }
 }

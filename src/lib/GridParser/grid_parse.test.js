@@ -13,7 +13,6 @@ test('gridParserTest', () => {
     let grid = x.RunGridColumnsInit()
     console.log(grid)
     expect(true).toBe(true)
-
 })
 
 // test('subGridParserTest', () => {

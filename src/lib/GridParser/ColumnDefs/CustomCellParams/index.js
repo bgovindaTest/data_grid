@@ -42,7 +42,6 @@ class CustomCellParams {
 
         if (cE === "agTextCellEditor") { return }
         else if ( cE  === "autoCompleteEditor" ) {
-            console.log('hi', valuesObject)
             let x = new AutoCompleteParams(grid_column, valuesObject)
             x.AutoCompleteParamsInit()
         } else if (cE === 'agLargeTextCellEditor') {

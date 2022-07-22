@@ -19,6 +19,7 @@ class Push {
         this.pushFieldParams  = []
         this.pushLookupParams = {}
         this.pushValueGetters = {}
+        this.defaultValues    = {}
     }
     PushParamsInit( ) {
         let columnDefs = this.columnDefs
@@ -28,6 +29,7 @@ class Push {
             let field       = grid_column['field']
             if (field === meta_column) { continue }
             if (! chmodFunc.IsPush( grid_column['chmodParams']  ) ) {continue}
+            this.DefaultValueInit(grid_column)
             let ce = grid_column['cellEditor']
             let vg = grid_column['valueGetter'] || null
             if (le.includes(ce) ) {
@@ -40,10 +42,23 @@ class Push {
             } else { this.pushFieldParams.push(field) }
         }
     }
+    DefaultValueInit(grid_column) {
+        let field = grid_column['field']
+        if (grid_column['defaultValue']['ifNullSet']) {
+            this.defaultValues[field] = grid_column['defaultValue']['value'] || null
+        }
+    }
+
     CreateRowDataOut(rowData, reqBody) {
         //main function to create rowData object to be sent to the server for saving
         let cx =this.CrudType(rowData, reqBody)
         let rd =this.MapRowData(rowData, cx['crudType'], cx['set_filters'] )
+        if (! rd.hasOwnProperty['id']) {rd['id'] = -1}
+        else {
+            if (type_check.IsNull(rd['id']) || type_check.IsNull(rd['id'])) {
+                rd['id'] = -1
+            }
+        }
         return rd
     }
     MapRowData(rowData, crudType, set_filters) {
@@ -55,10 +70,10 @@ class Push {
             // pullKey: =  //defaults to id //pullAndDisplay same key
             // displayKey: //defaults to id (this goes into values)
         */
-        let rowDataOut = []
+        let rowDataOut = {}
         if (crudType === 'delete') { return rowDataOut.push({'id': rowData['id']}) }
 
-        for (let i =0; i < this.pushFieldsParams.length; i++ ) {
+        for (let i =0; i < this.pushFieldParams.length; i++ ) {
             let field = this.pushFieldParams[i]
             if (crudType === 'update') {
                 if (field != 'id' && !set_filters.includes(field)) {continue}
@@ -70,21 +85,29 @@ class Push {
                 //default_values
                 let pullKey = mapx['pullKey']
                 let pushKey = mapx['pushKey']
-                x[pushKey] = rowData[pullKey]
-                rowDataOut.push(x)
+                this.AddValueToRow(pushKey, rowDataOut, rowData[pullKey] )
+
     
             } else if (this.pushValueGetters.hasOwnProperty(field)) {
                 let valueGetter = this.pushValueGetters[field]
                 let val = valueGetter({'data': rowData })
-                rowDataOut.push( val  )
+                this.AddValueToRow(field, rowDataOut, val )
             }
             else {
                 //default_values if available
-                x[field] = rowData[field]
-                rowDataOut.push(x)
+                this.AddValueToRow(field, rowDataOut, rowData[field] )
             }
         }
         return rowDataOut
+    }
+    AddValueToRow(field, rowDataOut, value ) {
+        if (value === null) {
+            if (this.defaultValues.hasOwnProperty(field)) {
+                rowDataOut[field] = this.defaultValues[field]
+            } else { rowDataOut[field] = value }
+        } else {
+            rowDataOut[field] = value
+        }
     }
 
     CrudType(rowData, reqBody) {
@@ -95,8 +118,8 @@ class Push {
         reqBody allows for an instead of quer to be set. It stored in reqBody[uiCrudType][crudType]
         */
         let mc = rowData[meta_column]
-        let crud_type  = mc[meta_crud_type]
-        let is_delete = mc[meta_is_delete]
+        let crud_type  = mc['crudType']
+        let is_delete = mc['is_delete']
         if (is_delete) {
             return {'crudType': reqBody['delete']['crudType'], 'set_filters': reqBody['delete']['set_filters'] } 
         } else {

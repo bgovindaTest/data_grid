@@ -19,90 +19,92 @@ function ReturnColumnDefs() {
 function ReturnTableData() {
     let tableData = [
         {
-            'a': '1', 'b': null, 'd': {'d': 'dvalue', 'id': 1},  
+            'a': '1', 'b': null, 'd': {'d': 'dvalue', 'id': '20'},  
             '_ag-meta_': {'crudType': 'insert', 'is_delete': false},
-            'id': -1
+            'id': '-2'
         }
     ]
     return tableData
 }
 
-function ReturnCrudParams(columnDefs) {
-    let crudParams = { 'default_route': 'localhost' }
+function ReturnCrudParams(columnDefs, set_filters) {
+    let crudParams = { 'default_route': 'localhost', 'set_filters': set_filters }
     let x = new rb(crudParams, columnDefs)
     x.CrudParamsInit()
     return crudParams
 
 }
 
-test('pushParams Init', () => {
-    let columnDefs = ReturnColumnDefs()
+// test('pushParams Init', () => {
+//     let columnDefs = ReturnColumnDefs()
 
-    let x = new gp(columnDefs,{}, 0)
-    let grid = x.RunGridColumnsInit()
-    let pxv  = new px(grid['columnDef'])
-    pxv.PushParamsInit()
-    let res = {
-        pushFieldParams: [ 'a', 'b', 'c', 'd', 'id' ],
-        pushLookupParams: { d: { pullKey: 'id', pushKey: 'd' } },
-        pushValueGetters: true,
-        defaultValues: {'b': '21'}
-    }
-    let exp = {'pushFieldParams': pxv['pushFieldParams'],
-        'pushLookupParams': pxv['pushLookupParams'],
-        'pushValueGetters': typeof pxv['pushValueGetters']['c'] === 'function',
-        'defaultValues': pxv['defaultValues']
-    }
-    expect(exp).toMatchObject(res)
-})
-
-test('pushParams CreateRow', () => {
-    let columnDefs = ReturnColumnDefs()
-    let x = new gp(columnDefs,{}, 0)
-    let grid = x.RunGridColumnsInit()
-    let tableData = ReturnTableData()
-    let reqBody = ReturnCrudParams(grid['columnDef'])
-    let pxv  = new px(grid['columnDef'])
-    pxv.PushParamsInit()
-    let rowData = tableData[0]
-    let rd = pxv.CreateRowDataOut(rowData, reqBody)
-    let res = { a: '1', b: '21', c: 2, d: -1, id: -1 }
-    expect(rd).toMatchObject(res)
-})
-
-
-
-
-test('pushParams update row', () => {
-    let columnDefs = ReturnColumnDefs()
-    let set_fields = ['a']
-    let x = new gp(columnDefs,{}, 0)
-    let grid = x.RunGridColumnsInit()
-    let tableData = ReturnTableData()
-    let reqBody = ReturnCrudParams(grid['columnDef'])
-    let pxv  = new px(grid['columnDef'])
-    pxv.PushParamsInit()
-    let rowData = tableData[0]
-    rowData['_ag-meta_']['crudType'] = 'update'
-    let rd = pxv.CreateRowDataOut(rowData, reqBody)
-    let res = { a: '1', id: -1 }
-    expect(rd).toMatchObject(res)
-})
-
-//update test with set fields
-//delete
-
-
-// let crudParams = ReturnCrudParams(columnDefs)
-
-// class Push {
-//     constructor(grid) {
-//         this.grid             = grid
-//         this.pushFieldParams  = []
-//         this.pushLookupParams = {}
-//         this.pushValueGetters = {}
+//     let x = new gp(columnDefs,{}, 0)
+//     let grid = x.RunGridColumnsInit()
+//     let pxv  = new px(grid['columnDef'])
+//     pxv.PushParamsInit()
+//     let res = {
+//         pushFieldParams: [ 'a', 'b', 'c', 'd', 'id' ],
+//         pushLookupParams: { d: { pullKey: 'id', pushKey: 'd' } },
+//         pushValueGetters: true,
+//         defaultValues: {'b': '21'}
 //     }
-//     PushParamsInit( ) {
+//     let exp = {'pushFieldParams': pxv['pushFieldParams'],
+//         'pushLookupParams': pxv['pushLookupParams'],
+//         'pushValueGetters': typeof pxv['pushValueGetters']['c'] === 'function',
+//         'defaultValues': pxv['defaultValues']
+//     }
+//     expect(exp).toMatchObject(res)
+// })
+
+// test('pushParams CreateRow', () => {
+//     let columnDefs = ReturnColumnDefs()
+//     let x = new gp(columnDefs,{}, 0)
+//     let grid = x.RunGridColumnsInit()
+//     let tableData = ReturnTableData()
+//     let reqBody = ReturnCrudParams(grid['columnDef'], [])
+//     let pxv  = new px(grid['columnDef'])
+//     pxv.PushParamsInit()
+//     let rowData = tableData[0]
+//     let rd = pxv.CreateRowDataOut(rowData, reqBody)
+//     let res = { a: '1', b: '21', c: 2, d: '20', id: '-2' }
+//     expect(rd).toMatchObject(res)
+// })
+
+// test('pushParams CreateRow editable false', () => {
+//     let columnDefs = ReturnColumnDefs()
+//     columnDefs[0]['editable'] = false
+//     columnDefs[2]['editable'] = false
+//     let x = new gp(columnDefs,{}, 0)
+//     let grid = x.RunGridColumnsInit()
+//     let tableData = ReturnTableData()
+//     let reqBody = ReturnCrudParams(grid['columnDef'], [])
+//     let pxv  = new px(grid['columnDef'])
+//     pxv.PushParamsInit()
+//     let rowData = tableData[0]
+//     let rd = pxv.CreateRowDataOut(rowData, reqBody)
+//     let res = {  c: 2, d: -1, id: -1 }
+//     expect(rd).toMatchObject(res)
+// })
+
+
+// test('pushParams update row a only', () => {
+//     let columnDefs = ReturnColumnDefs()
+//     let set_filters = ['a']
+//     let x = new gp(columnDefs,{}, 0)
+//     let grid = x.RunGridColumnsInit()
+//     let tableData = ReturnTableData()
+//     let reqBody = ReturnCrudParams(grid['columnDef'], set_filters)
+//     // console.log(reqBody)
+//     let pxv  = new px(grid['columnDef'])
+//     pxv.PushParamsInit()
+//     let rowData = tableData[0]
+//     rowData['_ag-meta_']['crudType'] = 'update'
+//     let rd = pxv.CreateRowDataOut(rowData, reqBody)
+//     console.log(rd)
+//     let res = { a: '1', id: '-1' }
+//     // console.log(rowDa)
+//     expect(rd).toMatchObject(res)
+// })
 
 
 // CreatePushPayload(reqBodyParams, uiCrudType, data )

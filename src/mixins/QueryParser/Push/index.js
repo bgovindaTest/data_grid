@@ -53,10 +53,10 @@ class Push {
         //main function to create rowData object to be sent to the server for saving
         let cx =this.CrudType(rowData, reqBody)
         let rd =this.MapRowData(rowData, cx['crudType'], cx['set_filters'] )
-        if (! rd.hasOwnProperty['id']) {rd['id'] = -1}
+        if (! rd.hasOwnProperty('id') ) {rd['id'] = '-1'}
         else {
             if (type_check.IsNull(rd['id']) || type_check.IsNull(rd['id'])) {
-                rd['id'] = -1
+                rd['id'] = '-1'
             }
         }
         return rd
@@ -76,7 +76,9 @@ class Push {
         for (let i =0; i < this.pushFieldParams.length; i++ ) {
             let field = this.pushFieldParams[i]
             if (crudType === 'update') {
-                if (field != 'id' && !set_filters.includes(field)) {continue}
+                if (set_filters.length > 0) {
+                    if (field != 'id' && !set_filters.includes(field)) {continue}
+                }
             }
 
             let x = {}
@@ -85,9 +87,7 @@ class Push {
                 //default_values
                 let pullKey = mapx['pullKey']
                 let pushKey = mapx['pushKey']
-                this.AddValueToRow(pushKey, rowDataOut, rowData[pullKey] )
-
-    
+                this.AddValueToRow(pushKey, rowDataOut, rowData[field][pullKey] )    
             } else if (this.pushValueGetters.hasOwnProperty(field)) {
                 let valueGetter = this.pushValueGetters[field]
                 let val = valueGetter({'data': rowData })
@@ -123,7 +123,7 @@ class Push {
         if (is_delete) {
             return {'crudType': reqBody['delete']['crudType'], 'set_filters': reqBody['delete']['set_filters'] } 
         } else {
-            return {'crudType': reqBody[crud_type]['crudType'], 'set_filters': reqBody['delete']['set_filters'] } 
+            return {'crudType': reqBody[crud_type]['crudType'], 'set_filters': reqBody[crud_type]['set_filters'] } 
         }
     }
     CreatePushPayload(reqBodyParams, uiCrudType, data ) {

@@ -53,7 +53,6 @@ const type_check   = require('../../../TypeCheck')
 const chmodFunc    = require('../../../lib/chmodFunc')
 const meta_column_name = data_config.meta_column_name
 
-
 class Pull {
     /*
         filterParams, orderByParams and pageParams is initialized
@@ -93,7 +92,7 @@ class Pull {
         this.lookupFields.push(meta_column_name)
     }
 
-    ToRowData(queryRowData) {
+    QueryToRowData(queryRowData) {
         /*
         loops throug queryRowData and returns rowData. Checks if fields are lookups and 
         assembles them into an object 
@@ -154,9 +153,6 @@ class Pull {
         let urlParams = this.GetRouteParams( )
         return urlParams
     }
-
-
-
     NewQuerySet() {
         //resets query params.
         ftmp = this.filterParams['new']
@@ -169,8 +165,6 @@ class Pull {
         let keys = Object.keys(newPage)
         for(let i = 0; i < keys.length; i++) {this.pageParams[keys[i]] =newPage[keys[i]] }
     }
-
-
     //pagination functions
     ChangePage(i) {
         let page_params = this.PageParams
@@ -230,7 +224,6 @@ class Pull {
         pgx['offset'] = String(offset)
         return pgx
     }
-
     //Functions below used for processing filter object.
     WhereObject(filter_list) {
         /*
@@ -255,7 +248,6 @@ class Pull {
         let fr = {}
         let operator = filterRow['operator']
         let value  = null
-        let value2 = null
         if (data_config.array_parse_types.includes(operator)) {
             let values = ArrayValueParse(filterRow)
             if (values.length === 0) { return }
@@ -265,8 +257,7 @@ class Pull {
         else if (data_config.between_parse_types.includes(operator)) {
             let values = BetweenValueParse(filterRow)
             if (values.length != 2) { return }
-            value  = values[0]
-            value2 = values[1]
+            value  = [values[0], values[1] ]
         }
 
         else if (data_config.null_parse_types.includes(operator)) { }
@@ -279,7 +270,6 @@ class Pull {
         fr['column_name'] = filterRow['column_name']
         fr['operator']    = operator
         fr['value']       = value
-        fr['value2']      = value2
         fout.push(fr)
     }
     ArrayValueParse(filterRow) {
@@ -319,97 +309,6 @@ class Pull {
         else if (data_type === 'boolean') { return type_check.IsBoolean}
         else { return type_check.IsString }
     }
-
-
-
-
-
 }
 
-
-
-//add meta_column in gridFunctions
-function ServerRowToUiRow(queryRowData, IsLookup, IsCrud) {
-    //parses queryRowData into rowData for grid.
-
-    let rowData = {}
-    let keys = Object.keys(queryRowData)
-    for(let i =0; i < keys.length; i++ ) {
-        let field = keys[i]
-        let isCrud = IsCrud[field] || false
-        if (! isCrud ) {continue}
-        if (isCrud === 'w') {continue}
-        //If IsLookup
-        if (! IsLookup.hasOwnProperty(field) ) {
-            let val = LookupParse(column_name, queryRowData)
-            rowData[field] = val
-        } else { rowData[field] = queryRowData[keys[i].trim()] }
-    }
-    return rowData
-}
-
-function ColumnLookupFields(serverRowData) {
-    /*
-    Converts xyz to xyz. .operator is special
-    if field has . assumes base string is field and lookup field is after
-
-
-    */
-    let fields = Object.keys(serverRowData)
-    let lookups = {}
-    let rowData = {}
-    for(let i =0; i< fields.length; i++ ) {
-        let fx = fields[i]
-        if (fx.includes('.')) {
-            let fk = fx.split(".")[0]
-            lookups[fk] = {}
-        }
-        rowData[fx] = serverRowData[fx]
-    }
-    for(let i =0; i < fields.length; i++ ) {
-        if (fx.includes('.')) {
-            let fk = fx.split(".")[0]
-            let lk = fx.split(".")[1]
-            lookups[fk][lk] = rowData[fk]
-        } else if (lookups.hasOwnProperty(fx) ) {
-            lookups[fx][fx] = rowData[fx]
-        }
-    }
-    for(let i =0; i < fields.length; i++ ) {
-        if (fx.includes('.')) {
-            let fk = fx.split(".")[0]
-            let lk = fx.split(".")[1]
-            lookups[fk][lk] = rowData[fk]
-        } else if (lookups.hasOwnProperty(fx) ) {
-            lookups[fx][fx] = rowData[fx]
-        }
-    }
-    let lks = Object.keys(lookups)
-    for(let i =0; i< lks.length; i++) { rowData[lks[i]] = lookups[lks[i]] }
-    return rowData
-}
-
-
-
-//add functionality for aliases later
-//error if is string. means no match found
-function LookupParse(column_name, queryRowData) {
-    let column_value = {}
-    let keys = Object.keys(queryRowData)
-    let cn_dot = column_name+'.'
-    for(let i =0; i < keys.length; i++ ) {
-        let value = queryRowData[keys[i]]
-        let key = keys[i]
-        if (key.startsWith(cn_dot) ) {
-            let k2 = key.split('.')
-            if (k2.length < 2) {continue}
-            column_value[k2[1].trim() ] = value
-        }
-    }
-    return column_value
-}
-
-
-//crud_fields
-//ignore primary_key
-//{'column_name': 'col_name_1', 'operator': '=', 'value':  1 },
+module.exports = Pull

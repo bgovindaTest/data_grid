@@ -71,7 +71,7 @@ class Pull {
         for (let i =0; i < columnDefs.length; i++ ) {
             let grid_column = columnDefs[i]
             let field       = grid_column['field']
-            if (field === meta_column) { continue }
+            if (field === meta_column_name) { continue }
             if (! chmodFunc.IsPull( grid_column['chmodParams']  ) ) {continue}
             let ce = grid_column['cellEditor']
             if (le.includes(ce) ) { //Or is links?
@@ -104,9 +104,15 @@ class Pull {
         let qKeys = Object.keys(queryRowData)
         for(let i =0; i < qKeys.length; i++ ) {
             let qKey = qKeys[i]
-            if (this.lookupFields.includes(qkey) ) {
+            if (this.lookupFields.includes(qKey) ) {
                 //if xyz else if
-                lookupMapData[field][qKey] = String(queryRowData[qKey])
+                let field = qKey
+                let value = queryRowData[qKey]
+                if (type_check.IsObject(value)) {
+                    lookupMapData[field][qKey] = value                    
+                } else {
+                    lookupMapData[field][qKey] = String(queryRowData[qKey])
+                }
                 continue
             }
             if (qKey.includes('.')) {
@@ -118,7 +124,11 @@ class Pull {
                 lookupMapData[fieldKey][subFieldKey] = String( queryRowData[qKey] )
                 continue
             }
-            if (this.pullFields.includes(qKey) ) {rowData[qKey] = String( queryRowData[qKey] )  }
+            if (this.pullFields.includes(qKey) ) {
+                let value = queryRowData[qKey]
+                if (value === null) { rowData[qKey] = value } 
+                else { rowData[qKey] = String( value ) }
+            }
         }
         for(let i =0; i< this.lookupFields.length; i++) {
             let field = this.lookupFields[i]

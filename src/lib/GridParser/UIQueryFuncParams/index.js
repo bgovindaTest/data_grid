@@ -106,13 +106,13 @@ class QueryParams {
             else if  ( showFilter ) {
                 defaultFilter.push(dFV)
                 filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['dataType'] })
-            } else if (showFilter) {
+            } else  {
                 filterList.push({'headerName': dFV['headerName'], 'column_name': dFV['column_name'], 'dataType': dFV['column_name'] })
             }
         } else {
             let showFilter   = grid_column['showFilter']
             if (showFilter) {
-                filterList.push({'headerName': grid_column['headerName'], 'column_name': grid_column['column_name'], 'dataType': grid_column['dataType'] })
+                filterList.push({'headerName': grid_column['headerName'], 'column_name': grid_column['field'], 'dataType': grid_column['dataType'] })
             }
         }
 

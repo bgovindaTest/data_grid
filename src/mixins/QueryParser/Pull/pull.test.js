@@ -5,12 +5,13 @@ const gp = require('../../../lib/GridParser')
 function ReturnColumnDefs() {
     let columnDefs = [
         {'field': 'a',  'editable': true, 'dataType': 'numeric', 'defaultFilter': 1, 'showFilter': false, 'showSort': false },
-        {'field': 'b',  'editable': true, 'defaulFilter': 'b filter', 'showFilter': true, 'showSort': true},
-        {'field': 'c',  'chmodParams': 'r', 'cellEditor': 'autoCompleteEditor', 'dataType': 'text', 'showFilter': true, 'showSort': true},
+        {'field': 'b',  'editable': true, 'defaultFilter': 'b filter', 'showFilter': true, 'showSort': true},
+        {'field': 'c',  'chmodParams': 'r', 'cellEditor': 'autoCompleteEditor', 'defaultSort': 'asc', 'dataType': 'text', 'showFilter': true, 'showSort': true},
         {'field': 'id', 'chmodParams': 'rw','defaultFilter': '-1', 'showFilter': false,},
     ]
     return columnDefs
 }
+
 
 
 test('pull Init', () => {
@@ -48,22 +49,97 @@ test('server data to rowData', () => {
     expect(exp).toMatchObject(rowData)
 })
 
+test('query params defaults', () => {
+    let columnDefs = ReturnColumnDefs()
+    let x = new gp(columnDefs,{}, 0)
+    let grid = x.RunGridColumnsInit()
+    let qp = grid['queryParams']
+
+    px = new Pull(grid['columnDef'], qp.filterParams, qp.orderByParams, qp.pageParams)
 
 
-// NewQueryParams() 
-// PreviousPageParams() 
-// NextPageParams()  
-// urlParams
-// NewQuerySet()
-// //pagination functions
-// ChangePage(i)
-// GetRouteParam
-// OrderByObject()
-// PaginationObject()
-// //Functions below used for processing filter object.
-// WhereObject()
-// AppendFilterRow
-// ArrayValueParse(filterRow) 
-// BetweenValueParse
-// // function TypeCheckFunction(data_type) {
-// GetTypeCheckFunction
+    px.PullParamsInit()
+    let urlParams = px.GetRouteParams( )
+    let res = {
+        where: [
+          { column_name: 'a', operator: '=', value: '1' },
+          { column_name: 'id', operator: '=', value: '-1' },
+          { column_name: 'b', operator: '=', value: 'b filter' }
+        ],
+        order_by: [ { column_name: 'c', order_by: 'asc' } ],
+        limit: '10000',
+        offset: '0'
+      }
+    expect(res).toMatchObject(urlParams)
+})
+
+test('query params next page pushed twice', () => {
+    let columnDefs = ReturnColumnDefs()
+    let x = new gp(columnDefs,{}, 0)
+    let grid = x.RunGridColumnsInit()
+    let qp = grid['queryParams']
+    px = new Pull(grid['columnDef'], qp.filterParams, qp.orderByParams, qp.pageParams)
+    px.PullParamsInit()
+    px.NextPageParams() 
+    let urlParams = px.NextPageParams()
+    let res = {
+        where: [
+          { column_name: 'a', operator: '=', value: '1' },
+          { column_name: 'id', operator: '=', value: '-1' },
+          { column_name: 'b', operator: '=', value: 'b filter' }
+        ],
+        order_by: [ { column_name: 'c', order_by: 'asc' } ],
+        limit: '10000',
+        offset: '20000'
+    }
+    expect(res).toMatchObject(urlParams)
+})
+
+test('new query', () => {
+    let columnDefs = ReturnColumnDefs()
+    let x = new gp(columnDefs,{}, 0)
+    let grid = x.RunGridColumnsInit()
+    let qp = grid['queryParams']
+    px = new Pull(grid['columnDef'], qp.filterParams, qp.orderByParams, qp.pageParams)
+    px.PullParamsInit()
+    qp['filterParams']['new'] = [
+        {
+          headerName: 'b',
+          column_name: 'b',
+          dataType: 'text',
+          operator: 'in',
+          value: ' b filter, happy \nwhats ups, example',
+          value2: null,
+          delimiterType: '\n'
+        },
+        {
+            headerName: 'b',
+            column_name: 'b',
+            dataType: 'text',
+            operator: 'between',
+            value: 'a12',
+            value2: 'b12',
+            delimiterType: '\n'
+        }
+    ]
+
+
+    qp['orderByParams']['new'] = [
+        { headerName: 'b', column_name: 'b', order_by: 'desc' }
+    ]
+
+    px.NewQuerySet()
+    let urlParams = px.GetRouteParams( )
+    let res = {
+        where: [
+          { column_name: 'a', operator: '=', value: '1' },
+          { column_name: 'id', operator: '=', value: '-1' },
+          { column_name: 'b', operator: 'in', value: [ 'b filter, happy', 'whats ups, example' ] },
+          { column_name: 'b', operator: 'between', value: [ 'a12', 'b12' ] }
+        ],
+        order_by: [ { column_name: 'b', order_by: 'desc' } ],
+        limit: '10000',
+        offset: '0'
+      }
+    expect(res).toMatchObject(urlParams)
+})

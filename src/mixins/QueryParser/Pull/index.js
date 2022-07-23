@@ -159,31 +159,29 @@ class Pull {
     }
     NewQuerySet() {
         //resets query params.
-        ftmp = this.filterParams['new']
-        otmp = this.orderByParams['new']
+        let ftmp = this.filterParams['new']
+        let otmp = this.orderByParams['new']
         this.filterParams['current'] = ftmp
         this.filterParams['new'] = []
         this.orderByParams['current'] = otmp
         this.orderByParams['new'] = []
-        newPage = PageInit()
-        let keys = Object.keys(newPage)
-        for(let i = 0; i < keys.length; i++) {this.pageParams[keys[i]] =newPage[keys[i]] }
+        this.pageParams['offset'] = 0
+        this.pageParams['page_index'] = 0
     }
     //pagination functions
     ChangePage(i) {
-        let page_params = this.PageParams
+        let page_params = this.pageParams
         let page_index  = page_params['page_index']
         if(type_check.IsInteger(i) ) {
             page_index = page_index + parseInt(i)
         } else {page_index = 0 }
-
         if (page_index < 0) { page_index = 0 }
+        page_params['page_index'] = page_index
         let page_size = page_params['page_size']
-        page_params['limit']  = (1+page_index)*page_size
         page_params['offset'] = page_index*page_size
     }
 
-    GetRouteParams(filterParams, orderByParams, pageParams ) {
+    GetRouteParams( ) {
         /*
         Pulls data rules and intializes paramters. queryParams is an object that contains the current values
         from all the modal windows.
@@ -240,11 +238,11 @@ class Pull {
         //enforcedFilters
         for(var i =0; i< enforced_filter_list.length; i++) {
             let frow = enforced_filter_list[i]
-            AppendFilterRow(fout, frow)
+            this.AppendFilterRow(fout, frow)
         }
         for(let i =0; i< filter_list.length; i++) {
             let frow = filter_list[i]
-            AppendFilterRow(fout, frow)
+            this.AppendFilterRow(fout, frow)
         }
         return fout
     }
@@ -253,13 +251,13 @@ class Pull {
         let operator = filterRow['operator']
         let value  = null
         if (data_config.array_parse_types.includes(operator)) {
-            let values = ArrayValueParse(filterRow)
+            let values = this.ArrayValueParse(filterRow)
             if (values.length === 0) { return }
             value  = values
         }
 
         else if (data_config.between_parse_types.includes(operator)) {
-            let values = BetweenValueParse(filterRow)
+            let values = this.BetweenValueParse(filterRow)
             if (values.length != 2) { return }
             value  = values
         }
@@ -281,12 +279,16 @@ class Pull {
 
         let value = filterRow['value']
         let data_type = filterRow['dataType']
-        let tcFunc = GetTypeCheckFunction(data_type)
-        let delim  = DelimiterType (filterRow['delimiter'])
-        let values = value.split(delim)
+        let tcFunc = this.GetTypeCheckFunction(data_type)
+        let delim  = data_config.ReturnDelimiterType(filterRow['delimiterType'])
+        let values = value.split( data_config.regExMap[delim] )
         let out_array = []
         for (let i = 0; i < values.length; i++) {
-            if (tcFunc(values[i])) { out_array.push(String(values[i]).trim() ) }
+            if (tcFunc(values[i])) { 
+                let x = String(values[i]).trim()
+                if (x === "" ) {continue}
+                out_array.push(x) 
+            }
         }
         return out_array
     }
@@ -295,7 +297,7 @@ class Pull {
         let val1 = filterRow['value']
         let val2 = filterRow['value2']
         let data_type = filterRow['dataType']
-        let tcFunc = GetTypeCheckFunction(data_type)
+        let tcFunc = this.GetTypeCheckFunction(data_type)
         if (tcFunc(val1) && tcFunc(val2) ) { return [String(val1), String(val2)] }
         return []
     }

@@ -151,10 +151,19 @@ let sortDisplayName = {'asc': 'Ascending', 'desc': 'Descending'}
 
 //delimiter by regex string. value is passed to javascript split methods.
 //takes a string or regex expression.
-let delimiter_typeName = { '/\s+/':'Any Space', //any is space or newline
-    '\n': 'New Line', '/ +/': 'Space', ',': "Comma", 
+let delimiter_typeName = { '\s+':'Any Space', //any is space or newline
+    '\n': 'New Line', ' +': 'Space', ',': "Comma", 
     ';':"SemiColon"}
-let defaultDelimiter = '/\s+/'
+
+let defaultDelimiter = '\s+'
+//string conversion for delimiter type doesnt always work
+//regExMap is quickfix because delimiter_typeName keys dont always
+//work in split function for string when input is a regex string i.e. \s+ doesnt work
+//but \n does
+let regExMap  = {
+    '\s+': /\s+/, //any is space or newline
+    '\n': '\n', ' +': ' +',',': ",", 
+    ';': ';'}
 //gets converted to \;\
 
 //postgres commands to replace null values
@@ -261,5 +270,6 @@ module.exports = {
     'date_types':   date_types,
     'object_types': object_types,
     'cellEditors': cellEditors,
-    'if_null_types': if_null_types
+    'if_null_types': if_null_types,
+    'regExMap': regExMap
 }

@@ -5,162 +5,25 @@ It mainly calls the initialization scripts in GridPraser
 
 Combines modules from GridFunctions and GridParser into main mixin
 
-*/
-
-/*
 The grid functions module has functions for user changes to the grid. 
 
-Grid Function
-redraw_rows: refresh UI of grid
-remove_row_data: removes all rows from grid
-append_rows: adds new rows to grid
-new_sheet: creates an empty sheet.
-undo: runs UndoRow on all selected rows.
-UndoRow: Returns a given rows server fields to original values
-Delete: runs SetDelete on all selected rows
-SetDelete: sets __is_delete__ variable to (true/false) on a given row
-insert: main insert function
-InsertSelected: insert the number of rows highlighted
-CreateNewRow: creates a new row. 
-server_error_display:
+//has axios object in main plugin.
+//dev vs prod
 
-Inputs:
-gridOptions: Required by ag-grid contains api often set to gridApi
-gridColumnApi: Required by ag-grid
-gridParams:
-rowData:
 
-try: catch added to grid functions because range selection lingers and will try to return
-rows that were selected before filter
-*/
-/*
 This module contains the code that is responsible for sending and receiving data to the server via
 crud operations. This module provides the functions to pull data and saving data to the server.
 
 
-Query Type: Get Routes:
-For pulling data from the server. The structure below is used. The rows is what should be processed and set to the
-client grid 
-get_route
-    'error_msg': err_msg, 'is_error': true, 'rows': [], 'table_name': table_name, 'route_name': route_name }
 
 
-Saving Data:
-For saving data the server expect a req.body object containing the following structure. If the route is empty just send an empty array 
-otherwise each object in the array should contain the key:value pairs required
-to save data to the server.
-
-This module is used to intialize the modal windows and query data that is created on the client side and
-sent to the server side.
-
-InitializeQueryParams: Main function to initialze query params and modal windows. Takes the data_rules, pagination object
-    and params object. returns {"pagination": pagination, 'order_by':order_by, 'columnSortNames': columnSortNames, 'where': where, 'modalParams': modalParams }
-NextPage: Changes the offest parateter in the pagination object to retrieve next group of server data.
-CreateGetRouteParams: This takes the where, pagination, order_by objects and processes them to be sent to the server.
-
-Below is the structure of the main inputs 
-where_sort_rules (data_rules), pagination and params example:
-var where =[
-  {'variable_name': 'date_test','data_describe': "I'm Batmant",'is_sort': true, 
-    'is_filter': true, 'filter_active': true, 'filter_show': true, 'data_type': 'date', 'query_type': 'date', 'value': null },
-
-  {'variable_name': 'string_test' ,'is_sort': true, 'is_filter': true, 'filter_active': true,
-    'filter_show': false, 'data_type': 'string', 'query_type': '', 'value': 'abc' },
-]
-
-let query_params = [
-    Array of objects. Contains information for crud operations.
-    Operation order is not preserved.
-    {
-        "crud_type": "", //only needed for save route 
-        "data": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
-        "default_fields": "", //object with default type {x:"default_value_x", y:"default_value_y"}
-        "set_fields": "",  //array that has columns that should be used for set
-        "on_conflict": "", //string a-zA-Z0-9
-        "on_constraint": "", //string a-zA-Z0-9
-        "where": "", //array of objects: [{x:"valx1", y:"valy1"},{x:"valx2", y:"valy2"}]
-        "offset": "", //should be integer greater or equal to 0
-        "limit": "", //should be positive integer
-        "search_filter": "", //string or object with quick filter type:
-        "search_rank": "", //bool
-        "returning": "", //array of fields to used for returning [id, column_1, xxx] //defaults to id?
-        "order_by": ""  // [{'col1': 'asc}, {'col_2': 'desc'}] 
-        }
-    ]
-    
-
-
-req.body['insert'] = [{}]
-req.body['update'] = [{}]
-req.body['upsert'] = [{}]
-req.body['delete'] = [{}]
 
 Saving Data Returned From Server: Below is the structure of the return values. Its primarily meant to communciate what 
 data failed to be saved and why. if is_eror is true the error_msg should be attached to the corresponding row based
 on node_id. If there are error the grid will be set to display an error state where error messages are shown as the 
 last column. All other grid functions will be disabled.
 
-save_route format json object
-{
-    "error": {
-        "is_error": false,
-        "error_msg": ""
-    },
-    "output": {
-        "insert": [
-            {
-                "is_error": true,
-                "node_id": 23,
-                "error_msg": "insert not allowed for users table. in route users for client row 23",
-                "id": -1
-            }
-        ],
-        "update": [
-            {
-                "is_error": true,
-                "node_id": 4,
-                "error_msg": "Cannot change value of role for primary admin 4",
-                "id": 1
-            },
-            {
-                "is_error": false,
-                "node_id": 21,
-                "error_msg": "",
-                "id": 4
-            },
-            {
-                "is_error": true,
-                "node_id": -1,
-                "error_msg": "Nothing to update after permissions filter.",
-                "id": -1
-            }
-        ],
-        "upsert": [
-            {
-                "is_error": true,
-                "node_id": 4,
-                "error_msg": "upsert not allowed for users table. in route users for client row 4",
-                "id": -1
-            }
-        ],
-        "delete": [
-            {
-                "is_error": true,
-                "node_id": 4,
-                "error_msg": "delete not allowed for users table. in route users for client row 4. Row can be deactivated  by setting is_active to false to prevent further use and to hide.",
-                "id": 70
-            },
-            {
-                "is_error": true,
-                "node_id": 4,
-                "error_msg": "delete not allowed for users table. in route users for client row 4. Row can be deactivated  by setting is_active to false to prevent further use and to hide.",
-                "id": 1
-            }
-        ]
-    },
-    "table_name": "users",
-    "route_name": "users"
-}
+
 
 Common Inputs: 
 axios object:
@@ -169,74 +32,67 @@ server route:
 modalParams.loading
 modalParams.saving
 error state?
-
-DeleteCrudPrep() {} 
-InsertCrudPrep() {}
-UpdateCrudPrep() {}
-
 */
 
+var GridController = {
 
-// const meta_column_name = '_ag-meta_'
-// const meta_delete_undo_name = '_ag-meta-delete-undo_'
-
-//combines modal operations with grid functions?
-
-/*
-on grid ready initialize app?
-
-*/
-
-// class InitializeParameters {
-//     constructor() {
-//         this.url  = null
-//         this.urlParams = null
-//         this.init_params = null
-//         this.is_read_only = null
-//         this.folderName = null
-//         this.pageName = null
-//     }
-//     async RunInitialization() {
-//         this.ParseUrlParams()
-//         await this.PullAppLayout()
-//         await this.LoadInitialParams()
-//         await this.DownloadStaticDropDowns()
-//         await this.CreateMainGrid()
-//     }
-
-//     ParseUrlParams() {}
-
-//     async PullAppLayout() {
-//         //parse url params
-//         //get jsonObject and user permissions
-//     }
-//     async LoadInitialParams() {}
-
-//     async DownloadStaticDropDowns() {}
-//     async CreateMainGrid() {}
-//     HeaderParams()
-// }
+    // Grid Function
+    // redraw_rows: refresh UI of grid
+    // remove_row_data: removes all rows from grid
+    // append_rows: adds new rows to grid
+    // new_sheet: creates an empty sheet.
+    // undo: runs UndoRow on all selected rows.
+    // UndoRow: Returns a given rows server fields to original values
+    // Delete: runs SetDelete on all selected rows
+    // SetDelete: sets __is_delete__ variable to (true/false) on a given row
+    // insert: main insert function
+    // InsertSelected: insert the number of rows highlighted
+    // CreateNewRow: creates a new row. 
+    // server_error_display:
+    
+    // Inputs:
+    // gridOptions: Required by ag-grid contains api often set to gridApi
+    // gridColumnApi: Required by ag-grid
+    // gridParams:
+    // rowData:
 
 
-//has axios object in main plugin.
-//dev vs prod
-var myMixin = {
+
+//props provide flags on calling mechanism. i.e. subgrid or
+//main grid
+props: {
+    pageConfig: {
+        type: Object,
+        default: null
+    },
+    isSubModal: {
+        type: Boolean,
+        default: false
+    }
+
+},
+
+
+
 data () {
     return {
         loading: true,
-        pageConfig: null,  //main json object?
+        is_test: true,
+        is_development: true, //used file paths to laod data.
+        is_read_only: false,
+
+        row_index: 0,
+
         url_params: {},
         global_params: {},
+
         //main_grid_params
         tableData: null,
         headerParams: null,
-        saveModal: false,
-        filterModal: false,
-        orderByModal: false,
+        columnDefs: null,
         gridApi: null,
         columnApi: null,
         gridOptions: null,
-        //generated functions?
 
         //
         queryParams: {},
@@ -245,10 +101,90 @@ data () {
         enforcedFilterParams: {},
 
         //data ready for save stored here. allows for save to continue
-        toSave: {}
+        toSave: [], //stores payload
+
+        //functions created by gridParser
+        gridFunctions: null,
+
+
+        // gf['Insert']       = this.InsertRowInit(defaultValues) //for newly added rows via add row or new_sheet
+        // gf['CopyRow']      = this.CopyRowInit()
+        // gf['Update']       = this.UpdateRowInit() //for rows created from querying the database
+        // gf['Undo']         = this.UndoRow() //function to reset row based on backup values
+        // gf['Delete']       = this.DeleteRow()
+        // gf['UndoDelete']   = this.DeleteUndoRow()
+        // //grid_changes before saving
+        // gf['CrudStatus']   = this.CrudStatus()
+
+        // //delete_warning
+        // gf['deleteWarning'] = grid['deleteWarning'] || ""
+
+
+
+        //modalParams
+        saveModal: false,
+        filterModal: false,
+        orderByModal: false,
 
     }
 },
+
+// 'qparams_prefix':"",
+// 'url_prefix':"",
+// '__url_params__': {},
+// '__valuesObject__': [{}] //array is grid position object key is field and value is values to be passed.
+// '__is_read_only__':  true/false (do the have modification permssions)
+//     //if no force editable to false
+
+async mounted () {
+    /*
+    This object is ran to initialize all the required data from the server. When all initial loading is complete the 
+    main page with the nav bar, grid and footer will be displayed. The order of the initializations matter.
+
+    MainPage
+        1. GetRoute
+        2. Pull Configuration
+        3. Pull and create ValueObject
+        4. Parse Grid Configurations
+        5. TurnLoading off
+        6. Load Table Data
+    SubPage
+        1. Parse Sub Grid Configurations
+        2. Turn Loading off
+        3. LoadData
+
+    */
+    //if submodal else.
+
+
+    try {
+
+
+
+        await this.UserPermissionsInitialize()
+        this.gridParams['user_permissions'] = this.user_permissions
+        //need to add user_permissions
+        this.columnDefs = await grid_init.InitializeAggrid(this.gridParams, this.grid_column_rules, this.autocomplete_map, this.$axios)
+        // console.log(this.columnDefs)
+        field_functions.InitalizeRowCreation(this.gridParams,this.new_input_params, this.query_routes )
+        this.QueryParamsInitialize()
+        this.AddLocalData()
+        this.page_status.initial_loading = false
+
+        //CreateFunctionsParam Object
+        //addParamsObject to cellEditorParams
+
+
+        // console.log(this.autocomplete_map)
+    } catch (err) {
+        // console.log(err)
+        // throw err
+        this.page_status.initial_loading_error = String(err)
+    }
+},
+
+
+
 
 methods: {
     onGridReady(params) {
@@ -257,21 +193,38 @@ methods: {
         this.gridOptions = params
         //add active state updates
     },
-    onSubGridReady(params) {
-        this.subGridApi     = params.api
-        this.subColumnApi   = params.columnApi
-        this.subGridOptions = params
+
+    ParsePageConfig() {
+        //{'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+
+
     },
 
-
-
-    Insert: async function () {},
+    ResetIndex() {this.row_index = 0    },
+    AddIndex()   {this.row_index += 0   },
+    GetIndex()   {return this.row_index },
 
     async AppendStaticDropDown() {
         //runs after gridParser. pull any static arrays?
     },
 
-    //UI functions
+    /*
+        //UI functions
+
+
+
+    */
+
+    UrlParams() {},
+
+    //is root
+
+    async GetGridConfigurations() {},
+
+    async GetValueObject() {},
+
+
+
     RedrawRows() {
         //redraws all visible rows gridOptions.api === gridApi
         // gridApi.redrawRows() --maynot be needed anymore
@@ -287,6 +240,8 @@ methods: {
         */
         this.tableData.length = 0
     },
+
+
 
     ResetAllRowData() {
         //returns rowData to backup value. stored in metadata column
@@ -360,7 +315,7 @@ methods: {
                 var rowModel = api.getModel()
                 var rowNode = rowModel.getRow(rowIndex)
                 var rowx = rowNode.data
-                this.UndoRow(rowx)
+                this.UndoRow(rowx) //gridFunctions?
                 rowNodes.push(rowNode)
             }
             this.RedrawRows()
@@ -532,6 +487,32 @@ methods: {
         var gridColumnApi = gridOptions.columnApi
         gridColumnApi.setColumnVisible(field_functions.server_error(), is_error)
     },
+
+    /*
+        Loading modules
+        save_route format json object
+        {
+            "error": {
+                "is_error": false,
+                "error_msg": ""
+            },
+            "output": {
+                "insert": [
+                    {
+                        "is_error": true,
+                        "node_id": 23,
+                        "error_msg": "insert not allowed for users table. in route users for client row 23",
+                        "id": -1
+                    }
+                ],
+                ]
+            },
+            "table_name": "users",
+            "route_name": "users"
+        }
+    */
+
+
 
     //CRUD Operations
     async RunQuery(route_name, query_routes, where, order_by, pagination, get_route_params,field_variables, axios_object,is_next_page) {
@@ -801,11 +782,6 @@ methods: {
     },
 
 
-
-    CrudInsert() {},
-    CrudDelete() {},
-    CrudUpdate() {},
-
     FixData() {
         //clear save object.
         //close save modal
@@ -896,10 +872,7 @@ methods: {
     
         return rowy
     },
-    ProcessLookupData() {
-        //converts flat sql query to json object for lookups
-        //i.e. autocomplete and agrichselect editor
-    },
+
     async ExtractRowsForSave(rowData) {
         /*
         This extracts all completed rows that should be sent to the server for saving.
@@ -996,4 +969,4 @@ methods: {
 
 }
 
-module.exports = myMixin
+module.exports = GridController

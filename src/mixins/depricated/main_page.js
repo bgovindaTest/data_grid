@@ -43,8 +43,4 @@ var myMixin = {
     LoadMainGrid: async function () {},
 
 
-
-
-
-
 } 

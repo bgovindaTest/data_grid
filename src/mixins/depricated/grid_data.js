@@ -30,8 +30,9 @@ var myMixin = {
                 toSave: {}
             */
             subGridModal: false,
+            //IsSubGrid
 
-
+            //IfSubGridProp not null else
             //subGrid
             subTableData: null,
             subHeaderParams: null,

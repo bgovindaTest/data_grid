@@ -34,6 +34,16 @@ modalParams.saving
 error state?
 */
 
+/*
+create subgrid functions
+
+create crudColumn Functions
+
+*/
+
+
+
+
 var GridController = {
 
     // Grid Function

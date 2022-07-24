@@ -97,6 +97,13 @@ class CrudColumnFunctions {
         this.defaultValues = defValue
     }
 
+    /*
+    Insert, Update and Copy functions take a params object that contains
+    the row_index and query_data pulled from server and/or meta_column params
+
+    */
+
+
 
     InsertRowInit(defaultValues) {
         /*
@@ -182,6 +189,7 @@ class CrudColumnFunctions {
         }
         return fu
     }
+
 
     UndoRow() {
         //reverts rowData to values from backups
@@ -425,6 +433,48 @@ class CrudColumnFunctions {
             if (grid_column['cloneOnCopy'] || false) {
                 this.cloneOnCopy.push(field)
             }
+        }
+    }
+}
+
+function CreateMetaColumn(rowDataParams, default_meta_params) {
+    /* 
+    rowDataParams
+    meta_params {
+        row_index: integer
+        data: {  meta_column{  }  }
+
+    // }
+    //insert
+    { 'crudType': 'insert', 'is_delete': false }
+
+    //update
+
+
+    //copy
+    { 'crudType': 'insert', 'is_delete': false }
+
+    function getRowHeight(params) {
+    return params.data.rowHeight;
+    }
+    */
+    let defaultRowHeight = 25
+    let data = rowDataParams['data']  || {}
+    let mx   = data[meta_column_name] || {}  
+
+    let dfx = default_meta_params
+    dfx['row_index'] = rowDataParams['row_index'] || -1
+    if (dfx['row_index'] === -1) {console.error('row_index is -1. Unitialized index')}
+    let valid_crudTypes = ['insert', 'update']
+
+    dfx['row_height'] = mx['row_height'] || defaultRowHeight
+    if (typeof dfx['row_height'] != 'number' ) { dfx['row_height'] =defaultRowHeight }
+
+
+    if (mx.hasOwnProperty('crudType') ) {
+        let cT = mx['crudType']
+        if (valid_crudTypes.includes(cT)) {
+            dfx['crudType'] = cT
         }
     }
 }

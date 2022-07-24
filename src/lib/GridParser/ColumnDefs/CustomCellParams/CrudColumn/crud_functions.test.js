@@ -37,8 +37,10 @@ test('insert new row function', () => {
     let defaultValues = {'colA': {'value': 'a', 'dataType': '', 'key': '', ifNullSet: false, 'useKey': false }, 
         'colb': {'value': 'b', 'dataType': '', 'key': '', ifNullSet: false, 'useKey': false } }
     let f = x.InsertRowInit(defaultValues)
-    let rowData = f()
-    let exp = {colA: 'a', colb: 'b', '_ag-meta_': { crudType: 'insert', is_delete: false,
+    let rowDataParams = {'row_index': 1}
+    let rowData = f(rowDataParams)
+    let exp = {colA: 'a', colb: 'b', '_ag-meta_': { crudType: 'insert', is_delete: false, row_index: 1,
+        row_height: 25,
         backup: { colA: 'a', colb: 'b' } }
     }
     expect(rowData).toMatchObject(exp)
@@ -48,11 +50,30 @@ test('update row function', () => {
     let x = new cf()
     let rowData = {'a':1, 'b': 2}
     let f = x.UpdateRowInit()
-    f(rowData)
+    let rowDataParams = {'row_index':2 , 'data': rowData }
+
+    f(rowDataParams)
     let exp = { a: 1, b: 2,
         '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1, b: 2 } }
     }
     expect(rowData).toMatchObject(exp)
+})
+
+test('copy row function', () => {
+    let x = new cf()
+    x.cloneOnCopy = ['b'] 
+
+    let rowData =  { a: 1, b: 2,
+        '_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1, b: 2 } }
+    }
+    let rowDataParams = {'row_index': 1, 'data': rowData, 'meta_column': {}}
+    let f = x.CopyRowInit()
+    let newRowData = f(rowDataParams)
+    let exp = {'a': null, 'b': 2, '_ag-meta_': { crudType: 'insert', is_delete: false, row_index: 1,
+        row_height: 25,
+        backup: { 'a': null, 'b': 2 } }
+    }
+    expect(newRowData).toMatchObject(exp)
 })
 
 test('undo row function', () => {

@@ -116,11 +116,13 @@ class CrudColumnFunctions {
             returns rowData object
         */
         const rdv = this.ReturnDefaultValue
-        let fx = function () {
+        let fx = function (rowDataParams) {
             //rowData is empty object
             //fields
             let rowData = {}
             let meta_column = { 'crudType': 'insert', 'is_delete': false }
+            CreateMetaColumn(rowDataParams, meta_column)
+
             let insert_backups = {}
             let field_names = Object.keys(defaultValues)
             for (let i = 0; i< field_names.length; i++ ) {
@@ -149,19 +151,20 @@ class CrudColumnFunctions {
             //lodashCloneDeep
             //setNull
         */
-        let meta_column = { 'crudType': 'insert', 'is_delete': false }
         let setCopy = this.cloneOnCopy
-        let frow_copy = function (params) {
-            let initRowData = params.data
+        let frow_copy = function (rowDataParams) {
+            let initRowData = rowDataParams.data
+            let meta_column = { 'crudType': 'insert', 'is_delete': false }
+            CreateMetaColumn(rowDataParams, meta_column)
+
             let keys = Object.keys(initRowData)
             let newRowData = {}
-            newRowData[meta_column_name] = meta_column
             for (let i =0; i< keys.length; i++) {
                 let field = keys[i]
                 if (field === meta_column_name) {continue}
                 if (setCopy.includes(field) ) {
                     //lodashCloneDeep
-                    let val = params.data[field]
+                    let val = initRowData[field]
                     if (type_check.IsObject(val) || type_check.IsArray(val) ) {
                         newRowData[field] = lodashCloneDeep(val)
                     } else if (type_check.IsUndefined(val)) {
@@ -170,8 +173,10 @@ class CrudColumnFunctions {
                     else { newRowData[field] = val }
                 } else { newRowData[field] = null }
             }
-            meta_column['backup'] = lodashCloneDeep(newRowData)
-            return newRow
+            let backup = lodashCloneDeep(newRowData)
+            newRowData[meta_column_name] = meta_column
+            meta_column['backup'] = backup
+            return newRowData
         }
         return frow_copy
     }
@@ -181,10 +186,14 @@ class CrudColumnFunctions {
             rowData is preporcessed from QueryParams/Pull. Adds metadata column and copies rowData
             to backup
         */
-        let fu = function (rowData) {
+        let fu = function (rowDataParams) {
+
+            let rowData = rowDataParams.data
             //row_data is whats stored in server object
             let rowBackup = lodashCloneDeep(rowData) //messes up column order probably?
-            let meta_column = { 'crudType': 'update', 'is_delete': false, 'backup': rowBackup }
+            let meta_column = { 'crudType': 'update', 'is_delete': false}
+            CreateMetaColumn(rowDataParams, meta_column)
+            meta_column['backup'] = rowBackup 
             rowData[meta_column_name] = meta_column
         }
         return fu
@@ -439,12 +448,19 @@ class CrudColumnFunctions {
 
 function CreateMetaColumn(rowDataParams, default_meta_params) {
     /* 
-    rowDataParams
-    meta_params {
+    This module combines meta information sent from grid during use with
+    default parameters. Allows for dynamic overwrites of meta_column
+
+    rowDataParams has the same structure as aggrid params object. but only
+    contains a row_index and data field. the metacolumn in data can be used
+    to overwrite default behavior. 
+    rowDataParams {
         row_index: integer
         data: {  meta_column{  }  }
-
-    // }
+        meta_column: {} //optional has higher priority then data.meta_column. used
+            //when something else should be used instead. mainly for copy row dont
+            //want to use the old meta column by default
+    }
     //insert
     { 'crudType': 'insert', 'is_delete': false }
 
@@ -458,9 +474,16 @@ function CreateMetaColumn(rowDataParams, default_meta_params) {
     return params.data.rowHeight;
     }
     */
+    let mx = {}
+    if (rowDataParams.hasOwnProperty('meta_column') ) { mx = rowDataParams['meta_column']} 
+    else { 
+        let data = rowDataParams['data']  || {}        
+        mx = data[meta_column_name] || {} 
+    }
+
     let defaultRowHeight = 25
-    let data = rowDataParams['data']  || {}
-    let mx   = data[meta_column_name] || {}  
+
+
 
     let dfx = default_meta_params
     dfx['row_index'] = rowDataParams['row_index'] || -1

@@ -168,7 +168,7 @@ async mounted () {
     this.tableData  = main_grid['tableData']
     // console.log(this.tableData)
     this.columnDefs = px['columnDefs']
-    // console.log(this.columnDefs)
+    console.log(this.columnDefs)
     // columnDefs: null,
 
 

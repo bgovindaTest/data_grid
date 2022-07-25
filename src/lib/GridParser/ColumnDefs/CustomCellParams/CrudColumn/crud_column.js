@@ -39,6 +39,9 @@ function CrudColumnInit(grid) {
         }
     }
     du_column['field'] = meta_column_name
+    // du_column['cellEditor'] = "crudSelectEditor"
+    du_column['cellRenderer'] = "crudSelectEditor"
+
 
     let defaultCellEditorParams = {
         "allowDelete": {'update': true,  'insert': false}, //shows delete for pulled data only (has precedence)
@@ -54,6 +57,7 @@ function CrudColumnInit(grid) {
     SetParameters('allowUndo', cellEditorParams, defaultCellEditorParams)
     SetParameters('allowCopy', cellEditorParams, defaultCellEditorParams)
 
+    // du_column['editable'] = true
     //always at beginning. maybe hidden though.
     if (! is_defined) {
         grid.unshift(du_column)

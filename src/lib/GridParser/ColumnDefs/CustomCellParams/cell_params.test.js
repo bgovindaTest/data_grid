@@ -159,7 +159,7 @@ test('autocomplete params with lookup', () => {
         pushKey: 'a',
         pullKey: 'id',
         displayKey: 'a',
-        columnDef: [ { field: 'id', width: 150 }, { field: 'a', width: 150 } ],
+        columnDefs: [ { field: 'id', width: 150 }, { field: 'a', width: 150 } ],
         values: [ { id: '1', a: 'a1' }, { id: '2', a: 'a2' } ],
         mapObject: { a1: { id: '1', a: 'a1' }, a2: { id: '2', a: 'a2' } }
     }

@@ -41,62 +41,31 @@ create crudColumn Functions
 
 */
 
-/*
-Array insert and array remove.
-Array.prototype.insert = function ( index, item ) {
-    this.splice( index, 0, item );
-};
 
-var arr = [ 'A', 'B', 'D', 'E' ];
-arr.insert(2, 'C');
-
-
-*/
 
 
 //imports
 
-const gridParser = require('../lib/GridParser')
+const ColumnDefsInit = require('../lib/GridParser')
+let testGrid         = require('./TestGrids/test_grid')
 
 var GridController = {
-
-    // Grid Function
-    // redraw_rows: refresh UI of grid
-    // remove_row_data: removes all rows from grid
-    // append_rows: adds new rows to grid
-    // new_sheet: creates an empty sheet.
-    // undo: runs UndoRow on all selected rows.
-    // UndoRow: Returns a given rows server fields to original values
-    // Delete: runs SetDelete on all selected rows
-    // SetDelete: sets __is_delete__ variable to (true/false) on a given row
-    // insert: main insert function
-    // InsertSelected: insert the number of rows highlighted
-    // CreateNewRow: creates a new row. 
-    // server_error_display:
-    
-    // Inputs:
-    // gridOptions: Required by ag-grid contains api often set to gridApi
-    // gridColumnApi: Required by ag-grid
-    // gridParams:
-    // rowData:
-
-
 
 //props provide flags on calling mechanism. i.e. subgrid or
 //main grid
 
 
-props: {
-    pageConfig: {
-        type: Object,
-        default: null
-    },
-    isSubModal: {
-        type: Boolean,
-        default: false
-    }
+// props: {
+//     pageConfig: {
+//         type: Object,
+//         default: null
+//     },
+//     isSubModal: {
+//         type: Boolean,
+//         default: false
+//     }
 
-},
+// },
 
 
 
@@ -146,6 +115,17 @@ data () {
         // gf['deleteWarning'] = grid['deleteWarning'] || ""
 
 
+        // data() {
+        //     return {
+        //       columnDefs: null,
+        //       rowData: null,
+        //       showModal:true,
+        //       modalx: {modal1: false},
+        //       api: null,
+        //       columnApi: null
+        //     };
+        //   },
+
 
         //modalParams
         saveModal: false,
@@ -154,13 +134,6 @@ data () {
 
     }
 },
-
-// 'qparams_prefix':"",
-// 'url_prefix':"",
-// '__url_params__': {},
-// '__valuesObject__': [{}] //array is grid position object key is field and value is values to be passed.
-// '__is_read_only__':  true/false (do the have modification permssions)
-//     //if no force editable to false
 
 async mounted () {
     /*
@@ -181,22 +154,39 @@ async mounted () {
 
     */
     //if submodal else.
+    // if (this.is_development) {
+
+    // }
+    let main_grid = testGrid['grids'][0]
+    let columnDefConfig = main_grid['columnDefs']
+    let valuesObject = {}
+    let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
+    let px  = cdi.RunGridColumnsInit() 
+
+    // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+
+    this.tableData  = main_grid['tableData']
+    // console.log(this.tableData)
+    this.columnDefs = px['columnDefs']
+    // console.log(this.columnDefs)
+    // columnDefs: null,
 
 
-    try {
-        let urlParams    = UrlParams()
-        let userPerms    = await this.UserPermissions(urlParams)
-        let pageConfig   = await this.PullPageConfiguration(urlParams)
-        if (this.is_read_only) {
+
+    // try {
+        // let urlParams    = UrlParams()
+        // let userPerms    = await this.UserPermissions(urlParams)
+        // let pageConfig   = await this.PullPageConfiguration(urlParams)
+        // if (this.is_read_only) {
             //if read only
             //create empty values object
             //set everything to editable: false
 
 
 
-        } else { 
-            let valuesObject = await PullValuesObject(pageConfig) 
-        }
+        // } else { 
+        //     let valuesObject = await PullValuesObject(pageConfig) 
+        // }
         //headerParams
 
         //gridParser
@@ -210,16 +200,16 @@ async mounted () {
 
 
 
-        this.page_status.initial_loading = false
+        // this.page_status.initial_loading = false
 
 
         //Pull Init data?
 
-    } catch (err) {
-        // console.log(err)
-        // throw err
-        this.page_status.initial_loading_error = String(err)
-    }
+    // } catch (err) {
+    //     // console.log(err)
+    //     // throw err
+    //     this.page_status.initial_loading_error = String(err)
+    // }
 },
 
 
@@ -446,6 +436,18 @@ methods: {
         //set delete column to false?
     },
 
+
+    /*
+    Array insert and array remove.
+    Array.prototype.insert = function ( index, item ) {
+        this.splice( index, 0, item );
+    };
+
+    var arr = [ 'A', 'B', 'D', 'E' ];
+    arr.insert(2, 'C');
+
+
+    */
 
 
 

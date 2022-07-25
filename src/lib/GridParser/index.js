@@ -43,7 +43,7 @@ Parses grids json object and converts expression syntax into javascript function
                 on_conflict: ''
         }
 
-        'columnDef':
+        'columnDefs':
         {
             //agrid info
             'headerName': xyz
@@ -166,7 +166,7 @@ class ColumnDefsInit {
         //adds metacolumn and creates auxilary functions
         tmp = new CrudMetaColumn()
         let gridFunctions = tmp.MetaColumnInit(grid)
-        return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+        return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
 
 
     }
@@ -200,7 +200,7 @@ class ColumnDefsInit {
         //adds metacolumn and creates auxilary functions
         tmp = new CrudMetaColumn()
         let gridFunctions = tmp.MetaColumnInit(grid)
-        return {'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+        return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
     }
 }
 

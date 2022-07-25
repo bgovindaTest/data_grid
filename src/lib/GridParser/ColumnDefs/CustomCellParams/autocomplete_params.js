@@ -12,7 +12,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     validator: if_not object
     cellEditorParams: {
         values: [{}] //always object
-        columnDef: [
+        columnDefs: [
             {header: "id" , field: "id", width: 50},
             {header: "name", field: "name", width: 50},
             {header: "username", header: "username", width: 75 },
@@ -76,12 +76,12 @@ class AutoCompleteParams {
         CellEditorParamsCheck(grid_column)
         let cep = grid_column['cellEditorParams']
 
-        if (! cep.hasOwnProperty('columnDef') ) { this.AutocompleteDefaultColumnDef() } 
-        else if ( type_check.IsArray(cep['columnDef'] ) ) {
-            if (cep['columnDef'].length === 0) {
+        if (! cep.hasOwnProperty('columnDefs') ) { this.AutocompleteDefaultColumnDef() } 
+        else if ( type_check.IsArray(cep['columnDefs'] ) ) {
+            if (cep['columnDefs'].length === 0) {
                 this.AutocompleteDefaultColumnDef()
             }
-        } else if ( type_check.IsNull(cep['columnDef'] ) ) {
+        } else if ( type_check.IsNull(cep['columnDefs'] ) ) {
             this.AutocompleteDefaultColumnDef()
         }
         else{ this.AutocompleteDefaultColumnDef() }
@@ -107,9 +107,9 @@ class AutoCompleteParams {
         let columnWidth = this.defaultColumnWidth
         //if different values
         if (displayKey !== pullKey) {
-            cep['columnDef'] = [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
+            cep['columnDefs'] = [{'field':pullKey, "width": columnWidth}, {'field': displayKey, "width": columnWidth}]
         } else {
-            cep['columnDef'] = [{'field': displayKey, "width": columnWidth}]
+            cep['columnDefs'] = [{'field': displayKey, "width": columnWidth}]
         }
         //add pushKey?
     }

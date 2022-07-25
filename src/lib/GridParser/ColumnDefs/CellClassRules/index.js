@@ -13,14 +13,18 @@ need to add pass is null or true
 
 const type_check = require('../../../TypeCheck')
 
+
+
+
 function CellClassRulesInit( grid_column) {
     /*
         Assembles cellClassRules based on if is_editable is a function or boolean and
         if validatorFunction is defined
     */
+
     let is_editable = grid_column['editable']
     let validator_function = grid_column['validator'] || null
-    if (grid_column.hasOwnProperty('cellClassRules')) { return }
+    // if (grid_column.hasOwnProperty('cellClassRules')) { return }
 
     cellClassRules = {}
     if (type_check.IsNull(validator_function) || type_check.IsUndefined(validator_function) ) {
@@ -31,10 +35,10 @@ function CellClassRulesInit( grid_column) {
         }
         else if (type_check.IsBoolean(is_editable)) {
             if (is_editable) {
-                cellClassRules['editable_pass_style'] = params => true
+                cellClassRules['editable_pass_style'] = function (params) {return true }
             }
             else { 
-                cellClassRules['non_editable_pass_style'] = params => true 
+                cellClassRules['non_editable_pass_style'] = function (params) {return true }
             }
         }
     } 
@@ -47,12 +51,62 @@ function CellClassRulesInit( grid_column) {
         cellClassRules['non_editable_pass_style']   = NonEditablePassStyle(is_editable, validator_function)
         cellClassRules['non_editable_error_style']  = NonEditableErrorStyle(is_editable, validator_function)
     }
-    grid_column['cellClassRules'] = cellClassRules
+
+    let cellStyles = {
+        "editable_pass_style": {
+            "borderColor": '',
+            "borderWidth": 'thin',
+            "backgroundColor": ""
+        },
+    
+        "editable_error_style":  {
+            "borderColor": 'red',
+            "borderWidth": 'thin', 
+            "backgroundColor": ""
+        },
+    
+        "non_editable_pass_style": {
+            "borderColor": '',
+            "borderWidth": 'thin', 
+            "backgroundColor": "rgba(189, 195, 199, 0.3)"
+        },
+    
+        "non_editable_error_style": {
+            "borderColor": 'red',
+            "borderWidth": 'thin', 
+            "backgroundColor": "rgba(189, 195, 199, 0.3)"
+        }
+    
+    }
+
+    //quick hack to use cellStyle instead of cellClassRules. Rules was not working
+    let cellStyleKeys = Object.keys(cellClassRules)
+    const fs = function CellStyle( params ) {
+        for (let i =0; i<cellStyleKeys.length; i++ ) {
+            let cs = cellStyleKeys[i]
+            let fn =cellClassRules[cs]
+            // console.log(cellClassRules)
+            // console.log(fn)
+            if (fn(params)) {
+                return cellStyles[cs]
+            }
+        }
+        return null
+    }
+
+    grid_column['cellStyle'] = fs
+    //return cellStyle
+    // grid_column['cellClassRules'] = cellClassRules
 }
+
+
+
+
 
 function EditablePassStyle(is_editable, vf) {
     if (type_check.IsFunction(is_editable) ) {
-        return function (params) { return is_editable(params) && ValidatorPass(vf(params) ) }
+        return function (params) { 
+            return is_editable(params) && ValidatorPass(vf(params) ) }
     }
     else {
         return function (params) { return is_editable && ValidatorPass(vf(params) ) }

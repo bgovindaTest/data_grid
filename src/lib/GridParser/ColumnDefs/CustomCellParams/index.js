@@ -13,6 +13,8 @@ let cellEditors = {
     'defaultEditor': 'agTextCellEditor'
 }
 
+customFunctions are added to cell Editor params
+
 */
 
 //import crud column

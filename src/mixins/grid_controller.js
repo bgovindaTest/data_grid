@@ -41,8 +41,22 @@ create crudColumn Functions
 
 */
 
+/*
+Array insert and array remove.
+Array.prototype.insert = function ( index, item ) {
+    this.splice( index, 0, item );
+};
+
+var arr = [ 'A', 'B', 'D', 'E' ];
+arr.insert(2, 'C');
 
 
+*/
+
+
+//imports
+
+const gridParser = require('../lib/GridParser')
 
 var GridController = {
 
@@ -70,6 +84,8 @@ var GridController = {
 
 //props provide flags on calling mechanism. i.e. subgrid or
 //main grid
+
+
 props: {
     pageConfig: {
         type: Object,
@@ -168,24 +184,37 @@ async mounted () {
 
 
     try {
+        let urlParams    = UrlParams()
+        let userPerms    = await this.UserPermissions(urlParams)
+        let pageConfig   = await this.PullPageConfiguration(urlParams)
+        if (this.is_read_only) {
+            //if read only
+            //create empty values object
+            //set everything to editable: false
 
 
 
-        await this.UserPermissionsInitialize()
-        this.gridParams['user_permissions'] = this.user_permissions
-        //need to add user_permissions
-        this.columnDefs = await grid_init.InitializeAggrid(this.gridParams, this.grid_column_rules, this.autocomplete_map, this.$axios)
-        // console.log(this.columnDefs)
-        field_functions.InitalizeRowCreation(this.gridParams,this.new_input_params, this.query_routes )
-        this.QueryParamsInitialize()
-        this.AddLocalData()
+        } else { 
+            let valuesObject = await PullValuesObject(pageConfig) 
+        }
+        //headerParams
+
+        //gridParser
+        //gridFunctions
+
+
+        //ValueObject
+
+        //If readonly
+
+
+
+
         this.page_status.initial_loading = false
 
-        //CreateFunctionsParam Object
-        //addParamsObject to cellEditorParams
 
+        //Pull Init data?
 
-        // console.log(this.autocomplete_map)
     } catch (err) {
         // console.log(err)
         // throw err
@@ -197,11 +226,34 @@ async mounted () {
 
 
 methods: {
+    /*
+        Initialization functions
+
+    */
+    UrlParams() {
+        // https://flaviocopes.com/urlsearchparams/
+        let url = window.location.href
+        let urlx = new URL(url)
+        let path = urlx.pathname
+        let tmp  = path.split('/')
+        let projectFolder = "" //tmp[0]
+        let tableName     = "" //tmp[1]
+        if (tmp.length >= 2) {
+            projectFolder = tmp[0]
+            tableName = tmp[1]
+        } else if (tmp.length === 1) { tableName = tmp[0] }
+        return {'projectFoldect': projectFolder, 'tableName': tableName}
+    },
+
+    //is root
+
+
     onGridReady(params) {
         this.gridApi     = params.api
         this.columnApi   = params.columnApi
         this.gridOptions = params
         //add active state updates
+        // getRowHeight: params => params.node.group ? 50 : 20,
     },
 
     ParsePageConfig() {
@@ -209,6 +261,17 @@ methods: {
 
 
     },
+
+    GetRowHeight(params) {
+        /* <ag-grid-vue
+            :getRowHeight="getRowHeight"
+            other grid options ... 
+        </ag-grid-vue> */
+
+
+        // params.node.group ? 50 : 20,
+    },
+
 
     ResetIndex() {this.row_index = 0    },
     AddIndex()   {this.row_index += 0   },
@@ -225,9 +288,7 @@ methods: {
 
     */
 
-    UrlParams() {},
 
-    //is root
 
     async GetGridConfigurations() {},
 
@@ -251,8 +312,6 @@ methods: {
         this.tableData.length = 0
     },
 
-
-
     ResetAllRowData() {
         //returns rowData to backup value. stored in metadata column
         for (let i=0; i< this.tableData.length; i++) {
@@ -268,11 +327,8 @@ methods: {
         or just one json row.
         */
         if( Array.isArray(rows) ){
-            for (let i = 0; i < rows.length; i++) {
-                this.tableData.push(rows[i])
-            }
-        }
-        else { this.tableData.push(rows) }
+            for (let i = 0; i < rows.length; i++) { this.tableData.push(rows[i]) }
+        } else { this.tableData.push(rows) }
     },
     AppendRowsTop(rows ) {
         /*
@@ -474,30 +530,6 @@ methods: {
         //rowData.splice(targetIndex, 0, newRow);
     },
 
-    QueryRouteRowInputsInitialize(query_row_inputs) {
-        /*
-        This function finish initializing the default parameters in query_row_inputs. This object is used to add default parameters 
-        to each row for data pulled from the server. A common change is to set what route the row will goto on save. The default route is update.
-        */
-        var default_params = field_functions.DefaultUpdateRouteParameters()
-        for (let key in default_params) {
-            if (query_row_inputs.hasOwnProperty(key)) {continue}
-            query_row_input[key] = default_params[key]
-        }
-    },
-
-    ServerErrorDisplay(gridOptions,is_error) {
-        /*
-        //used to hid show error
-        //This function hides columns based on which tab is selected.
-        //lastUpdatedBy shown on View and Edit Tab
-        //status is only show for edit tab 
-        */
-
-        var gridColumnApi = gridOptions.columnApi
-        gridColumnApi.setColumnVisible(field_functions.server_error(), is_error)
-    },
-
     /*
         Loading modules
         save_route format json object
@@ -525,23 +557,14 @@ methods: {
 
 
     //CRUD Operations
-    async RunQuery(route_name, query_routes, where, order_by, pagination, get_route_params,field_variables, axios_object,is_next_page) {
+    async RunPullQuery() {
         /*
         This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
         Query Types modal window. The where, order_by and pagination modules are pulled from the objects to create the query params object
         to send to the server. field_variables contains parameters needed to process the data pulled for the server to be added to the
         client grid. 
     
-        query_routes: { //need to have save route inorder to define how default values will be added
-                'current_cfte(i)': {'route':'/route/path/insert', 'input_params': {'__save_route__': 'insert'} , 'description': 'New cfte. on save will try to create a new row'},
-                'current_cfte(u)': {'route':'/route/path/update', 'input_params': {'__save_route__': 'update'} , 'description': 'current cfte. on save will try to update current row'},
-                'new_providers': {'route':'/route/path/update', 'input_params': {'__save_route__': 'insert'} , 'description': 'Assigned providers without a cfte'},
-                'default': {'route':'/route/path/update', 'input_params': {'__save_route__': 'update'} , 'description': 'Assigned providers without a cfte'},
-                // 'save': //
-        }
     
-        [{'variable_name': , 'query_type': , 'value':  , 'data_type': ''}]
-        New Sheet should also initialzie get_route_params. Need to reset grid_rout_params
     
         Errors handled in navbar component.
     
@@ -551,130 +574,23 @@ methods: {
         //query_loading modal launch
         //other buttons dont run during loading?
 
-        var query_object = query_routes[route_name]
-        if (!is_next_page) {
-            //initialize get_route_params
-            var queryParams = { 'where': where, 'order_by': order_by, 'pagination': pagination}
-            var grid_query_params = qparams.CreateGetRouteParams(queryParams) 
-            
-            get_route_params['current_get_route'] = query_object['route']
-            get_route_params['input_params'] = query_object['input_params']
-            get_route_params['where']      = grid_query_params['where']
-            get_route_params['order_by']   = grid_query_params['order_by']
-            get_route_params['pagination'] = grid_query_params['pagination']
-            get_route_params['route_name'] = route_name
-        }
-    
-    
-        var server_params = {
-            'where': get_route_params['where'],
-            'order_by': get_route_params['order_by'],
-            'pagination': get_route_params['pagination']
-            // 'user_id': 1
-        }
-        var server_route = query_object['route']
+
     
         var dx = await axios_object.post(server_route,server_params)
-        var output = dx.data
-        var processedOutput =  ProcessServerDataForAggrid(output['rows'], get_route_params['input_params'], field_variables)
-        //if error throw?
-    
-        //remove tableData
 
-
-        //add processedOutput
-
-
-        return processedOutput
-        //if no errors? else //Add error to loadModule?
-    
-        // clearRowData
-        // appendData
-    },
-    
-    ProcessServerDataForAggrid(serverRowData, input_params, field_variables) {
+        //push to table?
         /*
-        Loops through all the data pulled from the server and appends default parameters needed to populate the
-        grid with the correct functionaliaty
-    
+            Loops through all the data pulled from the server and appends default parameters needed to populate the
+            grid with the correct functionaliaty
         */
         var processedRowData = []
         for (let i =0; i < serverRowData.length; i++ ) {
             let rowx = ServerRowDefaultValues(serverRowData[i], input_params, field_variables)
             processedRowData.push(rowx)
         }
-        return processedRowData
-    },
+        //api.setRowData(processedRowData)
 
-    ServerRowDefaultValues(serverRow, input_params, field_variables) {
-        /*
-        This function converts data pulled from the server into the required form for the client side.
-        Need a timestamp component parser for updated_at.
-        */
-        //set default values
-        var rowx = {}
-        for (const key in input_params) {
-            rowx[key] = input_params[key] 
-        }
-    
-        var field_list = field_variables['fields']
-        var field_map  = field_variables['field_map']
-        // console.log(field_list)
-        let server_columns_not_null = 0
-        let total_server_columns = 0
-        // console.log('wtf')
-        // console.log(serverRow)
-        for (let i=0; i< field_list.length; i++) {
-            let field_name = field_list[i]
-            if (serverRow.hasOwnProperty(field_name)) {
-                // console.log('inside loop')
-                let data_type = field_map[field_name]['data_type']
-                var server_value = serverRow[field_name]
-                if (data_type === 'date') {
-                    server_value = ConvertServerDateToClientValue(server_value)
-                }
-                else if (data_type === 'autocomplete') {
-                    if (typeof server_value === "boolean") {
-                        server_value = String(server_value)
-                    }
-                } else if (data_type === 'boolean') {
-                    server_value = String(server_value)
-                }
-    
-                //if boolean convert to string
-                total_server_columns += 1
-                if (server_value === null ) {server_columns_not_null += 1}
-                rowx[field_name] = server_value
-                rowx[field_functions.BackupFieldName(field_name)] = server_value
-            }
-        }
-        if (serverRow.hasOwnProperty('allow_update')) {
-            rowx[field_functions.allow_update()] = serverRow['allow_update']
-        }
-        if (serverRow.hasOwnProperty('allow_delete')) {
-            rowx[field_functions.allow_delete()] = serverRow['allow_delete']
-        }
-        if (serverRow.hasOwnProperty('is_assigned')) {
-            rowx[field_functions.is_assigned()] = serverRow['is_assigned']
-        }
-    
-        if (server_columns_not_null > 0 && server_columns_not_null === total_server_columns) {
-            rowx[field_functions.is_empty()      ] = false
-            rowx[field_functions.is_complete()   ] = true
-            rowx[field_functions.is_incomplete() ] = false
-        } else if (server_columns_not_null === 0 ) {
-            rowx[field_functions.is_empty()      ] = true
-            rowx[field_functions.is_complete()   ] = false
-            rowx[field_functions.is_incomplete() ] = false
-        } else {
-            rowx[field_functions.is_empty()      ] = false
-            rowx[field_functions.is_complete()   ] = false
-            rowx[field_functions.is_incomplete() ] = true
-        }
-        return rowx
-    
     },
-    
     
     async SaveData( saveRows, save_route, server_fields, field_map, autocomplete_map, axios_object, saveModalParams  ) {
         /*
@@ -696,6 +612,20 @@ methods: {
         //has row_error = ?
         var count = 0
         // var row_error_map = {}
+
+
+        for (let i=0; i< tableData.length; i++) {
+            //allow ui to refresh for batch value changes
+            batch_count += 1
+            if (batch_count > 1000) {
+                batch_count = 0
+                await new Promise(r => setTimeout(r, 20))
+            }
+        }
+
+
+
+
         for(let i =0; i <saveRows.length; i++ ) {
             let rowx = saveRows[i]
     
@@ -739,56 +669,17 @@ methods: {
             await SendSaveDataAndProcessError ( save_route, req_body, row_map, saveModalParams, axios_object )
             // UpdateModalRowErrorInformation(saveModalParams, row_error_map)
         }
-        //if error AddServerErrorMessagesToRow field_functions.server_error()
-        // AddServerErrorMessagesToRow(saveRows, row_error_map)
     },
-    ExtractSaveParams(grid) {
+
+    async TimeOut(index, batch_count) {
         /*
+        Number of iterations before setting await. Allows UI to refresh. 
+        index comes from a for loop index.
 
-            allowNull: true/false
-            isRequired: true/false
-            ignoreError: true/false (for calculated fields?) allow to pass or skip?
         */
-
-        //isCrud or has validator
-        let fields = []
-        let fwarn = {} //need to get validation functions.
-        let ferrs = {}
-        let allowNull = {}
-        let isRequired = {}
-        let ignoreError = {}
-        for(let i=0; i < grid.length; i++) {
-            let isCrud     = false
-            let hasValid   = false
-            let grid_column = grid[i]
-            let field = grid_column['field']
-            let is_error = false
-            let is_required = false
-
-            if (grid_column.hasOwnProperty('isCrud')) { isCrud = grid_column['isCrud'] }
-            if (grid_column.hasOwnProperty('validator')) { hasValid = true }
-            if (!isCrud || !hasValid) { continue }
-            fields.push(field)
-            if (grid_column.hasOwnProperty('isRequired'))  { isRequired[field]  = grid_column['isRequired'] }
-            if (grid_column.hasOwnProperty('ignoreError')) { 
-                ignoreError[field] = grid_column['ignoreError']
-                is_error = ignoreError[field]
-            }
-            if (grid_column.hasOwnProperty('allowNull'))   { 
-                allowNull[field]   = grid_column['allowNull'] 
-                is_required 
-            }
-            if (grid_column.hasOwnProperty('validator'))   { 
-                
-                //error or warning
-
-                allowNull   = grid_column['allowNull'] 
-            
-            }
-
-            // if (grid_column.hasOwnProperty('validator')) {}
+        if (index % batch_count === 0) {
+            await new Promise(r => setTimeout(r, 20))
         }
-
     },
 
 
@@ -799,181 +690,9 @@ methods: {
     ContinueSave() {
         //continues save 
     },
-    UpdateSaveInfo() {
-        saveModalParams['insert_count'] += req_body['insert'].length
-        saveModalParams['update_count'] += req_body['update'].length
-        saveModalParams['delete_count'] += req_body['delete'].length
-        saveModalParams['upsert_count'] += req_body['upsert'].length
-        saveModalParams['row_start'] += saveModalParams['row_end']
-        saveModalParams['error_count'] += number_errors
-        saveModalParams['row_end']   += save_count
-    },
-    
-    async SendSaveDataAndProcessError ( save_route, req_body, row_map, saveModalParams, axios_object  ) {
-        /*
-            This is the main save function it sends the data in req_body to the server. Any rows that are rejected
-            an error message is added the the saveRow through the row_map object. Also a count of rejected rows
-            is passed to the saveModalParams.
-        */
-        // console.log(req_body)
-        var dx = await axios_object.post(save_route, req_body)
-        let dx_data = dx.data
-        // console.log(dx_data)
-        AppendErrorsToRowData(row_map, saveModalParams, dx_data['output'])
-        if (dx_data['error']['is_error']) {
-            throw new Error(dx['error']['error_msg'])
-        }
-    
-    },
-    ProcessData(rowx,row_map, node_id, server_fields, field_map, autocomplete_map, save_route) {
-        /*
-            ProcessData to be sent to the server.
-            need to add node_id for filtering purposes?
-    
-            //loop through server fields only?
-            field_map = gridParams[field_variables][field_map]
-            //determine what route to append to based on the row data route. i.e.
-            row_data[__is_deleted__] if no id ignore
-            if __save_route__ == 'insert'
-            for (let i = 0: i< row_data.length; i++ ) {
-                var key
-                if (!field_map.hasOwnProperty())
-    {'field': "", 'backup_field': "", 'validation_field': "", 'data_type': "", 'is_server_field': false, 'has_validation': false }
-            }
-            //need to check length of object before appending?
-        */
-        var rowy = {}
-        for (let i=0; i < server_fields.length; i++) {
-            let field_name = server_fields[i]
-            let lookup = field_map[field_name]
-            let backup_field_name = lookup['backup_field']
-            let data_type = lookup['data_type']
-            let current_value = rowx[field_name]
-            let backup_value = rowx[backup_field_name]
-            //add node_id
-            rowx['node_id'] = node_id
-            rowy['node_id'] = node_id
-            row_map[node_id] = rowx
-            //
-            if (save_route === 'update') { if (backup_value === current_value) {continue} }
-            if (data_type === 'date') {
-                current_value = ConvertDateValue(current_value)
-                if (current_value === null ) {continue}
-            }
-            if (data_type === 'autocomplete') {
-                let autocomplete_lookup = autocomplete_map[field_name]
-                let crud_column_name = autocomplete_lookup['crud_value']
-                let mfx = autocomplete_lookup['mapFunction']
-                if (!mfx.hasOwnProperty(current_value)) {continue}
-                current_value = mfx[current_value][crud_column_name]
-                let return_field = autocomplete_lookup['return_field']
-                if (return_field !== "") {field_name = return_field}
-                //if autcomplete_lookup has return_field  then replace field with return field?
-                //used when the name of the data being pulled is different than the save route?
-            }
-            rowy[field_name] = current_value
-        }
-    
-        if (save_route === 'update' || save_route === 'delete') {
-            //check type?
-            rowy['id'] = rowx['id']
-        }
-        // rowy['last_modified_by_user_id'] = 1
-    
-        return rowy
-    },
-
-    async ExtractRowsForSave(rowData) {
-        /*
-        This extracts all completed rows that should be sent to the server for saving.
-        */
-        //need to update conditional. I dont think its right
-        let saveRows = []
-        for (let i=0; i<rowData.length; i++) {
-            if ( IsSaveRow(rowData[i])
-            
-            ) { saveRows.push(rowData[i]) }
-        }
-        return saveRows
-    },
-
-    async IsSaveRow(grid_functions) {
-        /*
-        Filter passes if the row should be included for saving.
-    
-        If new row skip if deleted. if new row and is changed is complete and no error should pass
-    
-        if old row i.e. for update. Can change if 
-
-        loop through everything and return crud params by type
-
-        batch and debounce?
-        */
-        // {'finsert': finsert, 'fupdate': fupdate, 'fundo': fundo,
-        // 'fdel': fdel, 'ferror': ferror, 'fcomp': fcomp, 'fchange': fchange }
-        let IsChanged   = grid_functions['fchange']
-        let IsCompleted = grid_functions['fcomp']
-        let IsError     = grid_functions['ferror']
-        let IsWarning   = grid_functions['fwarn']
-
-
-        let incomplete = 0
-        let errors     = 0
-        let warnings   = 0
-        let saves      = 0
-        let save_object = {'insert': [], 'update': [], 'delete': [], 'error_count': errors,
-            'incomplete_count': incomplete, 'warning_count': warnings, 'save_count': saves }
-
-        let tableData = []
-        batch_count = 0
-        for (let i=0; i< tableData.length; i++) {
-            //allow ui to refresh for batch value changes
-            batch_count += 1
-            if (batch_count > 1000) {
-                batch_count = 0
-                await new Promise(r => setTimeout(r, 20))
-            }
-
-            let rowData = tableData[i]
-            if (! IsChanged(rowData) ) { continue }
-            if ( this.IsDeleted(rowData) ) {
-                save_object['delete'].push(rowData)
-                continue
-            }
-
-            if (! IsCompleted(rowData)) {
-                incomplete += 1
-                continue
-            }
-            let is_error = IsError(rowData)
-            if (is_error === false || is_error === null ) {
-                let row_type = rowData[meta_column_name]['row_type']
-                save_object[row_type].push(rowData)
-                if (is_error === null) {errors +=1} 
-            } else {errors += 1}
-        }
-    },
-
-    /*
-    CreateGetRouteParams takes the objects generated by the modal windows, parses them and preprocess the data type. If all values
-    are valid its included in the final object. Else its excluded from the final object sent to the server.
-    */
-    CreateGetRouteParams(queryParams) {
-        /*
-        Pulls data rules and intializes paramters. queryParams is an object that contains the current values
-        from all the modal windows.
-        req_body from client has the following structure
-        req.body['where'] = [{}]
-        req.body['order_by'] = [{}]
-        req.body['pagination'] = {}
-        */
-
-        //from QueryParser and current queryParams
-        var req_body = {'where': [], 'order_by': [], 'pagination': {} }
-        return req_body
-    },
-
-
+    EndSave() {
+        //reset save object
+    }
 
 }
 

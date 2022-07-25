@@ -24,33 +24,26 @@ function CellClassRulesInit( grid_column) {
 
     let is_editable = grid_column['editable']
     let validator_function = grid_column['validator'] || null
+    if (type_check.IsNull(validator_function) || type_check.IsUndefined(validator_function) ) {
+        validator_function = function (params) {return true}
+    }
+    let IsEditableFunction = null
+    if (type_check.IsBoolean(is_editable) ) {
+        IsEditableFunction = function (params) {return is_editable}
+    } else {
+        //function
+        IsEditableFunction = is_editable
+    }
+
+
+
     // if (grid_column.hasOwnProperty('cellClassRules')) { return }
 
-    cellClassRules = {}
-    if (type_check.IsNull(validator_function) || type_check.IsUndefined(validator_function) ) {
-        //no validation function
-        if (type_check.IsFunction(is_editable)) { 
-            cellClassRules['editable_pass_style'] = params => is_editable(params)
-            cellClassRules['non_editable_pass_style'] = params => !is_editable(params) 
-        }
-        else if (type_check.IsBoolean(is_editable)) {
-            if (is_editable) {
-                cellClassRules['editable_pass_style'] = function (params) {return true }
-            }
-            else { 
-                cellClassRules['non_editable_pass_style'] = function (params) {return true }
-            }
-        }
-    } 
-    
-    
-    else {
-
-        cellClassRules['editable_pass_style']       = EditablePassStyle(is_editable, validator_function)
-        cellClassRules['editable_error_style']      = EditableErrorStyle(is_editable, validator_function)
-        cellClassRules['non_editable_pass_style']   = NonEditablePassStyle(is_editable, validator_function)
-        cellClassRules['non_editable_error_style']  = NonEditableErrorStyle(is_editable, validator_function)
-    }
+    let cellClassRules = {}
+    cellClassRules['editable_pass_style']       = EditablePassStyle(IsEditableFunction, validator_function)
+    cellClassRules['editable_error_style']      = EditableErrorStyle(IsEditableFunction, validator_function)
+    cellClassRules['non_editable_pass_style']   = NonEditablePassStyle(IsEditableFunction, validator_function)
+    cellClassRules['non_editable_error_style']  = NonEditableErrorStyle(IsEditableFunction, validator_function)
 
     let cellStyles = {
         "editable_pass_style": {
@@ -84,7 +77,7 @@ function CellClassRulesInit( grid_column) {
     const fs = function CellStyle( params ) {
         for (let i =0; i<cellStyleKeys.length; i++ ) {
             let cs = cellStyleKeys[i]
-            let fn =cellClassRules[cs]
+            let fn = cellClassRules[cs]
             // console.log(cellClassRules)
             // console.log(fn)
             if (fn(params)) {

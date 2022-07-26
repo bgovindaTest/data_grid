@@ -78,7 +78,6 @@ data () {
         is_development: true, //used file paths to laod data.
         is_read_only: false,
 
-        row_index: 0,
 
         url_params: {},
         global_params: {},
@@ -172,10 +171,7 @@ async mounted () {
     for (let i=0; i < this.tableData.length; i++) {
         let rdp = {}
         rdp['data']      = this.tableData[i]
-        rdp['row_index'] = this.GetIndex()
-        console.log(rdp)
         updx(rdp)
-        this.AddIndex()
     }
 
 
@@ -242,18 +238,6 @@ methods: {
         const GetIndex = this.GetIndex
         const AddRowToTable = this.AddRowToTable
         const MetaFunctions = gridFunctions
-        const copyFunction  = gridFunctions['CopyRow']
-
-        const CopyAddRow = function (rowDataParamsx) {
-            //gets new index. copies row. updates index
-            let rowDataParams = {}
-            rowDataParams['row_index'] = GetIndex()
-            rowDataParams['data'] = rowDataParamsx.data
-            let newRowData = copyFunction(rowDataParams)
-            AddRowToTable(newRowData)
-            AddIndex()
-        }
-        MetaFunctions['CopyAddRow'] = CopyAddRow
         let mc = null
         for (let i =0; i< columnDefs.length; i++) {
             let grid_column = columnDefs[i]
@@ -326,10 +310,6 @@ methods: {
         // params.node.group ? 50 : 20,
     },
 
-
-    ResetIndex() {this.row_index = 0    },
-    AddIndex()   {this.row_index += 0   },
-    GetIndex()   {return this.row_index },
 
     async AppendStaticDropDown() {
         //runs after gridParser. pull any static arrays?

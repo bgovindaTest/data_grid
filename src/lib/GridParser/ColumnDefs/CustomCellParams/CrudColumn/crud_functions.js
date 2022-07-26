@@ -78,7 +78,8 @@ class CrudColumnFunctions {
         gf['Delete']       = this.DeleteRow()
         gf['UndoDelete']   = this.DeleteUndoRow()
         gf['SetDelete']    = this.SetDelete()
-        //grid_changes before saving
+        //grid_changes before saving DeleteStatus
+        gf['DeleteStatus'] = this.DeleteStatus()
         gf['CrudStatus']   = this.CrudStatus()
 
         //delete_warning
@@ -229,6 +230,14 @@ class CrudColumnFunctions {
             rowData[meta_column_name]['is_delete'] = change_delete }
         return SetDeleteRow
 
+    }
+    DeleteStatus() {
+        //sets delete to true
+        let DeleteStatus = function (rowDataParams) {
+            let rowData = rowDataParams.data 
+            return rowData[meta_column_name]['is_delete'] 
+        }
+        return DeleteStatus
     }
 
 
@@ -506,7 +515,7 @@ function CreateMetaColumn(rowDataParams, default_meta_params) {
 
 
     let dfx = default_meta_params
-    dfx['row_index'] = rowDataParams['row_index']
+    // dfx['row_index'] = rowDataParams['row_index']
     // if (dfx['row_index'] === -1) {console.error('row_index is -1. Unitialized index')}
     let valid_crudTypes = ['insert', 'update']
 

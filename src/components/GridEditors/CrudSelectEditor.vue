@@ -48,9 +48,16 @@ may require emitter for
 <script>
 
 export default {
- 
-   data() {
-       return {
+    /*
+
+
+
+
+    */
+
+
+    data() {
+        return {
             is_deleted: false,
             can_delete: true,
             can_undo: true,
@@ -61,7 +68,7 @@ export default {
             crudType: null,
             api: null,
 
-       }
+        }
     },
     mounted () {
         let colDef = this.params.colDef
@@ -71,31 +78,36 @@ export default {
         // console.log(gf)
         this.api = this.params.api
         this.rowDataParams['data'] = this.params.data
+        let rowData = this.params.data
+        let rdp = this.rowDataParams
+
+        this.is_deleted = gf['DeleteStatus'](rdp)
+        console.log(this.params)
         // this.gridFunctions = 
             // console.log(this.params.data)
     },
 
     methods: {
-       /* Component Editor Lifecycle methods */
-       // the final value to send to the grid, on completion of editing
+        /* Component Editor Lifecycle methods */
+        // the final value to send to the grid, on completion of editing
         Delete() {
             let rdp = this.rowDataParams
             let fn  = this.gridFunctions['SetDelete'] 
             fn(rdp)
-            console.log(rdp)
+            let fns  = this.gridFunctions['DeleteStatus'] 
+            this.is_deleted = fns(rdp)
+            this.api.refreshCells()
         },
         Remove() {
-            //console.log('hi')
-            // let rdp = this.rowDataParams
-            // let fn  = this.gridFunctions['SetDelete'] 
-            // fn(rdp)
+            let rowData = this.params.data
+            this.api.applyTransaction({'remove': [rowData] })
         },
         Add() {
+            let row_index = this.params.node.rowIndex
             let rdp = this.rowDataParams
-            let fn  = this.gridFunctions['CopyAddRow'] 
-            fn(rdp)
-            console.log(rdp)
-
+            let fn  = this.gridFunctions['CopyRow']
+            let newRowData = fn(rdp)
+            this.api.applyTransaction({'add':[newRowData], 'addIndex': row_index})
         },
         Undo() {
             let rdp = this.rowDataParams

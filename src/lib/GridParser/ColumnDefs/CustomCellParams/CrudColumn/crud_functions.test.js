@@ -37,9 +37,9 @@ test('insert new row function', () => {
     let defaultValues = {'colA': {'value': 'a', 'dataType': '', 'key': '', ifNullSet: false, 'useKey': false }, 
         'colb': {'value': 'b', 'dataType': '', 'key': '', ifNullSet: false, 'useKey': false } }
     let f = x.InsertRowInit(defaultValues)
-    let rowDataParams = {'row_index': 1}
+    let rowDataParams = {}
     let rowData = f(rowDataParams)
-    let exp = {colA: 'a', colb: 'b', '_ag-meta_': { crudType: 'insert', is_delete: false, row_index: 1,
+    let exp = {colA: 'a', colb: 'b', '_ag-meta_': { crudType: 'insert', is_delete: false,
         row_height: 25,
         backup: { colA: 'a', colb: 'b' } }
     }
@@ -50,7 +50,7 @@ test('update row function', () => {
     let x = new cf()
     let rowData = {'a':1, 'b': 2}
     let f = x.UpdateRowInit()
-    let rowDataParams = {'row_index':2 , 'data': rowData }
+    let rowDataParams = {'data': rowData }
 
     f(rowDataParams)
     let exp = { a: 1, b: 2,
@@ -66,10 +66,10 @@ test('copy row function', () => {
     let rowData =  { a: 1, b: 2,
         '_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1, b: 2 } }
     }
-    let rowDataParams = {'row_index': 1, 'data': rowData, 'meta_column': {}}
+    let rowDataParams = { 'data': rowData, 'meta_column': {}}
     let f = x.CopyRowInit()
     let newRowData = f(rowDataParams)
-    let exp = {'a': null, 'b': 2, '_ag-meta_': { crudType: 'insert', is_delete: false, row_index: 1,
+    let exp = {'a': null, 'b': 2, '_ag-meta_': { crudType: 'insert', is_delete: false,
         row_height: 25,
         backup: { 'a': null, 'b': 2 } }
     }

@@ -211,7 +211,10 @@ class CrudColumnFunctions {
             for (let i = 0; i< field_names.length; i++ ) {
                 let field_name = field_names[i]
                 if (rowData.hasOwnProperty(field_name)) {
-                    rowData[field_name] = backups[field_name] || null 
+                    rowData[field_name] = backups[field_name]
+                    if (type_check.IsUndefined(rowData[field_name])) {
+                        rowData[field_name] = null
+                    }
                 }
             }
             rowData[meta_column_name]['is_delete'] = false
@@ -503,8 +506,8 @@ function CreateMetaColumn(rowDataParams, default_meta_params) {
 
 
     let dfx = default_meta_params
-    dfx['row_index'] = rowDataParams['row_index'] || -1
-    if (dfx['row_index'] === -1) {console.error('row_index is -1. Unitialized index')}
+    dfx['row_index'] = rowDataParams['row_index']
+    // if (dfx['row_index'] === -1) {console.error('row_index is -1. Unitialized index')}
     let valid_crudTypes = ['insert', 'update']
 
     dfx['row_height'] = mx['row_height'] || defaultRowHeight

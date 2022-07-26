@@ -166,9 +166,19 @@ async mounted () {
     let px  = cdi.RunGridColumnsInit()
     this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
 
+    const updx = px['gridFunctions']['Update']
     // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-
     this.tableData  = main_grid['tableData']
+    for (let i=0; i < this.tableData.length; i++) {
+        let rdp = {}
+        rdp['data']      = this.tableData[i]
+        rdp['row_index'] = this.GetIndex()
+        console.log(rdp)
+        updx(rdp)
+        this.AddIndex()
+    }
+
+
     // console.log(this.tableData)
     this.columnDefs = px['columnDefs']
     // console.log(this.columnDefs)
@@ -234,10 +244,11 @@ methods: {
         const MetaFunctions = gridFunctions
         const copyFunction  = gridFunctions['CopyRow']
 
-        const CopyAddRow = function (rowData) {
+        const CopyAddRow = function (rowDataParamsx) {
+            //gets new index. copies row. updates index
             let rowDataParams = {}
             rowDataParams['row_index'] = GetIndex()
-            rowDataParams['data'] = rowData
+            rowDataParams['data'] = rowDataParamsx.data
             let newRowData = copyFunction(rowDataParams)
             AddRowToTable(newRowData)
             AddIndex()

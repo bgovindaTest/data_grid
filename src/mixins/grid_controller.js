@@ -1,81 +1,38 @@
 /*
 This mix in is used in the Main.vue
-
 It mainly calls the initialization scripts in GridPraser
-
 Combines modules from GridFunctions and GridParser into main mixin
-
 The grid functions module has functions for user changes to the grid. 
-
-//has axios object in main plugin.
-//dev vs prod
 
 
 This module contains the code that is responsible for sending and receiving data to the server via
 crud operations. This module provides the functions to pull data and saving data to the server.
 
-
-
-
-
 Saving Data Returned From Server: Below is the structure of the return values. Its primarily meant to communciate what 
 data failed to be saved and why. if is_eror is true the error_msg should be attached to the corresponding row based
 on node_id. If there are error the grid will be set to display an error state where error messages are shown as the 
 last column. All other grid functions will be disabled.
-
-
-
-Common Inputs: 
-axios object:
-server params:
-server route:
-modalParams.loading
-modalParams.saving
-error state?
 */
 
-/*
-create subgrid functions
-
-create crudColumn Functions
-
-*/
-
-
-
-
-//imports
 
 const ColumnDefsInit = require('../lib/GridParser')
 const data_config    = require('../lib/DataConfig')
 const meta_column    = data_config.meta_column_name
-let testGrid         = require('./TestGrids/test_grid')
+let   testGrid       = require('./TestGrids/test_grid')
 
 var GridController = {
 
 //props provide flags on calling mechanism. i.e. subgrid or
 //main grid
-
-
-// props: {
-//     pageConfig: {
-//         type: Object,
-//         default: null
-//     },
-//     isSubModal: {
-//         type: Boolean,
-//         default: false
-//     }
-
-// },
-
-// 'valuesObject': [{}] //array is grid position object key is field and value is values to be passed.
-// 'is_read_only':  true/false (do the have modification permssions)
-//     //if no force editable to false
-
-// gridOptions: {
-//     suppressPropertyNamesCheck = true
-// }
+props: {
+    //has configuration object. 
+    subGridPageConfig: {
+        type: Object
+    },
+    mainGridRowData: {
+        type: Object
+    }
+},
 
 
 data () {
@@ -91,7 +48,7 @@ data () {
 
         //main_grid_params
         tableData: null,
-        headerParams: null,
+        navHeaderParams: null,
         columnDefs: null,
         gridApi: null,
         columnApi: null,
@@ -109,32 +66,6 @@ data () {
         //functions created by gridParser
         gridFunctions: null,
 
-
-        // gf['Insert']       = this.InsertRowInit(defaultValues) //for newly added rows via add row or new_sheet
-        // gf['CopyRow']      = this.CopyRowInit()
-        // gf['Update']       = this.UpdateRowInit() //for rows created from querying the database
-        // gf['Undo']         = this.UndoRow() //function to reset row based on backup values
-        // gf['Delete']       = this.DeleteRow()
-        // gf['UndoDelete']   = this.DeleteUndoRow()
-        // //grid_changes before saving
-        // gf['CrudStatus']   = this.CrudStatus()
-
-        // //delete_warning
-        // gf['deleteWarning'] = grid['deleteWarning'] || ""
-
-
-        // data() {
-        //     return {
-        //       columnDefs: null,
-        //       rowData: null,
-        //       showModal:true,
-        //       modalx: {modal1: false},
-        //       api: null,
-        //       columnApi: null
-        //     };
-        //   },
-
-
         //modalParams
         saveModal: false,
         filterModal: false,
@@ -143,121 +74,63 @@ data () {
     }
 },
 
-async mounted () {
-    /*
-    This object is ran to initialize all the required data from the server. When all initial loading is complete the 
-    main page with the nav bar, grid and footer will be displayed. The order of the initializations matter.
-
-    MainPage
-        1. GetRoute
-        2. Pull Configuration
-        3. Pull and create ValueObject
-        4. Parse Grid Configurations
-        5. TurnLoading off
-        6. Load Table Data
-    SubPage
-        1. Parse Sub Grid Configurations
-        2. Turn Loading off
-        3. LoadData
-
-    */
-    //if submodal else.
-    // if (this.is_development) {
-
-    // }
-    let main_grid = testGrid['grids'][0]
-    let columnDefConfig = main_grid['columnDefs']
-    let valuesObject = {}
-    let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
-    let px  = cdi.RunGridColumnsInit()
-    // this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
-
-    const updx = px['gridFunctions']['Update']
-    // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-    this.tableData  = main_grid['tableData']
-    for (let i=0; i < this.tableData.length; i++) {
-        let rdp = {}
-        rdp['data']      = this.tableData[i]
-        updx(rdp)
-    }
-
-    //initialize push and pull
-
-
-    // console.log(this.tableData)
-    this.columnDefs = px['columnDefs']
-    // console.log(this.columnDefs)
-    // columnDefs: null,
-
-
-
-    // try {
-        // let urlParams    = UrlParams()
-        // let userPerms    = await this.UserPermissions(urlParams)
-        // let pageConfig   = await this.PullPageConfiguration(urlParams)
-        // if (this.is_read_only) {
-            //if read only
-            //create empty values object
-            //set everything to editable: false
-
-
-
-        // } else { 
-        //     let valuesObject = await PullValuesObject(pageConfig) 
-        // }
-        //headerParams
-
-        //gridParser
-        //gridFunctions
-
-
-        //ValueObject
-
-        //If readonly
-
-
-
-
-        // this.page_status.initial_loading = false
-
-
-        //Pull Init data?
-
-    // } catch (err) {
-    //     // console.log(err)
-    //     // throw err
-    //     this.page_status.initial_loading_error = String(err)
-    // }
-},
-
-
-
-
 methods: {
     /*
         Initialization functions
-
     */
-    AddMetaColumnFunctions(gridFunctions, columnDefs) {
+    SubGridInit() {
+        //parses props initializes fields
+    },
+    NavHeaderParamsInit(navHeaderParams) {
         /*
-            This adds functions created in CrudColumn/crud_functions to crudColumn parameters.
-            Creates CopyAddRow which requires references to main grid
+            Initialization functions
+            navHeaderParams: {
+                name: 'x'
+                links: [{'name': xxx, 'url': xxx }],
+                help: "",
+                addRow:   false,
+                newSheet: false,
+                save: false,
+                showFilter: false,
+                showSort:   false,
+                showSearchBar: false //not implemented yet
+                showHome: true,
+                loadData: true
+            }
         */
-        const MetaFunctions = gridFunctions
-        let mc = null
-        for (let i =0; i< columnDefs.length; i++) {
-            let grid_column = columnDefs[i]
-            let field = grid_column['field']
-            if (field === meta_column) {
-                mc = grid_column
-                break
+        let navParams ={'name': "", 'help': "", addRow:   false,
+            newSheet: false, save: false, showFilter: false,
+            showSort:   false,  showHome: false,
+            showSearchBar: false, loadData: true //not implemented yet
+        }
+        let keys = Object.keys(navParams)
+        for(let i =0; i < keys.length; i+=1 ) {
+            let key = keys[i]
+            if (! navHeaderParams.hasOwnProperty(key)) {
+                navHeaderParams[key] = navParams[key]
             }
         }
-        if (mc===null) {return}
-        let cep = mc['cellEditorParams']
-        cep['gridFunctions'] = MetaFunctions
+        this.navHeaderParams = navHeaderParams
     },
+    RunColumnDefsInit() {
+        let main_grid = testGrid['grids'][0]
+        let columnDefConfig = main_grid['columnDefs']
+        let valuesObject = {}
+        let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
+        let px  = cdi.RunGridColumnsInit()
+        // this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
+  
+        const updx = px['gridFunctions']['Update']
+        // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+        this.tableData  = main_grid['tableData']
+        for (let i=0; i < this.tableData.length; i++) {
+            let rdp = {}
+            rdp['data']      = this.tableData[i]
+            updx(rdp)
+        }
+        this.columnDefs = px['columnDefs']
 
+    },
     UrlParams() {
         // https://flaviocopes.com/urlsearchparams/
         let url = window.location.href
@@ -275,20 +148,14 @@ methods: {
             tableName = tmp[0] 
             route = tableName
         }
+        //if tmp.length === 0  //is_root
         return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': route}
     },
-
-    //is root
-
-
     onGridReady(params) {
         this.gridApi     = params.api
         this.columnApi   = params.columnApi
         this.gridOptions = params
-        //add active state updates
-        // getRowHeight: params => params.node.group ? 50 : 20,
     },
-
     async PullAndParsePageConfig() {
         /*
             rowSelectStyle: xx
@@ -312,21 +179,12 @@ methods: {
         const rh = this.gridFunctions['RowHeight']
         return rh(params)
     },
-
-
     async AppendStaticDropDown() {
         //runs after gridParser. pull any static arrays?
     },
-
     /*
         //UI functions
-
-
-
     */
-
-
-
     async GetGridConfigurations() {},
 
     async GetValueObject() {},
@@ -340,15 +198,12 @@ methods: {
         if( row_index === null ){ this.api.applyTransaction({'add':rowDataArray}) } 
         else {  this.api.applyTransaction({'add':rowDataArray, 'addIndex': row_index}) }
     },
-
     AddRow() {
         //button push
         const insertf  = gridFunctions['Insert']
         let newRowData = insertf({})
         this.gridApi.applyTransaction({'add':[newRowData]})
     },
-
-
     NewSheet() {
         /* Creates blank sheet for adding data */
         let pageSize = this.pageParams['limit']
@@ -360,8 +215,6 @@ methods: {
         }
         this.gridApi.setRowData(rows)
     },
-
-
     GetRangeSelection() {
         let api = this.gridApi
         let rangeSelection = api.getCellRanges()
@@ -371,7 +224,6 @@ methods: {
         let endRow = Math.max(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
         return {'startRow': startRow, 'endRow': endRow}
     },
-
     UndoSelected() {
         /*
         undo loops through all rows that have been highlighted when undo function is selected
@@ -393,8 +245,6 @@ methods: {
             console.error("undo faild. lingering selection the likely cause after using view")
         }
     },
-
-
     SetDeleteSelected(bool_value) {
         //used to delete rows in add dat
         //check if allow delete.
@@ -421,8 +271,6 @@ methods: {
             console.log("delete failed. lingering selection the likely cause after using view")
         }
     },
-
-
     InsertSelected() {
         //used to delete rows in add dat
         //check if allow delete.
@@ -455,9 +303,6 @@ methods: {
             console.log("remove failed. lingering selection the likely cause after using view")
         }
     },
-
-
-
     //CRUD Operations
     async RunPullQuery() {
         /*
@@ -524,9 +369,7 @@ methods: {
 
         //else save rows
         //PushSaveData
-
     },
-
     async TimeOut(index, batch_count) {
         /*
         Number of iterations before setting await. Allows UI to refresh. 
@@ -537,7 +380,6 @@ methods: {
             await new Promise(r => setTimeout(r, 20))
         }
     },
-
     SaveStatusCount(rowStatus, save_count) {
         let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error']
         for (let i =0; i < save_params.length; i++ ) {
@@ -545,8 +387,6 @@ methods: {
             if (rowStatus[sp]) { save_count[sp] += 1 }
         }
     },
-
-
     FixData() {
         //clear save object.
         //close save modal

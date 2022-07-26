@@ -61,32 +61,6 @@ import grid_controller from "@/mixins/grid_controller"
 export default {
   name: "App",
   mixins: [grid_controller],
-  // data () {
-  //   return {
-  //     gridApi: null,
-  //     columnApi: null,
-  //     gridOptions: null,
-  //     columnDefs: [{
-  //           field: 'year',
-
-  //     // cellStyle: params => {
-  //     //     if ( params.value === 2008) {
-  //     //         //mark police cells as red
-  //     //         return {color: 'red', backgroundColor: 'green'};
-  //     //     }
-  //     //     return null;
-  //     // }
-
-  //     cellClass: function(params) { return '.rag-green'; }
-
-
-  //     }],
-  //     tableData: [{'year':2008}, {'year':2004}]
-  //   }
-  // },
-
-
-
   components: {
     "ag-grid-vue":AgGridVue,
     // "autoComplete": AutoComplete,
@@ -96,9 +70,38 @@ export default {
     // // "subGridSelector": SubGridSelector,
     // "grid-header": GridHeader,
     // "Modal": VueModal
+  },
+  async mounted () {
+      /*
+      This object is ran to initialize all the required data from the server. When all initial loading is complete the 
+      main page with the nav bar, grid and footer will be displayed. The order of the initializations matter.
+
+      MainPage
+          1. GetRoute
+          2. Pull Configuration
+          3. Pull and create ValueObject
+          4. Parse Grid Configurations
+          5. TurnLoading off
+          6. Load Table Data
+      SubPage
+          1. Parse Sub Grid Configurations
+          2. Turn Loading off
+          3. LoadData
+
+      */
+      //if submodal else.
+      // if (this.is_development) {
+
+      // }
+      this.RunColumnDefsInit()
   }
 
+
 };
+
+
+
+
 
 
 </script>

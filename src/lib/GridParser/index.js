@@ -11,8 +11,12 @@ Parses grids json object and converts expression syntax into javascript function
             name: 'x'
             links: [{'name': xxx, 'url': xxx }],
             help: "",
-            addRow:   false
-            newSheet: false
+            addRow:   false,
+            newSheet: false,
+            save: false,
+            showFilter: false,
+            showSort:   false,
+            showSearchBar: false //not implemented yet
         }
         'queryParams': //i.e. new row, update, delete, etc read/etc create default objects for query params? handled by query parser
         { 

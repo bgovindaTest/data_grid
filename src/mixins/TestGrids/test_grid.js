@@ -2,7 +2,7 @@ let test_grid = {
 "grids": [
     {
         "columnDefs": [
-            {"field": "a", "dataType": "numeric","requiredFields": ['a'] ,"validator":"ifnull(a,0)  > 0",  "editable": true, "defaultFilter": true, "showFilter": false, "showSort": true},
+            {"field": "a", "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['a'] ,"validator":"ifnull(a,0)  > 0",  "editable": true, "defaultFilter": true, "showFilter": false, "showSort": true},
             {"field": "b", "editable": true, "defaultValue": "a"},
             {"field": "c", "valueGetter": "ifnull(a,0) +1" , "validator": "ifnull(a,0) + 1 > 0"}
 

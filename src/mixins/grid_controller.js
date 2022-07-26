@@ -47,6 +47,8 @@ create crudColumn Functions
 //imports
 
 const ColumnDefsInit = require('../lib/GridParser')
+const data_config    = require('../lib/DataConfig')
+const meta_column    = data_config.meta_column_name
 let testGrid         = require('./TestGrids/test_grid')
 
 var GridController = {
@@ -161,14 +163,15 @@ async mounted () {
     let columnDefConfig = main_grid['columnDefs']
     let valuesObject = {}
     let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
-    let px  = cdi.RunGridColumnsInit() 
+    let px  = cdi.RunGridColumnsInit()
+    this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
 
     // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
 
     this.tableData  = main_grid['tableData']
     // console.log(this.tableData)
     this.columnDefs = px['columnDefs']
-    console.log(this.columnDefs)
+    // console.log(this.columnDefs)
     // columnDefs: null,
 
 
@@ -220,6 +223,56 @@ methods: {
         Initialization functions
 
     */
+    AddMetaColumnFunctions(gridFunctions, columnDefs) {
+        /*
+            This adds functions created in CrudColumn/crud_functions to crudColumn parameters.
+            Creates CopyAddRow which requires references to main grid
+        */
+        const AddIndex = this.AddIndex
+        const GetIndex = this.GetIndex
+        const AddRowToTable = this.AddRowToTable
+        const MetaFunctions = gridFunctions
+        const copyFunction  = gridFunctions['CopyRow']
+
+        const CopyAddRow = function (rowData) {
+            let rowDataParams = {}
+            rowDataParams['row_index'] = GetIndex()
+            rowDataParams['data'] = rowData
+            let newRowData = copyFunction(rowDataParams)
+            AddRowToTable(newRowData)
+            AddIndex()
+        }
+        MetaFunctions['CopyAddRow'] = CopyAddRow
+        let mc = null
+        for (let i =0; i< columnDefs.length; i++) {
+            let grid_column = columnDefs[i]
+            let field = grid_column['field']
+            if (field === meta_column) {
+                mc = grid_column
+                break
+            }
+        }
+        if (mc===null) {return}
+        let cep = mc['cellEditorParams']
+        cep['gridFunctions'] = MetaFunctions
+
+
+        // gf['Insert']       = this.InsertRowInit(defaultValues) //for newly added rows via add row or new_sheet
+        // gf['CopyRow']      = this.CopyRowInit()
+        // gf['Update']       = this.UpdateRowInit() //for rows created from querying the database
+        // gf['Undo']         = this.UndoRow() //function to reset row based on backup values
+        // gf['Delete']       = this.DeleteRow()
+        // gf['SetDelete']       = this.DeleteRow()
+        // gf['UndoDelete']   = this.DeleteUndoRow()
+        // gf['SetDelete']    = this.SetDelete()
+
+    },
+
+    AddRowToTable( rowData ) {
+        this.tableData.push(rowData)
+    },
+
+
     UrlParams() {
         // https://flaviocopes.com/urlsearchparams/
         let url = window.location.href

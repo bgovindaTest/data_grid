@@ -10,13 +10,25 @@ may require emitter for
 
 <template>
 <div >
-    <button > 
+
+    <button title="Add/Copy Row" @click="Add()"> 
+        <font-awesome-icon :icon="['fas', 'plus']" />
+    </button>
+
+
+    <button title="Undo Row" @click="Undo()"> 
         <font-awesome-icon :icon="['fas', 'undo']" />
     </button>
-    <button @click="is_deleted = !is_deleted" > 
+    <button @click="Delete()" title="Set For Delete" > 
         <font-awesome-icon :icon="['fas', 'trash-alt']" v-if="is_deleted" />   
         <font-awesome-icon :icon="['far', 'trash-alt']" v-else /> 
     </button>
+
+    <button title="Remove Row" @click="Remove()" > 
+        <font-awesome-icon :icon="['fas', 'ban']" />
+    </button>
+
+
 </div>
 </template>
 
@@ -30,32 +42,32 @@ export default {
             can_delete: true,
             can_undo: true,
             value: true,
-            cellValue: null
+            cellValue: null,
+            metaFunctions: null,
        }
     },
+    mounted () {
+            console.log(this.params)
+            console.log(this.params.data)
+    },
 
-
-   methods: {
+    methods: {
        /* Component Editor Lifecycle methods */
        // the final value to send to the grid, on completion of editing
-        beforeMount() {
-            // this simple editor doubles any value entered into the input
-            this.cellValue = this.params
+        Delete() {
+
+        },
+        Remove() {
+
+        },
+        Add() {
+
+        },
+        Undo() {
+
         }
-   }
+    }
 
 }
-
-// function removeSelected() {
-//   const selectedRowNodes = gridOptions.api.getSelectedNodes();
-//   const selectedIds = selectedRowNodes.map(function (rowNode) {
-//     return rowNode.id;
-//   });
-//   immutableStore = immutableStore.filter(function (dataItem) {
-//     return selectedIds.indexOf(dataItem.symbol) < 0;
-//   });
-//   gridOptions.api.setRowData(immutableStore);
-// }
-
 
 </script>

@@ -77,6 +77,7 @@ class CrudColumnFunctions {
         gf['Undo']         = this.UndoRow() //function to reset row based on backup values
         gf['Delete']       = this.DeleteRow()
         gf['UndoDelete']   = this.DeleteUndoRow()
+        gf['SetDelete']    = this.SetDelete()
         //grid_changes before saving
         gf['CrudStatus']   = this.CrudStatus()
 
@@ -202,8 +203,9 @@ class CrudColumnFunctions {
 
     UndoRow() {
         //reverts rowData to values from backups
-        let fundo = function (rowData) {
+        let fundo = function (rowDataParams) {
             //undo row to initial state.
+            let rowData = rowDataParams.data
             let backups = rowData[meta_column_name]['backup']
             let field_names = Object.keys(backups)
             for (let i = 0; i< field_names.length; i++ ) {
@@ -216,17 +218,32 @@ class CrudColumnFunctions {
         }
         return fundo
     }
+    SetDelete() {
+        //sets delete to true
+        let SetDeleteRow = function (rowDataParams) {
+            let rowData = rowDataParams.data 
+            let change_delete = !rowData[meta_column_name]['is_delete']
+            rowData[meta_column_name]['is_delete'] = change_delete }
+        return SetDeleteRow
+
+    }
+
+
     DeleteRow() {
         //sets delete to true
-        let DeleteRow = function (rowData) { rowData[meta_column_name]['is_delete'] = true }
+        let DeleteRow = function (rowDataParams) {
+            let rowData = rowDataParams.data    
+            rowData[meta_column_name]['is_delete'] = true 
+        }
         return DeleteRow
     }
     DeleteUndoRow() {
         //sets delete to false
-        return function DeleteUndoRow (rowData) { rowData[meta_column_name]['is_delete'] = false }
+        return function DeleteUndoRow (rowDataParams) { 
+            let rowData = rowDataParams.data    
+            rowData[meta_column_name]['is_delete'] = false 
+        }
     }
-
-
     //before crud operations.
     IsRowChanged() {
         //Determines if cell value is Null. If any value is empty its false

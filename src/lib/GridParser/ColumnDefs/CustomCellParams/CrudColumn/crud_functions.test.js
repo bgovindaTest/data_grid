@@ -82,7 +82,7 @@ test('undo row function', () => {
         '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1, b: 2 } }
     }
     let f = x.UndoRow()
-    f(rowData)
+    f({'data':rowData})
     let exp = { a: 1, b: 2,
         '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1, b: 2 } }
     }
@@ -93,7 +93,7 @@ test('delete row function', () => {
     let x = new cf()
     let rowData = { a: 1, '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1} } }
     let f = x.DeleteRow()
-    f(rowData)
+    f({'data':rowData})
     let exp = { a: 1,'_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1 } } }
     expect(rowData).toMatchObject(exp)
 } )
@@ -102,7 +102,7 @@ test('undo delete row function', () => {
     let x = new cf()
     let rowData = { a: 1, '_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1} } }
     let f = x.DeleteUndoRow()
-    f(rowData)
+    f({'data':rowData})
     let exp = { a: 1,'_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1 } } }
     expect(rowData).toMatchObject(exp)
 } )

@@ -81,6 +81,8 @@ class CrudColumnFunctions {
         //grid_changes before saving DeleteStatus
         gf['DeleteStatus'] = this.DeleteStatus()
         gf['CrudStatus']   = this.CrudStatus()
+        //RowHigh uses params called directly by grid
+        gf['RowHeight']    = function (params) {return params.data[meta_column_name]['row_height'] || 25}
 
         //delete_warning
         gf['deleteWarning'] = grid['deleteWarning'] || ""

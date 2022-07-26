@@ -17,12 +17,17 @@ Creates Auxillary function for crud operations
 const CrudColumnInit   = require('./crud_column')
 const CrudColumnFunctions = require('./crud_functions')
 
+const data_config    = require('../../../../DataConfig')
+const meta_column    = data_config.meta_column_name
+
 class MetaColumnAssembly {
     constructor() {}
 
     MetaColumnInit(grid) {
         this.CrudColumn( grid )
         let funcs = this.CreateAuxillaryFunction( grid )
+        let columnDefs = grid
+        this.AddMetaColumnFunctions(funcs, columnDefs)
         return funcs
     }
 
@@ -47,6 +52,27 @@ class MetaColumnAssembly {
         let grid_functions = tmp.CreateAuxilaryFunction( grid )
         return grid_functions
     }
+    AddMetaColumnFunctions(gridFunctions, columnDefs) {
+        /*
+            This adds functions created in CrudColumn/crud_functions to crudColumn parameters.
+            Creates CopyAddRow which requires references to main grid
+        */
+        const MetaFunctions = gridFunctions
+        let mc = null
+        for (let i =0; i< columnDefs.length; i++) {
+            let grid_column = columnDefs[i]
+            let field = grid_column['field']
+            if (field === meta_column) {
+                mc = grid_column
+                break
+            }
+        }
+        if (mc===null) {return}
+        let cep = mc['cellEditorParams']
+        cep['gridFunctions'] = MetaFunctions
+    }
+
+
 }
 
 module.exports = MetaColumnAssembly

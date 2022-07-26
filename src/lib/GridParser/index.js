@@ -3,31 +3,16 @@ Parses grids json object and converts expression syntax into javascript function
 
     All Lookup objects must have id field.
 
-    'qparams_prefix':"",
-    'url_prefix':"",
-    '__url_params__': {},
-    '__valuesObject__': [{}] //array is grid position object key is field and value is values to be passed.
-    '__is_read_only__':  true/false (do the have modification permssions)
-        //if no force editable to false
-
-
-    gridOptions: {
-        suppressPropertyNamesCheck = true
-    }
-
-
-
-    //first grid is main. others can be called as subgrids
     grids: [
     {
-        rowHeights: { column_name add to metaColumn} //should be sent from main query. 
+        rowSelectStyle: xx
+
         navHeaderParams: {
             name: 'x'
             links: [{'name': xxx, 'url': xxx }],
             help: "",
-            addRow: true,
+            addRow:   false
             newSheet: false
-            //functions added here that are created from columnDef value parser
         }
         'queryParams': //i.e. new row, update, delete, etc read/etc create default objects for query params? handled by query parser
         { 
@@ -101,6 +86,8 @@ Parses grids json object and converts expression syntax into javascript function
                 removeButton: adds remove maybe cancel icon to crudColumn. For rows that
                     dont have a delete option.
 
+                rowHeights: sent as meta_column.row_height in query. not a main parameter 
+
             }
         }
     }
@@ -118,10 +105,6 @@ const CrudMetaColumn   = require('./ColumnDefs/CustomCellParams/CrudColumn')
 const ChmodParams = require('./ChmodParams')
 
 const lodashCloneDeep = require('lodash.clonedeep')
-
-
-
-
 
 //has whole grid object. Any data loading comes from
 //grid_funcs. Vue Components can also have async await
@@ -167,8 +150,6 @@ class ColumnDefsInit {
         tmp = new CrudMetaColumn()
         let gridFunctions = tmp.MetaColumnInit(grid)
         return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-
-
     }
 
     RunGridColumnsInit() {

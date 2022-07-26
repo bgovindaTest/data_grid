@@ -69,6 +69,13 @@ var GridController = {
 
 // },
 
+// 'valuesObject': [{}] //array is grid position object key is field and value is values to be passed.
+// 'is_read_only':  true/false (do the have modification permssions)
+//     //if no force editable to false
+
+// gridOptions: {
+//     suppressPropertyNamesCheck = true
+// }
 
 
 data () {
@@ -163,7 +170,7 @@ async mounted () {
     let valuesObject = {}
     let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
     let px  = cdi.RunGridColumnsInit()
-    this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
+    // this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
 
     const updx = px['gridFunctions']['Update']
     // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
@@ -173,6 +180,8 @@ async mounted () {
         rdp['data']      = this.tableData[i]
         updx(rdp)
     }
+
+    //initialize push and pull
 
 
     // console.log(this.tableData)
@@ -247,16 +256,6 @@ methods: {
         if (mc===null) {return}
         let cep = mc['cellEditorParams']
         cep['gridFunctions'] = MetaFunctions
-
-
-        // gf['Insert']       = this.InsertRowInit(defaultValues) //for newly added rows via add row or new_sheet
-        // gf['CopyRow']      = this.CopyRowInit()
-        // gf['Update']       = this.UpdateRowInit() //for rows created from querying the database
-        // gf['Undo']         = this.UndoRow() //function to reset row based on backup values
-        // gf['Delete']       = this.DeleteRow()
-        // gf['SetDelete']       = this.DeleteRow()
-        // gf['UndoDelete']   = this.DeleteUndoRow()
-        // gf['SetDelete']    = this.SetDelete()
     },
 
     UrlParams() {
@@ -267,11 +266,16 @@ methods: {
         let tmp  = path.split('/')
         let projectFolder = "" //tmp[0]
         let tableName     = "" //tmp[1]
+        let route = ""
         if (tmp.length >= 2) {
             projectFolder = tmp[0]
             tableName = tmp[1]
-        } else if (tmp.length === 1) { tableName = tmp[0] }
-        return {'projectFoldect': projectFolder, 'tableName': tableName}
+            route = projectFolder +'/' + tableName
+        } else if (tmp.length === 1) { 
+            tableName = tmp[0] 
+            route = tableName
+        }
+        return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': route}
     },
 
     //is root
@@ -285,20 +289,28 @@ methods: {
         // getRowHeight: params => params.node.group ? 50 : 20,
     },
 
-    ParsePageConfig() {
+    async PullAndParsePageConfig() {
+        /*
+            rowSelectStyle: xx
+            navHeaderParams:
+            'queryParams'
+            'columnDefs'
+
+        */
+        let routeParams = this.UrlParams()
+        let route = routeParams['route']
         //{'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-
-
+        let dx = await axios_object.post(route,{})
+        //navbar
+        //columnDef
     },
 
     GetRowHeight(params) {
-        /* <ag-grid-vue
-            :getRowHeight="getRowHeight"
-            other grid options ... 
-        </ag-grid-vue> */
-
-
-        // params.node.group ? 50 : 20,
+        /* 
+            Returns row height
+        */
+        const rh = this.gridFunctions['RowHeight']
+        return rh(params)
     },
 
 
@@ -397,10 +409,10 @@ methods: {
             let rowRange = this.GetRangeSelection()
             const deletef  = gridFunctions['Delete']
             const undo_deletef  = gridFunctions['UndoDelete']
-            for (var rowIndex = rowRange.startRow; rowIndex <= rowRange.endRow; rowIndex++) {
-                var rowModel = api.getModel()
-                var rowNode = rowModel.getRow(rowIndex)
-                var rowx = rowNode.data
+            for (let rowIndex = rowRange.startRow; rowIndex <= rowRange.endRow; rowIndex++) {
+                let rowModel = api.getModel()
+                let rowNode = rowModel.getRow(rowIndex)
+                let rowx = rowNode.data
                 if (bool_value) { deletef({'data': rowx}) }
                 else { undo_deletef({'data': rowx})  }
             }
@@ -411,76 +423,38 @@ methods: {
     },
 
 
-    InsertSelected(rowData, gridOptions, new_input_params) {
+    InsertSelected() {
         //used to delete rows in add dat
         //check if allow delete.
         //button function
-        var api = gridOptions.api
-        var rangeSelection = api.getCellRanges()
-        if (rangeSelection.length === 0) { return }
-        rangeSelection = rangeSelection[0]
-        var startRow = Math.min(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-        var endRow = Math.max(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-        var numNewRows = (endRow-startRow) +1
-        insert(rowData, numNewRows, gridOptions, new_input_params, false)
+        let rowRange = this.GetRangeSelection()
+        const insertf  = gridFunctions['Insert']
+        let newRows = []
+        for (let rowIndex = rowRange.startRow; rowIndex <= rowRange.endRow; rowIndex++) {
+            newRows.push( insertf({}) )
+        }
+        this.AppendRows( newRows, row_index=rowrange.startRow )
     },
-
-
-    RemoveSelected(rowData, gridOptions) {
+    RemoveSelected() {
         //removes row from grid. Adds indicator to row which is then spliced out
         //check if allow delete.
         //button function
         try {
-            var api = gridOptions.api
-            var rangeSelection = api.getCellRanges()
-            if (rangeSelection.length === 0) { return }
-            rangeSelection = rangeSelection[0]
-            var startRow = Math.min(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-            var endRow = Math.max(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-            for (var rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
-                var rowModel = api.getModel()
-                var rowNode = rowModel.getRow(rowIndex)
-                var rowx = rowNode.data
-                rowx['__is_set_for_removal__'] = true
+            let rowRange = this.GetRangeSelection()
+            let api = this.gridApi
+            let rows = []
+            for (let rowIndex = rowRange.startRow; rowIndex <= rowRange.endRow; rowIndex++) {
+                let rowModel = api.getModel()
+                let rowNode = rowModel.getRow(rowIndex)
+                let rowx = rowNode.data
+                rows.push(rowx)
             }
-            var i = 0;
-            while (i < rowData.length) {
-            if (rowData[i].hasOwnProperty('__is_set_for_removal__') ) {
-                rowData.splice(i, 1);
-            } else {
-                ++i;
-            }
-            }
-            redraw_rows(gridOptions)
+            this.api.applyTransaction({'remove': [rows] })
+
         } catch (err) {
             console.log("remove failed. lingering selection the likely cause after using view")
         }
     },
-
-
-    /*
-        Loading modules
-        save_route format json object
-        {
-            "error": {
-                "is_error": false,
-                "error_msg": ""
-            },
-            "output": {
-                "insert": [
-                    {
-                        "is_error": true,
-                        "node_id": 23,
-                        "error_msg": "insert not allowed for users table. in route users for client row 23",
-                        "id": -1
-                    }
-                ],
-                ]
-            },
-            "table_name": "users",
-            "route_name": "users"
-        }
-    */
 
 
 
@@ -516,11 +490,11 @@ methods: {
             let rowx = ServerRowDefaultValues(serverRowData[i], input_params, field_variables)
             processedRowData.push(rowx)
         }
-        //api.setRowData(processedRowData)
+        this.gridApi.setRowData(processedRowData)
 
     },
     
-    async SaveData( saveRows, save_route, server_fields, field_map, autocomplete_map, axios_object, saveModalParams  ) {
+    async SaveData() {
         /*
         This funciton processes the rows for saving into the final form. Each row is sent to its specific saving route in
         req_body object. A temporary object is created row_map which stores a temporary node_id value -> save_row. This
@@ -531,72 +505,26 @@ methods: {
         id needed to save to the server.
         */
     
-        var req_body = {
-            // 'user_id': 1,
-            'insert': [], 'update': [],
-            'upsert': [], 'delete': []
+        //clearSaveData
+        let save_data = { 'insert': [], 'update': [], 'delete': [] }
+        let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0}
+        const deleteWarning = this.gridFunctions['deleteWarning'] 
+        const CrudStats     = this.gridFunctions['CrudStatus']
+        for(let i =0; i <this.tableData.length; i++ ) {
+            let rowData   = this.tableData[i]
+            let rowStatus = CrudStats(rowData)
+            this.SaveStatusCount(rowStatus, save_count)
+            //insteadOfQuery for crudType
+            let crudType = rowData[meta_column]['crudType']
+            this.ReqDataAssembly(rowData, crudType, rowStatus, save_data)
+            await TimeOut(1, 1000)
         }
-        row_map = {} // node_id -> saveRow
-        //has row_error = ?
-        var count = 0
-        // var row_error_map = {}
+        //if is_changed but nothing to save
+        //else if not is_changed no changes detected
 
+        //else save rows
+        //PushSaveData
 
-        for (let i=0; i< tableData.length; i++) {
-            //allow ui to refresh for batch value changes
-            batch_count += 1
-            if (batch_count > 1000) {
-                batch_count = 0
-                await new Promise(r => setTimeout(r, 20))
-            }
-        }
-
-
-
-
-        for(let i =0; i <saveRows.length; i++ ) {
-            let rowx = saveRows[i]
-    
-            if(rowx[field_functions.is_deleted()] )  {
-                count +=1
-                req_body['delete'].push( ProcessData(rowx,row_map, i, server_fields, field_map, autocomplete_map, 'delete') )
-    
-            } else if(rowx[field_functions.save_route()] === 'insert' )  {
-                count +=1
-                req_body['insert'].push( ProcessData(rowx,row_map, i, server_fields, field_map, autocomplete_map, 'insert') )
-    
-            } else if(rowx[field_functions.save_route()] === 'update' )  {
-    
-                count +=1
-                req_body['update'].push( ProcessData(rowx,row_map, i, server_fields, field_map, autocomplete_map, 'update') )
-    
-            }  else if(rowx[field_functions.save_route()] === 'upsert' )  {
-    
-                count +=1
-                req_body['upsert'].push( ProcessData(rowx,row_map, i, server_fields, field_map, autocomplete_map, 'upsert') )
-            } else {
-                rowx['node_id'] = -1
-            }
-    
-            if (count > 100 ) {
-                UpdateModalSaveInformation(saveModalParams, req_body, count)
-                await SendSaveDataAndProcessError(save_route, req_body, row_map, saveModalParams, axios_object)
-                // UpdateModalRowErrorInformation(saveModalParams, row_error_map)
-                //save data
-                //count error messages
-                //process errors
-                count = 0
-                req_body['insert'] = [] 
-                req_body['update'] = []
-                req_body['upsert'] = []
-                req_body['delete'] = []
-            }
-        }
-        if (count > 0) {
-            UpdateModalSaveInformation(saveModalParams, req_body, count)
-            await SendSaveDataAndProcessError ( save_route, req_body, row_map, saveModalParams, axios_object )
-            // UpdateModalRowErrorInformation(saveModalParams, row_error_map)
-        }
     },
 
     async TimeOut(index, batch_count) {
@@ -610,18 +538,36 @@ methods: {
         }
     },
 
+    SaveStatusCount(rowStatus, save_count) {
+        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error']
+        for (let i =0; i < save_params.length; i++ ) {
+            let sp = save_params[i]
+            if (rowStatus[sp]) { save_count[sp] += 1 }
+        }
+    },
+
 
     FixData() {
         //clear save object.
         //close save modal
     },
-    ContinueSave() {
-        //continues save 
+    PushSaveData() {
+        //continues save
     },
     EndSave() {
         //reset save object
-    }
+    },
+    async ReqDataAssembly(rowData, crudType, rowStatus, saveData) {
 
+        let isSave = rowStatus['is_save']
+        if (! isSave ) {return}
+        let validCrudTypes = ['insert', 'update', 'delete']
+        if (validCrudTypes.includes(crudType) ) {
+            // need to process data?
+            let saveRowData = rowData //Push processing placeholder
+            saveData[crudType].push(saveRowData)
+        } else { console.error('error processing data') }
+    }
 }
 
 }

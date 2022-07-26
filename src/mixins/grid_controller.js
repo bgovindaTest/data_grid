@@ -234,9 +234,6 @@ methods: {
             This adds functions created in CrudColumn/crud_functions to crudColumn parameters.
             Creates CopyAddRow which requires references to main grid
         */
-        const AddIndex = this.AddIndex
-        const GetIndex = this.GetIndex
-        const AddRowToTable = this.AddRowToTable
         const MetaFunctions = gridFunctions
         let mc = null
         for (let i =0; i< columnDefs.length; i++) {
@@ -260,13 +257,7 @@ methods: {
         // gf['SetDelete']       = this.DeleteRow()
         // gf['UndoDelete']   = this.DeleteUndoRow()
         // gf['SetDelete']    = this.SetDelete()
-
     },
-
-    AddRowToTable( rowData ) {
-        this.tableData.push(rowData)
-    },
-
 
     UrlParams() {
         // https://flaviocopes.com/urlsearchparams/
@@ -329,75 +320,47 @@ methods: {
     async GetValueObject() {},
 
 
-
-    RedrawRows() {
-        //redraws all visible rows gridOptions.api === gridApi
-        // gridApi.redrawRows() --maynot be needed anymore
-        this.gridApi.refreshCells()
-    },
-
-    RemoveTableData() {
+    AppendRows( rowDataArray, row_index=null ) {
         /*
-        This function takes the rowData object and removes all rows without setting new object. This removes
-        all rows without breaking linking to object throughout app
-
-        rowData: main array for aggrid contains all table data
+        This add new rows to the main tableData object in aggrid. array of rows
+        and starting index optional
         */
-        this.tableData.length = 0
-    },
-
-    ResetAllRowData() {
-        //returns rowData to backup value. stored in metadata column
-        for (let i=0; i< this.tableData.length; i++) {
-            let rowData = this.tableData[i]
-            this.UndoRow (rowData[i])
-        }
-        this.RedrawRows()
+        if( row_index === null ){ this.api.applyTransaction({'add':rowDataArray}) } 
+        else {  this.api.applyTransaction({'add':rowDataArray, 'addIndex': row_index}) }
     },
 
-    AppendRows( rows ) {
-        /*
-        This add new rows to the main tableData object in aggrid. Can accept and array of rows
-        or just one json row.
-        */
-        if( Array.isArray(rows) ){
-            for (let i = 0; i < rows.length; i++) { this.tableData.push(rows[i]) }
-        } else { this.tableData.push(rows) }
+    AddRow() {
+        //button push
+        const insertf  = gridFunctions['Insert']
+        let newRowData = insertf({})
+        this.gridApi.applyTransaction({'add':[newRowData]})
     },
-    AppendRowsTop(rows ) {
-        /*
-        This add new rows to the main rowData object in aggrid. Can accept and array of rows
-        or just one json row.
-        */
-        if( Array.isArray(rows) ){
-            for (let i = 0; i < rows.length; i++) { this.tableData.unshift(rows[i]) }
-        } else { this.tableData.unshift(rows) }
-    },
+
 
     NewSheet() {
-        /*
-        Get page limit size from pagination?
-        //check if valid. If not get default 1k?
-        */
-        var pageSize = this.ReturnPageSize()
-        var rows = []
+        /* Creates blank sheet for adding data */
+        let pageSize = this.pageParams['limit']
+        let rows = []
+        const insertf  = gridFunctions['Insert']
         for (let i =0; i < pageSize; i++) {
-            rows.push( this.CreateNewRow() )
+            let newRowData = insertf({})
+            rows.push( newRowData )
         }
-        this.RemoveTableData()
-        this.AppendRows(rows)
-        this.RedrawRows()
+        this.gridApi.setRowData(rows)
     },
 
-    ReturnPageSize() {
-        //Use page limit size from pagination to determine size of page.
-        //For new sheet.
-        let lx = this.pagination['limit']
-        if (isNaN(lx)) {return 1000}
-        return lx
+
+    GetRangeSelection() {
+        let api = this.gridApi
+        let rangeSelection = api.getCellRanges()
+        if (rangeSelection.length === 0) { return {'startRow': 0, 'endRow': 0} }
+        rangeSelection = rangeSelection[0]
+        let startRow = Math.min(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
+        let endRow = Math.max(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
+        return {'startRow': startRow, 'endRow': endRow}
     },
 
-    Undo() {
+    UndoSelected() {
         /*
         undo loops through all rows that have been highlighted when undo function is selected
         and runs UndoRow on them. This replaces the current values with those stored in the backup
@@ -405,117 +368,48 @@ methods: {
         */
         try{
             let api = this.gridApi
-            var rangeSelection = api.getCellRanges()
-            if (rangeSelection.length === 0) { return }
-            rangeSelection = rangeSelection[0]
-            var startRow = Math.min(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-            var endRow = Math.max(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-            var rowNodes = []
-            for (var rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+            let rowRange = this.GetRangeSelection()
+            const undof  = gridFunctions['Undo']
+            for (let rowIndex = rowRange.startRow; rowIndex <= rowRange.endRow; rowIndex++) {
                 var rowModel = api.getModel()
                 var rowNode = rowModel.getRow(rowIndex)
                 var rowx = rowNode.data
-                this.UndoRow(rowx) //gridFunctions?
-                rowNodes.push(rowNode)
+                undof({'data': rowx}) //gridFunctions?
             }
-            this.RedrawRows()
+            api.refreshCells()
         } catch (err) {
-            console.log("undo faild. lingering selection the likely cause after using view")
+            console.error("undo faild. lingering selection the likely cause after using view")
         }
     },
 
 
-    UndoRow (rowx) {
-        //set row data back to backup/original value
-        //use columnDef parameter
-        this.SetBackup(rowx)
-        this.SetDelete(rowx, false)
-    },
-
-    SetBackup (rowx) {
-        //returns all server fields to original values.
-
-        //get from prams object
-        for(var i = 0; i < server_fields.length; i++) {
-            var key = server_fields[i] //change here
-            var backupKey = field_functions.BackupFieldName(key)
-            rowx[key]  = rowx[backupKey]
-        }
-    },
-
-
-    Delete(bool_value) {
+    SetDeleteSelected(bool_value) {
         //used to delete rows in add dat
         //check if allow delete.
         //button function
         // console.log('Delete function')
+
+        // gf['Delete']       = this.DeleteRow()
+        // gf['UndoDelete']   = this.DeleteUndoRow()
+
         try {
             let api = this.gridApi
-            var rangeSelection = api.getCellRanges()
-            if (rangeSelection.length === 0) { return }
-            rangeSelection = rangeSelection[0]
-            var startRow = Math.min(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-            var endRow = Math.max(rangeSelection.startRow.rowIndex, rangeSelection.endRow.rowIndex)
-            var rowNodes = []
-            for (var rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+            let rowRange = this.GetRangeSelection()
+            const deletef  = gridFunctions['Delete']
+            const undo_deletef  = gridFunctions['UndoDelete']
+            for (var rowIndex = rowRange.startRow; rowIndex <= rowRange.endRow; rowIndex++) {
                 var rowModel = api.getModel()
                 var rowNode = rowModel.getRow(rowIndex)
                 var rowx = rowNode.data
-                //rowData['delete'] = "Delete"
-                SetDelete(rowx, bool_value)
-                rowNodes.push(rowNode)
+                if (bool_value) { deletef({'data': rowx}) }
+                else { undo_deletef({'data': rowx})  }
             }
-            api.redrawRows({'rowNodes': rowNodes})
+            api.refreshCells()
         } catch (err) {
             console.log("delete failed. lingering selection the likely cause after using view")
         }
     },
 
-    SetDelete(rowx, bool_value) {
-        //is delete changes allowed?
-        //Need to check delete param. SetDelete, SetUnmodified and SetModified used to track which rows have been edited
-        //This is used to determine if selecting an Edit/Add tab will be allowed b/c only one
-        //Modification allowed at a time
-
-        //set delete column to false?
-    },
-
-
-    /*
-    Array insert and array remove.
-    Array.prototype.insert = function ( index, item ) {
-        this.splice( index, 0, item );
-    };
-
-    var arr = [ 'A', 'B', 'D', 'E' ];
-    arr.insert(2, 'C');
-
-
-    */
-
-
-
-    Insert(rowData, num_rows, gridOptions, new_input_params, add_top=false) {
-        /*
-        // check what happens to NodeId after insert?
-        Refrences:
-        // https://stackoverflow.com/questions/38505806/add-remove-rows-in-ag-grid/38949539
-        // https://stackoverflow.com/questions/57463050/how-to-find-out-the-index-of-a-selected-row-of-a-ag-grid
-        */
-        var rows = []
-        for (let i =0; i < num_rows ; i++) {
-            rows.push(CreateNewRow(new_input_params))
-        }
-        if (add_top) {
-            append_rows_top(rowData, rows )
-        } else {
-            append_rows(rowData, rows)
-        }
-        if (rows.length > 0) {
-            redraw_rows(gridOptions)
-        }
-
-    },
 
     InsertSelected(rowData, gridOptions, new_input_params) {
         //used to delete rows in add dat
@@ -563,18 +457,6 @@ methods: {
         }
     },
 
-
-    CreateNewRow(new_input_params) {
-        /*
-        This creates a new row object. The intial default values are stored in gridParams['insert_row_params']
-        */
-        var new_row = {}
-        for (let key in new_input_params) {
-            new_row[key] = new_input_params[key]
-        }
-        return new_row
-        //rowData.splice(targetIndex, 0, newRow);
-    },
 
     /*
         Loading modules

@@ -51,14 +51,11 @@ test('agrich params with lookup', () => {
     let grid_column = grid[0]
     y = new AgRichParams(grid_column, valuesObject)
     y.AgRichSelectParamsInit()
-    // console.log(grid_column['cellEditorParams'])
-    // console.log(grid_column['valueSetter'])
-    // console.log(grid_column['valueGetter'])
     let expected = {
         pushKey: 'a',
         pullKey: 'id',
         displayKey: 'a',
-        values: [ 'a1', 'a2' ],
+        values: [ { id: 1, a: 'a1' }, { id: 2, a: 'a2' } ],
         mapObject: { a1: { id: '1', a: 'a1' }, a2: { id: '2', a: 'a2' } }
     }
     expect(grid_column['cellEditorParams']).toMatchObject(expected)
@@ -128,7 +125,7 @@ test('links params', () => {
     y.LinkInit()
     let params = {'value': {'urlName': 'linkName', 'urlPath': 'linkPath'}}
     let res = grid_column['cellRenderer'](params)
-    let expected = `<a href="linkPath" target="_blank" rel="noopener">'+ linkName+'</a>`
+    let expected = `<a href="linkPath" target="_blank" rel="noopener">linkName</a>`
     expect(expected).toBe(res)
 })
 
@@ -161,12 +158,11 @@ test('autocomplete params with lookup', () => {
         displayKey: 'a',
         columnDefs: [ { field: 'id', width: 150 }, { field: 'a', width: 150 } ],
         values: [ { id: '1', a: 'a1' }, { id: '2', a: 'a2' } ],
-        mapObject: { a1: { id: '1', a: 'a1' }, a2: { id: '2', a: 'a2' } }
+        mapObject: { a1: { id: '1', a: 'a1' }, a2: { id: '2', a: 'a2' } },
+        columnDefs: [ { field: 'id', width: 150 }, { field: 'a', width: 150 } ],
+        rowData: [ { id: '1', a: 'a1' }, { id: '2', a: 'a2' } ],
     }
-  
-  
-
-    expect(expected).toMatchObject(grid_column['cellEditorParams'])
+    expect(grid_column['cellEditorParams']).toMatchObject(expected)  
 })
 
 test('main assembly runs', () => {
@@ -186,17 +182,5 @@ test('main assembly runs', () => {
     }
     let y = new CustomCellParams(grid[3], valuesObject)
     y.CustomCellParamsInit()
-    // console.log(grid)
     expect(true).toBe(true)
-
-
 })
-
-
-
-//agrich params
-//autococomplete
-//date_time
-//largeText
-//links
-//subGrid

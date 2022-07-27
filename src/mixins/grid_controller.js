@@ -117,9 +117,6 @@ methods: {
             updx(rdp)
         }
         this.columnDefs = px['columnDefs']
-        console.log(px['columnDefs'])
-
-
     },
 
     ValuesObjectParser(gridIndex, columnDefs) {

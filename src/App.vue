@@ -93,7 +93,8 @@ export default {
       // if (this.is_development) {
 
       // }
-      this.RunColumnDefsInit()
+      // this.RunColumnDefsInit()
+      this.MainGridInit()
   }
 
 

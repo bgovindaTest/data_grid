@@ -24,7 +24,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
             this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
             to extract the selectValues array. 
             use post or get route?
-
+        valuesObject (optional) if hardcoded into config pull from here
         pushKey = grid_column["cellEditorPrams"]['pushKey'] //defaults to field
         pullKey = grid_column["cellEditorPrams"]['pullKey'] //defaults to id
         displayKey = grid_column["cellEditorPrams"]['displayKey'] //defaults to id also is the return key?

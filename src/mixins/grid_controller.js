@@ -66,6 +66,7 @@ data () {
         //functions created by gridParser
         gridFunctions: null,
 
+        valuesObject: {}, //contains values for lookups
         //modalParams
         saveModal: false,
         filterModal: false,
@@ -81,6 +82,59 @@ methods: {
     SubGridInit() {
         //parses props initializes fields
     },
+    MainGridInit() {
+
+        let main_grid = testGrid['grids'][0]
+        let columnDefConfig = main_grid['columnDefs']
+        this.ValuesObjectParser(0, columnDefConfig)
+        let valuesObject = this.valuesObject[0]
+        let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
+        let px  = cdi.RunGridColumnsInit()
+        // this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
+  
+        const updx = px['gridFunctions']['Update']
+        // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+        this.tableData  = main_grid['tableData']
+        for (let i=0; i < this.tableData.length; i++) {
+            let rdp = {}
+            rdp['data']      = this.tableData[i]
+            updx(rdp)
+        }
+        this.columnDefs = px['columnDefs']
+        console.log(px['columnDefs'])
+
+
+    },
+
+    ValuesObjectParser(gridIndex, columnDefs) {
+        /*
+            gridIndex: positions of columnDefs in pageParams array
+            columnDefs: definititions for a grid at the given index
+
+        */
+        let lookupEditors = data_config.cellEditors.lookupEditors
+        this.valuesObject[gridIndex] = {}
+        for(let i =0; i < columnDefs.length; i++) {
+            let columnDef = columnDefs[i]
+            let field      = columnDef['field']
+            let cellEditor = columnDef['cellEditor'] || ""
+            if (! lookupEditors.includes(cellEditor)) {continue}
+            if (! columnDef.hasOwnProperty('cellEditorParams')) {continue}
+            let cep = columnDef['cellEditorParams']
+            let vx        = cep['valuesObject'] || []
+            let api_route = cep['api_route']    || []
+            if (api_route === null) {
+                this.valuesObject[gridIndex][field] = vx
+                continue
+            }
+            let api_data = []
+            //get api_data
+            this.valuesObject[gridIndex][field] = vx.concat(api_data)
+        }
+    },
+
+
+
     NavHeaderParamsInit(navHeaderParams) {
         /*
             Initialization functions

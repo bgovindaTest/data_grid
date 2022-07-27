@@ -19,8 +19,6 @@ may require emitter for
         // gf['SetDelete']    = this.SetDelete()
 
 -->
-
-
 <template>
 <div >
 
@@ -79,12 +77,12 @@ export default {
         this.gridFunctions = gf
         // console.log(gf)
         this.api = this.params.api
-        this.rowDataParams['data'] = this.params.data
-        let rdp = this.rowDataParams
+        // this.rowDataParams['data'] = this.params.data
+        // let rdp = this.rowDataParams
 
         //add parameters
-        this.is_deleted = gf['DeleteStatus'](rdp)
-        let mc = this.rowDataParams.data[meta_column]
+        this.is_deleted = this.params.data[meta_column]['is_delete']
+        let mc          = this.params.data[meta_column]
         let crudType = mc['crudType']
 
         this.allow_delete = cep['allowDelete'][crudType]
@@ -102,11 +100,12 @@ export default {
         /* Component Editor Lifecycle methods */
         // the final value to send to the grid, on completion of editing
         Delete() {
-            let rdp = this.rowDataParams
-            let fn  = this.gridFunctions['SetDelete'] 
-            fn(rdp)
-            let fns  = this.gridFunctions['DeleteStatus'] 
-            this.is_deleted = fns(rdp)
+            /*
+            DeleteStatus and SetDelete not working clearing information?
+            */
+            let x = this.is_deleted
+            this.is_deleted = !x
+            this.params.data[meta_column]['is_delete'] = !x
             this.api.refreshCells()
         },
         Remove() {
@@ -116,17 +115,18 @@ export default {
         Add() {
             let row_index = this.params.node.rowIndex
             let rdp = {}
-            rdp['data'] = this.rowDataParams.data
+            rdp['data'] =   this.params.data//this.rowDataParams.data
             rdp['meta_column'] = {} //ignore meta_column in data use defaults
             let fn  = this.gridFunctions['CopyRow']
+
             let newRowData = fn(rdp)
             this.api.applyTransaction({'add':[newRowData], 'addIndex': row_index})
         },
         Undo() {
-            let rdp = this.rowDataParams
-            console.log(rdp.data[meta_column])
-            let fn  = this.gridFunctions['Undo'] 
-            fn(rdp)
+            let fn  = this.gridFunctions['Undo']
+            let x = this.params.data
+            //fn(rdp)
+            fn({'data': x})
             this.api.refreshCells()
         }
     }

@@ -2,10 +2,10 @@ let test_grid = {
 "grids": [
     {
         "columnDefs": [
-            // {"field": "num", "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['num'] ,"validator":"ifnull(num,0)  > 0", 
-            //     "editable": true, "defaultFilter": true, "showFilter": false, "showSort": true},
-            // {"field": "date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true},
-            // {"field": "num_+_1",   "valueGetter": "ifnull(num,0) +1" , "validator": "ifnull(num,0) + 1 > 0"},
+            {"field": "num", "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['num'] ,"validator":"ifnull(num,0)  > 0", 
+                "editable": true, "defaultFilter": true, "showFilter": false, "showSort": true},
+            {"field": "date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true},
+            {"field": "num_+_1",   "valueGetter": "ifnull(num,0) +1" , "validator": "ifnull(num,0) + 1 > 0"},
             {"field": "full_name", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true,
                 "cellEditorParams": {
                     "valuesObject": [
@@ -15,8 +15,8 @@ let test_grid = {
                     ]
                 }
             },
-            // {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
-            // {"field": "links", 'cellRenderer': "LinksRenderer" },
+            {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
+            {"field": "links","cloneOnCopy": true, 'cellRenderer': "LinksRenderer" },
             {"field": "full_namex", 'cellEditor': "autoCompleteEditor", "editable": true,
                 "validator": "islookup(full_namex)",
                 "cellEditorParams": {
@@ -27,11 +27,7 @@ let test_grid = {
                     ],
                     "columnDefs": ["full_namex", "first_name", "last_name", "id"]
                 }
-        }
-
-
-
-
+            }
         ],
         "queryParams": {
             "default": "localhost:8080"
@@ -41,7 +37,8 @@ let test_grid = {
                 "num": 0, "links": {"urlPath": "/fakePath/home", "urlName": "LinksTest"},
                 "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"},
                 "auto": null,
-                "full_namex": null
+                "full_namex": null,
+                "date": null
             },
 
             // {"a": 1, "b":'x'},

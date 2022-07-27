@@ -22,6 +22,7 @@ To add later
     text_color:?
 */
 
+const type_check = require('../../../TypeCheck')
 
 class LinkParams {
     constructor (grid_column) {
@@ -31,6 +32,10 @@ class LinkParams {
         //add cell render
         this.SetDefaults() 
         this.grid_column['cellRenderer'] = function (params) {
+
+            if (type_check.IsUndefined(params.value) ){ return `<p style="color:red;">No url path</p>` }
+            if (!type_check.IsObject(params.value) ){ return `<p style="color:red;">No url path</p>` }
+
             if (! params.value.urlPath) {
                 return `<p style="color:red;">No url path</p>`
             }

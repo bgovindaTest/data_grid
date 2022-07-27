@@ -59,8 +59,9 @@ class AutoCompleteParams {
         let grid_column  = this.grid_column
         PushPullInit(grid_column)
         this.DefaultParameters()
-        this.ValueGetter()
-        this.ValueSetter()
+        //this.ValueGetter()
+        //this.ValueSetter()
+        this.CellRenderer()
         grid_column['cellEditorPopup'] = true
         grid_column['ignoreError'] = false
     }
@@ -81,6 +82,9 @@ class AutoCompleteParams {
             if (cep['columnDefs'].length === 0) {
                 this.AutocompleteDefaultColumnDef()
             }
+            else {
+                this.AutucompleteInitColumnDef()
+            }
         } else if ( type_check.IsNull(cep['columnDefs'] ) ) {
             this.AutocompleteDefaultColumnDef()
         }
@@ -98,6 +102,46 @@ class AutoCompleteParams {
         }
         this.grid_column['cellEditorParams']['mapObject'] = mapObject
     }
+
+    AutucompleteInitColumnDef() {
+        //if array or json array passed
+        let cep = this.grid_column['cellEditorParams']
+        let pullKey    = cep['pullKey']
+        let displayKey = cep['displayKey']
+        let columnWidth = this.defaultColumnWidth
+        //if different values
+        let cdef = cep['columnDefs']
+        let ndef = []
+        if ( type_check.IsJsonArray(cdef) ) { ndef = cdef } 
+        else { for (let i =0; i < cdef.length; i++) { ndef.push({'field': cdef[i]}) } }
+
+
+        let hasPullKey    = false
+        let hasDisplayKey = false
+
+        for(let i = 0; i < ndef.length; i++ ) {
+            let nx    = ndef[i]
+            let field = nx['field'] || ""
+            if (field === "") { console.error(`missing field for autocomplete`)}
+            if (! nx.hasOwnProperty('width')) {nx['width'] = columnWidth}
+            if (field === displayKey) { hasDisplayKey = true}
+            if (field === pullKey)    { hasPullKey = true}
+        }
+
+
+        if (!hasPullKey) {
+            ndef.push( {'field':pullKey, "width": columnWidth})
+        } 
+        if (!hasDisplayKey) {
+            ndef.push({'field': displayKey, "width": columnWidth})
+        }
+        cep['columnDefs'] = ndef
+
+
+
+    }
+
+
 
     AutocompleteDefaultColumnDef() {
         //default columnDef for lookups.
@@ -131,6 +175,21 @@ class AutoCompleteParams {
         }
         grid_column['valueGetter'] = fn
     }
+    CellRenderer() {
+
+        let cep = this.grid_column['cellEditorParams']
+        let displayKey = cep['displayKey']
+        this.grid_column['cellRenderer'] = function (params) {
+            let val = params.value // params.data[field][displayKey] || null
+            if (val === null || typeof val === 'undefined') { return `<p></p>` }
+            else if (type_check.IsString(val) ) { return `<p>${val}</p>` }
+            else {
+                val = params.value[displayKey]
+                return `<p>${val}</p>`
+            }
+        }
+    }
+
 
 
     CopyAndStringifyValuesObject() {
@@ -171,7 +230,8 @@ class AutoCompleteParams {
             }
             values.push(y)
         }
-        cep['values'] = values
+        cep['values']  = values
+        cep['rowData'] = values
     }
     ValueSetter() {
         // this.grid_column['cellEditorParams']['mapObject'] = mapObject

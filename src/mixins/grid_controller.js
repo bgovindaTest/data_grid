@@ -83,7 +83,23 @@ methods: {
         //parses props initializes fields
     },
     MainGridInit() {
+        /*
+        This object is ran to initialize all the required data from the server. When all initial loading is complete the 
+        main page with the nav bar, grid and footer will be displayed. The order of the initializations matter.
 
+        MainPage
+            1. GetRoute
+            2. Pull Configuration
+            3. Pull and create ValueObject
+            4. Parse Grid Configurations
+            5. TurnLoading off
+            6. Load Table Data
+        SubPage
+            1. Parse Sub Grid Configurations
+            2. Turn Loading off
+            3. LoadData
+
+        */
         let main_grid = testGrid['grids'][0]
         let columnDefConfig = main_grid['columnDefs']
         this.ValuesObjectParser(0, columnDefConfig)

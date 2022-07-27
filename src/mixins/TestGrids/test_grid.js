@@ -15,8 +15,18 @@ let test_grid = {
                     ]
                 }
             },
-            {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
-            {"field": "links", 'cellRenderer': "LinksRenderer" }
+            // {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
+            // {"field": "links", 'cellRenderer': "LinksRenderer" },
+            {"field": "full_namex", 'cellEditor': "autoCompleteEditor", "editable": true,
+                "cellEditorParams": {
+                    "valuesObject": [
+                        {"full_namex": "B G", "first_name": "B", "last_name": "G", "id": "1"},
+                        {"full_namex": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2"},
+                        {"full_namex": "Time Drake", "first_name": "Tim", "last_name": "Drake", "id": "3"},
+                    ],
+                    "columnDefs": ["full_namex", "first_name", "last_name", "id"]
+                }
+        }
 
 
 
@@ -28,7 +38,9 @@ let test_grid = {
         "tableData": [
             {
                 "num": 0, "links": {"urlPath": "/fakePath/home", "urlName": "LinksTest"},
-                "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"}
+                "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"},
+                "auto": null,
+                "full_namex": 'hi' //null
             },
 
             // {"a": 1, "b":'x'},

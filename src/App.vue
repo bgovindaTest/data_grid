@@ -38,24 +38,11 @@
 <script>
 import { AgGridVue } from "ag-grid-vue3";
 // import VueModal from '@kouts/vue-modal'
-// import AutoComplete from "./components/GridEditors/AutoComplete"
+import AutoCompleteEditor from "./components/GridEditors/AutoCompleteEditor"
 import DateTimeEditor   from "./components/GridEditors/DateTimeSelector"
 import crudSelectEditor from "./components/GridEditors/CrudSelectEditor"
 // import SubGridSelector from "./components/GridEditors/SubGridSelector"
 // import GridHeader from "./components/GridLayout/Header"
-
-// let cellClassRules = {}
-//     cellClassRules['editable_pass_style']       = params => false
-//     cellClassRules['editable_error_style']      = params => false
-//     cellClassRules['non_editable_pass_style']   = params => false
-//     cellClassRules['non_editable_error_style']  = params => true
-
-// const ragCellClassRules = {
-//   'rag-green-outer': (params) => params.value === 2008,
-//   'rag-amber-outer': (params) => params.value === 2004,
-//   'rag-red-outer': (params) => params.value === 2000,
-// };
-
 
 import grid_controller from "@/mixins/grid_controller"
 export default {
@@ -63,10 +50,9 @@ export default {
   mixins: [grid_controller],
   components: {
     "ag-grid-vue":AgGridVue,
-    // "autoComplete": AutoComplete,
+    "autoCompleteEditor": AutoCompleteEditor,
     "dateTimeEditor":   DateTimeEditor,
     "crudSelectEditor": crudSelectEditor
-    // "deleteUndoSelector": DeleteUndoSelector,
     // // "subGridSelector": SubGridSelector,
     // "grid-header": GridHeader,
     // "Modal": VueModal

@@ -154,7 +154,7 @@ class AgRichParams {
         let cep = grid_column['cellEditorParams']
         cep['cellRenderer'] = function (params) {
                 let val = params.value
-                if (val === null) { return `<p>${val}</p>` }
+                if (val === null) { return `<p>${val}</p>` }    
                 else {
                     val = params.value[displayKey]
                     return `<p>${val}</p>`
@@ -162,7 +162,7 @@ class AgRichParams {
         }
         grid_column['cellRenderer'] = function (params) {
                 let val = params.value // params.data[field][displayKey] || null
-                if (val === null) { return `<p></p>` }
+                if (val === null || typeof val === 'undefined') { return `<p></p>` }
                 else {
                     val = params.value[displayKey]
                     return `<p>${val}</p>`

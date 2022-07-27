@@ -39,7 +39,7 @@
 import { AgGridVue } from "ag-grid-vue3";
 // import VueModal from '@kouts/vue-modal'
 // import AutoComplete from "./components/GridEditors/AutoComplete"
-// import DateSelector from "./components/GridEditors/DateSelector"
+import DateTimeEditor   from "./components/GridEditors/DateTimeSelector"
 import crudSelectEditor from "./components/GridEditors/CrudSelectEditor"
 // import SubGridSelector from "./components/GridEditors/SubGridSelector"
 // import GridHeader from "./components/GridLayout/Header"
@@ -64,7 +64,7 @@ export default {
   components: {
     "ag-grid-vue":AgGridVue,
     // "autoComplete": AutoComplete,
-    // "dateSelector": DateSelector,
+    "dateTimeEditor":   DateTimeEditor,
     "crudSelectEditor": crudSelectEditor
     // "deleteUndoSelector": DeleteUndoSelector,
     // // "subGridSelector": SubGridSelector,

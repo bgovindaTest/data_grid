@@ -318,7 +318,7 @@ class AutoCompleteParams {
                 return true
             }
         
-            params.data[columnName] = key_value
+            params.data[field] = key_value
             return true
         }
         return fn

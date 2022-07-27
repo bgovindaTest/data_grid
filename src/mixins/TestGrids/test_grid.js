@@ -18,6 +18,7 @@ let test_grid = {
             // {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
             // {"field": "links", 'cellRenderer': "LinksRenderer" },
             {"field": "full_namex", 'cellEditor': "autoCompleteEditor", "editable": true,
+                "validator": "islookup(full_namex)",
                 "cellEditorParams": {
                     "valuesObject": [
                         {"full_namex": "B G", "first_name": "B", "last_name": "G", "id": "1"},
@@ -40,7 +41,7 @@ let test_grid = {
                 "num": 0, "links": {"urlPath": "/fakePath/home", "urlName": "LinksTest"},
                 "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"},
                 "auto": null,
-                "full_namex": 'hi' //null
+                "full_namex": null
             },
 
             // {"a": 1, "b":'x'},

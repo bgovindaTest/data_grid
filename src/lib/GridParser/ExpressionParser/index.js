@@ -62,7 +62,15 @@ function lookup(lookup_column, lookup_field) {
         console.error(`lookup field ${lookup_field} missing for column object ${lookup_column} `)
         return null
     }
+}
 
+function islookup(lookup_column) {
+    /*
+    If object or null counts as valid otherwise false
+    */
+    if (type_check.IsNull(lookup_column))      { return true}
+    if (type_check.IsObject(lookup_column) ) { return true}
+    else {return false}
 }
 
 
@@ -216,6 +224,7 @@ function ImportFunctions(mathx) {
         "ifnull": ifnull,
         "lookup": lookup,
         'nullcast': nullcast,
+        'islookup': islookup,
         'isobject': type_check.IsObject,
         'isstring': type_check.IsString,
         'isarray': type_check.IsArray,

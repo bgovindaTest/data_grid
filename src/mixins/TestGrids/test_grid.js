@@ -15,7 +15,7 @@ let test_grid = {
                     ]
                 }
             },
-            // {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' }
+            {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' }
 
 
 

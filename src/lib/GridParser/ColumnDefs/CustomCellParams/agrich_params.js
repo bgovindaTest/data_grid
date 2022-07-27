@@ -76,24 +76,12 @@ class AgRichParams {
                 // if (! params.value.urlPath) {
                     // console.log(params)
                     let val = params.value // params.data[field][displayKey] || null
-                    console.log(params.value)
                     if (val === null) { return `<p></p>` }
                     else {
                         val = params.value[displayKey]
                         return `<p>${val}</p>`
                     }
-            }
-
-
-                // let urlPath = params.value.urlPath
-                // let urlName = ""
-    
-                // if (! params.value.hasOwnProperty('urlName') ) { urlName = urlPath } 
-                // else { urlName = params.value.urlName }
-    
-                // //make urlPath url safe?
-                // return `<a href="${urlPath}" target="_blank" rel="noopener">'+ ${urlName}+'</a>`
-                // return '<a href="https://www.google.com" target="_blank" rel="noopener">'+ params.value+'</a>'       
+            }  
     
 
         } else {

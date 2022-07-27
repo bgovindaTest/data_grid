@@ -19,7 +19,7 @@ test('default params init default settings', () => {
           isRequired: false,
           ignoreError: false,
           dataType: 'text',
-          width: 500,
+          width: 200,
           editable: false,
           hide: false,
           headerName: 'a'
@@ -31,7 +31,7 @@ test('default params init default settings', () => {
           isRequired: false,
           ignoreError: false,
           dataType: 'text',
-          width: 500,
+          width: 200,
           editable: false,
           hide: false
         }
@@ -39,7 +39,7 @@ test('default params init default settings', () => {
   
     let x = new dp(grid)
     x.DefaultParamsInit()
-    expect(grid).toMathObject(res)
+    expect(grid).toMatchObject(res)
 })
 
 //check subGrid

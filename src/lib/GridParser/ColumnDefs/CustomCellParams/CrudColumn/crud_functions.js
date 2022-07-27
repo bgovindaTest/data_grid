@@ -46,7 +46,25 @@ class CrudColumnFunctions {
             // pages config.
             // let backups = {'backups': {}, 'row_type': '' }
         */
-    
+
+        //for copy
+        //https://stackoverflow.com/questions/36419195/how-can-i-get-the-index-from-a-json-object-with-value
+        // var data = [{"name":"placeHolder","section":"right"},{"name":"Overview","section":"left"},
+        //{"name":"ByFunction","section":"left"},{"name":"Time","section":"left"},{"name":"allFit","section":"left"},
+        //{"name":"allbMatches","section":"left"},{"name":"allOffers","section":"left"},{"name":"allInterests","section":"left"},
+        //{"name":"allResponses","section":"left"},{"name":"divChanged","section":"right"}];
+        // var index = -1;
+        // var val = "allInterests"
+        // var filteredObj = data.find(function(item, i){
+        //   if(item.name === val){
+        //     index = i;
+        //     return i;
+        //   }
+        // });
+        
+        // console.log(index, filteredObj);
+
+
         //is_crud
         //need to add column for delete
         let gf = {}
@@ -59,8 +77,12 @@ class CrudColumnFunctions {
         gf['Undo']         = this.UndoRow() //function to reset row based on backup values
         gf['Delete']       = this.DeleteRow()
         gf['UndoDelete']   = this.DeleteUndoRow()
-        //grid_changes before saving
+        gf['SetDelete']    = this.SetDelete()
+        //grid_changes before saving DeleteStatus
+        gf['DeleteStatus'] = this.DeleteStatus()
         gf['CrudStatus']   = this.CrudStatus()
+        //RowHigh uses params called directly by grid
+        gf['RowHeight']    = function (params) {return params.data[meta_column_name]['row_height'] || 25}
 
         //delete_warning
         gf['deleteWarning'] = grid['deleteWarning'] || ""
@@ -79,6 +101,13 @@ class CrudColumnFunctions {
         this.defaultValues = defValue
     }
 
+    /*
+    Insert, Update and Copy functions take a params object that contains
+    the row_index and query_data pulled from server and/or meta_column params
+
+    */
+
+
 
     InsertRowInit(defaultValues) {
         /*
@@ -91,11 +120,13 @@ class CrudColumnFunctions {
             returns rowData object
         */
         const rdv = this.ReturnDefaultValue
-        let fx = function () {
+        let fx = function (rowDataParams) {
             //rowData is empty object
             //fields
             let rowData = {}
             let meta_column = { 'crudType': 'insert', 'is_delete': false }
+            CreateMetaColumn(rowDataParams, meta_column)
+
             let insert_backups = {}
             let field_names = Object.keys(defaultValues)
             for (let i = 0; i< field_names.length; i++ ) {
@@ -124,19 +155,20 @@ class CrudColumnFunctions {
             //lodashCloneDeep
             //setNull
         */
-        let meta_column = { 'crudType': 'insert', 'is_delete': false }
         let setCopy = this.cloneOnCopy
-        let frow_copy = function (params) {
-            let initRowData = params.data
+        let frow_copy = function (rowDataParams) {
+            let initRowData = rowDataParams.data
+            let meta_column = { 'crudType': 'insert', 'is_delete': false }
+            CreateMetaColumn(rowDataParams, meta_column)
+
             let keys = Object.keys(initRowData)
             let newRowData = {}
-            newRowData[meta_column_name] = meta_column
             for (let i =0; i< keys.length; i++) {
                 let field = keys[i]
                 if (field === meta_column_name) {continue}
                 if (setCopy.includes(field) ) {
                     //lodashCloneDeep
-                    let val = params.data[field]
+                    let val = initRowData[field]
                     if (type_check.IsObject(val) || type_check.IsArray(val) ) {
                         newRowData[field] = lodashCloneDeep(val)
                     } else if (type_check.IsUndefined(val)) {
@@ -145,8 +177,10 @@ class CrudColumnFunctions {
                     else { newRowData[field] = val }
                 } else { newRowData[field] = null }
             }
-            meta_column['backup'] = lodashCloneDeep(newRowData)
-            return newRow
+            let backup = lodashCloneDeep(newRowData)
+            newRowData[meta_column_name] = meta_column
+            meta_column['backup'] = backup
+            return newRowData
         }
         return frow_copy
     }
@@ -156,42 +190,74 @@ class CrudColumnFunctions {
             rowData is preporcessed from QueryParams/Pull. Adds metadata column and copies rowData
             to backup
         */
-        let fu = function (rowData) {
+        let fu = function (rowDataParams) {
+
+            let rowData = rowDataParams.data
             //row_data is whats stored in server object
             let rowBackup = lodashCloneDeep(rowData) //messes up column order probably?
-            let meta_column = { 'crudType': 'update', 'is_delete': false, 'backup': rowBackup }
+            let meta_column = { 'crudType': 'update', 'is_delete': false}
+            CreateMetaColumn(rowDataParams, meta_column)
+            meta_column['backup'] = rowBackup 
             rowData[meta_column_name] = meta_column
         }
         return fu
     }
 
+
     UndoRow() {
         //reverts rowData to values from backups
-        let fundo = function (rowData) {
+        let fundo = function (rowDataParams) {
             //undo row to initial state.
+            let rowData = rowDataParams.data
             let backups = rowData[meta_column_name]['backup']
             let field_names = Object.keys(backups)
             for (let i = 0; i< field_names.length; i++ ) {
                 let field_name = field_names[i]
                 if (rowData.hasOwnProperty(field_name)) {
-                    rowData[field_name] = backups[field_name] || null 
+                    rowData[field_name] = backups[field_name]
+                    if (type_check.IsUndefined(rowData[field_name])) {
+                        rowData[field_name] = null
+                    }
                 }
             }
             rowData[meta_column_name]['is_delete'] = false
         }
         return fundo
     }
+    SetDelete() {
+        //sets delete to true
+        let SetDeleteRow = function (rowDataParams) {
+            let rowData = rowDataParams.data 
+            let change_delete = !rowData[meta_column_name]['is_delete']
+            rowData[meta_column_name]['is_delete'] = change_delete }
+        return SetDeleteRow
+
+    }
+    DeleteStatus() {
+        //sets delete to true
+        let DeleteStatus = function (rowDataParams) {
+            let rowData = rowDataParams.data 
+            return rowData[meta_column_name]['is_delete'] 
+        }
+        return DeleteStatus
+    }
+
+
     DeleteRow() {
         //sets delete to true
-        let DeleteRow = function (rowData) { rowData[meta_column_name]['is_delete'] = true }
+        let DeleteRow = function (rowDataParams) {
+            let rowData = rowDataParams.data    
+            rowData[meta_column_name]['is_delete'] = true 
+        }
         return DeleteRow
     }
     DeleteUndoRow() {
         //sets delete to false
-        return function DeleteUndoRow (rowData) { rowData[meta_column_name]['is_delete'] = false }
+        return function DeleteUndoRow (rowDataParams) { 
+            let rowData = rowDataParams.data    
+            rowData[meta_column_name]['is_delete'] = false 
+        }
     }
-
-
     //before crud operations.
     IsRowChanged() {
         //Determines if cell value is Null. If any value is empty its false
@@ -407,6 +473,62 @@ class CrudColumnFunctions {
             if (grid_column['cloneOnCopy'] || false) {
                 this.cloneOnCopy.push(field)
             }
+        }
+    }
+}
+
+function CreateMetaColumn(rowDataParams, default_meta_params) {
+    /* 
+    This module combines meta information sent from grid during use with
+    default parameters. Allows for dynamic overwrites of meta_column
+
+    rowDataParams has the same structure as aggrid params object. but only
+    contains a row_index and data field. the metacolumn in data can be used
+    to overwrite default behavior. 
+    rowDataParams {
+        row_index: integer
+        data: {  meta_column{  }  }
+        meta_column: {} //optional has higher priority then data.meta_column. used
+            //when something else should be used instead. mainly for copy row dont
+            //want to use the old meta column by default
+    }
+    //insert
+    { 'crudType': 'insert', 'is_delete': false }
+
+    //update
+
+
+    //copy
+    { 'crudType': 'insert', 'is_delete': false }
+
+    function getRowHeight(params) {
+    return params.data.rowHeight;
+    }
+    */
+    let mx = {}
+    if (rowDataParams.hasOwnProperty('meta_column') ) { mx = rowDataParams['meta_column']} 
+    else { 
+        let data = rowDataParams['data']  || {}        
+        mx = data[meta_column_name] || {} 
+    }
+
+    let defaultRowHeight = 25
+
+
+
+    let dfx = default_meta_params
+    // dfx['row_index'] = rowDataParams['row_index']
+    // if (dfx['row_index'] === -1) {console.error('row_index is -1. Unitialized index')}
+    let valid_crudTypes = ['insert', 'update']
+
+    dfx['row_height'] = mx['row_height'] || defaultRowHeight
+    if (typeof dfx['row_height'] != 'number' ) { dfx['row_height'] =defaultRowHeight }
+
+
+    if (mx.hasOwnProperty('crudType') ) {
+        let cT = mx['crudType']
+        if (valid_crudTypes.includes(cT)) {
+            dfx['crudType'] = cT
         }
     }
 }

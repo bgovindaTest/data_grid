@@ -39,11 +39,16 @@ function CrudColumnInit(grid) {
         }
     }
     du_column['field'] = meta_column_name
+    // du_column['cellEditor'] = "crudSelectEditor"
+    du_column['cellRenderer'] = "crudSelectEditor"
+
 
     let defaultCellEditorParams = {
         "allowDelete": {'update': true,  'insert': false}, //shows delete for pulled data only (has precedence)
         "allowUndo":   {'update': true,  'insert': true}, //shows undo for insert and update  (has precedence)
-        "allowCopy":   {'update': true,  'insert': true} //show + for copy row.
+        "allowCopy":   {'update': true,  'insert': true}, //show + for copy row.
+        "allowRemove": {'update': false,  'insert': true}
+        //gridFunctions added in main mixin. requires access to parameters not created until page is initialized
     }
     SetDefaults(du_column)
     if (!du_column.hasOwnProperty('cellEditorParams') ) { 
@@ -53,7 +58,9 @@ function CrudColumnInit(grid) {
     SetParameters('allowDelete', cellEditorParams, defaultCellEditorParams)
     SetParameters('allowUndo', cellEditorParams, defaultCellEditorParams)
     SetParameters('allowCopy', cellEditorParams, defaultCellEditorParams)
+    SetParameters('allowRemove', cellEditorParams, defaultCellEditorParams)
 
+    // du_column['editable'] = true
     //always at beginning. maybe hidden though.
     if (! is_defined) {
         grid.unshift(du_column)

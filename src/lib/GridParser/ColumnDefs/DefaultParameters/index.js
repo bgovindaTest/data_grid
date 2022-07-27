@@ -123,10 +123,11 @@ class DefaultParams {
         if (! grid_column.hasOwnProperty('isRequired'))  { grid_column['isRequired']  = false }
         if (! grid_column.hasOwnProperty('ignoreError')) { grid_column['ignoreError'] = false }
         if (! grid_column.hasOwnProperty('dataType'))    { grid_column['dataType'] = 'text'}
-        if (! grid_column.hasOwnProperty('width'))       { grid_column['width'] = 500 }
+        if (! grid_column.hasOwnProperty('width'))       { grid_column['width'] = 200 }
         if (! grid_column.hasOwnProperty('editable') )   { grid_column['editable'] = false }
         if (! grid_column.hasOwnProperty('hide') )       { grid_column['hide'] = false }
         if (! grid_column.hasOwnProperty('cloneOnCopy') ){ grid_column['cloneOnCopy'] = false }
+        if (! grid_column.hasOwnProperty('resizable') )  { grid_column['resizable'] = true }
         //cloneOnCopy if true add fields values to new row else set as null
 
         this.IfNull(grid_column)

@@ -37,8 +37,10 @@ test('insert new row function', () => {
     let defaultValues = {'colA': {'value': 'a', 'dataType': '', 'key': '', ifNullSet: false, 'useKey': false }, 
         'colb': {'value': 'b', 'dataType': '', 'key': '', ifNullSet: false, 'useKey': false } }
     let f = x.InsertRowInit(defaultValues)
-    let rowData = f()
+    let rowDataParams = {}
+    let rowData = f(rowDataParams)
     let exp = {colA: 'a', colb: 'b', '_ag-meta_': { crudType: 'insert', is_delete: false,
+        row_height: 25,
         backup: { colA: 'a', colb: 'b' } }
     }
     expect(rowData).toMatchObject(exp)
@@ -48,11 +50,30 @@ test('update row function', () => {
     let x = new cf()
     let rowData = {'a':1, 'b': 2}
     let f = x.UpdateRowInit()
-    f(rowData)
+    let rowDataParams = {'data': rowData }
+
+    f(rowDataParams)
     let exp = { a: 1, b: 2,
         '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1, b: 2 } }
     }
     expect(rowData).toMatchObject(exp)
+})
+
+test('copy row function', () => {
+    let x = new cf()
+    x.cloneOnCopy = ['b'] 
+
+    let rowData =  { a: 1, b: 2,
+        '_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1, b: 2 } }
+    }
+    let rowDataParams = { 'data': rowData, 'meta_column': {}}
+    let f = x.CopyRowInit()
+    let newRowData = f(rowDataParams)
+    let exp = {'a': null, 'b': 2, '_ag-meta_': { crudType: 'insert', is_delete: false,
+        row_height: 25,
+        backup: { 'a': null, 'b': 2 } }
+    }
+    expect(newRowData).toMatchObject(exp)
 })
 
 test('undo row function', () => {
@@ -61,7 +82,7 @@ test('undo row function', () => {
         '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1, b: 2 } }
     }
     let f = x.UndoRow()
-    f(rowData)
+    f({'data':rowData})
     let exp = { a: 1, b: 2,
         '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1, b: 2 } }
     }
@@ -72,7 +93,7 @@ test('delete row function', () => {
     let x = new cf()
     let rowData = { a: 1, '_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1} } }
     let f = x.DeleteRow()
-    f(rowData)
+    f({'data':rowData})
     let exp = { a: 1,'_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1 } } }
     expect(rowData).toMatchObject(exp)
 } )
@@ -81,7 +102,7 @@ test('undo delete row function', () => {
     let x = new cf()
     let rowData = { a: 1, '_ag-meta_': { crudType: 'update', is_delete: true, backup: { a: 1} } }
     let f = x.DeleteUndoRow()
-    f(rowData)
+    f({'data':rowData})
     let exp = { a: 1,'_ag-meta_': { crudType: 'update', is_delete: false, backup: { a: 1 } } }
     expect(rowData).toMatchObject(exp)
 } )

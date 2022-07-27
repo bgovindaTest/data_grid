@@ -30,4 +30,29 @@ function SubGridNameFunction( rowData, subgridNameConfig ) {
 
 }
 
+// HeaderParams() {
+//     /*
+//     Sets header params
+
+//     */
+//     let headerParams  = this.headerParams
+//     headerParams['newSheet'] = false
+//     headerParams['addRow']   = true
+//     headerParams['save']   = true
+
+//     let is_read_only = headerParams['isReadOnly'] || false
+//     if (is_read_only) {
+//         headerParams['newSheet'] = false
+//         headerParams['addRow']   = false
+//         headerParams['save']   = false
+//     }
+//     if (type_check.IsNull(this.crudParams['insert'])) { 
+//         headerParams['addRow']   = false
+//         headerParams['newSheet'] = false
+//     }
+//     if (type_check.IsNull(this.crudParams['insert']) && type_check.IsNull(this.crudParams['update'])
+//         && type_check.IsNull(this.crudParams['delete'])) { headerParams['save']   = false }
+// }
+
+
 module.exports = HeaderParams

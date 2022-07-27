@@ -6,57 +6,17 @@ Each grid_column_rule has the structure below. A more indepth description is in 
     data_type: 
     cellEditorFramework: "autoComplete"
     cellEditorParams: {
-        rowDataValues: selectValues, for drop down?
-        return_value: 'appointment_code', (return_value is used as key)
-        column_info: [
-            {header: "id" , init_width: 50},
-            {header: "name", init_width: 50},
-            {header: "username", init_width: 75 },
-            {header: "email", init_width: 200 },
-            {header: "phone", init_width: 150 },
-            {header: "website", init_width: 100 }
-        ]
-        map_route: string
-        map_params: {} 
-        crud_value: 'id'
-        return_field: ""
-        view_aliases: {}
-        lookup_aliases: {}
+        rowData: from valuesObject
+        columnDefs: array or json object
     }
 
-    //make object by default. 
-
-    cellEditor: "autoComplete",
-The cellEditorFramework must be equal to 'AutocompleteAg' This tells the grid which input format to use.
-selectValues: is the array that contains all the data and return values for the autocomplete column and related calculated fields. The data can be 
-    initialized in each ./pages/xxx.vue if no map_route is defined i.e. !grid_row_rule.hasOwnProperty('map_route') this will be left unchanged. 
-    Otherwise this will be overwritten by data from the server.
-return_value: this is a name of a unique column in selectValues. This is whats returned by the autocomplete. Its also used as the key
-    in the created maping function that allows calculated columns to generate values based on the return value inputed in a cell
-api_route: this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
-    to extract the selectValues array. 
-    use post or get route?
-crud_value:
-
-
-axios return object
-{ 'error_msg': err_msg, 'is_error': true, 'rows': [], 'table_name': table_name, 'route_name': route_name }
-
-Returns:
-autocomplete_map[field] -> {'selectValues': [{}], 'mapFunction': map_function, 'key': return_value, 'crud_value', crud_value }
-
-gridWidth + 'px'
+Not implemented for live searching yet. api_route is fired during initialization.
 -->
-
-
 <template>
-
-
-
   <div ref="autoCompleteArea" :style="{ width: gridWidth + 'px' }" >
     <input
       ref="input"
-      v-model="value"
+      v-model="search_str"
       style=" height: 28px; font-weight: 400; font-size: 12px;"
       :style="{ width: params.column.actualWidth + 'px' }"
         @keydown.down = 'onKeydown'
@@ -88,33 +48,25 @@ gridWidth + 'px'
 <script>
 import { AgGridVue } from "ag-grid-vue3";
 const debounce = require('debounce')
+const type_check = require('../../lib/TypeCheck')
 
 export default {
  
    data() {
        return {
             gridApi: null,
-
+            search_str: "",
             value: null,
+            backupValue: null,
             queryChars: 2,
-            gridHeight: 175,
-            gridWidth: 375,
+            gridHeight: 400,
+            gridWidth: 650,
             rowSelection: "single",
-            propertyName: 'x',
+            propertyName: null,
+            displayKey: null,
             is_async: false,
-            columnDefs: [
-                { field: "x" },
-                { field: "y" },
-            ],
-
-            rowData: [
-                { x: "Toyota",  y: "Celica"},
-                { x: "Ford",    y: "Mondeo"},
-                { x: "Porsche", y: "Boxster"},
-                { x: "Brandon", y: "G"},
-                { x: "Kim", y: "K"},
-            ],
-
+            columnDefs: null,
+            rowData: null,
             overlayNoRowsTemplate: '<span class="ag-overlay-loading-center">No Rows</span>',
             overlayLoadingTemplate: '<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'
        }
@@ -129,8 +81,8 @@ export default {
        // the final value to send to the grid, on completion of editing
         getValue() {
             // this simple editor doubles any value entered into the input
-            let fx = this.handleClickOutside
-            document.removeEventListener('click', fx)
+            // let fx = this.handleClickOutside
+            // document.removeEventListener('click', fx)
             this.params.eGridCell.focus()
             return this.value;
         },
@@ -147,17 +99,22 @@ export default {
         // Gets called once when editing is finished (eg if Enter is pressed).
         // If you return true, then the result of the edit will be ignored.
         isCancelAfterEnd() {
-            // our editor will reject any value greater than 1000
-            return this.value > 1000;
+            let x = this.value
+            if (type_check.IsNull(x) )     {return false}
+            if (type_check.IsObject(x) )   {return false}
+            if (type_check.IsUndefined(x)) {return false}
+            return true
         },
 
         rowConfirmed() {
             let x = this.gridApi.getSelectedRows()[0]
-            if (this.gridApi.getSelectedRows()[0]) {
-                this.selectedObject = this.gridApi.getSelectedRows()[0];
+
+            if (this.gridApi.getRenderedNodes().length === 0) {
+                this.value = null
+            } else if (x) {
+                this.selectedObject = x
                 this.isCanceled = false;
-                this.value = this.selectedObject['x']
-                //console.log(this.value)
+                this.value = this.selectedObject
             }
             //get firs row_data field?
             this.params.api.stopEditing();
@@ -167,13 +124,12 @@ export default {
 
         rowClicked(event) {
             this.selectedObject = event.data;
-            this.value = this.selectedObject['x']
+            this.value = this.selectedObject
             this.isCanceled = false;
             this.params.api.stopEditing();
         },
 
         onGridReady(event) {
-            console.log('ongridread')
             this.gridApi = event.api;
             // this.gridApi.sizeColumnsToFit();
             // this.columnFilter = this.gridApi.getFilterInstance(this.propertyName);
@@ -181,7 +137,9 @@ export default {
             this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
             this.gridApi.ensureIndexVisible(0, "top");
             // console.log(this.gridApi.setQuickFilter)
-
+            if (this.search_str !== "" ) {
+                this.gridApi.setQuickFilter(this.search_str)
+            }
         },
 
         navigateGrid() {
@@ -234,47 +192,36 @@ export default {
         change: debounce( async function(e) {
                 this.gridApi.showLoadingOverlay();
                 // await new Promise(r => setTimeout(r, 2000))
-                this.gridApi.setQuickFilter(this.value)
+                this.gridApi.setQuickFilter(this.search_str)
                 if (this.gridApi.getDisplayedRowAtIndex(0) !== undefined) {
                     this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
                     this.gridApi.ensureIndexVisible(0, "top");
                 }
                 this.gridApi.hideOverlay()
-            }, 1000
+            }, 50
         ),
 
         client_filter() {
                 this.gridApi.showLoadingOverlay();
-                this.gridApi.setQuickFilter(this.value)
+                this.gridApi.setQuickFilter(this.search_str)
                 if (this.gridApi.getDisplayedRowAtIndex(0) !== undefined) {
                     this.gridApi.getDisplayedRowAtIndex(0).setSelected(true);
                     this.gridApi.ensureIndexVisible(0, "top");
                 }
                 this.gridApi.hideOverlay()
         },
-
-
-
         async server_filter() {
+            //need to implement
             this.gridApi.showLoadingOverlay()
-            //try catch
-
-            //await filter
-            //clear row_data
-            //add_new_data
             this.gridApi.hideOverlay()
 
         },
         set_params() {},
         handleClickOutside(event) {
-            // if (!this.$el.contains(event.target)) {
-            //     this.params.api.stopEditing();
-
-            // }
             if (!this.$refs.autoCompleteArea.contains(event.target)) {
                 //reset values?
-                this.params.api.stopEditing(); 
-
+                this.value = this.backupValue
+                this.params.api.stopEditing();
             }
 
         },
@@ -283,11 +230,35 @@ export default {
     mounted() {
         document.addEventListener('click', this.handleClickOutside)
         this.input = this.$refs.input;
-        this.value = this.params.value;
-        if (this.params.key == "Backspace") {this.value = "" } 
-        else if (this.params.key == "Delete") { this.value = ""}
-        else if (this.params.charPress !== null ) { this.value = this.params.charPress }
+        this.search_str =  "" //this.params.value;
+        if (this.params.key == "Backspace") {this.search_str = "" } 
+        else if (this.params.key == "Delete") { this.search_str = ""}
+        else if (this.params.charPress !== null ) { 
+            this.search_str = this.params.charPress 
+        }
+
+        // console.log(this.params.value)
+        // console.log(typeof this.params.value)
+
+        if (typeof this.params.value === "string") {
+            this.search_str = this.params.value
+        }
+        let colDef = this.params.colDef
+        let cep = colDef['cellEditorParams']
+        this.columnDefs = cep['columnDefs']
+        this.rowData    = cep['rowData']
+        this.displayKey = cep['displayKey']
+        this.propertyName = cep['displayKey']
+        if (cep.hasOwnProperty('gridHeight') ) {this.gridHeight = cep['gridHeight']}
+        if (cep.hasOwnProperty('gridWidth') ) {this.gridWidth   = cep['gridWidth']}
+        if (type_check.IsObject(this.params.value) ) {
+            this.backupValue = this.params.value
+        }
         this.$nextTick(() =>  { this.$refs.input.focus() } );
+    },
+    beforeUnmount() {
+        let fx = this.handleClickOutside
+        document.removeEventListener('click', fx)
     }
 }
 

@@ -15,7 +15,8 @@ cellEditorParams: {
     pullKey: =  //defaults to id //pullAndDisplay same key
     displayKey: //defaults to id (this goes into values)
     mapObjectLookupFields: defaults to all in object. otherwise fitler
-    api: url_string
+    valuesObject (optional) if hardcoded into config pull from here
+    api_route: url_string
     mapObject: {key: value} takes select value and returns other value for crud
         mapObject[rowData['field] ] = {pushKey: pull_id}
         or 
@@ -53,12 +54,12 @@ class AgRichParams {
         let isLookup = grid_column['isLookup'] || false
 
         if (isLookup ) {
-            let cep = grid_column['cellEditorParams']
             this.ValuesAndMapObject()
+            this.CellEditor(grid_column)
             grid_column['isLookup'] = true
-            this.ValueGetter( grid_column, cep['mapObject']  )
-            this.ValueSetter( grid_column, cep['mapObject']  )
 
+
+    
 
         } else {
             this.ValuesDropDown()
@@ -126,7 +127,8 @@ class AgRichParams {
             let x = valuesObject[i]
             let dk = x[displayKey]
             mapObject[dk] = this.MapObjectFields(x) //y {'id: 1} -> {'user_id': 1}
-            values.push(dk)
+            values.push(x)
+            //values.push(dk)
         }
         let cep = this.grid_column['cellEditorParams']
         cep['values']    =  values
@@ -146,6 +148,28 @@ class AgRichParams {
         return svalues
     }
 
+    CellEditor(grid_column) {
+        //for lookups shows displayKey in dropdown and in cell field
+        let displayKey = this.grid_column['cellEditorParams']['displayKey']
+        let cep = grid_column['cellEditorParams']
+        cep['cellRenderer'] = function (params) {
+                let val = params.value
+                if (val === null) { return `<p>${val}</p>` }    
+                else {
+                    val = params.value[displayKey]
+                    return `<p>${val}</p>`
+                }
+        }
+        grid_column['cellRenderer'] = function (params) {
+                let val = params.value // params.data[field][displayKey] || null
+                if (val === null || typeof val === 'undefined') { return `<p></p>` }
+                else {
+                    val = params.value[displayKey]
+                    return `<p>${val}</p>`
+                }
+        }
+    }
+
 
     ValueSetter( grid_column, mapObject  ) {
         /*
@@ -155,24 +179,38 @@ class AgRichParams {
         if (grid_column.hasOwnProperty('valueSetter')) {return}
         const field = grid_column['field']
         let fn = function (params) {
-            let val = params.data[field]
-            if (val === null ) { return null}
+            // console.log('wtf')
+            // console.log(params.data)
+            // console.log(params.newValue)
+            let val = params.newValue //params.data[field]
+            //console.log(val)
+            console.log(val)
+            if (val === null ) { 
+                params.data[field] = null
+                return true
+            }
             else if ( type_check.IsUndefined(params.data[field]) ) {
                 console.error(`undefined`)
-                return null
+                params.data[field] = null
+                return true
             }
 
-            let backupVal = params[meta_column_name]['backup'][field]
-            if (val === backupVal) {return val}
-            else if (mapObject.hasOwnProperty(val) ) {
-                return mapObject(val) //mapObject should have 
+            let backupVal = params.data[meta_column_name]['backup'][field]
+            if (val === backupVal) {
+                params.data[field] = val
+                return true
             }
-            return null
+            else if (mapObject.hasOwnProperty(val) ) {
+                params.data[field] = mapObject[val]
+                return  true
+            }
+            params.data[field] = null
+            return true
         }
         grid_column['valueSetter'] = fn
     }
 
-    ValueGetter(grid_column) {
+    ValueFormatter(grid_column) {
         /*
             Returns null or displayValue of object for richselector when set as a 
             lookup
@@ -184,15 +222,44 @@ class AgRichParams {
         let displayKey = grid_column['displayKey'] 
 
         let fn = function (params) {
+            console.log('valueGeter')
+            console.log(params.data[field])
             if (type_check.IsNull(params.data[field]) ) {return null}
             else if ( type_check.IsUndefined(params.data[field]) ) {
                 console.error(`undefined`)
                 return null
             }
-            return params.data[field][displayKey] || null
+            return  params.data[field][displayKey] // || null
         }
-        grid_column['valueGetter'] = fn
+        grid_column['valueFormatter'] = fn
     }
+    // ValueGetter(grid_column) {
+    //     /*
+    //         Returns null or displayValue of object for richselector when set as a 
+    //         lookup
+    //     */
+
+    //     //data is object for autocomplete
+    //     if (grid_column.hasOwnProperty('valueGetter')) {return}
+    //     let field = grid_column['field']
+    //     let displayKey = grid_column['displayKey'] 
+
+    //     let fn = function (params) {
+    //         console.log('valueGeter')
+    //         console.log(params.data)
+    //         if (type_check.IsNull(params.data[field]) ) {return null}
+    //         else if ( type_check.IsUndefined(params.data[field]) ) {
+    //             console.error(`undefined`)
+    //             return null
+    //         }
+
+    //         console.log(params.data[field])
+    //         return  'why' //params.data[field][displayKey] || null
+    //     }
+    //     grid_column['valueGetter'] = fn
+    // }
+
+
     CheckRequiredFields( valuesObject) {
         let displayKey = this.grid_column['cellEditorParams']['displayKey']
         let pushKey = this.grid_column['cellEditorParams']['pushKey']

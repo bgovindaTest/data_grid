@@ -42,7 +42,10 @@ class CustomCellParams {
         let cE = this.grid_column['cellEditor'] || "agTextCellEditor"
         let cR = this.grid_column['cellRenderer'] || ""
 
-        if (cE === "agTextCellEditor") { return }
+        if (cR === "LinksRenderer") {
+            let x = new Links(grid_column)
+            x.LinkInit()
+        } else if (cE === "agTextCellEditor") { return }
         else if ( cE  === "autoCompleteEditor" ) {
             let x = new AutoCompleteParams(grid_column, valuesObject)
             x.AutoCompleteParamsInit()
@@ -60,9 +63,6 @@ class CustomCellParams {
             x.SubGridParamsInit()
         } else if (cE === 'crudSelectEditor' || field === data_config.meta_column_name) {
             return
-        } else if (cR === "LinksRenderer") {
-            let x = new Links(grid_column)
-            x.LinkInit()
         }
         else {
             console.error(`invalid cellEditor ${cE} for field ${field}`)

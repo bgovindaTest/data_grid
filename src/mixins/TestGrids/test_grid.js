@@ -15,7 +15,9 @@ let test_grid = {
                     ]
                 }
             },
-            {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' }
+            {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
+            {"field": "links", 'cellRenderer': "LinksRenderer" }
+
 
 
 
@@ -24,7 +26,11 @@ let test_grid = {
             "default": "localhost:8080"
         },
         "tableData": [
-            {"num": 0, "b":null, "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"}},
+            {
+                "num": 0, "links": {"urlPath": "/fakePath/home", "urlName": "LinksTest"},
+                "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"}
+            },
+
             // {"a": 1, "b":'x'},
             // {"a": 2, "b":'y'},
             // {"a":-4, "b":'z'}

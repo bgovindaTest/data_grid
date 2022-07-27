@@ -42,7 +42,7 @@ class LinkParams {
             else { urlName = params.value.urlName }
 
             //make urlPath url safe?
-            return `<a href="${urlPath}" target="_blank" rel="noopener">'+ ${urlName}+'</a>`
+            return `<a href="${urlPath}" target="_blank" rel="noopener">${urlName}</a>`
             // return '<a href="https://www.google.com" target="_blank" rel="noopener">'+ params.value+'</a>'       
         }
     }

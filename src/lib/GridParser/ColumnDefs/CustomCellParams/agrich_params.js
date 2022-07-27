@@ -54,34 +54,11 @@ class AgRichParams {
         let isLookup = grid_column['isLookup'] || false
 
         if (isLookup ) {
-            let cep = grid_column['cellEditorParams']
             this.ValuesAndMapObject()
+            this.CellEditor(grid_column)
             grid_column['isLookup'] = true
-            //this.ValueGetter( grid_column, cep['mapObject']  )
-            // this.ValueFormatter(grid_column)
-            //this.ValueSetter( grid_column, cep['mapObject']  )
-            let displayKey = this.grid_column['cellEditorParams']['displayKey']
-            let field = this.grid_column['field']
-            cep['cellRenderer'] = function (params) {
-                // if (! params.value.urlPath) {
-                    // console.log(params)
-                    let val = params.value // params.data[field][displayKey] || null
-                    if (val === null) { return `<p>${val}</p>` }
-                    else {
-                        val = params.value[displayKey]
-                        return `<p>${val}</p>`
-                    }
-            }
-            grid_column['cellRenderer'] = function (params) {
-                // if (! params.value.urlPath) {
-                    // console.log(params)
-                    let val = params.value // params.data[field][displayKey] || null
-                    if (val === null) { return `<p></p>` }
-                    else {
-                        val = params.value[displayKey]
-                        return `<p>${val}</p>`
-                    }
-            }  
+
+
     
 
         } else {
@@ -169,6 +146,28 @@ class AgRichParams {
             svalues[field] = String(values_row[field])
         }
         return svalues
+    }
+
+    CellEditor(grid_column) {
+        //for lookups shows displayKey in dropdown and in cell field
+        let displayKey = this.grid_column['cellEditorParams']['displayKey']
+        let cep = grid_column['cellEditorParams']
+        cep['cellRenderer'] = function (params) {
+                let val = params.value
+                if (val === null) { return `<p>${val}</p>` }
+                else {
+                    val = params.value[displayKey]
+                    return `<p>${val}</p>`
+                }
+        }
+        grid_column['cellRenderer'] = function (params) {
+                let val = params.value // params.data[field][displayKey] || null
+                if (val === null) { return `<p></p>` }
+                else {
+                    val = params.value[displayKey]
+                    return `<p>${val}</p>`
+                }
+        }
     }
 
 

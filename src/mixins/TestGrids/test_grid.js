@@ -40,10 +40,6 @@ let test_grid = {
                 "full_namex": null,
                 "date": null
             },
-
-            // {"a": 1, "b":'x'},
-            // {"a": 2, "b":'y'},
-            // {"a":-4, "b":'z'}
         ]
     }
 ]}

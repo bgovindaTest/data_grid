@@ -67,13 +67,20 @@ data () {
         gridFunctions: null,
 
         valuesObject: {}, //contains values for lookups
-        //modalParams
-        saveModal: false,
-        filterModal: false,
-        orderByModal: false,
-
+        //boolean values for modal
+        modalParams: {
+            saveModal: false,
+            filterModal: false,
+            orderByModal: false,
+            helpModal: false,
+            subGridModal: false
+        }
     }
 },
+
+//computed get page number
+//{'limit': limit, 'offset': 0, 'page_index': 0, 'page_size': page_size }
+
 
 methods: {
     /*
@@ -119,7 +126,7 @@ methods: {
         this.columnDefs = px['columnDefs']
     },
 
-    ValuesObjectParser(gridIndex, columnDefs) {
+    async ValuesObjectParser(gridIndex, columnDefs) {
         /*
             gridIndex: positions of columnDefs in pageParams array
             columnDefs: definititions for a grid at the given index
@@ -150,33 +157,46 @@ methods: {
 
     NavHeaderParamsInit(navHeaderParams) {
         /*
-            Initialization functions
-            navHeaderParams: {
-                name: 'x'
-                links: [{'name': xxx, 'url': xxx }],
-                help: "",
-                addRow:   false,
-                newSheet: false,
-                save: false,
-                showFilter: false,
-                showSort:   false,
-                showSearchBar: false //not implemented yet
-                showHome: true,
-                loadData: true
-            }
+            Initialization nav header params for navbar functionality
         */
-        let navParams ={'name': "", 'help': "", addRow:   false,
-            newSheet: false, save: false, showFilter: false,
-            showSort:   false,  showHome: false,
-            showSearchBar: false, loadData: true //not implemented yet
+        let defaultNavHeaderParams ={
+                'home': true,
+                'help': false,
+                'links': [],// or object array. 
+                'previous_page':  false, //for pagination
+                'next_page':  false, //for pagination
+                'pull_data':  false, //for pagination
+                'page_number': true,
+                'save':  false,
+                'add_row':   true,
+                'new_sheet': false,
+                'load_data_init': true,
+                'help': ""
         }
-        let keys = Object.keys(navParams)
+        let keys = Object.keys(defaultNavHeaderParams)
         for(let i =0; i < keys.length; i+=1 ) {
             let key = keys[i]
-            if (! navHeaderParams.hasOwnProperty(key)) {
-                navHeaderParams[key] = navParams[key]
-            }
+            if (! navHeaderParams.hasOwnProperty(key)) { navHeaderParams[key] = defaultNavHeaderParams[key] }
         }
+        let homeRoute = {'name': "Home", 'url': '/'}
+        if(navHeaderParams['links'] === null ) {
+            navHeaderParams['links'] = []
+            this.navHeaderParams = navHeaderParams
+            return
+        } else if (navHeaderParams['home'] === false ) {
+            this.navHeaderParams = navHeaderParams
+            return   
+        }
+        let links = navHeaderParams['links']
+        let home_hit = false
+        for(let i =0 ; i < links.length; i++ ) {
+            let link = links[i]
+            if (link.name === 'Home') { 
+                home_hit = true
+                break
+            }
+        }        
+        if (! home_hit ) { links.unshift(homeRoute) }
         this.navHeaderParams = navHeaderParams
     },
     RunColumnDefsInit() {

@@ -4,7 +4,7 @@
         <div class="navbar-start">
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" v-if="display.add"> <strong>Add Row</strong> </a>
+                    <a class="button is-light" v-if="display.add_row"> <strong>Add Row</strong> </a>
                 </div>
             </div>
 
@@ -89,10 +89,12 @@ export default {
             default: [
                 {'name': 'Home',  'url': "/"},
             ]
+        },
+        page_number: {
+            type: Number,
+            default: 1
         }
     },
-
-
     data () {
         return {
             //show icons for header?
@@ -100,9 +102,12 @@ export default {
                 'home': false,
                 'help': false,
                 'links': false,
-                'page':  false, //for pagination
+                'previous_page':  false, //for pagination
+                'next_page':  false, //for pagination
+                'pull_data':  false, //for pagination
+                'page_number': true,
                 'save':  false,
-                'add':   false,
+                'add_row':   true,
                 'new_sheet': false
             }
         }

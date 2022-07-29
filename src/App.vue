@@ -1,10 +1,18 @@
 <template>
 <div>
 
-<div v-if="loading">loading</div>
+
+
+
+<div v-if="loading">
+  <!-- error msg change color display message i.e. permission denied contact xyz -->
+  <page-loader />
+</div>
 <div v-else>
   <order-by :orderByParams="orderByParams"/>
 </div>
+
+
   <!-- <order-by :orderByParams="orderByParams"/> -->
 
   <!-- <grid-header 
@@ -61,11 +69,14 @@ import GridHeader from "./components/Header"
 /*
 Modals
 */
-import OrderBy from "./components/CrudModals/QueryParams/OrderBy"
+import OrderBy    from "./components/OrderBy"
+import Help       from "./components/Help"
+import PageLoader from "./components/PageLoader"
 
-
-
+//main mixin
 import grid_controller from "@/mixins/grid_controller"
+
+
 export default {
   name: "App",
   mixins: [grid_controller],
@@ -77,7 +88,9 @@ export default {
     // // "subGridSelector": SubGridSelector,
     "grid-header": GridHeader,
     // "Modal": VueModal,
-    "order-by": OrderBy
+    "order-by": OrderBy,
+    "help": Help,
+    'page-loader': PageLoader
   },
   methods: {
     Log() {
@@ -104,7 +117,8 @@ export default {
 
       */
       this.MainGridInit()
-      this.loading = false
+      await new Promise(r => setTimeout(r, 1000))
+      // this.loading = false
   }
 
 

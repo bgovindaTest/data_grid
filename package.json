@@ -22,6 +22,7 @@
     "flatpickr": "^4.6.13",
     "lodash": "^4.17.21",
     "lodash.clonedeep": "^4.5.0",
+    "markdown-it": "^13.0.1",
     "mathjs": "^10.5.3",
     "moment": "^2.29.3",
     "vue": "^3.0.0",

@@ -1,11 +1,37 @@
 <template>
-<div class="dx">
-    <svg class="spinner" viewBox="0 0 50 50">
-    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-    </svg>
+<div>
+  <div v-if="is_error" style="padding-left: 20px; padding-top: 20px;">
+    <h1>Error</h1>
+    <p>{{error_msg}}</p>
 
+  </div>
+  <div class="dx" v-else>
+      <svg class="spinner" viewBox="0 0 50 50">
+      <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+      </svg>
+  </div>
 </div>   
 </template>
+
+<script>
+//loading screen. if error occurs display error.
+
+export default {
+  props: {
+    error_msg: {
+      String,
+      default: ""
+    }
+  },
+  computed: {
+    is_error() {
+      return this.error_msg.length > 0
+    }
+  }
+
+}
+</script>
+
 
 <style lang="scss">
 .dx {

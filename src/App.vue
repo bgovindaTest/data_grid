@@ -1,9 +1,15 @@
 <template>
 <div>
 
-  <grid-header 
-    @help="Log()"
+<div v-if="loading">loading</div>
+<div v-else>
+  <order-by :orderByParams="orderByParams"/>
+</div>
+  <!-- <order-by :orderByParams="orderByParams"/> -->
 
+  <!-- <grid-header 
+    @help="Log()"
+    :page_number="page_number"
   />
   <ag-grid-vue
     style="width: 100%; height: calc(100vh - 3.25rem)"
@@ -11,7 +17,7 @@
     :columnDefs="columnDefs"
     :rowData="tableData"
     @grid-ready="onGridReady"
-  />
+  /> -->
 
   <!-- <h1>hola</h1>
     @grid-ready="onGridReady"
@@ -52,6 +58,13 @@ import crudSelectEditor from "./components/GridEditors/CrudSelectEditor"
 // import SubGridSelector from "./components/GridEditors/SubGridSelector"
 import GridHeader from "./components/Header"
 
+/*
+Modals
+*/
+import OrderBy from "./components/CrudModals/QueryParams/OrderBy"
+
+
+
 import grid_controller from "@/mixins/grid_controller"
 export default {
   name: "App",
@@ -63,7 +76,8 @@ export default {
     "crudSelectEditor": crudSelectEditor,
     // // "subGridSelector": SubGridSelector,
     "grid-header": GridHeader,
-    // "Modal": VueModal
+    // "Modal": VueModal,
+    "order-by": OrderBy
   },
   methods: {
     Log() {
@@ -90,6 +104,7 @@ export default {
 
       */
       this.MainGridInit()
+      this.loading = false
   }
 
 

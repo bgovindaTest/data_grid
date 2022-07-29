@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            <div class="navbar-item">1</div>
+            <div class="navbar-item">{{page_number}}</div>
 
             <div class="navbar-item">
                 <div class="buttons">
@@ -92,7 +92,7 @@ export default {
         },
         page_number: {
             type: Number,
-            default: 1
+            default: -1
         }
     },
     data () {

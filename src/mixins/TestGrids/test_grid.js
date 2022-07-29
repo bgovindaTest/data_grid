@@ -2,11 +2,11 @@ let test_grid = {
 "grids": [
     {
         "columnDefs": [
-            {"field": "num", "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['num'] ,"validator":"ifnull(num,0)  > 0", 
+            {"field": "num", "headerName": "Number",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['num'] ,"validator":"ifnull(num,0)  > 0", 
                 "editable": true, "defaultFilter": true, "showFilter": false, "showSort": true},
-            {"field": "date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true},
+            {"field": "date", "headerName": "Date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true},
             {"field": "num_+_1",   "valueGetter": "ifnull(num,0) +1" , "validator": "ifnull(num,0) + 1 > 0"},
-            {"field": "full_name", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true,
+            {"field": "full_name", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true, "showSort": true,
                 "cellEditorParams": {
                     "valuesObject": [
                         {"full_name": "B G", "first_name": "B", "last_name": "G", "id": "1"},
@@ -17,7 +17,7 @@ let test_grid = {
             },
             {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
             {"field": "links","cloneOnCopy": true, 'cellRenderer': "LinksRenderer" },
-            {"field": "full_namex", 'cellEditor': "autoCompleteEditor", "editable": true,
+            {"field": "full_namex", 'cellEditor': "autoCompleteEditor", "editable": true, "showSort": true,
                 "validator": "islookup(full_namex)",
                 "cellEditorParams": {
                     "valuesObject": [

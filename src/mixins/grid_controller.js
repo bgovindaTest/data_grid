@@ -43,8 +43,8 @@ data () {
         is_read_only: false,
 
 
-        url_params: {},
-        global_params: {},
+        url_params: {},    //not implemented
+        global_params: {}, //not implemented
 
         //main_grid_params
         tableData: null,
@@ -55,10 +55,9 @@ data () {
         gridOptions: null,
 
         //
-        queryParams: {},
+        pageParams: {},
         orderByParams: {},
         filterParams: {},
-        enforcedFilterParams: {},
 
         //data ready for save stored here. allows for save to continue
         toSave: [], //stores payload
@@ -77,9 +76,13 @@ data () {
         }
     }
 },
-
-//computed get page number
-//{'limit': limit, 'offset': 0, 'page_index': 0, 'page_size': page_size }
+computed: {
+    page_number() {
+        //displayed in navbar to show current page
+        let page_index = this.pageParams['page_index']
+        return page_index + 1
+    }
+},
 
 
 methods: {
@@ -113,10 +116,9 @@ methods: {
         let valuesObject = this.valuesObject[0]
         let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
         let px  = cdi.RunGridColumnsInit()
-        // this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
+  
   
         const updx = px['gridFunctions']['Update']
-        // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
         this.tableData  = main_grid['tableData']
         for (let i=0; i < this.tableData.length; i++) {
             let rdp = {}
@@ -124,7 +126,19 @@ methods: {
             updx(rdp)
         }
         this.columnDefs = px['columnDefs']
+        this.LinkUIQueryParams(px['queryParams'])
+        console.log(this.orderByParams)
     },
+    LinkUIQueryParams( queryParams ) {
+        /*
+
+
+        */
+        this.pageParams     = queryParams['pageParams']
+        this.filterParams   = queryParams['filterParams']
+        this.orderByParams  = queryParams['orderByParams']
+    },
+
 
     async ValuesObjectParser(gridIndex, columnDefs) {
         /*

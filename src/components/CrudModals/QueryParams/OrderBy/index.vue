@@ -27,9 +27,9 @@ order_by object. This information is parsed by get_route_params on RunQuery.
   <div v-for="(n,index) in order_by" v-bind:key="index" >
         <p class="is-inline-block is-size-4 mr-2 mb-3" >{{SortLabel(index)}} </p>
         <div class="select" >
-          <select class="is-inline-bloc" v-model="order_by[index].column_name">
+          <select class="is-inline-bloc" v-model="order_by[index].column_name" @change="LogChange">
               <option value="" disabled selected hidden>Select a Column</option>
-              <option v-for="(valx, index2) in remaining_options(index)" :key="index2" :value="valx">{{valx}}</option>
+              <option v-for="(valx, index2) in remaining_options(index)" :key="index2" :value="valx">{{ReturnHeaderName(valx)}}</option>
           </select>
         </div>
         <div class="select" >
@@ -47,35 +47,73 @@ order_by object. This information is parsed by get_route_params on RunQuery.
 </template>
 <script>
 
+// {'headerName': headerName, 'column_name': field, 'order_by': 'asc' }
+// @change="someHandler"
+
+import type_check from '@/lib/TypeCheck'
 
 export default {
 
+  props: {
+    orderByParams: {
+      type: Object,
+      default: {
+        'new': [],
+        'orderByList': []
+      }
+    }
+  },
+
   data() {
     return {
-
-
-      order_by: [
-        {'column_name': "a", "column_order": "" },
-        {'column_name': "b", "column_order": "" },
-        {'column_name': "c", "column_order": "" },
-        {'column_name': "d", "column_order": "" }
-      ],
-      columnSortNames: ['a','b','c','d','e','f','g','h','i',
-        'j','k', 'l','m','n','o','p','q','r','s','t'] //,
+      order_by: null,  
+      // [
+      //   {'column_name': "a", "column_order": "" },
+      //   {'column_name': "b", "column_order": "" },
+      //   {'column_name': "c", "column_order": "" },
+      //   {'column_name': "d", "column_order": "" }
+      // ],
+      columnSortNames: [],
+      
+      // ['a','b','c','d','e','f','g','h','i',
+      //   'j','k', 'l','m','n','o','p','q','r','s','t'], //,
       // 'b': b,
-      // 'vx': vx
+      // 'vx': vx,
+      headerNameMap: {}
     }
   },  
 
   mounted: function () {
+    this.order_by = this.orderByParams['new']
     if (this.order_by.length < 1) {
-      this.order_by.push({'column_name': "", "column_order": "asc" })
+      this.order_by.push({'headerName': "",'column_name': "", "column_order": "asc" })
+    }
+    let orderByList = this.orderByParams['orderByList']
+
+    for (let i=0; i< orderByList.length; i++) {
+      let ox = orderByList[i]
+      let column_name = ox['column_name']
+      let header_name = ox['headerName']
+      this.columnSortNames.push(column_name)
+      this.headerNameMap[column_name] = header_name
     }
     this.SetDefaultSortOrder()
   },
 
 
   methods: {
+    ReturnHeaderName(column_name) {
+      if (type_check.IsNull(column_name) || type_check.IsUndefined(column_name ) ) {return ""}
+      if (this.headerNameMap.hasOwnProperty(column_name)) {
+        return this.headerNameMap[column_name]
+      } else {
+        return ""
+      }
+    },
+    ChangeHeader(orderByRow) {
+      orderByRow['headerName'] = this.ReturnHeaderName(orderByRow['column_name'])
+    },
+
     remaining_options (index) {
       var tmp = []
       var current_value = this.order_by[index].column_name
@@ -147,42 +185,5 @@ export default {
     }
   }
 }
-
-function ColumnSortParams(where_sort_rules) {
-    /*
-    This function takes the where_sort_rules object and creates two objects used to determine what
-    columns can be sorted from the server data and an object to store the rules for the sort passed. The variable_name
-    is added to columnSortNames if the where_sort_rules as is_sort: true. if it has a sort_order: asc/desc as a default value
-    its added to the order_by object as a default 
-
-    returns:
-        columnSortNames: List of all columns that a user can sort by
-        order_by: [{'variable_name': , 'sort_order':}] a json list that contains what columns should be sorted
-            in what order and how.
-    */
-    var i
-    var columnSortNames = []
-    var sort_rules = []
-    for (i=0; i< where_sort_rules.length; i++) {
-        var variable_name = where_sort_rules[i].variable_name
-        if (! where_sort_rules[i].hasOwnProperty('is_sort') ) {continue}
-        var is_sort = where_sort_rules[i].is_sort
-        if (!is_sort) {continue}
-        if (!columnSortNames.includes(variable_name) ) { 
-            columnSortNames.push(variable_name) 
-            if (where_sort_rules[i].hasOwnProperty('sort_order') ) {
-                var sort_order = where_sort_rules[i].sort_order
-                if ( ['asc', 'desc'].includes(sort_order.toLowerCase()) ) {
-                    sort_rules.push({'variable_name': variable_name, 'sort_order': sort_order})
-                } else { sort_rules.push({'variable_name': variable_name, 'sort_order': 'desc'}) }
-            }
-        }
-    }
-    var output = {}
-    output['columnSortNames'] = columnSortNames
-    output['order_by'] = sort_rules
-    return output
-}
-
 
 </script>

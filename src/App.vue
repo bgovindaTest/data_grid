@@ -1,67 +1,43 @@
 <template>
 <div>
+  <div v-if="loading">
+    <!-- error msg change color display message i.e. permission denied contact xyz -->
+    <page-loader />
+  </div>
+  <div v-else>
+    <grid-header 
+        @help="helpModal = true" @add-row="AddRow()"
+        @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
+        @pull-data="Log()" @previous-page="Log()" @next-page="Log()"
+        @new-sheet="Log()" @save="Log()"
+        :page_number="page_number"
+    />
 
+    <ag-grid-vue
+      style="width: 100%; height: calc(100vh - 3.25rem)"
+      class="ag-theme-alpine"
+      :columnDefs="columnDefs"
+      :rowData="tableData"
+      @grid-ready="onGridReady"
+      suppressPropertyNamesCheck="true"
+    />
 
-
-
-<div v-if="loading">
-  <!-- error msg change color display message i.e. permission denied contact xyz -->
-  <page-loader />
-</div>
-<div v-else>
-
-
-
-    <Modal v-model="qtest" modal-class="fullscreen-modal" title="Query parameters">
+    <Modal v-model="queryModal" modal-class="fullscreen-modal" title="Query parameters">
       <div class="tabs">
         <ul>
-          <li class="is-active"><a>Filters</a></li>
-          <li><a>Order By</a></li>
+          <li :class="{'is-active':  filter_active  }"><a @click="FilterModal">Filters</a></li>
+          <li :class="{'is-active': !filter_active  }"><a @click="OrderByModal">Order By</a></li>
         </ul>
       </div>
       <filters v-if="filter_active" :filterParams="filterParams"/>
       <order-by v-else :orderByParams="orderByParams"/>
     </Modal>
 
+    <Modal v-model="helpModal" modal-class="fullscreen-modal" title="Help Modal">
+      <help :help_msg="help_msg" />
+    </Modal>
 
-
-
-
-</div>
-
-
-  <!-- <order-by :orderByParams="orderByParams"/> -->
-
-  <!-- <grid-header 
-    @help="Log()"
-    :page_number="page_number"
-  />
-  <ag-grid-vue
-    style="width: 100%; height: calc(100vh - 3.25rem)"
-    class="ag-theme-alpine"
-    :columnDefs="columnDefs"
-    :rowData="tableData"
-    @grid-ready="onGridReady"
-  /> -->
-
-  <!-- <h1>hola</h1>
-    @grid-ready="onGridReady"
-
-    @help="console.log('help from main')"
-
-
-
-  </ag-grid-vue>
-    <Modal v-model="modalx.modal1" modal-class="fullscreen-modal" title="My first modal">
-        <ag-grid-vue
-          style="width: 100%; height: 100%"
-          class="ag-theme-alpine"
-          :columnDefs="columnDefs2"
-          :rowData="rowData2"
-        >
-        </ag-grid-vue>
-    </Modal> -->
-
+  </div>
 </div>
 </template>
 
@@ -104,14 +80,6 @@ export default {
     "help": Help,
     'page-loader': PageLoader
   },
-  data() {
-    return {
-      qtest: true,
-      filter_active: true,
-
-
-    }
-  },
 
   methods: {
     Log() {
@@ -152,6 +120,4 @@ export default {
   @import "./assets/bulma.scss";
   @import "./assets/vue_modal.scss";
   * { margin: 0 }
-
-
 </style>

@@ -4,23 +4,21 @@
         <div class="navbar-start">
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" v-if="display.add_row"> <strong>Add Row</strong> </a>
+                    <a class="button is-light" v-if="display.add_row" @click="Add()"> <strong>Add Row</strong> </a>
                 </div>
             </div>
 
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" v-if="display.new_sheet"> <strong>New Sheet</strong> </a>
+                    <a class="button is-light" v-if="display.new_sheet" @click="NewSheet()"> <strong>New Sheet</strong> </a>
                 </div>
             </div>
-
 
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" v-if="display.save"> <strong>Save</strong> </a>
+                    <a class="button is-light" v-if="display.save" @click="Save()"> <strong>Save</strong> </a>
                 </div>
             </div>
-
 
             <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link" v-if="display.links" >Links</a>
@@ -32,7 +30,7 @@
             <!-- pull data -->
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light"> <strong>Pull Data</strong> </a>
+                    <a class="button is-light" @click="PullData()"> <strong>Pull Data</strong> </a>
                 </div>
             </div>
 
@@ -41,7 +39,7 @@
             <!-- pagination -->
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light"> <strong>Previous Page</strong> </a>
+                    <a class="button is-light" @click="PreviousPage()"> <strong>Previous Page</strong> </a>
                 </div>
             </div>
 
@@ -49,7 +47,7 @@
 
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light"> <strong>Next Page</strong> </a>
+                    <a class="button is-light" @click="NextPage()"> <strong>Next Page</strong> </a>
                 </div>
             </div>
             <!--end paginaiont -->
@@ -57,8 +55,8 @@
             <!-- filter and sort -->
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light"><strong>Filter</strong> </a>
-                    <a class="button is-light"><strong> Sort </strong> </a>
+                    <a class="button is-light" @click="FilterModal()" ><strong>Filter</strong> </a>
+                    <a class="button is-light" @click="OrderByModal()"><strong> Sort </strong> </a>
                 </div>
             </div>
             <!-- end filter and sort -->
@@ -111,18 +109,18 @@ export default {
                 'new_sheet': false
             }
         }
-
     },
     methods: {
         Help() { this.$emit('help') },
+        PullData() { this.$emit('pull-data') } ,
         NextPage() { this.$emit('next-page') } ,
         PreviousPage() { this.$emit('previous-page') },
         Add() { this.$emit('add-row')},
         NewSheet() { this.$emit('new-sheet')},
         Save() {this.$emit('save')   },
-        ToUrl(urlPath) {
-            console.log(urlPath)
-        }
+        FilterModal()  { this.$emit('filter-modal')},
+        OrderByModal() { this.$emit('orderby-modal')   },
+        ToUrl(urlPath) { console.log(urlPath) }
     },
     mounted() {
         let dx = Object.keys(this.display)

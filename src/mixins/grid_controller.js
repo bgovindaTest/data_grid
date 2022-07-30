@@ -67,13 +67,20 @@ data () {
 
         valuesObject: {}, //contains values for lookups
         //boolean values for modal
-        modalParams: {
-            saveModal: false,
-            filterModal: false,
-            orderByModal: false,
-            helpModal: false,
-            subGridModal: false
-        }
+
+        queryModal: false,
+        filter_active: true, //if false use orderby
+
+        helpModal: false,
+        saveModal: false,
+        // modalParams: {
+        //     saveModal: false,
+        //     filterModal: false,
+        //     orderByModal: false,
+        //     helpModal: false,
+        //     subGridModal: false
+        // }
+        help_msg: "# placeholder not implemented yet \n# No Help Message"
     }
 },
 computed: {
@@ -125,7 +132,8 @@ methods: {
             rdp['data']      = this.tableData[i]
             updx(rdp)
         }
-        this.columnDefs = px['columnDefs']
+        this.columnDefs    = px['columnDefs']
+        this.gridFunctions = px['gridFunctions']
         this.LinkUIQueryParams(px['queryParams'])
     },
     LinkUIQueryParams( queryParams ) {
@@ -271,6 +279,16 @@ methods: {
         //navbar
         //columnDef
     },
+    FilterModal() {
+        this.queryModal = true
+        this.filter_active= true //if false use orderby
+    },
+    OrderByModal() {
+        this.queryModal = true
+        this.filter_active= false //if false use orderby
+    },
+
+
 
     GetRowHeight(params) {
         /* 
@@ -300,7 +318,7 @@ methods: {
     },
     AddRow() {
         //button push
-        const insertf  = gridFunctions['Insert']
+        const insertf  = this.gridFunctions['Insert']
         let newRowData = insertf({})
         this.gridApi.applyTransaction({'add':[newRowData]})
     },
@@ -308,7 +326,7 @@ methods: {
         /* Creates blank sheet for adding data */
         let pageSize = this.pageParams['limit']
         let rows = []
-        const insertf  = gridFunctions['Insert']
+        const insertf  = this.gridFunctions['Insert']
         for (let i =0; i < pageSize; i++) {
             let newRowData = insertf({})
             rows.push( newRowData )

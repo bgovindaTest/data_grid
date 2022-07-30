@@ -43,7 +43,9 @@ let test_grid = {
                 "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"},
                 "auto": null,
                 "full_namex": null,
-                "date": null
+                "date": null,
+                "datetime": null,
+                "time": null
             },
         ]
     }

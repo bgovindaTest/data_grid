@@ -129,7 +129,6 @@ export default {
   },
   methods: {
     flatPickerConfig(x) {
-      console.log(x)
       if (this.isTime ) {
         return  {
             enableTime: true,

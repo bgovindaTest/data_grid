@@ -15,21 +15,6 @@ function OnClose (dates, currentdatestring, picker) {
         setTimeout(() => {  that.params.api.stopEditing(); }, 10);
 }
 
-function ParseDate (datestr, format) {
-    // console.log(datestr, format)
-    let dx = TypeCastDate(datestr, format)
-    // return datestr
-    return dx
-}
-
-//enableTime
-//enableSeconds
-//range
-//allowInvalidPreload
-
-//to create a time picker
-//noCalendar
-//enableTime
 
 // {
 //   altInput: true,
@@ -67,53 +52,32 @@ week_number
 
 */
 
-
-function TypeCastDate(date_val, format_string) {
-    var date_formats = ['YYYY-MM-DD','YYYY-M-DD','YYYY-MM-D','YYYY-M-D', 'MM/DD/YYYY','M/DD/YYYY','MM/D/YYYY','M/D/YYYY']
-    var moment_date = moment(date_val, date_formats, true)
-    if (moment_date.isValid()) {
-        // return moment_date.format(format_string)
-        return moment_date.toDate()
-    } else {
-        return false
-    }
-}
-
 //update config from cellEditorParams
 export default {
-  data() {
-    return {
-        date: null,
-        config: {
-            allowInput: true,
-            onClose: OnClose
-            ,parseDate: ParseDate
-        }
-    };
-  },
-   beforeMount() {
-   },
+    data() {
+        return {
+            date: null,
+            config: {
+                allowInput: true,
+                onClose: OnClose
+                //,parseDate: ParseDate
+            }
+        };
+    },
+    beforeMount() {
+        let x = this.flatPickerConfig()
+        this.config = x
+    },
     components: { flatPickr },
 
 
-   mounted() {
-       that = this
+    mounted() {
+        that = this
         this.date = this.params.value;
         this.$nextTick(() => 
-        {
-            this.$refs.datePicker.fp.open();
-        }
-
-        
-        
-        
-        );
-   },
-
-
-
-
-   methods: {
+        { this.$refs.datePicker.fp.open(); });
+    },
+    methods: {
         getValue() {
             // this simple editor doubles any value entered into the input
             this.params.eGridCell.focus()
@@ -134,6 +98,32 @@ export default {
         isCancelAfterEnd() {
             // our editor will reject any value greater than 1000
             return false;
+        },
+        flatPickerConfig() {
+            let colDef   = this.params.colDef
+            let dataType = colDef['dataType']
+            if (dataType === 'time' ) {
+                return  {
+                    enableTime: true,
+                    enableSeconds: true,
+                    allowInput: true,
+                    noCalendar: true,
+                    onClose: OnClose                    
+                }
+            } else if (dataType === 'date' ) {
+                return {
+                    allowInput: true,
+                    onClose: OnClose
+                }
+
+            } else { //date time
+                return  {
+                    enableTime: true,
+                    enableSeconds: true,
+                    allowInput: true,
+                    onClose: OnClose
+                }
+            } 
         }
    }
 };

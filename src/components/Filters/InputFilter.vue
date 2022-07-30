@@ -49,10 +49,21 @@ let valid_operators = {'=': '=', '!=': '!=',
       </div>
     </div>
 
-    <div v-else-if="isTimeUnit" class="mt-2">
-      <flat-pickr ref="datePicker" v-model="filterRow.value" class="input box" placeholder="Enter date" ></flat-pickr>
-      <flat-pickr v-if="isBetweenInput" ref="datePicker2" v-model="filterRow.value2" class="input box" placeholder="Enter date" ></flat-pickr>
+    <div v-else-if="isTime" class="mt-2">
+      <flat-pickr ref="datePicker" v-model="filterRow.value" class="input box" placeholder="Enter date" :config="flatPickerConfig()" ></flat-pickr>
+      <flat-pickr v-if="isBetweenInput" ref="datePicker2" v-model="filterRow.value2" class="input box" placeholder="Enter date" :config="flatPickerConfig()" ></flat-pickr>
     </div>
+
+    <div v-else-if="isDate" class="mt-2">
+      <flat-pickr ref="datePicker" v-model="filterRow.value" class="input box" placeholder="Enter date" :config="flatPickerConfig()" ></flat-pickr>
+      <flat-pickr v-if="isBetweenInput" ref="datePicker2" v-model="filterRow.value2" class="input box" placeholder="Enter date" :config="flatPickerConfig()" ></flat-pickr>
+    </div>
+
+    <div v-else-if="isDateTime" class="mt-2">
+      <flat-pickr ref="datePicker" v-model="filterRow.value" class="input box" placeholder="Enter date" :config="flatPickerConfig()" ></flat-pickr>
+      <flat-pickr v-if="isBetweenInput" ref="datePicker2" v-model="filterRow.value2" class="input box" placeholder="Enter date" :config="flatPickerConfig()" ></flat-pickr>
+    </div>
+
 
     <div v-else-if="isText" class="mt-2">
       <div v-if="isInInput"> 
@@ -102,7 +113,8 @@ export default {
   },
   data() {
     return {
-      delimiterList: []
+      delimiterList: [],
+      dataType: null
     }
   },
   mounted() {
@@ -114,7 +126,27 @@ export default {
       x['delimiterName'] = typeName[ delimiterTypes[i] ]
       this.delimiterList.push( x )
     }
-    console.log(this.delimiterList)
+  },
+  methods: {
+    flatPickerConfig(x) {
+      console.log(x)
+      if (this.isTime ) {
+        return  {
+            enableTime: true,
+            enableSeconds: true,
+            allowInput: false,
+            noCalendar: true,
+        }
+      } else if (this.isDateTime ) {
+        return  {
+            enableTime: true,
+            enableSeconds: true,
+            allowInput: false,
+        }
+      } else { //(this.isDate) default{
+        return  {}
+      } 
+    }
   },
 
   components: { flatPickr },
@@ -126,7 +158,6 @@ export default {
       isTime() {return this.filterRow['dataType'] === 'time'},
       // isInterval() {return this.data_type === 'interval'},
       isBoolean() {return this.filterRow['dataType'] === 'bool' || this.filterRow['dataType'] === 'boolean'},
-      isTimeUnit() { return this.isDate||this.isDateTime || this.isTime },
 
       //determines input fields based on operator
       isBetweenInput() {
@@ -141,39 +172,6 @@ export default {
       isNullInput() {
         if ( data_config.null_parse_types.includes(     this.filterRow['operator'] )) { return true }
         return false
-      },
-      flatPickerConfig() {
-        if (this.isTime ) {
-          return  {
-              enableTime: true,
-              enableSeconds: true,
-              dateFormat: "YYYY-MM-DD  HH:MM:SS",
-              allowInput: false,
-              noCalendar: true,
-              parseDate: (datestr, format) => {
-                return type_check.TypeCastDateTime(datestr)
-              }
-          }
-        } else if (this.isDateTime ) {
-          return  {
-              enableTime: true,
-              enableSeconds: true,
-              dateFormat: "YYYY-MM-DD  HH:MM:SS",
-              allowInput: false,
-              parseDate: (datestr, format) => {
-                return type_check.TypeCastDateTime(datestr)
-              }
-          }
-        } else { //(this.isDate) default{
-          return  {
-              dateFormat: "YYYY-MM-DD",
-              allowInput: false,
-              parseDate: (datestr, format) => {
-                return type_check.TypeCastDate(datestr)
-              }
-          }
-        } 
-
       }
   }
 }

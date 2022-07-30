@@ -27,7 +27,12 @@ let test_grid = {
                     ],
                     "columnDefs": ["full_namex", "first_name", "last_name", "id"]
                 }
-            }
+            },
+            {"field": "datetime", "headerName": "DateTime", "cellEditor": 'dateTimeEditor', "dataType": "datetime",
+                "editable": true, "showSort": true, "showFilter": true},
+            {"field": "time", "headerName": "Time", "cellEditor": 'dateTimeEditor', "dataType": "time",
+                "editable": true, "showSort": true, "showFilter": true},
+
         ],
         "queryParams": {
             "default": "localhost:8080"

@@ -8,7 +8,7 @@ order_by object. This information is parsed by get_route_params on RunQuery.
   {'column_name': "a", "column_order": "" }
 -->
 <template>
-<div>
+<div class="container">
   <div class='level'>
     <div class="levelLeft">
       <button class="button is-small is-light" @click="AddRow()">Add</button>

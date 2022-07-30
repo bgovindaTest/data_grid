@@ -57,6 +57,13 @@ let valid_operators = {'=': '=', '!=': '!=',
     <div v-else-if="isText" class="mt-2">
       <div v-if="isInInput"> 
         <textarea class="textarea block" placeholder="e.g. Hello world" v-model="filterRow.value"></textarea>
+        <label class="label">Select Delimiter</label>
+        <div class="select">
+          <select v-model="filterRow.delimiterType">
+              <option v-for="(dx, index) in delimiterList" :key="index" :value="dx.delimiterType" >{{dx.delimiterName}}</option>
+          </select>
+        </div>
+
       </div>
       <div v-else>
         <input class="input" type="text" placeholder="text" v-model="filterRow.value">
@@ -93,6 +100,23 @@ export default {
       default: {}
     }
   },
+  data() {
+    return {
+      delimiterList: []
+    }
+  },
+  mounted() {
+    let delimiterTypes = Object.keys( data_config.delimiter_typeName )
+    let typeName = data_config.delimiter_typeName
+    for (let i =0; i < delimiterTypes.length; i++ ) {
+      let x = {}
+      x['delimiterType'] = delimiterTypes[i]
+      x['delimiterName'] = typeName[ delimiterTypes[i] ]
+      this.delimiterList.push( x )
+    }
+    console.log(this.delimiterList)
+  },
+
   components: { flatPickr },
   computed: {
       isNumber() { return data_config.number_types.includes(this.filterRow['dataType'] )},
@@ -118,7 +142,6 @@ export default {
         if ( data_config.null_parse_types.includes(     this.filterRow['operator'] )) { return true }
         return false
       },
-
       flatPickerConfig() {
         if (this.isTime ) {
           return  {

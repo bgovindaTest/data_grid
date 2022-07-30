@@ -3,22 +3,6 @@ The main filter module handles the display and where component for the queries. 
 
 The values stored in where are processed and stored in get_route_params. This object is used to help create the query params for the server.
 
-let cn = where_statements[i].column_name
-let cv = where_statements[i].value
-let op = where_statements[i].operator
-
-//value is data_type or array?
-
-{'in':[values]} //if from json string use 
-{'not_in':[values]}
-{'lt':value}
-{'gt':value}
-{'between':[values]} //must contain 2 values
-{'not_between':[values]} //must contain 2 values
-{'eq':value}
-{'neq':value}
-
-
 let valid_operators = {'=': '=', '!=': '!=', 
     '<>': '<>', '>':'>', '>=': '>=', 
     '<': '<', '<=': '<=', 
@@ -36,16 +20,9 @@ let valid_operators = {'=': '=', '!=': '!=',
     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
 }
-
-
-boolean
-number
-text
-date
-datetime
 -->
 <template>
-<div>
+<div class="container">
     <div class='level'>
         <div class="levelLeft">
             <button class="button is-small is-light" @click="AddRow()">Add</button>
@@ -74,12 +51,7 @@ datetime
         </div>
         <button class="delete ml-2 is-vcentered mt-2" type="button" @click="DeleteRowAtIndex(index)"></button>
         <input-filters :filterRow="filters[index]" />
-
-
-
     </div> 
-
-
 </div>
 </template>
 
@@ -139,7 +111,7 @@ methods: {
         let operator    = '='
         fx['value'] = null
         fx['valu2'] = null
-        fx['delimiterType'] = null
+        fx['delimiterType'] =  data_config.ReturnDelimiterType(null) 
         fx['operator']   = operator
         fx['dataType']   = dataType
         fx['headerName'] = this.headerNameMap[column_name]

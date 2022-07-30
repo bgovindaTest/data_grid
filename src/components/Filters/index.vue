@@ -22,7 +22,7 @@ let valid_operators = {'=': '=', '!=': '!=',
 }
 -->
 <template>
-<div class="container">
+<div class="ml-5 mr-5">
     <div class='level'>
         <div class="levelLeft">
             <button class="button is-small is-light" @click="AddRow()">Add</button>

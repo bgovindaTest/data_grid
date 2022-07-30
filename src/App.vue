@@ -10,8 +10,23 @@
 </div>
 <div v-else>
 
-  <filters :filterParams="filterParams"/>
-  <!-- <order-by :orderByParams="orderByParams"/> -->
+
+
+    <Modal v-model="qtest" modal-class="fullscreen-modal" title="Query parameters">
+      <div class="tabs">
+        <ul>
+          <li class="is-active"><a>Filters</a></li>
+          <li><a>Order By</a></li>
+        </ul>
+      </div>
+      <filters v-if="filter_active" :filterParams="filterParams"/>
+      <order-by v-else :orderByParams="orderByParams"/>
+    </Modal>
+
+
+
+
+
 </div>
 
 
@@ -35,15 +50,6 @@
     @help="console.log('help from main')"
 
 
-  <button @click="bxc()"> nada </button>
-  <div>
-    <button @click="json_pholder()"> call </button>
-    <div>{{ph}}</div>
-  </div> -->
-  <!-- <PageLoader /> -->
- <!-- <grid-header /> -->
-  <!-- <button @click="grid_hello">grid hello </button>
-
 
   </ag-grid-vue>
     <Modal v-model="modalx.modal1" modal-class="fullscreen-modal" title="My first modal">
@@ -61,7 +67,7 @@
 
 <script>
 import { AgGridVue } from "ag-grid-vue3";
-// import VueModal from '@kouts/vue-modal'
+import VueModal from '@kouts/vue-modal'
 import AutoCompleteEditor from "./components/GridEditors/AutoCompleteEditor"
 import DateTimeEditor   from "./components/GridEditors/DateTimeSelector"
 import crudSelectEditor from "./components/GridEditors/CrudSelectEditor"
@@ -71,7 +77,7 @@ import GridHeader from "./components/Header"
 /*
 Modals
 */
-import Filters     from "./components/Filters"
+import Filters    from "./components/Filters"
 import OrderBy    from "./components/OrderBy"
 import Help       from "./components/Help"
 import PageLoader from "./components/PageLoader"
@@ -90,12 +96,23 @@ export default {
     "crudSelectEditor": crudSelectEditor,
     // // "subGridSelector": SubGridSelector,
     "grid-header": GridHeader,
-    // "Modal": VueModal,
+
+
+    "Modal": VueModal,
     "order-by": OrderBy,
     "filters":   Filters,
     "help": Help,
     'page-loader': PageLoader
   },
+  data() {
+    return {
+      qtest: true,
+      filter_active: true,
+
+
+    }
+  },
+
   methods: {
     Log() {
       console.log('help from main')
@@ -133,7 +150,7 @@ export default {
   @import "~ag-grid-community/dist/styles/ag-grid.css";
   @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
   @import "./assets/bulma.scss";
-
+  @import "./assets/vue_modal.scss";
   * { margin: 0 }
 
 

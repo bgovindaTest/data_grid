@@ -33,9 +33,15 @@
       <order-by v-else :orderByParams="orderByParams"/>
     </Modal>
 
-    <Modal v-model="helpModal" modal-class="fullscreen-modal" title="Help Modal">
+    <Modal v-model="helpModal" title="Help Modal" modal-class="modalsm">
       <help :help_msg="help_msg" />
     </Modal>
+
+    <!-- <Modal v-model="saveModal" title="Save Modal" modal-class="modalsm">
+      <help :help_msg="help_msg" />
+    </Modal> -->
+
+
 
   </div>
 </div>

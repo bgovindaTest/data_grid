@@ -73,6 +73,7 @@ datetime
             </select>
         </div>
         <button class="delete ml-2 is-vcentered mt-2" type="button" @click="DeleteRowAtIndex(index)"></button>
+        <input-filters :filterRow="filters[index]" />
 
 
 
@@ -97,6 +98,9 @@ props: {
         'filterList': []
         }
     }
+},
+components: {
+    "input-filters": InputFilter
 },
 
 data() {

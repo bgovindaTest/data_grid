@@ -35,10 +35,7 @@ let valid_operators = {'=': '=', '!=': '!=',
     'like_in': "LIKE ANY", 'not_like_in': "NOT LIKE ALL",
     'ilike_in': "ILIKE ANY", 'not_ilike_in': "NOT ILIKE ALL",
 }
-
 -->
-
-
 <template>
 <div>
 
@@ -49,34 +46,43 @@ let valid_operators = {'=': '=', '!=': '!=',
     </div> -->
 
     <!-- operator defined -->
-    <div v-if="isTimeUnit">
+    <div v-if="isNullInput" />
 
-      <flat-pickr ref="datePicker" v-model="date" class="input box" placeholder="Text input button" ></flat-pickr>
-      <flat-pickr v-if="isBetween" ref="datePicker2" v-model="date" class="input box" placeholder="Text input button" ></flat-pickr>
+    <div v-else-if="isTimeUnit">
+      <br>
+      <flat-pickr ref="datePicker" v-model="filterRow.value" class="input box" placeholder="Text input button" ></flat-pickr>
+      <flat-pickr v-if="isBetween" ref="datePicker2" v-model="filterRow.value2" class="input box" placeholder="Text input button" ></flat-pickr>
 
     </div>
 
     <div v-else-if="isNumber">
       <!-- not in -->
-      <input class="input" type="number" placeholder="Number input">
-      <input v-if="isBetween" class="input" type="number" placeholder="Number input">
-      <!-- in no delimiter-->
-      <textarea class="textarea block" placeholder="e.g. Hello world"></textarea>
-
+      <br>
+      <div v-if="isInInput"> 
+        <textarea class="textarea block" placeholder="e.g. Hello world"></textarea>
+      </div>
+      <div v-else>
+        <input class="input" type="number" placeholder="Number input" v-model="filterRow.value">
+        <input v-if="isBetween" class="input" type="number" placeholder="Number input" v-model="filterRow.value2">
+      </div>
     </div>
 
 
     <div v-else-if="isText">
-      <!-- not in -->
-      <input class="input" type="text" placeholder="Number text">
-      <!-- in select delimiter -->
-      <textarea class="textarea block" placeholder="e.g. Hello world"></textarea>
-
+      <br>
+      <div v-if="isInInput"> 
+        <textarea class="textarea block" placeholder="e.g. Hello world"></textarea>
+      </div>
+      <div v-else>
+        <!-- not in -->
+        <input class="input" type="text" placeholder="Number text">
+      </div>
     </div>
 
     <div v-else-if="isBoolean">
+        <br>
         <div class="select" >
-          <select class="is-inline-block ml-2" v-model="order_by[index].column_order">
+          <select class="is-inline-block ml-2" v-model="filterRow.value">
               <option value="true" >True</option>
               <option value="false">False</option>
           </select>
@@ -105,30 +111,35 @@ export default {
   },
   computed: {
       isNumber() {
-          return this.data_type in ['integer', 'float', 'real', 
+          return this.filterRow['dataType'] in ['integer', 'float', 'real', 
             'number', 'decimal', 'numeric', 'smallint','bigint',
             'double precision', 'serial', 'bigserial', 'smallserial'
             ]
       },
-      isText() { return this.data_type in ['character', 'varying', 'varchar', 'char', 'text'] },
-      isDate() { return this.data_type === 'date' },
-      isDateTime() {return this.data_type === 'timestamp'},
-      isTime() {return this.data_type === 'time'},
-      isInterval() {return this.data_type === 'interval'},
-      isBoolean() {return this.data_type === 'bool' || this.data_type === 'boolean'},
-      isTimeUnit() { return this.isDate||this.isDateTime || this.isInterval },
+      isText() { return this.filterRow['dataType'] in ['character', 'varying', 'varchar', 'char', 'text'] },
+      isDate() { return this.filterRow['dataType'] === 'date' },
+      isDateTime() {return this.filterRow['dataType'] === 'timestamp'},
+      isTime() {return this.filterRow['dataType'] === 'time'},
+      // isInterval() {return this.data_type === 'interval'},
+      isBoolean() {return this.filterRow['dataType'] === 'bool' || this.filterRow['dataType'] === 'boolean'},
+      isTimeUnit() { return this.isDate||this.isDateTime || this.isTime },
+
+
 
       //determines input fields based on operator
       isBetweenInput() {
-        if (this.operator === "between" || this.operator === "not_bewteen") { return true }
+        if ( data_config.between_parse_types.includes(  this.filterRow['operator'] ) ) { return true }
         return false
       },
       isInInput() {
         //for textbox
+        if ( data_config.array_parse_types(this.filterRow['operator'] )) { return true }
+        return false
       },
-      isNullInput() {},
-      isDefaultInput() {},
-
+      isNullInput() {
+        if ( data_config.null_parse_types(this.filterRow['operator'] )) { return true }
+        return false
+      },
 
       flatPickerConfig() {
         if (this.isTime ) {

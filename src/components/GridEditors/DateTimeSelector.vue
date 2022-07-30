@@ -6,7 +6,6 @@
 
 <script>
 import flatPickr from 'vue-flatpickr-component';
-import moment from "moment"
 
 let that = null
 

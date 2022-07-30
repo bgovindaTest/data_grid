@@ -48,7 +48,7 @@ data () {
 
         //main_grid_params
         tableData: null,
-        navHeaderParams: null,
+        navHeaderParams: {},
         columnDefs: null,
         gridApi: null,
         columnApi: null,
@@ -70,16 +70,8 @@ data () {
 
         queryModal: false,
         filter_active: true, //if false use orderby
-
         helpModal: false,
         saveModal: false,
-        // modalParams: {
-        //     saveModal: false,
-        //     filterModal: false,
-        //     orderByModal: false,
-        //     helpModal: false,
-        //     subGridModal: false
-        // }
         help_msg: "# placeholder not implemented yet \n# No Help Message"
     }
 },
@@ -118,6 +110,7 @@ methods: {
 
         */
         let main_grid = testGrid['grids'][0]
+        let navHeaderParams = main_grid['naveHeaderParams'] || {}
         let columnDefConfig = main_grid['columnDefs']
         this.ValuesObjectParser(0, columnDefConfig)
         let valuesObject = this.valuesObject[0]
@@ -135,6 +128,7 @@ methods: {
         this.columnDefs    = px['columnDefs']
         this.gridFunctions = px['gridFunctions']
         this.LinkUIQueryParams(px['queryParams'])
+        this.NavHeaderParamsInit(navHeaderParams)
     },
     LinkUIQueryParams( queryParams ) {
         /*
@@ -182,17 +176,16 @@ methods: {
         */
         let defaultNavHeaderParams ={
                 'home': true,
-                'help': false,
+                'help': true,
                 'links': [],// or object array. 
-                'previous_page':  false, //for pagination
-                'next_page':  false, //for pagination
+                'previous_page':  true, //for pagination
+                'next_page':  true, //for pagination
                 'pull_data':  false, //for pagination
                 'page_number': true,
-                'save':  false,
-                'add_row':   true,
+                'save':  true,
+                'add_row':   false,
                 'new_sheet': false,
                 'load_data_init': true,
-                'help': ""
         }
         let keys = Object.keys(defaultNavHeaderParams)
         for(let i =0; i < keys.length; i+=1 ) {

@@ -28,11 +28,11 @@
             </div>
 
             <!-- pull data -->
-            <div class="navbar-item">
+            <!-- <div class="navbar-item">
                 <div class="buttons">
                     <a class="button is-light" @click="PullData()"> <strong>Pull Data</strong> </a>
                 </div>
-            </div>
+            </div> -->
 
             <!-- end pull data -->
 

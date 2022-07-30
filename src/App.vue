@@ -9,8 +9,9 @@
         @help="helpModal = true" @add-row="AddRow()"
         @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
         @pull-data="Log()" @previous-page="Log()" @next-page="Log()"
-        @new-sheet="Log()" @save="Log()"
+        @new-sheet="Log()" @save="saveModal = true"
         :page_number="page_number"
+        :navHeaderParams="navHeaderParams"
     />
 
     <ag-grid-vue
@@ -37,11 +38,9 @@
       <help :help_msg="help_msg" />
     </Modal>
 
-    <!-- <Modal v-model="saveModal" title="Save Modal" modal-class="modalsm">
-      <help :help_msg="help_msg" />
-    </Modal> -->
-
-
+    <Modal v-model="saveModal" title="Save Modal" modal-class="modalsm">
+      <save-data />
+    </Modal>
 
   </div>
 </div>
@@ -63,6 +62,7 @@ import Filters    from "./components/Filters"
 import OrderBy    from "./components/OrderBy"
 import Help       from "./components/Help"
 import PageLoader from "./components/PageLoader"
+import SaveData   from "./components/Save"
 
 //main mixin
 import grid_controller from "@/mixins/grid_controller"
@@ -76,15 +76,14 @@ export default {
     "autoCompleteEditor": AutoCompleteEditor,
     "dateTimeEditor":   DateTimeEditor,
     "crudSelectEditor": crudSelectEditor,
-    // // "subGridSelector": SubGridSelector,
     "grid-header": GridHeader,
-
 
     "Modal": VueModal,
     "order-by": OrderBy,
     "filters":   Filters,
     "help": Help,
-    'page-loader': PageLoader
+    'page-loader': PageLoader,
+    'save-data': SaveData
   },
 
   methods: {

@@ -40,9 +40,6 @@ order_by object. This information is parsed by get_route_params on RunQuery.
         </div>
         <button class="delete ml-2 is-vcentered mt-2" type="button" @click="DeleteRowAtIndex(index)"></button>
   </div>
-
-
-
 </div>
 </template>
 <script>
@@ -83,7 +80,7 @@ export default {
     }
   },  
 
-  mounted: function () {
+  mounted() {
     this.order_by = this.orderByParams['new']
     if (this.order_by.length < 1) {
       this.order_by.push({'headerName': "",'column_name': "", "column_order": "asc" })
@@ -99,7 +96,6 @@ export default {
     }
     this.SetDefaultSortOrder()
   },
-
 
   methods: {
     ReturnHeaderName(column_name) {

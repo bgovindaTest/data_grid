@@ -9,7 +9,9 @@
   <page-loader />
 </div>
 <div v-else>
-  <order-by :orderByParams="orderByParams"/>
+
+  <filters :filterParams="filterParams"/>
+  <!-- <order-by :orderByParams="orderByParams"/> -->
 </div>
 
 
@@ -69,6 +71,7 @@ import GridHeader from "./components/Header"
 /*
 Modals
 */
+import Filters     from "./components/Filters"
 import OrderBy    from "./components/OrderBy"
 import Help       from "./components/Help"
 import PageLoader from "./components/PageLoader"
@@ -89,6 +92,7 @@ export default {
     "grid-header": GridHeader,
     // "Modal": VueModal,
     "order-by": OrderBy,
+    "filters":   Filters,
     "help": Help,
     'page-loader': PageLoader
   },
@@ -120,13 +124,7 @@ export default {
       // await new Promise(r => setTimeout(r, 1000))
       this.loading = false
   }
-
-
 };
-
-
-
-
 
 
 </script>

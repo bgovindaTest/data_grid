@@ -60,7 +60,7 @@ let valid_operators = {'=': '=', '!=': '!=',
       <!-- not in -->
       <input class="input" type="number" placeholder="Number input">
       <input v-if="isBetween" class="input" type="number" placeholder="Number input">
-      <!-- in -->
+      <!-- in no delimiter-->
       <textarea class="textarea block" placeholder="e.g. Hello world"></textarea>
 
     </div>
@@ -69,7 +69,7 @@ let valid_operators = {'=': '=', '!=': '!=',
     <div v-else-if="isText">
       <!-- not in -->
       <input class="input" type="text" placeholder="Number text">
-      <!-- in -->
+      <!-- in select delimiter -->
       <textarea class="textarea block" placeholder="e.g. Hello world"></textarea>
 
     </div>

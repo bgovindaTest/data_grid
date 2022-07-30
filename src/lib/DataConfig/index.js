@@ -75,7 +75,7 @@ let boolean_default = 'false'
 
 //numbers
 let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
-    'real', 'double precision', 'money', 'numeric', 'float']
+    'real', 'double precision', 'money', 'float']
 let integer_types = ['smallint', 'integer', 'int', 'bigint']
 
 let serial_types = ['serial', 'bigseral'] //should be integers

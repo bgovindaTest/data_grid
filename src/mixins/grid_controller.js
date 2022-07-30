@@ -127,7 +127,6 @@ methods: {
         }
         this.columnDefs = px['columnDefs']
         this.LinkUIQueryParams(px['queryParams'])
-        console.log(this.orderByParams)
     },
     LinkUIQueryParams( queryParams ) {
         /*

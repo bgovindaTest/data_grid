@@ -3,10 +3,10 @@ let test_grid = {
     {
         "columnDefs": [
             {"field": "num", "headerName": "Number",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['num'] ,"validator":"ifnull(num,0)  > 0", 
-                "editable": true, "defaultFilter": true, "showFilter": false, "showSort": true},
-            {"field": "date", "headerName": "Date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true},
+                "editable": true, "defaultFilter": true, "showFilter": true, "showSort": true},
+            {"field": "date", "headerName": "Date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},
             {"field": "num_+_1",   "valueGetter": "ifnull(num,0) +1" , "validator": "ifnull(num,0) + 1 > 0"},
-            {"field": "full_name", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true, "showSort": true,
+            {"field": "full_name", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true, "showSort": true,"showFilter": true,
                 "cellEditorParams": {
                     "valuesObject": [
                         {"full_name": "B G", "first_name": "B", "last_name": "G", "id": "1"},

@@ -3,44 +3,60 @@ Used to create a company table/view from departments.
 
 
 */
+--Create Trigger updated_at
+--attach to each table
 
-SELECT 
-    -- entity_name,
-    id,
-    -- is_active,
-    -- company_name,
-    -- lob_name,
-    entity_code,
-    company_code,
-    lob_code,
-    DENSE_RANK() OVER ( ORDER BY company_code ) company_code_id,
-    DENSE_RANK() OVER ( ORDER BY lob_code )     lob_code_id
+--Create Trigger last_modified_by_user_id. allow null
 
-FROM ( 
-    SELECT entity_name, entity_code, id, is_active,
-    --company_name
-    CASE WHEN POSITION('_' IN entity_name ) > 0
-        THEN SPLIT_PART(entity_name, '_', 1)
-        ELSE 'LawsonSystemDepricated'
-    END company_name,
 
-    --company_code
-    CASE WHEN POSITION('_' IN entity_code ) > 0
-        THEN SPLIT_PART(entity_code, '_', 1)
-        ELSE 'LawsonSystemDepricated_Code'
-    END company_code,
+--company
+SELECT DISTINCT company_id as id, company_name, company_code FROM full_org ORDER BY company_id asc;
 
-    --lob_name
-    CASE WHEN POSITION('_' IN entity_name ) > 0
-        THEN SPLIT_PART(entity_name, '_', 2)
-        ELSE entity_name
-    END lob_name,
+--lob
+SELECT DISTINCT lob_id as id, lob_name, lob_code, --is_active
+FROM full_org
+ORDER BY lob_name asc
 
-    --lob_name
-    CASE WHEN POSITION('_' IN entity_code ) > 0
-        THEN SPLIT_PART(entity_code, '_', 2)
-        ELSE  'Lawson ' ||  entity_code
-    END lob_code
+--department
+SELECT DISTINCT department_id as id, lob_id, department_name, department_code, --is_active
+FROM full_org
+ORDER BY department_id asc
 
-    FROM entities
-) x
+--specialty
+SELECT DISTINCT specialty_id as id, department_id, specialty_name, specialty_code, --is_active
+FROM full_org
+ORDER BY specialty_id asc
+
+--time units
+
+
+--cost centers 
+SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code, --is_active
+ cfte_time, cfte_time_unit
+FROM full_org
+ORDER BY cost_center_id asc
+
+--company_cost_center
+SELECT DISTINCT id, cost_center_id, company_id --is_active
+FROM full_org
+ORDER BY cost_center_id asc
+
+--classifications
+SELECT id, classification_name, is_active, last_modified_by_user_id
+FROM classifications
+
+--providers --get default lcg_id, cpsc_id start_date, end_date
+SELECT id, npi, employee_number, first_name, last_name, classification_id, last_modified_by_user_id, is_active
+FROM providers
+
+--provider oracle_fte
+--
+
+--appointments
+select id, provider_id, cost_center_id as company_cost_center_id, lcg_id, cpsc_id, last_modified_by_user_id, is_active
+--if lcg/cpsc is ZZZZZ or 99999 i.e. id = 1 set null 
+FROM appointments
+
+--one_minus
+select id, appointment_id, effective_date, academic, contract, veterans_affaris, administration, null as cfte_max_time, last_modified_by_user_id
+FROM one_minus_cftes

@@ -1,0 +1,109 @@
+/*
+Used to create a company table/view from departments.
+
+
+*/
+--Create Trigger updated_at
+--attach to each table
+
+--Create Trigger last_modified_by_user_id. allow null
+
+
+--company
+SELECT DISTINCT company_id as id, company_name, company_code
+FROM full_org
+ORDER BY company_id asc;
+
+--lob
+SELECT DISTINCT lob_id as id, lob_name, lob_code, --is_active
+FROM full_org
+ORDER BY lob_name asc
+
+--department
+SELECT DISTINCT department_id as id, lob_id, department_name, department_code, --is_active
+FROM full_org
+ORDER BY department_id asc
+
+--specialty
+SELECT DISTINCT specialty_id as id, department_id, specialty_name, specialty_code, --is_active
+FROM full_org
+ORDER BY specialty_id asc
+
+--time units
+SELECT id, time_unit_name, is_active, last_modified_by_user_id
+FROM time_units;
+
+--cost centers 
+SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code, --is_active
+    40 as cfte_time, 3 as time_unit_id
+FROM full_org
+ORDER BY cost_center_id asc
+
+--company_cost_center
+SELECT DISTINCT id, cost_center_id, company_id --is_active
+FROM full_org
+ORDER BY cost_center_id asc
+
+--classifications
+SELECT id, classification_name, is_active, last_modified_by_user_id
+FROM classifications
+
+--providers --get default lcg_id, cpsc_id start_date, end_date
+SELECT id, npi, employee_number, first_name, last_name, classification_id, last_modified_by_user_id, is_active,
+lcg_id, cpsc_id, null as start_date, null as end_date
+FROM providers
+
+--appointments
+select id, provider_id, cost_center_id as company_cost_center_id,
+    CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  as lcg_id, 
+    CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id as cpsc_id,
+    last_modified_by_user_id, is_active, null as start_date, null as end_date
+FROM appointments
+
+--one_minus
+select id, appointment_id, effective_date, academic, contract, veterans_affaris, administration, null as cfte_max_time, last_modified_by_user_id
+FROM one_minus_cftes
+
+-- permission level
+/*
+1 company
+2 lob
+3 department
+4 specialty
+5 cost_center
+
+*/
+
+--user permissions
+SELECT *, 4 as permission_level_id FROM
+(
+    SELECT user_id, specialty_permissions.id as id, 
+        specialty_permissions.last_modified_by_user_id,
+        current_status_id, specialty_permissions.created_at,
+        specialty_permissions.updated_at, 
+        specialty_permissions.specialty_id as specialty_id,
+        entities.entity_name as "uen"
+    FROM specialty_permissions
+    INNER JOIN specialties on specialties.id = specialty_permissions.specialty_id
+    INNER JOIN departments on specialties.department_id = departments.id
+    INNER JOIN entities    on entities.id = departments.entity_id
+) as x
+
+INNER JOIN (
+    SELECT entity_name, old_specialty_id, company_cc_id FROM (
+        SELECT entity_name, old_specialty_id, id as company_cc_id, ROW_NUMBER() OVER( PARTITION BY entity_name, specialty_id) as rank
+        FROM full_org
+    ) tmp WHERE rank = 1
+) y
+on 
+    y.old_specialty_id = x.specialty_id AND
+    y.entity_name      = x.uen 
+ORDER BY user_id asc
+
+/*
+refreshed_dates
+
+
+id, effective_date, is_approved_date, 
+
+*/

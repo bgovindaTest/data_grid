@@ -2,22 +2,9 @@ let test_grid = {
 "grids": [
     {
         "columnDefs": [
-            {"field": "num", "headerName": "Number",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['num'] ,"validator":"ifnull(num,0)  > 0", 
-                "editable": true, "defaultFilter": true, "showFilter": true, "showSort": true},
-            {"field": "date", "headerName": "Date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},
-            {"field": "num_+_1",   "valueGetter": "ifnull(num,0) +1" , "validator": "ifnull(num,0) + 1 > 0"},
-            {"field": "full_name", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true, "showSort": true,"showFilter": true,
-                "cellEditorParams": {
-                    "valuesObject": [
-                        {"full_name": "B G", "first_name": "B", "last_name": "G", "id": "1"},
-                        {"full_name": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2"},
-                        {"full_name": "Time Drake", "first_name": "Tim", "last_name": "Drake", "id": "3"},
-                    ]
-                }
-            },
-            {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
-            {"field": "links","cloneOnCopy": true, 'cellRenderer': "LinksRenderer" },
+
             {"field": "full_namex", 'cellEditor': "autoCompleteEditor", "editable": true, "showSort": true,
+                'headerName': "ProviderName",
                 "validator": "islookup(full_namex)",
                 "cellEditorParams": {
                     "valuesObject": [
@@ -28,10 +15,36 @@ let test_grid = {
                     "columnDefs": ["full_namex", "first_name", "last_name", "id"]
                 }
             },
-            {"field": "datetime", "headerName": "DateTime", "cellEditor": 'dateTimeEditor', "dataType": "datetime",
-                "editable": true, "showSort": true, "showFilter": true},
-            {"field": "time", "headerName": "Time", "cellEditor": 'dateTimeEditor', "dataType": "time",
-                "editable": true, "showSort": true, "showFilter": true},
+
+            {"field": "is_approved", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true, "showSort": true,"showFilter": true,
+                "cellEditorParams": {
+                    "valuesObject": [
+                        {"is_approved": 'true', "id": "1"},
+                        {"is_approved": 'false',"id": "2"},
+                        {"is_approved": 'null',"id": "3"},
+                    ]
+                }
+            },
+
+            {"field": "date", "headerName": "EffectiveDate", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},
+
+
+            {"field": "cfte",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['cfte'], //,"validator":"1 >= ifnull(num,0)  > 0", 
+                "editable": true, "defaultFilter": true, "showFilter": true, "showSort": true},
+
+            {"field": "veterans_affairs",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['veterans_affairs'], //,"validator":"1 >= ifnull(num,0)  > 0", 
+                "editable": true, "defaultFilter": true, "showFilter": true, "showSort": true},
+    
+            {"field": "contract",   "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['contract'] ,//,"validator":"1 >= ifnull(num,0)  > 0", 
+                "editable": true, "defaultFilter": true, "showFilter": true, "showSort": true},
+
+            {"field": "academic",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['academic'] ,//,"validator":"1 >= ifnull(num,0)  > 0", 
+                "editable": true, "defaultFilter": true, "showFilter": true, "showSort": true},
+
+            {"field": "administrative",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['administrative'], //,"validator":"1 >= ifnull(num,0)  > 0", 
+                "editable": true, "defaultFilter": true, "showFilter": true, "showSort": true},
+
+                // {"field": "num_+_1",   "valueGetter": "ifnull(num,0) +1" , "validator": "ifnull(num,0) + 1 > 0"},
 
         ],
         "queryParams": {
@@ -39,14 +52,18 @@ let test_grid = {
         },
         "tableData": [
             {
-                "num": 0, "links": {"urlPath": "/fakePath/home", "urlName": "LinksTest"},
+                "cfte": 0,
+                "veterans_affairs": 0,
+                "contract": 0,
+                "academic": 0,
+                "administrative": 0,
                 "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"},
-                "auto": null,
                 "full_namex": null,
                 "date": null,
-                "datetime": null,
-                "time": null
+                "is_approved": "false"
             },
+
+            
         ]
     }
 ]}

@@ -1,0 +1,305 @@
+/*
+Create schema provider_effort
+*/
+CREATE SCHEMA app_admin;
+
+-- last_modified_by_user_id
+-- last_modified_by_user_id,
+
+CREATE TABLE app_admin.roles (
+    id bigserial PRIMARY KEY,
+    role_name text,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+COMMENT ON TABLE app_admin.roles $$ 
+
+$$;
+
+CREATE TABLE app_admin.users (
+    id bigserial PRIMARY KEY,
+    email text,
+    first_name text,
+    last_name text,
+    oauth_id text NOT NULL UNIQUE,
+    role_id integer,
+    -- as_user ?
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE app_admin.registered_tables (
+    id bigserial PRIMARY KEY,
+    schema_name text,
+    table_name text,
+    allow_select boolean default true,
+    allow_insert boolean default false,
+    allow_update boolean default false,
+    allow_delete boolean default false,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE app_admin.apps(
+    id bigserial PRIMARY KEY
+    project_name text,
+    table_name text,
+    description text,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE app_admin.app_permissions (
+    id bigserial PRIMARY KEY,
+    apps_id bigint REFERENCES app_admin.apps (id) NOT NULL,
+    registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
+    allow_select boolean default true,
+    allow_insert boolean default false,
+    allow_update boolean default false,
+    allow_delete boolean default false,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+
+);
+
+CREATE TABLE app_admin.user_app_permission (
+    id bigserial PRIMARY KEY,
+    user_id bigint REFERENCES app_admin.users (id)
+    app_id bigint  REFERENCES app_admin.apps  (id)
+    is_read_only boolean default true,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+
+);
+
+
+
+
+CREATE SCHEMA provider_effort;
+
+
+CREATE TABLE provider_effort.company (
+    id bigserial PRIMARY KEY,
+    company_name text NOT NULL,
+    company_code text NOT NULL UNIQUE
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.line_of_business (
+    id bigserial PRIMARY KEY,
+    lob_name text,
+    lob_code text NOT NULL UNIQUE,
+    is_active boolean default true
+    --SELECT DISTINCT lob_id as id, lob_name, lob_code, --is_active
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+
+);
+
+CREATE TABLE provider_effort.department (
+    id bigserial PRIMARY KEY,
+    department_name text NOT NULL,
+    department_code text NOT NULL UNIQUE,
+    is_active boolean default true
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+
+);
+
+CREATE TABLE provider_effort.specialty (
+    id bigserial PRIMARY KEY,
+    specialty_name text,
+    specialty_code text NOT NULL UNIQUE,
+    is_active boolean NOT NULL
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.time_unit (
+    id bigserial PRIMARY KEY,
+    time_unit_name text NOT NULL UNIQUE,
+--  SELECT id, time_unit_name, is_active, last_modified_by_user_id    
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.cost_center (
+    id bigserial PRIMARY KEY,
+    cost_center_name text,
+    cost_center_code text NOT NULL UNIQUE,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+-- SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code, --is_active    
+);
+
+CREATE TABLE provider_effort.company_cost_center (
+    id bigserial PRIMARY KEY
+    cost_center_id bigint NOT NULL REFERENCES provider_effort.cost_center (id)
+    company_id     bigint NOT NULL REFERENCES provider_effort.company    (id)
+    is_active boolean DEFAULT true,
+    -- cfte_full_time 
+    time_unit_id bigint NOT NULL REFERENCES provider_effort.time_unit (id)
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.classifications (
+    id bigserial PRIMARY KEY,
+    classification_name text NOT NULL,
+    is_active boolean true,
+
+--  SELECT id, classification_name, is_active, last_modified_by_user_id    
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.lcgs (
+    id bigserial PRIMARY KEY,
+    lcg_name text NOT NULL,
+    lcg_code text NOT NULL UNIQUE,
+    is_active boolean true,
+--  SELECT id, classification_name, is_active, last_modified_by_user_id    
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.cpscs (
+    id bigserial PRIMARY KEY,
+    cpsc_name text NOT NULL,
+    cpsc_code text NOT NULL UNIQUE,
+    is_active boolean true,
+--  SELECT id, classification_name, is_active, last_modified_by_user_id    
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.cpsc_lcg_map (
+    id bigserial PRIMARY KEY,
+    cpsc_ic bigint NOT NULL REFERENCES provider_effort.cpscs (id),
+    lcg_ic  bigint NOT NULL REFERENCES provider_effort.lcgs (id),
+    is_active boolean true,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+
+CREATE TABLE provider_effort.providers (
+    id bigserial PRIMARY KEY,
+    employee_number text NOT NULL UNIQUE,
+    npi text NOT NULL UNIQUE,
+    first_name text NOT NULL UNIQUE,
+    last_name text NOT NULL UNIQUE,
+    classification_id bigint REFERENCES provider_effort.classifications (id)
+    is_active boolean DEFAULT true,
+    cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
+    lcg_ic  bigint REFERENCES provider_effort.lcgs (id),
+    start_date date,
+    end_date date
+    -- SELECT id, npi, employee_number, first_name, last_name, classification_id, last_modified_by_user_id, is_active,
+    -- lcg_id, cpsc_id, null as start_date, null as end_date    
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.apppointments (
+    id bigserial PRIMARY KEY,
+    provider_id bigint REFERENCES provider_effort.providers,
+    cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
+    lcg_ic  bigint REFERENCES provider_effort.lcgs (id),
+    start_date date,
+    end_date date
+
+-- select id, provider_id, cost_center_id as company_cost_center_id,
+--     CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  as lcg_id, 
+--     CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id as cpsc_id,
+--     last_modified_by_user_id, is_active, null as start_date, null as end_date
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+);
+
+CREATE TABLE provider_effort.provider_effort (
+    id bigserial PRIMARY KEY
+    appointment_id bigint REFERENCES provider_effort.appointments (id)
+    effective_date date NOT NULL,
+    academic numeric default 0,
+    contract numeric default 0,
+    veterans_affairs numeric default 0,
+    administration numeric default 0,
+    cfte numeric default 0
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+
+-- null as cfte_max_time, last_modified_by_user_id
+);
+
+CREATE TABLE provider_effort.user_org_permissions (
+    id bigserial PRIMARY KEY
+--user permissions
+-- SELECT *, 4 as permission_level_id FROM
+-- (
+--     SELECT user_id, specialty_permissions.id as id, 
+--         specialty_permissions.last_modified_by_user_id,
+--         current_status_id, specialty_permissions.created_at,
+--         specialty_permissions.updated_at, 
+--         specialty_permissions.specialty_id as specialty_id,
+--         entities.entity_name as "uen"
+--     FROM specialty_permissions
+--     INNER JOIN specialties on specialties.id = specialty_permissions.specialty_id
+--     INNER JOIN departments on specialties.department_id = departments.id
+--     INNER JOIN entities    on entities.id = departments.entity_id
+-- ) as x
+
+-- INNER JOIN (
+--     SELECT entity_name, old_specialty_id, company_cc_id FROM (
+--         SELECT entity_name, old_specialty_id, id as company_cc_id, ROW_NUMBER() OVER( PARTITION BY entity_name, specialty_id) as rank
+--         FROM full_org
+--     ) tmp WHERE rank = 1
+-- ) y
+-- on 
+--     y.old_specialty_id = x.specialty_id AND
+--     y.entity_name      = x.uen 
+-- ORDER BY user_id asc
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+
+);
+
+CREATE TABLE provider_effort.refreshed_dates (
+    id bigserial PRIMARY KEY,
+    check_date date NOT NULL,
+    is_approved_date boolean false,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+    updated_at timestamptz NOT NULL DEFAULT NOW() 
+/*
+refreshed_dates
+
+
+id, effective_date, is_approved_date, 
+
+*/
+
+
+);
+
+-- CREATE LOGIN ROLE bgovindara
+-- CREATE ROLE app_user
+-- GRANT PERMISSIONS to app_user
+-- GRANT LOGIIN TO app_user
+-- SET timezone = 'America/Los_Angeles';
+-- set max logins

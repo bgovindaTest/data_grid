@@ -1,0 +1,22 @@
+
+
+SELECT appointment_id,  one_minus_cftes.id as id, one_minus_cftes.effective_date as effective_date,
+    lawson_fte, academic, contract, administration, veterans_affairs,
+    lawson_fte - ( academic + contract + administration + veterans_affairs) as cfte,
+    appointments.is_active, providers.first_name, providers.last_name, providers.npi, providers.employee_number,
+    classification_name, lcg_name, cpsc_name, users.email as  email, cpsc_code, lcg_code,
+    cost_center_name, entity_name, department_name, specialty_name,
+    entity_code, department_code, specialty_code, cost_center_code,
+    npi ||':'|| entity_code || '-' || department_code || '-' || specialty_code || '-' || cost_center_code as appointment_code,
+    one_minus_cftes.updated_at as updated_at
+FROM one_minus_cftes
+INNER JOIN appointments on appointments.id = one_minus_cftes.appointment_id
+INNER JOIN providers on appointments.provider_id = providers.id
+INNER JOIN classifications on classifications.id = providers.classification_id
+INNER JOIN lcgs on lcgs.id   = appointments.lcg_id
+INNER JOIN cpscs on cpscs.id = appointments.cpsc_id
+INNER JOIN users on users.id = one_minus_cftes.last_modified_by_user_id
+INNER JOIN cost_centers on cost_centers.id = appointments.cost_center_id
+INNER JOIN specialties on specialties.id = cost_centers.specialty_id
+INNER JOIN departments on departments.id = specialties.department_id    
+INNER JOIN entities on departments.entity_id = entities.id;

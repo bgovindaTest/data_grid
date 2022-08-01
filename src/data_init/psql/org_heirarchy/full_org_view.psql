@@ -1,0 +1,47 @@
+/*
+Full company organization view
+
+*/
+
+
+DROP VIEW IF EXISTS full_org;
+CREATE VIEW full_org as
+SELECT *, 
+    DENSE_RANK() OVER ( ORDER BY company_code )      company_id,
+    DENSE_RANK() OVER ( ORDER BY lob_code )          lob_id,
+    DENSE_RANK() OVER ( ORDER BY department_code )   department_id,
+    DENSE_RANK() OVER ( ORDER BY specialty_code )    specialty_id,
+    DENSE_RANK() OVER ( ORDER BY cost_center_code )  cost_center_id
+
+FROM (
+    SELECT 
+        entity_name, entity_code, department_name, department_code,
+        specialty_name, specialty_code,
+        cost_center_name, cost_center_code,
+        specialties.id as old_specialty_id,
+        cost_centers.id as id,
+        CASE WHEN POSITION('_' IN entity_name ) > 0
+            THEN SPLIT_PART(entity_name, '_', 1)
+            ELSE 'LawsonSystemDepricated'
+        END company_name,
+        --company_code
+        CASE WHEN POSITION('_' IN entity_code ) > 0
+            THEN SPLIT_PART(entity_code, '_', 1)
+            ELSE 'LawsonSystemDepricated_Code'
+        END company_code,
+        --lob_name
+        CASE WHEN POSITION('_' IN entity_name ) > 0
+            THEN SPLIT_PART(entity_name, '_', 2)
+            ELSE entity_name
+        END lob_name,
+        --lob_name
+        CASE WHEN POSITION('_' IN entity_code ) > 0
+            THEN SPLIT_PART(entity_code, '_', 2)
+            ELSE  'Lawson ' ||  entity_code
+        END lob_code
+    FROM entities
+    INNER JOIN departments on departments.entity_id   = entities.id    
+    INNER JOIN specialties on specialties.department_id   = departments.id
+    INNER JOIN cost_centers on cost_centers.specialty_id  = specialties.id
+) x;
+GRANT SELECT ON full_org TO iuh_viewer;

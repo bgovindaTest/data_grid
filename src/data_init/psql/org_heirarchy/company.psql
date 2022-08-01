@@ -1,0 +1,46 @@
+/*
+Used to create a company table/view from departments.
+
+
+*/
+
+SELECT 
+    -- entity_name,
+    id,
+    -- is_active,
+    -- company_name,
+    -- lob_name,
+    entity_code,
+    company_code,
+    lob_code,
+    DENSE_RANK() OVER ( ORDER BY company_code ) company_code_id,
+    DENSE_RANK() OVER ( ORDER BY lob_code )     lob_code_id
+
+FROM ( 
+    SELECT entity_name, entity_code, id, is_active,
+    --company_name
+    CASE WHEN POSITION('_' IN entity_name ) > 0
+        THEN SPLIT_PART(entity_name, '_', 1)
+        ELSE 'LawsonSystemDepricated'
+    END company_name,
+
+    --company_code
+    CASE WHEN POSITION('_' IN entity_code ) > 0
+        THEN SPLIT_PART(entity_code, '_', 1)
+        ELSE 'LawsonSystemDepricated_Code'
+    END company_code,
+
+    --lob_name
+    CASE WHEN POSITION('_' IN entity_name ) > 0
+        THEN SPLIT_PART(entity_name, '_', 2)
+        ELSE entity_name
+    END lob_name,
+
+    --lob_name
+    CASE WHEN POSITION('_' IN entity_code ) > 0
+        THEN SPLIT_PART(entity_code, '_', 2)
+        ELSE  'Lawson ' ||  entity_code
+    END lob_code
+
+    FROM entities
+) x

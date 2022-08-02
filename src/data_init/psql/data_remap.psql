@@ -66,16 +66,16 @@ FROM one_minus_cftes
 
 -- permission level
 /*
-1 company
-2 lob
+5 company
+4 lob
 3 department
-4 specialty
-5 cost_center
+2 specialty
+1 cost_center
 
 */
 
 --user permissions
-SELECT *, 4 as permission_level_id FROM
+SELECT *, 1 as permission_level_id FROM
 (
     SELECT user_id, specialty_permissions.id as id, 
         specialty_permissions.last_modified_by_user_id,

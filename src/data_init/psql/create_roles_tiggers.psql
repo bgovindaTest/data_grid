@@ -1,0 +1,8 @@
+-- CREATE LOGIN ROLE bgovindara
+-- CREATE ROLE app_user
+-- GRANT PERMISSIONS to app_user
+-- GRANT LOGIIN TO app_user
+-- SET timezone = 'America/Los_Angeles';
+-- set max logins
+
+-- reset indexes

@@ -1,0 +1,111 @@
+/*
+
+
+BEGIN;
+SET local app.userid = 1;
+-- sql queries where app_userid() ;
+COMMIT;
+*/
+CREATE OR REPLACE FUNCTION trigger_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER updated_at_timestamp
+BEFORE UPDATE ON todos --schema.table_name
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_updated_at();
+
+
+CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.last_modified_by_user_id = app_userid();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION app_userid() RETURNS bigint
+    AS $$select current_setting('app.user_id',true)::bigint;$$
+    LANGUAGE SQL
+    IMMUTABLE
+
+
+--default app_userid()
+CREATE TRIGGER set_app_userid
+BEFORE UPDATE OR INSERT ON todos --schema.table_name
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_last_modified_by_userid();
+
+-- https://satoricyber.com/postgres-security/postgres-row-level-security/#:~:text=What%20is%20Postgres%20Row%20Level,for%20one%20or%20more%20roles.
+
+-- row level security for app_user
+-- insert, update, delete
+-- effort table has two column unique_index for upsert.
+
+-- ALTER TABLE part ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY insert_effort on provider_effort.effort TO app_user
+FOR INSERT WITH CHECK (
+
+)
+
+CREATE POLICY update_effort on provider_effort.effort TO app_user
+FOR UPDATE USING (
+  
+)
+
+CREATE POLICY delete_effort on provider_effort.effort TO app_user
+FOR UPDATE USING (
+  EXISTS( )
+  
+)
+
+FROM appointments a
+INNER JOIN provider_effort.cost_center as c on a.cost_center_id = c.id
+
+
+-- CREATE POLICY insert_only_owned ON part
+--    FOR INSERT TO PUBLIC
+--    WITH CHECK (EXISTS(
+--                   SELECT 1
+--                   FROM object o
+--                   WHERE o.id = parent_id
+--                     AND owner = current_user
+--               ));
+
+-- CREATE POLICY accounts_policy
+-- ON public.accounts
+-- USING (username = CURRENT_USER)
+-- WITH CHECK (
+--  NOT accounts_is_excluded_full_name(full_name)
+-- );
+
+--user permissions
+-- SELECT *, 4 as permission_level_id FROM
+-- (
+--     SELECT user_id, specialty_permissions.id as id, 
+--         specialty_permissions.last_modified_by_user_id,
+--         current_status_id, specialty_permissions.created_at,
+--         specialty_permissions.updated_at, 
+--         specialty_permissions.specialty_id as specialty_id,
+--         entities.entity_name as "uen"
+--     FROM specialty_permissions
+--     INNER JOIN specialties on specialties.id = specialty_permissions.specialty_id
+--     INNER JOIN departments on specialties.department_id = departments.id
+--     INNER JOIN entities    on entities.id = departments.entity_id
+-- ) as x
+
+-- INNER JOIN (
+--     SELECT entity_name, old_specialty_id, company_cc_id FROM (
+--         SELECT entity_name, old_specialty_id, id as company_cc_id, ROW_NUMBER() OVER( PARTITION BY entity_name, specialty_id) as rank
+--         FROM full_org
+--     ) tmp WHERE rank = 1
+-- ) y
+-- on 
+--     y.old_specialty_id = x.specialty_id AND
+--     y.entity_name      = x.uen 
+-- ORDER BY user_id asc

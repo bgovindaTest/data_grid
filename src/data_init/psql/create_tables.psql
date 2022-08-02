@@ -1,0 +1,450 @@
+/*
+Create schema provider_effort
+*/
+CREATE SCHEMA app_admin;
+
+COMMENT ON SCHEMA app_admin $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE app_admin.roles (
+    id bigserial PRIMARY KEY,
+    role_name text,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE app_admin.roles $$ 
+
+$$;
+
+CREATE TABLE app_admin.users (
+    id bigserial PRIMARY KEY,
+    email        text,
+    first_name   text,
+    last_name    text,
+    oauth_id     text NOT NULL UNIQUE,
+    role_id      integer,
+    -- as_user ?
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE app_admin.registered_tables (
+    id bigserial PRIMARY KEY,
+    schema_name text,
+    table_name  text,
+    allow_select boolean default true,
+    allow_insert boolean default false,
+    allow_update boolean default false,
+    allow_delete boolean default false,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE app_admin.apps(
+    id bigserial PRIMARY KEY,
+    project_name text,
+    table_name   text,
+    description  text,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE app_admin.app_permissions (
+    id bigserial PRIMARY KEY,
+    apps_id bigint REFERENCES app_admin.apps (id) NOT NULL,
+    registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
+    allow_select boolean default true,
+    allow_insert boolean default false,
+    allow_update boolean default false,
+    allow_delete boolean default false,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE app_admin.user_app_permission (
+    id bigserial PRIMARY KEY,
+    user_id bigint REFERENCES app_admin.users (id),
+    app_id bigint  REFERENCES app_admin.apps  (id),
+    is_read_only   boolean default true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+
+-- main app tables
+CREATE SCHEMA provider_effort;
+
+COMMENT ON SCHEMA provider_effort $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+
+CREATE TABLE provider_effort.company (
+    id bigserial PRIMARY KEY,
+    company_name text NOT NULL,
+    company_code text NOT NULL UNIQUE,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.line_of_business (
+    id bigserial PRIMARY KEY,
+    lob_name text,
+    lob_code text NOT NULL UNIQUE,
+    is_active boolean default true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.department (
+    id bigserial PRIMARY KEY,
+    department_name text NOT NULL,
+    department_code text NOT NULL UNIQUE,
+    is_active boolean default true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.specialty (
+    id bigserial PRIMARY KEY,
+    specialty_name text,
+    specialty_code text NOT NULL UNIQUE,
+    is_active boolean NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.time_unit (
+    id bigserial PRIMARY KEY,
+    time_unit_name text NOT NULL UNIQUE,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.cost_center (
+    id bigserial PRIMARY KEY,
+    cost_center_name text,
+    cost_center_code text NOT NULL UNIQUE,
+    specialty_id bigint REFERENCES provider_effort.specialties (id),
+    is_active boolean NOT NULL default TRUE
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.company_cost_center (
+    id bigserial   PRIMARY KEY
+    cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id)
+    company_id     bigint  NOT NULL REFERENCES provider_effort.company    (id)
+    is_active      boolean NOT NULL DEFAULT true,
+    cfte_full_time numeric NOT NULL DEFAULT 40,
+    time_unit_id   bigint  REFERENCES provider_effort.time_unit (id),
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.classifications (
+    id bigserial PRIMARY KEY,
+    classification_name text NOT NULL,
+    is_active boolean true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+CREATE TABLE provider_effort.lcgs (
+    id bigserial PRIMARY KEY,
+    lcg_name text NOT NULL,
+    lcg_code text NOT NULL UNIQUE,
+    is_active boolean true,    
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.cpscs (
+    id bigserial PRIMARY KEY,
+    cpsc_name text NOT NULL,
+    cpsc_code text NOT NULL UNIQUE,
+    is_active boolean true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.cpsc_lcg_map (
+    id bigserial PRIMARY KEY,
+    cpsc_ic   bigint NOT NULL REFERENCES provider_effort.cpscs (id),
+    lcg_ic    bigint NOT NULL REFERENCES provider_effort.lcgs (id),
+    is_active boolean true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.providers (
+    id bigserial PRIMARY KEY,
+    employee_number text NOT NULL UNIQUE,
+    npi text NOT NULL UNIQUE,
+    first_name text NOT NULL UNIQUE,
+    last_name text NOT NULL UNIQUE,
+    classification_id bigint REFERENCES provider_effort.classifications (id)
+    is_active boolean DEFAULT true,
+    cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
+    lcg_ic  bigint REFERENCES provider_effort.lcgs (id),
+    start_date date,
+    end_date date,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.apppointments (
+    id bigserial PRIMARY KEY,
+    provider_id bigint REFERENCES provider_effort.providers,
+    cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
+    lcg_ic  bigint REFERENCES provider_effort.lcgs (id),
+    start_date date,
+    end_date   date,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+CREATE TABLE provider_effort.provider_effort (
+    id bigserial PRIMARY KEY,
+    appointment_id bigint REFERENCES provider_effort.appointments (id),
+    effective_date date NOT NULL,
+    academic numeric default 0,
+    contract numeric default 0,
+    veterans_affairs numeric default 0,
+    administration numeric default 0,
+    cfte numeric default 0,
+
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+CREATE TABLE provider_effort.oracle_effort (
+    id bigserial PRIMARY KEY,
+    provider_id  bigint REFERENCES provider_effort.providers (id),
+    effective_date date NOT NULL,
+    fte numeric default 0,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+
+
+CREATE TABLE provider_effort.user_org_permissions (
+    id bigserial PRIMARY KEY,
+    company_cost_center_id bigint NOT NULL REFERENCES provider_effort.company_cost_center (id),
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;
+
+CREATE TABLE provider_effort.refreshed_dates (
+    id bigserial PRIMARY KEY,
+    check_date date NOT NULL,
+    is_approved_date boolean false,
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    updated_at timestamptz NOT NULL DEFAULT NOW() ,
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+refreshed_dates
+
+id, effective_date, is_approved_date, 
+
+$$;

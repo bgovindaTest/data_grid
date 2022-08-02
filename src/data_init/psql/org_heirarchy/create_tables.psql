@@ -303,3 +303,15 @@ id, effective_date, is_approved_date,
 -- GRANT LOGIIN TO app_user
 -- SET timezone = 'America/Los_Angeles';
 -- set max logins
+
+
+-- CREATE VIEW provider_effort.user_org_permissions
+
+select * from
+user_org_permissions
+INNER JOIN company_cost_center
+INNER JOIN company
+INNER JOIN cost_center
+INNER JOIN specialties
+INNER JOIN departments
+INNER JOIN lob

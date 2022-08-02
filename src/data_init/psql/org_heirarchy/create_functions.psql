@@ -1,0 +1,57 @@
+CREATE OR REPLACE FUNCTION trigger_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER updated_at_timestamp
+BEFORE UPDATE ON todos
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_updated_at();
+
+-- set_config('my.setting', 'set before substraction', true);
+-- select current_setting('app.user_id',true)::bigint; returns null if missing
+
+-- set app.userid = 'id from server' local
+-- SET local app.userid = 1;
+
+CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.last_modified_by_user_id = app_userid();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION app_userid() RETURNS bigint
+    AS $$select current_setting('app.user_id',true)::bigint;$$
+    LANGUAGE SQL
+    IMMUTABLE
+
+-- https://satoricyber.com/postgres-security/postgres-row-level-security/#:~:text=What%20is%20Postgres%20Row%20Level,for%20one%20or%20more%20roles.
+
+-- row level security for app_user
+-- insert, update, delete
+-- effort table has two column unique_index for upsert.
+
+-- ALTER TABLE part ENABLE ROW LEVEL SECURITY;
+
+-- CREATE POLICY insert_only_owned ON part
+--    FOR INSERT TO PUBLIC
+--    WITH CHECK (EXISTS(
+--                   SELECT 1
+--                   FROM object o
+--                   WHERE o.id = parent_id
+--                     AND owner = current_user
+--               ));
+
+-- CREATE POLICY accounts_policy
+-- ON public.accounts
+-- USING (username = CURRENT_USER)
+-- WITH CHECK (
+--  NOT accounts_is_excluded_full_name(full_name)
+-- );
+
+-- COMMIT;

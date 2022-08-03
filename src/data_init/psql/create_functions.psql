@@ -19,6 +19,10 @@ BEFORE UPDATE ON todos --schema.table_name
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_updated_at();
 
+CREATE FUNCTION app_userid() RETURNS bigint
+    AS $$select current_setting('app.user_id',true)::bigint;$$
+LANGUAGE SQL
+IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
 RETURNS TRIGGER AS $$
@@ -27,12 +31,6 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE FUNCTION app_userid() RETURNS bigint
-    AS $$select current_setting('app.user_id',true)::bigint;$$
-    LANGUAGE SQL
-    IMMUTABLE
-
 
 --default app_userid()
 CREATE TRIGGER set_app_userid
@@ -46,8 +44,8 @@ EXECUTE PROCEDURE trigger_last_modified_by_userid();
 -- insert, update, delete
 -- effort table has two column unique_index for upsert.
 
+/*
 -- ALTER TABLE part ENABLE ROW LEVEL SECURITY;
-
 CREATE POLICY insert_effort on provider_effort.effort TO app_user
 FOR INSERT WITH CHECK (
 
@@ -64,48 +62,16 @@ FOR UPDATE USING (
   
 )
 
-FROM appointments a
-INNER JOIN provider_effort.cost_center as c on a.cost_center_id = c.id
 
 
--- CREATE POLICY insert_only_owned ON part
---    FOR INSERT TO PUBLIC
---    WITH CHECK (EXISTS(
---                   SELECT 1
---                   FROM object o
---                   WHERE o.id = parent_id
---                     AND owner = current_user
---               ));
 
--- CREATE POLICY accounts_policy
--- ON public.accounts
--- USING (username = CURRENT_USER)
--- WITH CHECK (
---  NOT accounts_is_excluded_full_name(full_name)
--- );
+CREATE POLICY insert_effort ON part
+   FOR INSERT TO PUBLIC
+   WITH CHECK (EXISTS(
+                  SELECT 1
+                  FROM provider_effort.company_cost_center as pcc
+                  INNER JOIN provider_effort.cost_center on  provider_effort.cost_center_id = pcc.cost_center_id
+                  WHERE pcc.id = company_cost_center_id
 
---user permissions
--- SELECT *, 4 as permission_level_id FROM
--- (
---     SELECT user_id, specialty_permissions.id as id, 
---         specialty_permissions.last_modified_by_user_id,
---         current_status_id, specialty_permissions.created_at,
---         specialty_permissions.updated_at, 
---         specialty_permissions.specialty_id as specialty_id,
---         entities.entity_name as "uen"
---     FROM specialty_permissions
---     INNER JOIN specialties on specialties.id = specialty_permissions.specialty_id
---     INNER JOIN departments on specialties.department_id = departments.id
---     INNER JOIN entities    on entities.id = departments.entity_id
--- ) as x
-
--- INNER JOIN (
---     SELECT entity_name, old_specialty_id, company_cc_id FROM (
---         SELECT entity_name, old_specialty_id, id as company_cc_id, ROW_NUMBER() OVER( PARTITION BY entity_name, specialty_id) as rank
---         FROM full_org
---     ) tmp WHERE rank = 1
--- ) y
--- on 
---     y.old_specialty_id = x.specialty_id AND
---     y.entity_name      = x.uen 
--- ORDER BY user_id asc
+              ));
+*/

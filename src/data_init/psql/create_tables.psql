@@ -3,13 +3,10 @@ Create schema provider_effort
 */
 CREATE SCHEMA app_admin;
 
-COMMENT ON SCHEMA app_admin $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+COMMENT ON SCHEMA app_admin IS $$ 
+This contains data for users and page configurations
 
 $$;
-
 
 CREATE TABLE app_admin.roles (
     id bigserial PRIMARY KEY,
@@ -19,8 +16,9 @@ CREATE TABLE app_admin.roles (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE app_admin.roles $$ 
-
+COMMENT ON TABLE app_admin.roles IS $$ 
+User role level. Default id is 2 which is a user. 1 is for
+admin
 $$;
 
 CREATE TABLE app_admin.users (
@@ -36,10 +34,8 @@ CREATE TABLE app_admin.users (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+COMMENT ON TABLE app_admin.users IS $$ 
+User information and credentials
 
 $$;
 
@@ -52,35 +48,38 @@ CREATE TABLE app_admin.registered_tables (
     allow_insert boolean default false,
     allow_update boolean default false,
     allow_delete boolean default false,
+    allow_execute  boolean default false,
+    allow_truncate boolean default false,
+
 
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
+COMMENT ON TABLE app_admin.registered_tables IS $$ 
+Tables from postgres with schema and password determines what the front end
+shoudl be allowed to do. The app_user role must also have the necessary postgres
+permissions set in the postgres server.
 
-id, effective_date, is_approved_date, 
-
+This table mainly exists to assign permission to the a given apps UI.
 $$;
-
 
 CREATE TABLE app_admin.apps(
     id bigserial PRIMARY KEY,
     project_name text,
     table_name   text,
     description  text,
+    page_config  json,
+    is_public    boolean default false, --anyone that can login has access
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE app_admin.apps IS $$ 
+App name and page_configurations config for the UI. page_config is where teh
+data is pulled to load the UI
 $$;
 
 
@@ -88,20 +87,22 @@ CREATE TABLE app_admin.app_permissions (
     id bigserial PRIMARY KEY,
     apps_id bigint REFERENCES app_admin.apps (id) NOT NULL,
     registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
-    allow_select boolean default true,
-    allow_insert boolean default false,
-    allow_update boolean default false,
-    allow_delete boolean default false,
+    allow_select   boolean default true,
+    allow_insert   boolean default false,
+    allow_update   boolean default false,
+    allow_delete   boolean default false,
+    allow_execute  boolean default false,
+    allow_truncate boolean default false,
+
+    is_test boolean default true, --in test mode no data saving can occur
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE app_admin.app_permissions IS $$ 
+permissions that are allowed by the apps configuration. This allows a registered table
+to give different permissions for different apps.
 $$;
 
 
@@ -115,10 +116,10 @@ CREATE TABLE app_admin.user_app_permission (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+COMMENT ON TABLE provider_effort.user_app_permission IS $$ 
+Links user_id to app_id. Determine if user can view page. Needs to join
+with app_admin.apps, app_permissions and user_app_permisisons. Dont need
+to check user_app_permissions if public
 
 $$;
 
@@ -377,7 +378,7 @@ id, effective_date, is_approved_date,
 $$;
 
 
-CREATE TABLE provider_effort.provider_effort (
+CREATE TABLE provider_effort.appointment_effort (
     id bigserial PRIMARY KEY,
     appointment_id bigint REFERENCES provider_effort.appointments (id),
     effective_date date NOT NULL,
@@ -421,6 +422,10 @@ $$;
 CREATE TABLE provider_effort.user_org_permissions (
     id bigserial PRIMARY KEY,
     company_cost_center_id bigint NOT NULL REFERENCES provider_effort.company_cost_center (id),
+    user_id bigint REFERENCES app_admin.users (id),
+    --level
+
+    is_active boolean DEFAULT FALSE NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()

@@ -106,8 +106,8 @@
      "query": "
         --appointments
         select id, provider_id, cost_center_id as company_cost_center_id,
-        CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  as lcg_id, 
-        CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id as cpsc_id,
+        CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  END as lcg_id, 
+        CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id END as cpsc_id,
         last_modified_by_user_id, is_active, null as start_date, null as end_date
         FROM appointments;
      "
@@ -121,7 +121,7 @@
             CASE WHEN ROUND(lawson - (contract + academic + veterans_affairs + administration), 3) = 0.999
                 THEN 1.0
             ELSE ROUND(lawson - (contract + academic + veterans_affairs + administration), 3)
-            cfte,
+            END cfte,
             null as cfte_max_time, last_modified_by_user_id
         FROM one_minus_cftes;
      "

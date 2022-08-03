@@ -9,7 +9,7 @@
     
             ],
             "queryParams": {
-                "default": "localhost:8080"
+                "default": "/root/root"
             }
         }
     ]

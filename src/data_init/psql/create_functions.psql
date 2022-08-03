@@ -14,11 +14,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER updated_at_timestamp
-BEFORE UPDATE ON todos --schema.table_name
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_updated_at();
-
 CREATE FUNCTION app_userid() RETURNS bigint
     AS $$select current_setting('app.user_id',true)::bigint;$$
 LANGUAGE SQL
@@ -31,47 +26,3 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
---default app_userid()
-CREATE TRIGGER set_app_userid
-BEFORE UPDATE OR INSERT ON todos --schema.table_name
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_last_modified_by_userid();
-
--- https://satoricyber.com/postgres-security/postgres-row-level-security/#:~:text=What%20is%20Postgres%20Row%20Level,for%20one%20or%20more%20roles.
-
--- row level security for app_user
--- insert, update, delete
--- effort table has two column unique_index for upsert.
-
-/*
--- ALTER TABLE part ENABLE ROW LEVEL SECURITY;
-CREATE POLICY insert_effort on provider_effort.effort TO app_user
-FOR INSERT WITH CHECK (
-
-)
-
-CREATE POLICY update_effort on provider_effort.effort TO app_user
-FOR UPDATE USING (
-  
-)
-
-CREATE POLICY delete_effort on provider_effort.effort TO app_user
-FOR UPDATE USING (
-  EXISTS( )
-  
-)
-
-
-
-
-CREATE POLICY insert_effort ON part
-   FOR INSERT TO PUBLIC
-   WITH CHECK (EXISTS(
-                  SELECT 1
-                  FROM provider_effort.company_cost_center as pcc
-                  INNER JOIN provider_effort.cost_center on  provider_effort.cost_center_id = pcc.cost_center_id
-                  WHERE pcc.id = company_cost_center_id
-
-              ));
-*/

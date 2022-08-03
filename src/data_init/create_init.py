@@ -1,7 +1,0 @@
-"""
-
-
-"""
-#login credentials
-#output directory
-

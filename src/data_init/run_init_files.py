@@ -37,6 +37,15 @@ class BackupData:
                 row['effective_date'] = str(row['effective_date'])
         return rows
 
+    def ResetIndexes():
+        """
+        -- ALTER SEQUENCE product_id_seq RESTART WITH 1453;
+        -- setval('product_id_seq', 1453);
+        -- SELECT SETVAL('project_id_seq', (SELECT MAX(id) + 1 FROM project));
+        """
+        pass
+
+
 if __name__ == "__main__":
     x = BackupData()
     x.BuildJsonFiles()

@@ -6,91 +6,92 @@
 --startread
 [ 
     {"name": "company",
-    "query": "
+    "query": """
         --company
         SELECT DISTINCT company_id as id, company_name, company_code
         FROM full_org
         ORDER BY company_id asc;
-    "
+    """
     },
     {"name": "line_of_business",
-    "query": "
+    "query": """
         --lob
         SELECT DISTINCT lob_id as id, lob_name, lob_code, --is_active
         FROM full_org
         ORDER BY lob_name asc;
-    "},
+    """
+    },
     {"name": "department",
-     "query": "
+     "query": """
         --department
         SELECT DISTINCT department_id as id, lob_id, department_name, department_code, --is_active
         FROM full_org
         ORDER BY department_id asc;
-     "
+     """
     },
 
     {"name": "specialty",
-     "query": "
+     "query": """
         --specialty
         SELECT DISTINCT specialty_id as id, department_id, specialty_name, specialty_code, --is_active
         FROM full_org
         ORDER BY specialty_id asc;
-     "
+     """
     },
     {"name": "time_units",
-     "query": "
+     "query": """
         --time units
         SELECT id, time_unit_name, is_active, last_modified_by_user_id
         FROM time_units;
-     "    
+     """
     },
     {"name": "cost_center",
-     "query": "
+     "query": """
         --cost centers 
         SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code, --is_active
             40 as cfte_time, 3 as time_unit_id
         FROM full_org
         ORDER BY cost_center_id asc;
-     "
+     """
     },
     {"name": "company_cost_center",
-     "query": "
+     "query": """
         --company_cost_center
         SELECT DISTINCT id, cost_center_id, company_id --is_active
         FROM full_org
         ORDER BY cost_center_id asc;
-     "
+     """
     },
     {"name": "classifications",
-     "query": "
+     "query": """
         --classifications
         SELECT id, classification_name, is_active, last_modified_by_user_id
         FROM classifications;
-     "
+     """
     },
     {"name": "cpsc",
-     "query": "
+     "query": """
         --classifications
         SELECT id, cpsc_code, cpsc_name, is_active, last_modified_by_user_id
         FROM cpscs;
-     "
+     """
     },
     {"name": "lcg",
-     "query": "
+     "query": """
         --classifications
         SELECT id, lcg_code,  lcg_name ,is_active, last_modified_by_user_id
         FROM lcgs;
-     "
+     """
     },
     {"name": "cpsc_lcg_map",
-     "query": "
+     "query": """
         --classifications
         SELECT id, cpsc_id,  lcg_id ,is_active, last_modified_by_user_id
         FROM cpsc_lcg_map;
-     "
+     """
     },
     {"name": "providers",
-     "query": "
+     "query": """
         --providers --get default lcg_id, cpsc_id start_date, end_date
         SELECT id, npi, employee_number, first_name, last_name, classification_id, last_modified_by_user_id, is_active,
         a.lcg_id as lcg_id, a.cpsc_id as cpsc_id, null as start_date, null as end_date
@@ -100,21 +101,20 @@
             FROM appointments
             WHERE appointments.provider_id = providers.id
          ) a  on a.provider_id = providers.id;
-     "
+     """
     },
     {"name": "appointments",
-     "query": "
+     "query": """
         --appointments
         select id, provider_id, cost_center_id as company_cost_center_id,
         CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  END as lcg_id, 
         CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id END as cpsc_id,
         last_modified_by_user_id, is_active, null as start_date, null as end_date
         FROM appointments;
-     "
+     """
     },
     {"name": "appointment_effort",
-     "query": "
-        --one_minus
+     "query": """
         select id, appointment_id, effective_date, academic, contract, veterans_affaris, administration, 
             lawson - (contract + academic + veterans_affairs + administration) 
             
@@ -124,21 +124,20 @@
             END cfte,
             null as cfte_max_time, last_modified_by_user_id
         FROM one_minus_cftes;
-     "
+     """
     },
     {"name": "oracle_effort",
-     "query": "
-        --one_minus
+     "query": """
         select ROW_NUMBER() OVER (ORDER BY a.provider_id), a.provider_id, effective_date, SUM(lawson) as fte, last_modified_by_user_id
         FROM one_minus_cftes 
         INNER JOIN appointments as a
         GROUP BY a.provider_id, effective_date
         ORDER BY a.provider_id
         ;
-     "
+     """
     },
     {"name": "user_org_permission",
-     "query": "
+     "query": """
         --user permissions
         SELECT *, 5 as permission_level_id FROM
         (
@@ -164,6 +163,6 @@
             y.old_specialty_id = x.specialty_id AND
             y.entity_name      = x.uen 
         ORDER BY user_id asc;
-     "
+     """
     }
 ]

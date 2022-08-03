@@ -2,8 +2,7 @@
 --startread
 [ 
     {"name": "users",
-    "query": "
-        --company
+    "query": """ 
         SELECT id, email, first_name, last_name, oauth_id,
             CASE WHEN role_id = 1
                 THEN true
@@ -12,6 +11,6 @@
             true as is_active,
         FROM users
         ORDER BY id asc;
-    "
+    """
     }
 ]

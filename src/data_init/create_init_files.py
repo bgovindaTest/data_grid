@@ -32,7 +32,7 @@ class BackupData:
             print(x[i]['name'])
             nx  = x[i]['name']
             sql_query = x[i]['query']
-            if nx != 'oracle_effort':
+            if nx != 'user_org_permission':
                 continue
 
             cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)

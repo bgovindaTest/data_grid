@@ -134,7 +134,7 @@
                ELSE ROUND( init_cfte, 3)
                END cfte
       FROM (
-         select id, appointment_id, effective_date, academic, contract, veterans_affairs, administration,
+         select id, appointment_id, effective_date::text, academic, contract, veterans_affairs, administration,
                (lawson_fte - (contract + academic + veterans_affairs + administration) )::numeric as init_cfte,
                null as cfte_max_time,last_modified_by_user_id as last_modified_userid
         FROM one_minus_cftes
@@ -143,14 +143,16 @@
     },
     {"name": "oracle_effort",
      "query": """
-        select ROW_NUMBER() OVER (ORDER BY a.provider_id), a.provider_id        
-         , effective_date, SUM(lawson_fte) as fte,
-         one_minus_cftes.last_modified_by_user_id as last_modified_userid
-        FROM one_minus_cftes 
-        INNER JOIN appointments as a on a.id = one_minus_cftes.appointment_id
-        GROUP BY a.provider_id, effective_date
-        ORDER BY a.provider_id
-       ;
+      SELECT provider_id, effective_date, fte, last_modified_userid FROM (
+         select 
+            ROW_NUMBER() OVER (PARTITION BY a.provider_id, effective_date) as rn,
+            a.provider_id,        
+            effective_date::text , SUM(lawson_fte) OVER (PARTITION BY a.provider_id, effective_date) as fte,
+            one_minus_cftes.last_modified_by_user_id as last_modified_userid
+         FROM one_minus_cftes 
+         INNER JOIN appointments as a on a.id = one_minus_cftes.appointment_id
+         ORDER BY a.provider_id
+      ) x WHERE rn =1;
      """
     },
     {"name": "user_org_permission",
@@ -159,7 +161,7 @@
         SELECT *, 5 as permission_level_id FROM
         (
             SELECT user_id, specialty_permissions.id as id, 
-                specialty_permissions.last_modified_user_id as last_modified_userid,
+                specialty_permissions.last_modified_by_user_id as last_modified_userid,
                 current_status_id, specialty_permissions.created_at,
                 specialty_permissions.updated_at, 
                 specialty_permissions.specialty_id as specialty_id,

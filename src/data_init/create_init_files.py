@@ -18,8 +18,19 @@ input_connect_string   = psql_cred.input_connect_string
 output_path = '/home/bgovi/PsqlCred/output_data'
 conn = psycopg2.connect(input_connect_string)
 
-pe_data = './psql/pe_data_remap.psql'
+pe_data    = './psql/pe_data_remap.psql'
+admin_data = './psql/admin_data_remap.psql'
 
+sql_out = output_path +'/sql/'
+json_out = output_path +'/json_out/'
+def mkdir(path):
+    try:
+        os.mkdir(path)
+    except:
+        pass
+
+mkdir(sql_out)
+mkdir(json_out)
 
 class BackupData:
 
@@ -27,69 +38,53 @@ class BackupData:
         pass
 
     def RunInit(self):
-        x = CreateSqlJson(pe_data)
+        #self.RunFile('provider_effort', pe_data)
+        self.RunFile('admin', admin_data)
+
+    def RunFile(self, schema_name, file_path):
+        x = CreateSqlJson(file_path)
         for i in range(0, len(x)):
-            print(x[i]['name'])
-            nx  = x[i]['name']
+            table_name = x[i]['name']
             sql_query = x[i]['query']
-            if nx != 'user_org_permission':
-                continue
-
-            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cur.execute(sql_query)
-            row = cur.fetchone()
-            print( row )
-
-
-    def LoadJson(self):
-        pass
-
-    def BuildJsonFiles(self):
-        file_path = output_path +  str( date.today() ) + '/'
-        mkdir(file_path)
-        for table_name in tables:
             print(table_name)
-            rows = self.RunPull(table_name)
-            self.WriteJsonBackup(rows,table_name)
-
-        for x in full_query_list:
-            fname = x[0]
-            print(fname)
-            sql_query = x[1]
+            full_name = schema_name +'.'+table_name
             rows = self.RunQuery(sql_query)
-            self.WriteJsonBackup(rows,fname)
+            self.WriteSqlFile(rows, full_name)
+            self.WriteJsonFile(rows, full_name)
 
         #run sepearte queries
     def RunQuery(self, sql_query):
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute(sql_query)
         rows = cur.fetchall()
-        for row in rows:
-            row['updated_at'] = str(row['updated_at'])
-            if 'effective_date' in row:
-                row['effective_date'] = str(row['effective_date'])
         return rows
 
-    def RunPull(self, table_name):
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        sql_query = "SELECT * From {table_name}".format(table_name = table_name)
-        cur.execute(sql_query)
-        rows = cur.fetchall()
-        for row in rows:
-            row['created_at'] = str(row['created_at'])
-            row['updated_at'] = str(row['updated_at'])
-            if 'effective_date' in row:
-                row['effective_date'] = str(row['effective_date'])
-        return rows
-
-    def WriteJsonBackup(self, rows, table_name):
-        fileName = output_path +  str( date.today() ) + '/' + table_name + '.json'
+    def WriteJsonFile(self, rows, table_name):
+        fileName = json_out + table_name + '.json'
         with open(fileName, 'w') as fp:
             json.dump( [ ix for ix in rows], fp, indent=4)
 
-    def WriteSqlFile(self, rwos, table_name ):
-        pass
+    def WriteSqlFile(self, rows, table_name ):
+        columns = self.RowColumns(rows[0])
+        insert_str = "INSERT INTO table_name ( {columns} ) VALUES\n".format(columns = ','.join(columns))
+        values = []
+        for row in rows:
+            values.append(self.RowValues(row, columns))
+        val_str = ',\n'.join(values)
+        fileName = sql_out + table_name + '.psql'
+        f = open(fileName, 'w')
+        f.writelines([insert_str, val_str, ';'])
+        f.close()
 
+    def RowColumns(self, row):
+        return list(row.keys() )
+
+    def RowValues(self, row, columns):
+        values = []
+        for cx in columns:
+            x = "$${value}$$".format(value=str(row[cx]))
+            values.append(x)
+        return "( {values} )".format(values=','.join(values))
 
 if __name__ == "__main__":
     x = BackupData()

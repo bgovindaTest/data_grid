@@ -1,47 +1,53 @@
--- /*
--- Test current cfte one minus
--- 2: Current CFTE One Minus: Pulls current cfte for all active providers/appointments
+/*
+Creates main view for appointment effort.
 
--- */
+*/
 
 --appointment effort table
-SELECT DISTINCT ON (appointment_id) appointment_id,  ae.id as id, 
-    ae.effective_date as effective_date,
-    academic, contract, administration, veterans_affairs, cfte, ae.is_active, 
-    providers.first_name, providers.last_name, providers.npi, providers.employee_number,
-    classification_name, , classifications.id,
+CREATE VIEW provider_effort.appointment_effort_full_join AS
+SELECT *, COALESCE(cfte,0.0)*cfte_max_time as cfte_time FROM (
+    SELECT  appointment_id,  ae.id as id, 
+        ae.effective_date as effective_date,
+        academic, contract, administration, veterans_affairs, cfte, ae.is_active, 
+        providers.first_name, providers.last_name, providers.npi, providers.employee_number,
+        classification_name, , classifications.id, providers.id as provider_id,
 
-    a.lcg_name, a.cpsc_name, 
-    a.cpsc_code, a.lcg_code,
-    
-    
-    company_name,    company_code, department_name, department_code ,
-    specialty_name,  specialty_code, cost_center_name, cost_center_code
+        --cpsc name
+        CASE WHEN a.lcg_id IS NULL THEN plcg.lcg_name    ELSE alcg.lcg_name END lcg_name,
+        CASE WHEN a.lcg_id IS NULL THEN plcg.lcg_code    ELSE alcg.lcg_code END lcg_code,
+        CASE WHEN a.lcg_id IS NULL THEN 'ProviderLcg'    ELSE 'AppointmentLcg' END lcg_origin,
 
-    ae.updated_at as updated_at
+        --cpsc value
+        CASE WHEN a.cpsc_id IS NULL THEN  pcpsc.cpsc_name    ELSE acpsc.cpsc_name END cpsc_name,
+        CASE WHEN a.cpsc_id IS NULL THEN  pcpsc.cpsc_code    ELSE acpsc.cpsc_code END cpsc_code,
+        CASE WHEN a.cpsc_id IS NULL THEN 'ProviderLcg' ELSE 'AppointmentLcg' END cpsc_origin,
+        
+        --time_unit
+        COALESCE( ae.cfte_full_time, COALESCE(ccc.cfte_full_time, 40.0) ) as cfte_max_time
+        ae.cfte_full_time as appointment_cfte_full_time,
+        company_cost_center.cfte_full_time as company_cost_center_cfte_full_time,
 
-    -- user info
-
-FROM appointment_effort as ae
-INNER JOIN appointments on appointments.id = ae.appointment_id
-INNER JOIN providers as p on appointments.provider_id = p.id
-INNER JOIN classifications on classifications.id      = p.classification_id
-INNER JOIN lcg  as alcg  on alcg.id   = appointments.lcg_id
-INNER JOIN cpsc as acpsc on acpsc.id  = appointments.cpsc_id
---providers lcg
-
-
---providers cpsc
-
-
-LEFT  JOIN users on users.id = ae.last_modified_by_user_id
-INNER JOIN company_cost_center as ccc on company_cost_center.id = appointments.company_cost_center_id
-INNER JOIN company                    on company.id      = company_cost_center.company_id
-INNER JOIN cost_centers               on cost_centers.id = company_cost_center.cost_center_id
-INNER JOIN specialty                  on specialty.id    = cost_centers.specialty_id
-INNER JOIN departments                on department.id   = specialty.department_id    
-INNER JOIN line_of_business           on departments.lob_id = line_of_business.id
-ORDER BY appointment_id asc, effective_date desc;
-
---user permissions
-WHERE effective_date <= CURRENT_DATE AND appointments.is_active = true
+        
+        company_name,    company_code, lob_name, lob_code,
+        department_name, department_code, specialty_name,
+        specialty_code, cost_center_name, cost_center_code,
+        users.first_name, users.last_name, users.email,
+        ae.updated_at as updated_at
+    FROM provider_effort.appointment_effort as ae
+    INNER JOIN provider_effort.appointments on appointments.id = ae.appointment_id
+    INNER JOIN provider_effort.providers as p on appointments.provider_id = p.id
+    INNER JOIN provider_effort.classifications on classifications.id      = p.classification_id
+    INNER JOIN provider_effort.lcg  as alcg on  alcg.id    = appointments.lcg_id
+    INNER JOIN provider_effort.cpsc as acpsc on acpsc.id  = appointments.cpsc_id
+    --providers lcg
+    INNER JOIN provider_effort.lcg  as plcg  on plcg.id   = providers.lcg_id
+    INNER JOIN provider_effort.cpsc as pcpsc on pcpsc.id  = providers.cpsc_id
+    LEFT  JOIN provider_effort.users on users.id = ae.last_modified_userid
+    INNER JOIN provider_effort.company_cost_center as ccc on company_cost_center.id = appointments.company_cost_center_id
+    INNER JOIN provider_effort.company                    on company.id      = company_cost_center.company_id
+    INNER JOIN provider_effort.cost_centers               on cost_centers.id = company_cost_center.cost_center_id
+    INNER JOIN provider_effort.specialty                  on specialty.id    = cost_centers.specialty_id
+    INNER JOIN provider_effort.departments                on department.id   = specialty.department_id    
+    INNER JOIN provider_effort.line_of_business           on departments.lob_id = line_of_business.id;
+    INNER JOIN provider_effort.time_unit as tu on tu.id = ccc.time_unit_id
+) x

@@ -336,7 +336,7 @@ CREATE TABLE provider_effort.appointment_effort (
     veterans_affairs numeric default 0,
     administration numeric default 0,
     cfte numeric default 0,
-
+    cfte_full_time numeric,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),

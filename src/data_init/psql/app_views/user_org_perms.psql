@@ -1,0 +1,31 @@
+/*
+User Permissions view based on specialty_level and cost_center
+
+The company_cost_center_id is used to determine if an appointment row
+or appointment_effort can be modified by a user.
+*/
+CREATE VIEW provider_effort.user_specialty_cost_center_permsissios AS 
+
+
+-- company cost_center
+SELECT ccc.id as id, ccc.company_id as company_id, ccc.cost_center_id as cost_center_id
+FROM provider_effort.company_cost_center ccc
+INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
+WHERE uop.user_id = app_userid() AND uop.specialty_level = false
+
+UNION
+--company cost_centers for specialty.
+SELECT ccc.id as id , ccc.company_id as company_id, ccc.cost_center_id as cost_center_id
+FROM provider_effort.company_cost_center ccc
+INNER JOIN (
+        SELECT ccc.company_id, cc2.id as cost_center_id 
+        --ccc.id  , ccc.company_id, cc2.id as cost_center_id
+        FROM provider_effort.company_cost_center ccc
+        INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
+        --filtered data based on user permissions.
+        INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
+        INNER JOIN provider_effort.specialty   as scc on scc.id = cc.specialty_id
+        INNER JOIN provider_effort.cost_center as cc2 on cc2.specialty_id = scc.id
+        WHERE uop.user_id = app_userid() AND uop.specialty_level = true
+) x 
+WHERE x.company_id = ccc.company_id AND x.cost_center_id = ccc.cost_center_id;

@@ -24,10 +24,12 @@ class BackupData:
             2. create admin tables
             3. create provider_effort tables
             4. add triggers
-            5. insert data
-            6. reset indexes
-            7. create roles
-            8. insert config files (for deployment component)
+            5. create_views
+            6. insert data
+            7. reset indexes
+            8. create policies
+            9. create roles
+            10. insert config files (for deployment component)
         """
         pass
 

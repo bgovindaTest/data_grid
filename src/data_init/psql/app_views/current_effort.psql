@@ -4,29 +4,44 @@
 
 -- */
 
--- SELECT DISTINCT ON (appointment_id) appointment_id,  one_minus_cftes.id as id, one_minus_cftes.effective_date as effective_date,
---     lawson_fte, academic, contract, administration, veterans_affairs,
---     lawson_fte - ( academic + contract + administration + veterans_affairs) as cfte,
---     appointments.is_active, providers.first_name, providers.last_name, providers.npi, providers.employee_number,
---     classification_name, lcg_name, cpsc_name, users.email,
+--appointment effort table
+SELECT DISTINCT ON (appointment_id) appointment_id,  ae.id as id, 
+    ae.effective_date as effective_date,
+    academic, contract, administration, veterans_affairs, cfte, ae.is_active, 
+    providers.first_name, providers.last_name, providers.npi, providers.employee_number,
+    classification_name, , classifications.id,
 
---     cpsc_code, lcg_code,
---     cost_center_name, entity_name, department_name, specialty_name,
---     npi ||':'|| entity_code || '-' || department_code || '-' || specialty_code || '-' || cost_center_code as appointment_code,
---     one_minus_cftes.updated_at as updated_at
--- FROM one_minus_cftes
--- INNER JOIN appointments on appointments.id = one_minus_cftes.appointment_id
--- INNER JOIN providers on appointments.provider_id = providers.id
--- INNER JOIN classifications on classifications.id = providers.classification_id
--- INNER JOIN lcgs on lcgs.id   = appointments.lcg_id
--- INNER JOIN cpscs on cpscs.id = appointments.cpsc_id
--- INNER JOIN users on users.id = one_minus_cftes.last_modified_by_user_id
+    a.lcg_name, a.cpsc_name, 
+    a.cpsc_code, a.lcg_code,
+    
+    
+    company_name,    company_code, department_name, department_code ,
+    specialty_name,  specialty_code, cost_center_name, cost_center_code
 
--- INNER JOIN cost_centers on cost_centers.id = appointments.cost_center_id
--- INNER JOIN specialties on specialties.id = cost_centers.specialty_id
--- INNER JOIN departments on departments.id = specialties.department_id    
--- INNER JOIN entities on departments.entity_id = entities.id
+    ae.updated_at as updated_at
+
+    -- user info
+
+FROM appointment_effort as ae
+INNER JOIN appointments on appointments.id = ae.appointment_id
+INNER JOIN providers as p on appointments.provider_id = p.id
+INNER JOIN classifications on classifications.id      = p.classification_id
+INNER JOIN lcg  as alcg  on alcg.id   = appointments.lcg_id
+INNER JOIN cpsc as acpsc on acpsc.id  = appointments.cpsc_id
+--providers lcg
 
 
--- WHERE effective_date <= CURRENT_DATE AND appointments.is_active = true
--- ORDER BY appointment_id asc, effective_date desc;
+--providers cpsc
+
+
+LEFT  JOIN users on users.id = ae.last_modified_by_user_id
+INNER JOIN company_cost_center as ccc on company_cost_center.id = appointments.company_cost_center_id
+INNER JOIN company                    on company.id      = company_cost_center.company_id
+INNER JOIN cost_centers               on cost_centers.id = company_cost_center.cost_center_id
+INNER JOIN specialty                  on specialty.id    = cost_centers.specialty_id
+INNER JOIN departments                on department.id   = specialty.department_id    
+INNER JOIN line_of_business           on departments.lob_id = line_of_business.id
+ORDER BY appointment_id asc, effective_date desc;
+
+--user permissions
+WHERE effective_date <= CURRENT_DATE AND appointments.is_active = true

@@ -5,26 +5,32 @@ Exports them as json and csv (or some other delimiter)
 import json
 import psycopg2
 import psycopg2.extras
-from datetime import date
-import os
 import sys
 sys.path.append('~/PsqlCred')
 import psql_cred
 
 output_connect_string = psql_cred.output_connect_string
-#create files?
-
 output_path = '~/PsqlCred/output_data'
-
 conn = psycopg2.connect(output_connect_string)
-
-
-full_query_list = [ ('one_minus_full', one_minus_full), ('time_based_full', time_based_full)]
 
 class BackupData:
 
     def __init__(self):
         pass
+
+    def Run(self):
+        """
+            1. create functions
+            2. create admin tables
+            3. create provider_effort tables
+            4. add triggers
+            5. insert data
+            6. reset indexes
+            7. create roles
+            8. insert config files (for deployment component)
+        """
+        pass
+
 
         #run sepearte queries
     def RunQuery(self, sql_query):

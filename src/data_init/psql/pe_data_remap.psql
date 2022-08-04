@@ -160,7 +160,8 @@
     {"name": "user_org_permission",
      "query": """
         --user permissions
-        SELECT *, 5 as permission_level_id FROM
+        SELECT user_id, company_cc_id as company_cost_center_id, true as is_active, 
+        1 as last_modified_userid, 5 as permission_level_id FROM
         (
             SELECT user_id, specialty_permissions.id as id, 
                 specialty_permissions.last_modified_by_user_id as last_modified_userid,
@@ -168,6 +169,7 @@
                 specialty_permissions.updated_at, 
                 specialty_permissions.specialty_id as specialty_id,
                 entities.entity_name as "uen"
+
             FROM specialty_permissions
             INNER JOIN specialties on specialties.id = specialty_permissions.specialty_id
             INNER JOIN departments on specialties.department_id = departments.id

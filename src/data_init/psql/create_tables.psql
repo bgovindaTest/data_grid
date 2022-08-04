@@ -2,13 +2,15 @@
 Create schema provider_effort
 */
 BEGIN;
+DROP SCHEMA IF EXISTS provider_effort CASCADE;
+DROP SCHEMA IF EXISTS app_admin CASCADE;
+
 CREATE SCHEMA app_admin;
 
 COMMENT ON SCHEMA app_admin IS $$ 
 This contains data for users and page configurations
 
 $$;
-
 
 CREATE TABLE app_admin.users (
     id bigserial PRIMARY KEY,
@@ -27,7 +29,6 @@ CREATE TABLE app_admin.users (
 COMMENT ON TABLE app_admin.users IS $$ 
 User information and credentials
 $$;
-
 
 CREATE TABLE app_admin.registered_tables (
     id bigserial PRIMARY KEY,
@@ -73,7 +74,6 @@ App name and page_configurations config for the UI. page_config is where teh
 data is pulled to load the UI
 $$;
 
-
 CREATE TABLE app_admin.app_permissions (
     id bigserial PRIMARY KEY,
     apps_id bigint REFERENCES app_admin.apps (id) NOT NULL,
@@ -98,7 +98,6 @@ permissions that are allowed by the apps configuration. This allows a registered
 to give different permissions for different apps.
 $$;
 
-
 CREATE TABLE app_admin.user_app_permission (
     id bigserial PRIMARY KEY,
     user_id bigint REFERENCES app_admin.users (id)  NOT NULL,
@@ -117,8 +116,6 @@ to check user_app_permissions if public
 
 $$;
 
-
-
 -- main app tables
 CREATE SCHEMA provider_effort;
 
@@ -126,8 +123,6 @@ COMMENT ON SCHEMA provider_effort IS $$
 main tables for provider effort app.
 
 $$;
-
-
 
 CREATE TABLE provider_effort.company (
     id bigserial PRIMARY KEY,
@@ -159,7 +154,6 @@ COMMENT ON TABLE provider_effort.line_of_business IS $$
 root heirarchy for practices
 
 $$;
-
 
 CREATE TABLE provider_effort.department (
     id bigserial PRIMARY KEY,
@@ -194,7 +188,6 @@ COMMENT ON TABLE provider_effort.specialty IS $$
 main grouping for staff
 $$;
 
-
 CREATE TABLE provider_effort.time_unit (
     id bigserial PRIMARY KEY,
     time_unit_name text NOT NULL UNIQUE,
@@ -205,7 +198,6 @@ CREATE TABLE provider_effort.time_unit (
 COMMENT ON TABLE provider_effort.time_unit IS $$ 
 time units ie seconds, minutes hours. used for queries
 $$;
-
 
 CREATE TABLE provider_effort.cost_center (
     id bigserial PRIMARY KEY,
@@ -223,7 +215,6 @@ COMMENT ON TABLE provider_effort.cost_center IS $$
 billing
 $$;
 
-
 CREATE TABLE provider_effort.company_cost_center (
     id bigserial   PRIMARY KEY,
     cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id),
@@ -240,7 +231,6 @@ CREATE TABLE provider_effort.company_cost_center (
 COMMENT ON TABLE provider_effort.company_cost_center IS $$ 
 connects companies with billing centers
 $$;
-
 
 CREATE TABLE provider_effort.classifications (
     id bigserial PRIMARY KEY,
@@ -269,7 +259,6 @@ COMMENT ON TABLE provider_effort.lcg IS $$
 staff skill set defined by lcg
 $$;
 
-
 CREATE TABLE provider_effort.cpsc (
     id bigserial PRIMARY KEY,
     cpsc_name text NOT NULL,
@@ -284,7 +273,6 @@ COMMENT ON TABLE provider_effort.cpsc IS $$
 staff skill set by cpsc
 $$;
 
-
 CREATE TABLE provider_effort.cpsc_lcg_map (
     id bigserial PRIMARY KEY,
     cpsc_id   bigint NOT NULL REFERENCES provider_effort.cpsc (id),
@@ -298,7 +286,6 @@ CREATE TABLE provider_effort.cpsc_lcg_map (
 COMMENT ON TABLE provider_effort.cpsc_lcg_map IS $$ 
 1:1 connection between cpsc and lcg
 $$;
-
 
 CREATE TABLE provider_effort.providers (
     id bigserial PRIMARY KEY,
@@ -320,7 +307,6 @@ CREATE TABLE provider_effort.providers (
 COMMENT ON TABLE provider_effort.providers IS $$ 
 names and company info on employees
 $$;
-
 
 CREATE TABLE provider_effort.appointments (
     id bigserial PRIMARY KEY,
@@ -376,8 +362,6 @@ CREATE TABLE provider_effort.oracle_effort (
 COMMENT ON TABLE provider_effort.oracle_effort IS $$ 
 total effort of staff
 $$;
-
-
 
 CREATE TABLE provider_effort.user_org_permissions (
     id bigserial PRIMARY KEY,

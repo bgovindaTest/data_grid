@@ -88,7 +88,7 @@ CREATE TABLE app_admin.app_permissions (
     is_test boolean default true, --in test mode no data saving can occur
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
 
     UNIQUE(apps_id, registered_table_id)
 );
@@ -110,7 +110,7 @@ CREATE TABLE app_admin.user_app_permission (
     UNIQUE(user_id, app_id)
 );
 
-COMMENT ON TABLE provider_effort.user_app_permission IS $$ 
+COMMENT ON TABLE app_admin.user_app_permission IS $$ 
 Links user_id to app_id. Determine if user can view page. Needs to join
 with app_admin.apps, app_permissions and user_app_permisisons. Dont need
 to check user_app_permissions if public
@@ -122,7 +122,7 @@ $$;
 -- main app tables
 CREATE SCHEMA provider_effort;
 
-COMMENT ON SCHEMA provider_effort $$ 
+COMMENT ON SCHEMA provider_effort IS $$ 
 main tables for provider effort app.
 
 $$;
@@ -152,7 +152,7 @@ CREATE TABLE provider_effort.line_of_business (
     is_active boolean default true NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid(),
+    last_modified_userid   bigint  DEFAULT app_userid()
 );
 
 COMMENT ON TABLE provider_effort.line_of_business IS $$ 
@@ -169,7 +169,7 @@ CREATE TABLE provider_effort.department (
     is_active  boolean default true NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
     UNIQUE(lob_id, department_code)
 );
 
@@ -186,7 +186,7 @@ CREATE TABLE provider_effort.specialty (
     is_active boolean NOT NULL DEFAULT TRUE,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
     UNIQUE(department_id, specialty_code)
 );
 
@@ -212,29 +212,28 @@ CREATE TABLE provider_effort.cost_center (
     cost_center_name text,
     cost_center_code text NOT NULL,
     specialty_id bigint REFERENCES provider_effort.specialty (id),
-    is_active boolean NOT NULL default TRUE
+    is_active boolean NOT NULL default TRUE,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),
-
     UNIQUE (specialty_id, cost_center_code)
 );
 
-COMMENT ON TABLE provider_effort.cost_center $$ 
+COMMENT ON TABLE provider_effort.cost_center IS $$ 
 billing
 $$;
 
 
 CREATE TABLE provider_effort.company_cost_center (
-    id bigserial   PRIMARY KEY
-    cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id)
-    company_id     bigint  NOT NULL REFERENCES provider_effort.company     (id)
+    id bigserial   PRIMARY KEY,
+    cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id),
+    company_id     bigint  NOT NULL REFERENCES provider_effort.company     (id),
     is_active      boolean NOT NULL DEFAULT true,
     cfte_full_time numeric NOT NULL DEFAULT 40,
     time_unit_id   bigint  REFERENCES provider_effort.time_unit (id),
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
     UNIQUE(company_id, cost_center_id)
 );
 
@@ -288,8 +287,8 @@ $$;
 
 CREATE TABLE provider_effort.cpsc_lcg_map (
     id bigserial PRIMARY KEY,
-    cpsc_ic   bigint NOT NULL REFERENCES provider_effort.cpsc (id),
-    lcg_ic    bigint NOT NULL REFERENCES provider_effort.lcg  (id),
+    cpsc_id   bigint NOT NULL REFERENCES provider_effort.cpsc (id),
+    lcg_id    bigint NOT NULL REFERENCES provider_effort.lcg  (id),
     is_active boolean NOT NULL DEFAULT true,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
@@ -307,10 +306,10 @@ CREATE TABLE provider_effort.providers (
     npi text NOT NULL,
     first_name text NOT NULL,
     last_name text NOT NULL,
-    classification_id bigint REFERENCES provider_effort.classifications (id)
+    classification_id bigint REFERENCES provider_effort.classifications (id),
     is_active boolean NOT NULL DEFAULT true,
-    cpsc_ic bigint REFERENCES provider_effort.cpsc (id),
-    lcg_ic  bigint REFERENCES provider_effort.lcg  (id),
+    cpsc_id bigint REFERENCES provider_effort.cpsc (id),
+    lcg_id  bigint REFERENCES provider_effort.lcg  (id),
     start_date date,
     end_date date,
     created_at timestamptz default now(),
@@ -326,14 +325,14 @@ $$;
 CREATE TABLE provider_effort.appointments (
     id bigserial PRIMARY KEY,
     provider_id bigint REFERENCES provider_effort.providers,
-    cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
-    lcg_ic  bigint REFERENCES provider_effort.lcgs (id),
+    cpsc_id bigint REFERENCES provider_effort.cpsc (id),
+    lcg_id  bigint REFERENCES provider_effort.lcg  (id),
     company_cost_center_id bigint REFERENCES provider_effort.company_cost_center (id),
     start_date date,
     end_date   date,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
     UNIQUE( provider_id, company_cost_center_id)
 );
 
@@ -394,7 +393,7 @@ CREATE TABLE provider_effort.user_org_permissions (
     UNIQUE(user_id, company_cost_center_id)
 );
 
-COMMENT ON TABLE provider_effort.user_org_permissions $$ 
+COMMENT ON TABLE provider_effort.user_org_permissions IS $$ 
 data permissions for user based on location
 permission_level based on what permission is worth ie check
 permisisons on company_cost_center or company_specialty
@@ -403,7 +402,7 @@ $$;
 CREATE TABLE provider_effort.refreshed_dates (
     id bigserial PRIMARY KEY,
     check_date date NOT NULL,
-    is_approved_date boolean false,
+    is_approved_date boolean DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT NOW(),
     updated_at timestamptz NOT NULL DEFAULT NOW() ,
     last_modified_userid   bigint  DEFAULT app_userid()

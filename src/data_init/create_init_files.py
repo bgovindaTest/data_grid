@@ -9,12 +9,12 @@ from datetime import date
 import os
 
 import sys
-sys.path.append('~/PsqlCred')
+sys.path.append('/home/bgovi/PsqlCred')
 import psql_cred
 
 
 input_connect_string   = psql_cred.input_connect_string
-output_path = '~/PsqlCred/output_data'
+output_path = '/home/bgovi/PsqlCred/output_data'
 conn = psycopg2.connect(input_connect_string)
 
 

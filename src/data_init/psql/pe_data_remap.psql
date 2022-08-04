@@ -8,7 +8,8 @@
     {"name": "company",
     "query": """
         --company
-        SELECT DISTINCT company_id as id, company_name, company_code
+        SELECT DISTINCT company_id as id, company_name, company_code, 1 as last_modified_userid,
+            CASE WHEN position('Lawson' in company_code) > 0 THEN true ELSE false END is_active 
         FROM full_org
         ORDER BY company_id asc;
     """
@@ -16,15 +17,18 @@
     {"name": "line_of_business",
     "query": """
         --lob
-        SELECT DISTINCT lob_id as id, lob_name, lob_code, --is_active
+        SELECT DISTINCT lob_id as id, lob_name, lob_code,1 as last_modified_userid, 
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active --is_active
         FROM full_org
         ORDER BY lob_name asc;
     """
     },
     {"name": "department",
      "query": """
-        --department
-        SELECT DISTINCT department_id as id, lob_id, department_name, department_code, --is_active
+        --departmentq
+        SELECT DISTINCT department_id as id, lob_id, department_name, department_code,
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active --is_active
         FROM full_org
         ORDER BY department_id asc;
      """
@@ -33,7 +37,9 @@
     {"name": "specialty",
      "query": """
         --specialty
-        SELECT DISTINCT specialty_id as id, department_id, specialty_name, specialty_code, --is_active
+        SELECT DISTINCT specialty_id as id, department_id, specialty_name, specialty_code,
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active--is_active
         FROM full_org
         ORDER BY specialty_id asc;
      """
@@ -48,7 +54,9 @@
     {"name": "cost_center",
      "query": """
         --cost centers 
-        SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code, --is_active
+        SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code,
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active, --is_active
             40 as cfte_time, 3 as time_unit_id
         FROM full_org
         ORDER BY cost_center_id asc;
@@ -57,7 +65,9 @@
     {"name": "company_cost_center",
      "query": """
         --company_cost_center
-        SELECT DISTINCT id, cost_center_id, company_id --is_active
+        SELECT DISTINCT id, cost_center_id, company_id, 
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active --is_active
         FROM full_org
         ORDER BY cost_center_id asc;
      """

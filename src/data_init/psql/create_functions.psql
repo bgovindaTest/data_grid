@@ -14,7 +14,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE FUNCTION app_userid() RETURNS bigint
+CREATE OR REPLACE FUNCTION app_userid() RETURNS bigint
     AS $$select 1::bigint;$$
     --AS $$select current_setting('app.user_id',true)::bigint;$$
 LANGUAGE SQL

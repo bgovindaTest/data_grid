@@ -51,6 +51,26 @@ class BackupData:
         """
         pass
 
+# company
+# line_of_business
+# department
+# specialty
+# time_units
+# cost_center
+# company_cost_center
+# classifications
+# cpsc
+# lcg
+# cpsc_lcg_map
+# providers
+# appointments
+# appointment_effort
+# oracle_effort
+# user_org_permission
+# full_org
+
+
+
 
 if __name__ == "__main__":
     x = BackupData()

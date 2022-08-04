@@ -19,7 +19,6 @@ CREATE TABLE app_admin.users (
     -- as_user ?
     is_admin      boolean default false,
     is_active     boolean default true,
-    admin_as_user boolean default false, --for admin to run as user.
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
@@ -27,7 +26,6 @@ CREATE TABLE app_admin.users (
 
 COMMENT ON TABLE app_admin.users IS $$ 
 User information and credentials
-
 $$;
 
 
@@ -126,9 +124,7 @@ $$;
 CREATE SCHEMA provider_effort;
 
 COMMENT ON SCHEMA provider_effort $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+main tables for provider effort app.
 
 $$;
 
@@ -144,10 +140,8 @@ CREATE TABLE provider_effort.company (
     UNIQUE (company_code)
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+COMMENT ON TABLE provider_effort.company IS $$ 
+company data
 
 $$;
 
@@ -162,10 +156,8 @@ CREATE TABLE provider_effort.line_of_business (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+COMMENT ON TABLE provider_effort.line_of_business IS $$ 
+root heirarchy for practices
 
 $$;
 
@@ -181,11 +173,8 @@ CREATE TABLE provider_effort.department (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.department IS $$ 
+owned by line of business contains specialties and cc
 $$;
 
 
@@ -200,11 +189,8 @@ CREATE TABLE provider_effort.specialty (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.specialty IS $$ 
+main grouping for staff
 $$;
 
 
@@ -215,11 +201,8 @@ CREATE TABLE provider_effort.time_unit (
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.time_unit IS $$ 
+time units ie seconds, minutes hours. used for queries
 $$;
 
 
@@ -236,11 +219,8 @@ CREATE TABLE provider_effort.cost_center (
     UNIQUE (specialty_id, cost_center_code)
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.cost_center $$ 
+billing
 $$;
 
 
@@ -256,11 +236,8 @@ CREATE TABLE provider_effort.company_cost_center (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.company_cost_center IS $$ 
+connects companies with billing centers
 $$;
 
 
@@ -273,11 +250,8 @@ CREATE TABLE provider_effort.classifications (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.classifications IS $$ 
+describes staff roles
 $$;
 
 CREATE TABLE provider_effort.lcg (
@@ -290,11 +264,8 @@ CREATE TABLE provider_effort.lcg (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.lcg $$ 
+staff skill set defined by lcg
 $$;
 
 
@@ -308,11 +279,8 @@ CREATE TABLE provider_effort.cpsc (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.cpsc $$ 
+staff skill set by cpsc
 $$;
 
 
@@ -327,10 +295,7 @@ CREATE TABLE provider_effort.cpsc_lcg_map (
 );
 
 COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+1:1 connection between cpsc and lcg
 $$;
 
 
@@ -352,10 +317,7 @@ CREATE TABLE provider_effort.providers (
 );
 
 COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+names and company info on employees
 $$;
 
 

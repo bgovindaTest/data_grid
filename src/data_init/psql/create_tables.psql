@@ -231,7 +231,7 @@ CREATE TABLE provider_effort.cost_center (
     is_active boolean NOT NULL default TRUE
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
 
     UNIQUE (specialty_id, cost_center_code)
 );
@@ -280,11 +280,11 @@ id, effective_date, is_approved_date,
 
 $$;
 
-CREATE TABLE provider_effort.lcgs (
+CREATE TABLE provider_effort.lcg (
     id bigserial PRIMARY KEY,
     lcg_name text NOT NULL,
     lcg_code text NOT NULL UNIQUE,
-    is_active boolean true,    
+    is_active boolean DEFAULT true,    
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
@@ -298,11 +298,11 @@ id, effective_date, is_approved_date,
 $$;
 
 
-CREATE TABLE provider_effort.cpscs (
+CREATE TABLE provider_effort.cpsc (
     id bigserial PRIMARY KEY,
     cpsc_name text NOT NULL,
     cpsc_code text NOT NULL UNIQUE,
-    is_active boolean true,
+    is_active boolean  DEFAULT true,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
@@ -318,9 +318,9 @@ $$;
 
 CREATE TABLE provider_effort.cpsc_lcg_map (
     id bigserial PRIMARY KEY,
-    cpsc_ic   bigint NOT NULL REFERENCES provider_effort.cpscs (id),
-    lcg_ic    bigint NOT NULL REFERENCES provider_effort.lcgs (id),
-    is_active boolean true,
+    cpsc_ic   bigint NOT NULL REFERENCES provider_effort.cpsc (id),
+    lcg_ic    bigint NOT NULL REFERENCES provider_effort.lcg  (id),
+    is_active boolean DEFAULT true,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
@@ -337,13 +337,13 @@ $$;
 CREATE TABLE provider_effort.providers (
     id bigserial PRIMARY KEY,
     employee_number text NOT NULL UNIQUE,
-    npi text NOT NULL UNIQUE,
-    first_name text NOT NULL UNIQUE,
-    last_name text NOT NULL UNIQUE,
+    npi text NOT NULL,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
     classification_id bigint REFERENCES provider_effort.classifications (id)
     is_active boolean DEFAULT true,
-    cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
-    lcg_ic  bigint REFERENCES provider_effort.lcgs (id),
+    cpsc_ic bigint REFERENCES provider_effort.cpsc (id),
+    lcg_ic  bigint REFERENCES provider_effort.lcg  (id),
     start_date date,
     end_date date,
     created_at timestamptz default now(),
@@ -364,11 +364,13 @@ CREATE TABLE provider_effort.apppointments (
     provider_id bigint REFERENCES provider_effort.providers,
     cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
     lcg_ic  bigint REFERENCES provider_effort.lcgs (id),
+    company_cost_center_id bigint REFERENCES provider_effort.company_cost_center (id),
     start_date date,
     end_date   date,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
+    UNIQUE( provider_id, company_cost_center_id)
 );
 
 COMMENT ON TABLE provider_effort.refreshed_dates $$ 

@@ -48,7 +48,7 @@
     {"name": "time_units",
      "query": """
         --time units
-        SELECT id, time_unit_name, is_active, 1 as last_modified_userid
+        SELECT id, time_unit_name, 1 as last_modified_userid
         FROM time_units;
      """
     },
@@ -57,8 +57,7 @@
         --cost centers 
         SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code,
             1 as last_modified_userid,
-            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active, --is_active
-            40 as cfte_time, 3 as time_unit_id
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active
         FROM full_org
         ORDER BY cost_center_id asc;
      """
@@ -68,7 +67,8 @@
         --company_cost_center
         SELECT DISTINCT id, cost_center_id, company_id, 
             1 as last_modified_userid,
-            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active --is_active
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN true ELSE false END is_active, --is_active
+            40 as cfte_time, 3 as time_unit_id
         FROM full_org
         ORDER BY cost_center_id asc;
      """
@@ -107,14 +107,16 @@
         SELECT id, npi, employee_number, first_name, last_name, classification_id,
         providers.last_modified_by_user_id as last_modified_userid, 
         providers.is_active,
-        a.lcg_id as lcg_id, a.cpsc_id as cpsc_id, null as start_date, null as end_date,
+        CASE WHEN a.lcg_id = 1 THEN null ELSE a.lcg_id  END as lcg_id, 
+        CASE WHEN a.cpsc_id =1 THEN null ELSE a.cpsc_id END as cpsc_id,
+        null as start_date, null as end_date,
         ROW_NUMBER() OVER (PARTITION BY npi) as rx
         FROM providers
         LEFT JOIN (
             SELECT lcg_id, cpsc_id, provider_id
             FROM appointments
          ) a  on a.provider_id = providers.id
-      ) x where x.rx = 1
+      ) x where x.rx = 1;
      """
     },
     {"name": "appointments",

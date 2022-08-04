@@ -17,8 +17,8 @@ CREATE TABLE app_admin.users (
     last_name    text,
     oauth_id     text NOT NULL UNIQUE,
     -- as_user ?
-    is_admin      boolean default false,
-    is_active     boolean default true,
+    is_admin      boolean default false NOT NULL,
+    is_active     boolean default true  NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
@@ -33,12 +33,12 @@ CREATE TABLE app_admin.registered_tables (
     id bigserial PRIMARY KEY,
     schema_name text,
     table_name  text,
-    allow_select boolean default true,
-    allow_insert boolean default false,
-    allow_update boolean default false,
-    allow_delete boolean default false,
-    allow_execute  boolean default false,
-    allow_truncate boolean default false,
+    allow_select boolean default true NOT NULL,
+    allow_insert boolean default false NOT NULL,
+    allow_update boolean default false NOT NULL,
+    allow_delete boolean default false NOT NULL,
+    allow_execute  boolean default false NOT NULL,
+    allow_truncate boolean default false NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),
@@ -78,12 +78,12 @@ CREATE TABLE app_admin.app_permissions (
     id bigserial PRIMARY KEY,
     apps_id bigint REFERENCES app_admin.apps (id) NOT NULL,
     registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
-    allow_select   boolean default true,
-    allow_insert   boolean default false,
-    allow_update   boolean default false,
-    allow_delete   boolean default false,
-    allow_execute  boolean default false,
-    allow_truncate boolean default false,
+    allow_select   boolean default true NOT NULL,
+    allow_insert   boolean default false NOT NULL,
+    allow_update   boolean default false NOT NULL,
+    allow_delete   boolean default false NOT NULL,
+    allow_execute  boolean default false NOT NULL,
+    allow_truncate boolean default false NOT NULL,
 
     is_test boolean default true, --in test mode no data saving can occur
     created_at timestamptz default now(),
@@ -101,13 +101,12 @@ $$;
 
 CREATE TABLE app_admin.user_app_permission (
     id bigserial PRIMARY KEY,
-    user_id bigint REFERENCES app_admin.users (id),
-    app_id bigint  REFERENCES app_admin.apps  (id),
+    user_id bigint REFERENCES app_admin.users (id)  NOT NULL,
+    app_id bigint  REFERENCES app_admin.apps  (id)  NOT NULL,
     is_read_only   boolean default true,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),
-
     UNIQUE(user_id, app_id)
 );
 
@@ -134,10 +133,10 @@ CREATE TABLE provider_effort.company (
     id bigserial PRIMARY KEY,
     company_name text NOT NULL,
     company_code text NOT NULL UNIQUE,
+    is_active boolean default true NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid(),
-    UNIQUE (company_code)
+    last_modified_userid   bigint  DEFAULT app_userid()
 );
 
 COMMENT ON TABLE provider_effort.company IS $$ 
@@ -150,10 +149,10 @@ CREATE TABLE provider_effort.line_of_business (
     id bigserial PRIMARY KEY,
     lob_name text,
     lob_code text NOT NULL UNIQUE,
-    is_active boolean default true,
+    is_active boolean default true NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
 );
 
 COMMENT ON TABLE provider_effort.line_of_business IS $$ 
@@ -165,12 +164,13 @@ $$;
 CREATE TABLE provider_effort.department (
     id bigserial PRIMARY KEY,
     department_name text NOT NULL,
-    department_code text NOT NULL UNIQUE,
+    department_code text NOT NULL,
     lob_id          bigint REFERENCES provider_effort.line_of_business (id),
-    is_active boolean default true,
+    is_active  boolean default true NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
+    UNIQUE(lob_id, department_code)
 );
 
 COMMENT ON TABLE provider_effort.department IS $$ 
@@ -181,12 +181,13 @@ $$;
 CREATE TABLE provider_effort.specialty (
     id bigserial PRIMARY KEY,
     specialty_name text,
-    specialty_code text NOT NULL UNIQUE,
+    specialty_code text NOT NULL,
     department_id  bigint REFERENCES provider_effort.department (id),
-    is_active boolean NOT NULL,
+    is_active boolean NOT NULL DEFAULT TRUE,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
+    UNIQUE(department_id, specialty_code)
 );
 
 COMMENT ON TABLE provider_effort.specialty IS $$ 
@@ -227,13 +228,14 @@ $$;
 CREATE TABLE provider_effort.company_cost_center (
     id bigserial   PRIMARY KEY
     cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id)
-    company_id     bigint  NOT NULL REFERENCES provider_effort.company    (id)
+    company_id     bigint  NOT NULL REFERENCES provider_effort.company     (id)
     is_active      boolean NOT NULL DEFAULT true,
     cfte_full_time numeric NOT NULL DEFAULT 40,
     time_unit_id   bigint  REFERENCES provider_effort.time_unit (id),
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
+    UNIQUE(company_id, cost_center_id)
 );
 
 COMMENT ON TABLE provider_effort.company_cost_center IS $$ 
@@ -244,7 +246,7 @@ $$;
 CREATE TABLE provider_effort.classifications (
     id bigserial PRIMARY KEY,
     classification_name text NOT NULL,
-    is_active boolean true,
+    is_active boolean DEFAULT true NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
@@ -258,13 +260,13 @@ CREATE TABLE provider_effort.lcg (
     id bigserial PRIMARY KEY,
     lcg_name text NOT NULL,
     lcg_code text NOT NULL UNIQUE,
-    is_active boolean DEFAULT true,    
+    is_active boolean DEFAULT true NOT NULL,    
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.lcg $$ 
+COMMENT ON TABLE provider_effort.lcg IS $$ 
 staff skill set defined by lcg
 $$;
 
@@ -273,13 +275,13 @@ CREATE TABLE provider_effort.cpsc (
     id bigserial PRIMARY KEY,
     cpsc_name text NOT NULL,
     cpsc_code text NOT NULL UNIQUE,
-    is_active boolean  DEFAULT true,
+    is_active boolean NOT NULL DEFAULT true,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.cpsc $$ 
+COMMENT ON TABLE provider_effort.cpsc IS $$ 
 staff skill set by cpsc
 $$;
 
@@ -288,13 +290,13 @@ CREATE TABLE provider_effort.cpsc_lcg_map (
     id bigserial PRIMARY KEY,
     cpsc_ic   bigint NOT NULL REFERENCES provider_effort.cpsc (id),
     lcg_ic    bigint NOT NULL REFERENCES provider_effort.lcg  (id),
-    is_active boolean DEFAULT true,
+    is_active boolean NOT NULL DEFAULT true,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+COMMENT ON TABLE provider_effort.cpsc_lcg_map IS $$ 
 1:1 connection between cpsc and lcg
 $$;
 
@@ -306,7 +308,7 @@ CREATE TABLE provider_effort.providers (
     first_name text NOT NULL,
     last_name text NOT NULL,
     classification_id bigint REFERENCES provider_effort.classifications (id)
-    is_active boolean DEFAULT true,
+    is_active boolean NOT NULL DEFAULT true,
     cpsc_ic bigint REFERENCES provider_effort.cpsc (id),
     lcg_ic  bigint REFERENCES provider_effort.lcg  (id),
     start_date date,
@@ -316,12 +318,12 @@ CREATE TABLE provider_effort.providers (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
+COMMENT ON TABLE provider_effort.providers IS $$ 
 names and company info on employees
 $$;
 
 
-CREATE TABLE provider_effort.apppointments (
+CREATE TABLE provider_effort.appointments (
     id bigserial PRIMARY KEY,
     provider_id bigint REFERENCES provider_effort.providers,
     cpsc_ic bigint REFERENCES provider_effort.cpscs (id),
@@ -335,11 +337,8 @@ CREATE TABLE provider_effort.apppointments (
     UNIQUE( provider_id, company_cost_center_id)
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.appointments IS $$ 
+where staff are located
 $$;
 
 
@@ -355,13 +354,12 @@ CREATE TABLE provider_effort.appointment_effort (
 
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(appointment_id, effective_date)
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+COMMENT ON TABLE provider_effort.appointment_effort IS $$ 
+staff worklevel at location
 
 $$;
 
@@ -372,14 +370,12 @@ CREATE TABLE provider_effort.oracle_effort (
     fte numeric default 0,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(provider_id, effective_date)
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.oracle_effort IS $$ 
+total effort of staff
 $$;
 
 
@@ -388,19 +384,20 @@ CREATE TABLE provider_effort.user_org_permissions (
     id bigserial PRIMARY KEY,
     company_cost_center_id bigint NOT NULL REFERENCES provider_effort.company_cost_center (id),
     user_id bigint REFERENCES app_admin.users (id),
+    specialty_level boolean default false,
     --level
 
     is_active boolean DEFAULT FALSE NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(user_id, company_cost_center_id)
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
-
+COMMENT ON TABLE provider_effort.user_org_permissions $$ 
+data permissions for user based on location
+permission_level based on what permission is worth ie check
+permisisons on company_cost_center or company_specialty
 $$;
 
 CREATE TABLE provider_effort.refreshed_dates (
@@ -412,10 +409,8 @@ CREATE TABLE provider_effort.refreshed_dates (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.refreshed_dates $$ 
-refreshed_dates
-
-id, effective_date, is_approved_date, 
+COMMENT ON TABLE provider_effort.refreshed_dates IS $$ 
+required dates for effort
 
 $$;
 COMMIT;

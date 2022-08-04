@@ -169,7 +169,7 @@
      "query": """
         --user permissions
         SELECT user_id, company_cc_id as company_cost_center_id, true as is_active, 
-        1 as last_modified_userid, 5 as permission_level_id FROM
+        1 as last_modified_userid, true as specialty_level FROM
         (
             SELECT user_id, specialty_permissions.id as id, 
                 specialty_permissions.last_modified_by_user_id as last_modified_userid,

@@ -10,10 +10,9 @@ def CreateSqlJson(file_path):
     is_start = False
     out = []
     for line in f:
-        if is_start:
-            if '--' in line:
-                continue
-
+        # if is_start:
+        #     if '--' in line:
+        #         continue
         if is_start:
             out.append(line)
         if line.strip() == '--startread':
@@ -21,6 +20,7 @@ def CreateSqlJson(file_path):
     f.close()
     out_str = ''.join(out)
     x = ast.literal_eval(out_str)
+    #print(out_str)
     return x
 
 if __name__ == "__main__":

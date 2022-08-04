@@ -11,19 +11,37 @@ import os
 import sys
 sys.path.append('/home/bgovi/PsqlCred')
 import psql_cred
+from parse_sql_json import CreateSqlJson
 
 
 input_connect_string   = psql_cred.input_connect_string
 output_path = '/home/bgovi/PsqlCred/output_data'
 conn = psycopg2.connect(input_connect_string)
 
+pe_data = './psql/pe_data_remap.psql'
 
-
-full_query_list = [ ('one_minus_full', one_minus_full), ('time_based_full', time_based_full)]
 
 class BackupData:
 
     def __init__(self):
+        pass
+
+    def RunInit(self):
+        x = CreateSqlJson(pe_data)
+        for i in range(0, len(x)):
+            print(x[i]['name'])
+            nx  = x[i]['name']
+            sql_query = x[i]['query']
+            if nx != 'oracle_effort':
+                continue
+
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute(sql_query)
+            row = cur.fetchone()
+            print( row )
+
+
+    def LoadJson(self):
         pass
 
     def BuildJsonFiles(self):
@@ -75,4 +93,4 @@ class BackupData:
 
 if __name__ == "__main__":
     x = BackupData()
-    x.BuildJsonFiles()
+    x.RunInit()

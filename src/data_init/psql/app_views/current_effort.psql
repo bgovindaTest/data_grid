@@ -12,7 +12,7 @@ CREATE VIEW provider_effort.appointment_effort_full_join AS
             providers.first_name, providers.last_name, providers.npi, providers.employee_number,
             classification_name, , classifications.id, providers.id as provider_id,
 
-            --cpsc name
+            --lcg name
             CASE WHEN a.lcg_id IS NULL THEN plcg.lcg_name    ELSE alcg.lcg_name END lcg_name,
             CASE WHEN a.lcg_id IS NULL THEN plcg.lcg_code    ELSE alcg.lcg_code END lcg_code,
             CASE WHEN a.lcg_id IS NULL THEN 'ProviderLcg'    ELSE 'AppointmentLcg' END lcg_origin,

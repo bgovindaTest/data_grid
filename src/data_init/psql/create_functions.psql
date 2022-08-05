@@ -2,7 +2,8 @@
 
 
 BEGIN;
-SET local app.userid = 1;
+SET local app.userid   = 1;
+SET local app.is_admin = false;
 -- sql queries where app_userid() ;
 COMMIT;
 */
@@ -20,9 +21,9 @@ CREATE OR REPLACE FUNCTION app_userid() RETURNS bigint
 LANGUAGE SQL
 IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION is_appuser_admin() RETURNS bigint
-    AS $$select 1::bigint;$$
-    --AS $$select current_setting('app.user_id',true)::bigint;$$
+CREATE OR REPLACE FUNCTION is_appuser_admin() RETURNS boolean
+    AS $$select true;$$
+    --AS $$select current_setting('app.is_admin',true)::boolean;$$
 LANGUAGE SQL
 IMMUTABLE;
 

@@ -4,8 +4,7 @@ User Permissions view based on specialty_level and cost_center
 The company_cost_center_id is used to determine if an appointment row
 or appointment_effort can be modified by a user.
 */
-CREATE VIEW provider_effort.user_specialty_cost_center_permsissios AS 
-
+CREATE VIEW provider_effort.user_specialty_cost_center_permsissions AS 
 
 -- company cost_center
 SELECT ccc.id as id, ccc.company_id as company_id, ccc.cost_center_id as cost_center_id

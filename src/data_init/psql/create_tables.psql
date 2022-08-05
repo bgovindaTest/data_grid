@@ -367,15 +367,17 @@ CREATE TABLE provider_effort.user_org_permissions (
     id bigserial PRIMARY KEY,
     company_cost_center_id bigint NOT NULL REFERENCES provider_effort.company_cost_center (id),
     user_id bigint REFERENCES app_admin.users (id),
-    specialty_level boolean default false,
+    specialty_level boolean default false NOT NULL,
     --level
-
+    department_level boolean default false NOT NULL,
+    lob_level boolean default false NOT NULL,
     is_active boolean DEFAULT FALSE NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid(),
-    UNIQUE(user_id, company_cost_center_id)
+    last_modified_userid   bigint  DEFAULT app_userid()
 );
+
+CREATE INDEX "index_user_org_permissions_on_userid" on provider_effort.user_org_permissions using btree (user_id);
 
 COMMENT ON TABLE provider_effort.user_org_permissions IS $$ 
 data permissions for user based on location

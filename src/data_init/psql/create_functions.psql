@@ -20,6 +20,14 @@ CREATE OR REPLACE FUNCTION app_userid() RETURNS bigint
 LANGUAGE SQL
 IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION is_appuser_admin() RETURNS bigint
+    AS $$select 1::bigint;$$
+    --AS $$select current_setting('app.user_id',true)::bigint;$$
+LANGUAGE SQL
+IMMUTABLE;
+
+
+
 CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
 RETURNS TRIGGER AS $$
 BEGIN

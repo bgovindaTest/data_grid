@@ -1,30 +1,52 @@
 /*
-User Permissions view based on specialty_level and cost_center
+Used in policy to determine if user has permissions.
 
-The company_cost_center_id is used to determine if an appointment row
-or appointment_effort can be modified by a user.
+The appointments company_cost_center permissions are expaded to
+company, cost_center, specialty, department and lob. If the inner
+join to the views below return a hit the permissions is available.
+
+
 */
-CREATE VIEW provider_effort.user_specialty_cost_center_permsissions AS 
-
 -- company cost_center
-SELECT ccc.id as id, ccc.company_id as company_id, ccc.cost_center_id as cost_center_id
+CREATE VIEW provider_effort.user_cost_center_permsissions AS 
+SELECT ccc.company_id as company_id, ccc.cost_center_id as cost_center_id
 FROM provider_effort.company_cost_center ccc
 INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
-WHERE uop.user_id = app_userid() AND uop.specialty_level = false
+WHERE uop.user_id = app_userid() AND uop.is_active = true;
 
-UNION
---company cost_centers for specialty.
-SELECT ccc.id as id , ccc.company_id as company_id, ccc.cost_center_id as cost_center_id
+--company specialty
+CREATE VIEW provider_effort.user_specialty_permsissions AS
+SELECT ccc.company_id as company_id, cc.specialty_id
 FROM provider_effort.company_cost_center ccc
-INNER JOIN (
-        SELECT ccc.company_id, cc2.id as cost_center_id 
-        --ccc.id  , ccc.company_id, cc2.id as cost_center_id
-        FROM provider_effort.company_cost_center ccc
-        INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
-        --filtered data based on user permissions.
-        INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
-        INNER JOIN provider_effort.specialty   as scc on scc.id = cc.specialty_id
-        INNER JOIN provider_effort.cost_center as cc2 on cc2.specialty_id = scc.id
-        WHERE uop.user_id = app_userid() AND uop.specialty_level = true
-) x 
-WHERE x.company_id = ccc.company_id AND x.cost_center_id = ccc.cost_center_id;
+INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
+INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
+WHERE uop.user_id = app_userid() AND uop.is_active = true AND uop.specialty_level = true;
+
+--company department
+CREATE VIEW provider_effort.user_department_permsissions AS
+SELECT ccc.company_id as company_id, sc.department_id
+FROM provider_effort.company_cost_center ccc
+INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
+INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
+INNER JOIN provider_effort.specialty   as sc on sc.id   = cc.specialty_id
+WHERE uop.user_id = app_userid() AND uop.is_active = true AND uop.department_level = true;
+
+--company lob
+CREATE VIEW provider_effort.user_lob_permsissions AS
+SELECT ccc.company_id as company_id, d.lob_id
+FROM provider_effort.company_cost_center ccc
+INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
+INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
+INNER JOIN provider_effort.specialty   as sc on sc.id   = cc.specialty_id
+INNER JOIN provider_effort.department  as d  on d.id    = sc.department_id 
+WHERE uop.user_id = app_userid() AND uop.is_active = true AND uop.department_level = true;
+
+CREATE VIEW provider_effort.user_all_permsissions AS
+SELECT ccc.company_id as company_id, d.lob_id, sc.department_id, cc.specialty_id, ccc.cost_center_id,
+    uop.specialty_level, uop.department_level, uop.lob_level
+FROM provider_effort.company_cost_center ccc
+INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
+INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
+INNER JOIN provider_effort.specialty   as sc on sc.id   = cc.specialty_id
+INNER JOIN provider_effort.department  as d  on d.id    = sc.department_id 
+WHERE uop.user_id = app_userid() AND uop.is_active = true;

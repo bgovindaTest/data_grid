@@ -314,6 +314,7 @@ CREATE TABLE provider_effort.appointments (
     cpsc_id bigint REFERENCES provider_effort.cpsc (id),
     lcg_id  bigint REFERENCES provider_effort.lcg  (id),
     company_cost_center_id bigint REFERENCES provider_effort.company_cost_center (id),
+    is_active boolean NOT NULL DEFAULT True,
     start_date date,
     end_date   date,
     created_at timestamptz default now(),

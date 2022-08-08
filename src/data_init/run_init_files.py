@@ -45,12 +45,21 @@ class BackupData:
                 row['effective_date'] = str(row['effective_date'])
         return rows
 
-    def ResetIndexes():
+    def ResetIndexes(self, schema_name):
         """
         -- ALTER SEQUENCE product_id_seq RESTART WITH 1453;
         -- setval('product_id_seq', 1453);
         -- SELECT SETVAL('project_id_seq', (SELECT MAX(id) + 1 FROM project));
         """
+        sql_query = """select table_schema, table_name, table_schema ||'.'||table_name|| '_id_seq' as seq 
+            from information_schema.tables WHERE table_schema = {table_schema};""".format(table_schema=schema_name)
+        rows = self.RunQuery(sql_query)
+        for row in rows:
+            sql_query = """SELECT SETVAL({seq}, (SELECT MAX(id) + 1 FROM "{schema_name}"."{table_name}"));""".format(schema_name=row['table_schema'], 
+                table_name=row['table_name'], seq_name=row['seq'])
+            self.RunQuery(sql_query)
+
+
         pass
 
 # company

@@ -38,8 +38,8 @@ class BackupData:
         pass
 
     def RunInit(self):
-        #self.RunFile('provider_effort', pe_data)
         self.RunFile('admin', admin_data)
+        self.RunFile('provider_effort', pe_data)
 
     def RunFile(self, schema_name, file_path):
         x = CreateSqlJson(file_path)
@@ -54,6 +54,7 @@ class BackupData:
 
         #run sepearte queries
     def RunQuery(self, sql_query):
+        # print(sql_query)
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute(sql_query)
         rows = cur.fetchall()
@@ -66,7 +67,7 @@ class BackupData:
 
     def WriteSqlFile(self, rows, table_name ):
         columns = self.RowColumns(rows[0])
-        insert_str = "INSERT INTO table_name ( {columns} ) VALUES\n".format(columns = ','.join(columns))
+        insert_str = "INSERT INTO {table_name} ( {columns} ) VALUES\n".format(columns = ','.join(columns), table_name = table_name)
         values = []
         for row in rows:
             values.append(self.RowValues(row, columns))
@@ -82,7 +83,7 @@ class BackupData:
     def RowValues(self, row, columns):
         values = []
         for cx in columns:
-            x = "$${value}$$".format(value=str(row[cx]))
+            x = "$${value}$$".format(value=str(row[cx])).replace("$$None$$", "NULL")
             values.append(x)
         return "( {values} )".format(values=','.join(values))
 

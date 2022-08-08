@@ -8,7 +8,7 @@
                 THEN true
                 ELSE false 
             END is_admin,
-            true as is_active,
+            true as is_active
         FROM users
         ORDER BY id asc;
     """

@@ -18,7 +18,7 @@ let test_grid = {
                 //     "columnDefs": ["full_name", "first_name", "last_name", "id"]
                 // }
             },
-
+            {"field": "cost_center","headerName": "Cost Center", "valueGetter":"lookup(full_name, cc)", "editable": false },
             // {"field": "is_approved", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true, "showSort": true,"showFilter": true,
             //     "cellEditorParams": {
             //         "valuesObject": [
@@ -65,7 +65,7 @@ let test_grid = {
                 "contract": 0,
                 "academic": 0,
                 "administrative": 0,
-                "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"},
+                "full_name": {"full_name": "John Smith", "first_name": "John", "last_name": "Smith", "id": "5", "cc": "cost center a"},
                 "date": "2022-01-01",
                 "is_approved": {"is_approved": 'false', "id": "2"}
             },
@@ -75,7 +75,7 @@ let test_grid = {
                 "contract": 0,
                 "academic": 0,
                 "administrative": 0,
-                "full_name": {"full_name": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2"},
+                "full_name": {"full_name": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2", "cc": "cost center b"},
                 "date": "2022-05-01",
                 "is_approved": {"is_approved": 'false', "id": "2"}
             },
@@ -85,7 +85,7 @@ let test_grid = {
                 "contract": 0,
                 "academic": 0,
                 "administrative": 0,
-                "full_name": {"full_name": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2"},
+                "full_name": {"full_name": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2", "cc": "cost center b"},
                 "date": "2022-01-01",
                 "is_approved": {"is_approved": 'false', "id": "2"}
             },
@@ -95,7 +95,7 @@ let test_grid = {
                 "contract": 0,
                 "academic": 0,
                 "administrative": 0,
-                "full_name": {"full_name": "Brandon Govi", "first_name": "Brabdib", "last_name": "Govi", "id": "3"},
+                "full_name": {"full_name": "Brandon Govi", "first_name": "Brabdib", "last_name": "Govi", "id": "3", "cc": "cost center c"},
                 "date": "2022-01-01",
                 "is_approved": {"is_approved": 'false', "id": "2"}
             },            

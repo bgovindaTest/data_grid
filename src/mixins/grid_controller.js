@@ -110,7 +110,7 @@ methods: {
 
         */
         let main_grid = testGrid['grids'][0]
-        let navHeaderParams = main_grid['naveHeaderParams'] || {}
+        let navHeaderParams = main_grid['navHeaderParams'] || {}
         let columnDefConfig = main_grid['columnDefs']
         this.ValuesObjectParser(0, columnDefConfig)
         let valuesObject = this.valuesObject[0]

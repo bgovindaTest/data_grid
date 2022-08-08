@@ -1,6 +1,9 @@
 let test_grid = {
 "grids": [
     {
+        "navHeaderParams": {
+            "links": [{'name':'providers', 'url': '/providers'}]
+        },
         "columnDefs": [
 
             {"field": "full_name", 'cellEditor': "autoCompleteEditor", "editable": false, "showSort": true,
@@ -29,19 +32,23 @@ let test_grid = {
             {"field": "date", "headerName": "EffectiveDate", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},
 
 
-            {"field": "cfte",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['cfte'], //,"validator":"1 >= ifnull(num,0)  > 0", 
+            {"field": "cfte",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['cfte'], "validator":"1 >= ifnull(cfte,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
 
-            {"field": "veterans_affairs",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['veterans_affairs'], //,"validator":"1 >= ifnull(num,0)  > 0", 
+            {"field": "veterans_affairs",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['veterans_affairs'],
+                "validator":"1 >= ifnull(veterans_affairs,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
     
-            {"field": "contract",   "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['contract'] ,//,"validator":"1 >= ifnull(num,0)  > 0", 
+            {"field": "contract",   "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['contract'] ,
+                "validator":"1 >= ifnull(contract,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
 
-            {"field": "academic",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['academic'] ,//,"validator":"1 >= ifnull(num,0)  > 0", 
+            {"field": "academic",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['academic'] ,
+                "validator":"1 >= ifnull(academic,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
 
-            {"field": "administrative",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['administrative'], //,"validator":"1 >= ifnull(num,0)  > 0", 
+            {"field": "administrative",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['administrative'],
+                "validator":"1 >= ifnull(administrative,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
 
             {"field": "full_effort",   "valueGetter": "ifnull(cfte,0) + ifnull(veterans_affairs,0) + ifnull(contract,0) + ifnull(academic,0) + ifnull(administrative,0) " ,

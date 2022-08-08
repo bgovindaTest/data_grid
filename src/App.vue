@@ -10,6 +10,7 @@
         @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
         @pull-data="Log()" @previous-page="Log()" @next-page="Log()"
         @new-sheet="Log()" @save="saveModal = true"
+        :links="navHeaderParams.links"
         :page_number="page_number"
         :navHeaderParams="navHeaderParams"
     />

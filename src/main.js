@@ -16,8 +16,8 @@ library.add(faAngleDown, faTrashAlt, faTrashRegular, faUndo, faPlus, faBan)
 
 
 // Vue.component('font-awesome-icon', FontAwesomeIcon)
-
+import axios_params from './axios_params'
 // createApp(App).mount('#app')
 const app = createApp(App).component("font-awesome-icon", FontAwesomeIcon) //.mount('#app')
-app.use(VueAxios, axios.create(  ))
+app.use(VueAxios, axios.create( axios_params.axiosConfig ))
 app.mount('#app')

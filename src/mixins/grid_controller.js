@@ -141,16 +141,7 @@ methods: {
         this.gridFunctions = px['gridFunctions']
         this.LinkUIQueryParams(px['queryParams'])
         this.NavHeaderParamsInit(navHeaderParams)
-        this.LoadDataInit()
-
-        // const updx = px['gridFunctions']['Update']
-        // this.tableData  = main_grid['tableData']
-        // for (let i=0; i < this.tableData.length; i++) {
-        //     let rdp = {}
-        //     rdp['data']      = this.tableData[i]
-        //     updx(rdp)
-        // }
-
+        this.LoadDataInit() //if development?
     },
     LinkUIQueryParams( queryParams ) {
         /*
@@ -446,13 +437,10 @@ methods: {
         pullx.PullParamsInit()
         let req_body = pullx.GetRouteParams()
         req_body['crud_type'] = 'select'
-        // console.log(req_body)        
 
         let route = this.routeParams['select']['route']
         let gfu   = this.gridFunctions['Update']
-        // let x = await this.axios.post(route, req_body)
         try{
-            // let axios_object = await this.axios.get('http://localhost:3000/data/public/company')
             let axios_object = await this.axios.post(route, req_body)
 
             let x = axios_object.data
@@ -460,25 +448,26 @@ methods: {
             let tableData = []
             for(let i = 0; i < serverTableData.length; i++) {
                 let serverRow = serverTableData[i]
-                let rowData_tmp   = pullx.QueryToRowData(serverRow)
-                //meta_column
-                //delete rowData['_ag-meta_']
-                let rowData = {}
-                rowData['company_code'] = rowData_tmp['company_code']
-                rowData['company_name'] = rowData_tmp['company_name']
-                rowData['is_active']    = rowData_tmp['is_active']
-
-                console.log(rowData)
+                let rowData   = pullx.QueryToRowData(serverRow)
                 gfu({'data': rowData})
                 tableData.push(rowData)
-                break
+                await this.TimeOut(i, 1000)
             }
             this.tableData = tableData
             // console.log(tableData)
         } catch (e) {
             console.error(e)
+            this.loading_error += String(e)
             //loading faild
         }
+
+        // const updx = px['gridFunctions']['Update']
+        // this.tableData  = main_grid['tableData']
+        // for (let i=0; i < this.tableData.length; i++) {
+        //     let rdp = {}
+        //     rdp['data']      = this.tableData[i]
+        //     updx(rdp)
+        // }
 
 
 

@@ -116,7 +116,12 @@ methods: {
             3. LoadData
 
         */
+
+        //wrap in big try catch for loading screen
+
         this.SetEnvironment()
+
+        //pull url params
 
         let main_grid   = testGrid['grids'][0]
         let routeParams = main_grid['routeParams'] || {}
@@ -133,20 +138,21 @@ methods: {
         let rpx = new RouteParams(routeParams, px['columnDefs'], axiosParams.baseUrl)
         rpx.RouteParamsInit()
         this.routeParams = routeParams
-        // console.log(routeParams)
-        // console.log(px)
 
 
         this.columnDefs    = px['columnDefs']
         this.gridFunctions = px['gridFunctions']
         this.LinkUIQueryParams(px['queryParams'])
         this.NavHeaderParamsInit(navHeaderParams)
-        this.LoadDataInit() //if development?
+        if (this.NODE_ENV === 'development' && main_grid.hasOwnProperty('tableData') ) {
+            this.LoadTestData(main_grid)
+        } else { this.LoadDataInit() }
+
+        this.loading = false
     },
     LinkUIQueryParams( queryParams ) {
         /*
-
-
+            Adds query params to main grid
         */
         this.pageParams     = queryParams['pageParams']
         this.filterParams   = queryParams['filterParams']
@@ -428,6 +434,9 @@ methods: {
         }
     },
     async LoadDataInit() {
+
+
+
         let cdef = this.columnDefs
         let p    = this.pageParams
         let o    = this.orderByParams
@@ -461,17 +470,17 @@ methods: {
             //loading faild
         }
 
-        // const updx = px['gridFunctions']['Update']
-        // this.tableData  = main_grid['tableData']
-        // for (let i=0; i < this.tableData.length; i++) {
-        //     let rdp = {}
-        //     rdp['data']      = this.tableData[i]
-        //     updx(rdp)
-        // }
-
-
-
     },
+    LoadTestData(main_grid) {
+        const updx = this.gridFunctions['Update']
+        this.tableData  = main_grid['tableData']
+        for (let i=0; i < this.tableData.length; i++) {
+            let rdp = {}
+            rdp['data']      = this.tableData[i]
+            updx(rdp)
+        }
+    },
+
 
     AssembleMutationQuery( ) {
         //combines req_body with routeParams

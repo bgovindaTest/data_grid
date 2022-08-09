@@ -113,7 +113,7 @@ export default {
       */
       this.MainGridInit()
       // await new Promise(r => setTimeout(r, 1000))
-      this.loading = false
+      // this.loading = false
   }
 };
 

@@ -17,14 +17,14 @@ let test_grid = {
         "routeParams": {
             "default_route": "data/public/company"
         },
-        "tableData": [
-            {
-                "id": '1',
-                "company_name": 'sup',
-                "company_code": '0',
-                "is_active": 'true'
-            },
-        ]
+        // "tableData": [
+        //     {
+        //         "id": '1',
+        //         "company_name": 'sup',
+        //         "company_code": '0',
+        //         "is_active": 'true'
+        //     },
+        // ]
     }
 ]}
 

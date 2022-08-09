@@ -21,6 +21,7 @@ const meta_column    = data_config.meta_column_name
 let   testGrid       = require('./TestGrids/test_grid')
 const RouteParams    = require('./RouteParser/RouteParams')
 const axiosParams    = require('../axios_params')
+const Pull           = require('./RouteParser/Pull') 
 
 var GridController = {
 
@@ -39,7 +40,11 @@ props: {
 
 data () {
     return {
-        loading: true,
+        loading: true, //main_loading modal
+        loading_error: "", //if not empty display error message during loading screen
+
+
+        load_data: false, // for pausing grid actions 
         NODE_ENV: "", //test development production
         is_read_only: false,
 
@@ -127,21 +132,25 @@ methods: {
         //Initialize routes
         let rpx = new RouteParams(routeParams, px['columnDefs'], axiosParams.baseUrl)
         rpx.RouteParamsInit()
-        console.log(routeParams)
+        this.routeParams = routeParams
+        // console.log(routeParams)
+        // console.log(px)
 
-        console.log(px)
 
-        const updx = px['gridFunctions']['Update']
-        this.tableData  = main_grid['tableData']
-        for (let i=0; i < this.tableData.length; i++) {
-            let rdp = {}
-            rdp['data']      = this.tableData[i]
-            updx(rdp)
-        }
         this.columnDefs    = px['columnDefs']
         this.gridFunctions = px['gridFunctions']
         this.LinkUIQueryParams(px['queryParams'])
         this.NavHeaderParamsInit(navHeaderParams)
+        this.LoadDataInit()
+
+        // const updx = px['gridFunctions']['Update']
+        // this.tableData  = main_grid['tableData']
+        // for (let i=0; i < this.tableData.length; i++) {
+        //     let rdp = {}
+        //     rdp['data']      = this.tableData[i]
+        //     updx(rdp)
+        // }
+
     },
     LinkUIQueryParams( queryParams ) {
         /*
@@ -427,6 +436,58 @@ methods: {
             console.log("remove failed. lingering selection the likely cause after using view")
         }
     },
+    async LoadDataInit() {
+        let cdef = this.columnDefs
+        let p    = this.pageParams
+        let o    = this.orderByParams
+        let f    = this.filterParams
+
+        let pullx = new Pull(cdef, f, o ,p)
+        pullx.PullParamsInit()
+        let req_body = pullx.GetRouteParams()
+        req_body['crud_type'] = 'select'
+        // console.log(req_body)        
+
+        let route = this.routeParams['select']['route']
+        let gfu   = this.gridFunctions['Update']
+        // let x = await this.axios.post(route, req_body)
+        try{
+            // let axios_object = await this.axios.get('http://localhost:3000/data/public/company')
+            let axios_object = await this.axios.post(route, req_body)
+
+            let x = axios_object.data
+            let serverTableData = x['output_data']
+            let tableData = []
+            for(let i = 0; i < serverTableData.length; i++) {
+                let serverRow = serverTableData[i]
+                let rowData_tmp   = pullx.QueryToRowData(serverRow)
+                //meta_column
+                //delete rowData['_ag-meta_']
+                let rowData = {}
+                rowData['company_code'] = rowData_tmp['company_code']
+                rowData['company_name'] = rowData_tmp['company_name']
+                rowData['is_active']    = rowData_tmp['is_active']
+
+                console.log(rowData)
+                gfu({'data': rowData})
+                tableData.push(rowData)
+                break
+            }
+            this.tableData = tableData
+            // console.log(tableData)
+        } catch (e) {
+            console.error(e)
+            //loading faild
+        }
+
+
+
+    },
+
+    AssembleMutationQuery( ) {
+        //combines req_body with routeParams
+    },
+
     //CRUD Operations
     async RunPullQuery() {
         /*
@@ -447,7 +508,7 @@ methods: {
 
 
     
-        var dx = await axios_object.post(server_route,server_params)
+        var dx = await axios_object.post(server_route,server_params) //axios_config
 
         //push to table?
         /*

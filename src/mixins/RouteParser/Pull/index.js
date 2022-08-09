@@ -136,6 +136,8 @@ class Pull {
                 rowData[field] = lookupMapData[field]
             }
         }
+        if (!type_check.IsObject(rowData[meta_column_name])) { rowData[meta_column_name] = {} }
+
         return rowData
     }
 

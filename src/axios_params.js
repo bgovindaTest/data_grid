@@ -25,7 +25,8 @@ else {
         loginRoute: 'http://localhost:3000/login',
         logoutRoute: `http://localhost:3000/logout`,
         tutorialRoute: `http://localhost:3000/data/tutorial`,
-        baseUrl: `http://localhost:3000`
+        baseUrl: `http://localhost:3000`,
+        axiosConfig: {}
     }
 }
 

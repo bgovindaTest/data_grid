@@ -49,7 +49,7 @@ class ReqBodyParams {
         return default_fields
     }
 
-    CrudParamsInit()  {
+    RouteParamsInit()  {
         /*
         Initializes reqBody object for each crudType
         */

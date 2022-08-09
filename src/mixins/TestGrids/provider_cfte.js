@@ -60,6 +60,16 @@ let test_grid = {
         },
         "tableData": [
             {
+                "cfte": 0,
+                "veterans_affairs": 0,
+                "contract": 0,
+                "academic": 0,
+                "administrative": 0,
+                "full_name": {"full_name": "John Smith", "first_name": "John", "last_name": "Smith", "id": "5", "cc": "cost center a"},
+                "date": "2022-01-01",
+                "is_approved": {"is_approved": 'false', "id": "2"}
+            },
+            {
                 "cfte": 0.8,
                 "veterans_affairs": 0,
                 "contract": 0,
@@ -88,19 +98,7 @@ let test_grid = {
                 "full_name": {"full_name": "Brandon Govi", "first_name": "Brabdib", "last_name": "Govi", "id": "3", "cc": "cost center c"},
                 "date": "2022-01-01",
                 "is_approved": {"is_approved": 'false', "id": "2"}
-            },
-
-            {
-                "cfte": 0,
-                "veterans_affairs": 0,
-                "contract": 0,
-                "academic": 0,
-                "administrative": 0,
-                "full_name": {"full_name": "John Smith", "first_name": "John", "last_name": "Smith", "id": "5", "cc": "cost center a"},
-                "date": "2022-01-01",
-                "is_approved": {"is_approved": 'false', "id": "2"}
-            },
-            
+            },            
         ]
     }
 ]}

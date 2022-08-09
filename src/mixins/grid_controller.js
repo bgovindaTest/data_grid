@@ -55,6 +55,7 @@ data () {
         gridOptions: null,
 
         //
+        routeParams: null,
         pageParams: {},
         orderByParams: {},
         filterParams: {},
@@ -109,7 +110,8 @@ methods: {
             3. LoadData
 
         */
-        let main_grid = testGrid['grids'][0]
+        let main_grid   = testGrid['grids'][0]
+        let routeParams = main_grid['routeParams'] || {} 
         let navHeaderParams = main_grid['navHeaderParams'] || {}
         let columnDefConfig = main_grid['columnDefs']
         this.ValuesObjectParser(0, columnDefConfig)
@@ -117,7 +119,8 @@ methods: {
         let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
         let px  = cdi.RunGridColumnsInit()
   
-  
+        console.log(px)
+
         const updx = px['gridFunctions']['Update']
         this.tableData  = main_grid['tableData']
         for (let i=0; i < this.tableData.length; i++) {

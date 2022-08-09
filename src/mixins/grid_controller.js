@@ -40,8 +40,7 @@ props: {
 data () {
     return {
         loading: true,
-        is_test: true,
-        is_development: true, //used file paths to laod data.
+        NODE_ENV: "", //test development production
         is_read_only: false,
 
 
@@ -112,6 +111,8 @@ methods: {
             3. LoadData
 
         */
+        this.SetEnvironment()
+
         let main_grid   = testGrid['grids'][0]
         let routeParams = main_grid['routeParams'] || {}
 
@@ -530,7 +531,18 @@ methods: {
             let saveRowData = rowData //Push processing placeholder
             saveData[crudType].push(saveRowData)
         } else { console.error('error processing data') }
+    },
+    SetEnvironment() {
+        let envx = process.env.NODE_ENV
+        if ( ['development','test','production'].includes(envx) ) {
+            this.NODE_ENV = envx
+        } else {
+            console.error(`Invalid node_env ${envx} setting environment to development`)
+            this.NODE_ENV ='development'
+        }
     }
+
+
 }
 
 }

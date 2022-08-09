@@ -15,7 +15,7 @@ let test_grid = {
 
         ],
         "routeParams": {
-            "default": "localhost:3000/data/provider_effort/company"
+            "default_route": "data/provider_effort/company"
         },
         "tableData": [
             {

@@ -18,30 +18,31 @@
 // }
 
 
-axiosParams = null
+//axiosParams = null
 //if dev
 axiosParams = {
     loginRoute: 'http://localhost:3000/login',
     logoutRoute: `http://localhost:3000/logout`,
     tutorialRoute: `http://localhost:3000/data/tutorial`,
-    axiosConfig: {
-        'baseUrl': `http://localhost:3000`
-    }
+    baseUrl: `http://localhost:3000`
+    // axiosConfig: {
+    //     'baseUrl': `http://localhost:3000`
+    // }
 }
 
 
 //if prod
-axiosParams = {
-    axiosUrl: `https://provider-effort.eastus.cloudapp.azure.com`,
-    loginRoute: 'https://provider-effort.eastus.cloudapp.azure.com/login',
-    logoutRoute: `https://provider-effort.eastus.cloudapp.azure.com/logout`,
-    tutorialRoute: `https://provider-effort.eastus.cloudapp.azure.com/data/tutorial`,
-    tutorialRoute: `http://localhost:8081/data/tutorial`,
-    axiosConfig: {
-        withCredentials: true,
-        baseUrl: `https://provider-effort.eastus.cloudapp.azure.com`
-    }
-}
+// axiosParams = {
+//     axiosUrl: `https://provider-effort.eastus.cloudapp.azure.com`,
+//     loginRoute: 'https://provider-effort.eastus.cloudapp.azure.com/login',
+//     logoutRoute: `https://provider-effort.eastus.cloudapp.azure.com/logout`,
+//     tutorialRoute: `https://provider-effort.eastus.cloudapp.azure.com/data/tutorial`,
+//     tutorialRoute: `http://localhost:8081/data/tutorial`,
+//     baseUrl: `https://provider-effort.eastus.cloudapp.azure.com`,
+//     axiosConfig: {
+//         withCredentials: true
+//     }
+// }
 
 
 

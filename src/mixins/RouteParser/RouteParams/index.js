@@ -7,7 +7,7 @@ delete button defaults to delete
 
 may need to change default behavior
 
-        'crudParams': //i.e. new row, update, delete, etc read/etc create default objects for query params?
+        'routeParams': //i.e. new row, update, delete, etc read/etc create default objects for query params?
             { 
                 default_route: ->
                 select:  ->
@@ -27,10 +27,11 @@ columnDefs =
 if null no crud allowed
 */
 
-class ReqBodyParams {
-    constructor (crudParams, columnDefs) { 
+class RouteParams {
+    constructor (crudParams, columnDefs, baseUrl = "") { 
         this.crudParams = crudParams
         this.columnDefs = columnDefs
+        this.baseUrl    = baseUrl
     }
 
     //ContextWindow
@@ -84,6 +85,9 @@ class ReqBodyParams {
         */
         let defaultParms = this.crudParams
         if (! xCrudParams.hasOwnProperty('route'))            {xCrudParams['route']          = this.DefaultRoute(xCrudParams['crudType'])}
+        else {
+            xCrudParams['route'] = PathJoin(this.baseUrl, xCrudParams['route'] )
+        }
         if (! xCrudParams.hasOwnProperty('on_constraint'))    {xCrudParams['on_constraint']  = defaultParms['on_constraint'] || ""}
         if (! xCrudParams.hasOwnProperty('on_conflict'))      {xCrudParams['on_conflict']    = defaultParms['on_conflict'] || ""}
         if (! xCrudParams.hasOwnProperty('set_fields'))       {xCrudParams['set_fields']     = defaultParms['set_fields'] || [] }
@@ -112,6 +116,7 @@ class ReqBodyParams {
         //for generic assembly
         //crudType is insert update or delete
         let base_str = this.crudParams['default_route'] || ""
+        base_str = PathJoin(this.baseUrl, base_str)
         if (base_str === "") {
             console.error('default route is not defined in crudParams')
         }
@@ -132,4 +137,4 @@ function PathJoin(base, new_path) {
     }
 }
 
-module.exports = ReqBodyParams
+module.exports = RouteParams

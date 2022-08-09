@@ -1,9 +1,9 @@
 const rb = require('./index.js')
 
 test('reqbody default only', () => {
-    let columnDefs = [{'field': 'x', 'ifNull': 'null'}, {'field':'y', 'ifNull': 'null'} ]
-    let routeParams = { 'default_route': 'localhost' }
-    let x = new rb(routeParams, columnDefs)
+    let columnDefs = [{'field': 'x', 'ifNull': 'default'}, {'field':'y', 'ifNull': 'null'} ]
+    let routeParams = { 'default_route': 'test' }
+    let x = new rb(routeParams, columnDefs, 'localhost')
     x.RouteParamsInit()
     console.log(routeParams)
     expect(true).toBe(true)
@@ -12,13 +12,13 @@ test('reqbody default only', () => {
 test('reqbody set_fields, set_filter', () => {
     let columnDefs = [{'field': 'x', 'ifNull': 'null'}, {'field':'y', 'ifNull': 'null'} ]
     let routeParams = { 
-        'default_route': 'localhost',
+        'default_route': 'data',
         'set_fields': ['x'],
         'constraint': 'unique',
         'delete':{ 'route': '/home/delete' }
 
     }
-    let x = new rb(routeParams, columnDefs)
+    let x = new rb(routeParams, columnDefs, 'localhost/')
     x.RouteParamsInit()
     console.log(routeParams)
     expect(true).toBe(true)

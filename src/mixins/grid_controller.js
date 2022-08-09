@@ -19,6 +19,8 @@ const ColumnDefsInit = require('../lib/GridParser')
 const data_config    = require('../lib/DataConfig')
 const meta_column    = data_config.meta_column_name
 let   testGrid       = require('./TestGrids/test_grid')
+const RouteParams    = require('./RouteParser/RouteParams')
+const axiosParams    = require('../axios_params')
 
 var GridController = {
 
@@ -111,7 +113,9 @@ methods: {
 
         */
         let main_grid   = testGrid['grids'][0]
-        let routeParams = main_grid['routeParams'] || {} 
+        let routeParams = main_grid['routeParams'] || {}
+
+
         let navHeaderParams = main_grid['navHeaderParams'] || {}
         let columnDefConfig = main_grid['columnDefs']
         this.ValuesObjectParser(0, columnDefConfig)
@@ -119,6 +123,11 @@ methods: {
         let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
         let px  = cdi.RunGridColumnsInit()
   
+        //Initialize routes
+        let rpx = new RouteParams(routeParams, px['columnDefs'], axiosParams.baseUrl)
+        rpx.RouteParamsInit()
+        console.log(routeParams)
+
         console.log(px)
 
         const updx = px['gridFunctions']['Update']

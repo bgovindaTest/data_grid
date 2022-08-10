@@ -434,36 +434,16 @@ methods: {
         }
     },
     async LoadDataInit() {
-
-
-
-        let cdef = this.columnDefs
-        let p    = this.pageParams
-        let o    = this.orderByParams
-        let f    = this.filterParams
-
-        let pullx = new Pull(cdef, f, o ,p)
-        pullx.PullParamsInit()
+        /*
+            initial data pull based on grid configurations. runs on page load.
+        */
+        let pullx = this.PullParamsObject()
         let req_body = pullx.GetRouteParams()
         req_body['crud_type'] = 'select'
-
         let route = this.routeParams['select']['route']
-        let gfu   = this.gridFunctions['Update']
         try{
-            let axios_object = await this.axios.post(route, req_body)
-
-            let x = axios_object.data
-            let serverTableData = x['output_data']
-            let tableData = []
-            for(let i = 0; i < serverTableData.length; i++) {
-                let serverRow = serverTableData[i]
-                let rowData   = pullx.QueryToRowData(serverRow)
-                gfu({'data': rowData})
-                tableData.push(rowData)
-                await this.TimeOut(i, 1000)
-            }
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
             this.tableData = tableData
-            // console.log(tableData)
         } catch (e) {
             console.error(e)
             this.loading_error += String(e)
@@ -471,6 +451,43 @@ methods: {
         }
 
     },
+    PullParamsObject () {
+        /*
+            Initializes object used to create parameters for select query
+        */
+        let cdef = this.columnDefs
+        let p    = this.pageParams
+        let o    = this.orderByParams
+        let f    = this.filterParams
+        let pullx = new Pull(cdef, f, o ,p)
+        pullx.PullParamsInit()
+        return pullx
+    },
+
+    async RunTableDataQuery(pullParams, route, req_body) {
+        /*
+        This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
+        Query Types modal window. The where, order_by and pagination modules are pulled from the objects to create the query params object
+        to send to the server. field_variables contains parameters needed to process the data pulled for the server to be added to the
+        client grid. 
+    
+
+        */
+        let gfu   = this.gridFunctions['Update']
+        let axios_object = await this.axios.post(route, req_body)
+        let x = axios_object.data
+        let serverTableData = x['output_data']
+        let tableData = []
+        for(let i = 0; i < serverTableData.length; i++) {
+            let serverRow = serverTableData[i]
+            let rowData   = pullParams.QueryToRowData(serverRow)
+            gfu({'data': rowData})
+            tableData.push(rowData)
+            await this.TimeOut(i, 1000)
+        }
+        return tableData
+    },
+
     LoadTestData(main_grid) {
         const updx = this.gridFunctions['Update']
         this.tableData  = main_grid['tableData']
@@ -481,45 +498,52 @@ methods: {
         }
     },
 
+    async PreviousPage() {
+        if (this.page_index <=0 ) { return }
+        let pullx = this.PullParamsObject()
+        let req_body = pullx.PreviousPageParams()
+        req_body['crud_type'] = 'select'
+        let route = this.routeParams['select']['route']
+        try{
+            let tableData = await this.CreateTableDataArray(pullx, route, req_body)
+            this.tableData = tableData
+        } catch (e) {
+            console.error(e)
+            this.loading_error += String(e)
+        }
+    },
+
+    async NextPage() {
+        let pullx = this.PullParamsObject()
+        let req_body = pullx.NextPageParams()
+        req_body['crud_type'] = 'select'
+        let route = this.routeParams['select']['route']
+        try{
+            let tableData = await this.CreateTableDataArray(pullx, route, req_body)
+            this.tableData = tableData
+        } catch (e) {
+            console.error(e)
+            this.loading_error += String(e)
+        }
+    },
+    async RunNewQuery() {
+        let pullx = this.PullParamsObject()
+        let req_body = pullx.NewQueryParams()
+        req_body['crud_type'] = 'select'
+        let route = this.routeParams['select']['route']
+        try{
+            let tableData = await this.CreateTableDataArray(pullx, route, req_body)
+            this.tableData = tableData
+        } catch (e) {
+            console.error(e)
+            this.loading_error += String(e)
+        }
+
+    },
+
 
     AssembleMutationQuery( ) {
         //combines req_body with routeParams
-    },
-
-    //CRUD Operations
-    async RunPullQuery() {
-        /*
-        This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
-        Query Types modal window. The where, order_by and pagination modules are pulled from the objects to create the query params object
-        to send to the server. field_variables contains parameters needed to process the data pulled for the server to be added to the
-        client grid. 
-    
-    
-    
-        Errors handled in navbar component.
-    
-        initialize get_route_params when initial RunQuery is ran.
-        */
-
-        //query_loading modal launch
-        //other buttons dont run during loading?
-
-
-    
-        var dx = await axios_object.post(server_route,server_params) //axios_config
-
-        //push to table?
-        /*
-            Loops through all the data pulled from the server and appends default parameters needed to populate the
-            grid with the correct functionaliaty
-        */
-        var processedRowData = []
-        for (let i =0; i < serverRowData.length; i++ ) {
-            let rowx = ServerRowDefaultValues(serverRowData[i], input_params, field_variables)
-            processedRowData.push(rowx)
-        }
-        this.gridApi.setRowData(processedRowData)
-
     },
     
     async SaveData() {
@@ -592,6 +616,9 @@ methods: {
         } else { console.error('error processing data') }
     },
     SetEnvironment() {
+        /*
+            Sets behavior of grid based on node enviornment
+        */
         let envx = process.env.NODE_ENV
         if ( ['development','test','production'].includes(envx) ) {
             this.NODE_ENV = envx
@@ -600,8 +627,6 @@ methods: {
             this.NODE_ENV ='development'
         }
     }
-
-
 }
 
 }

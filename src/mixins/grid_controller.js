@@ -36,15 +36,22 @@ props: {
         type: Object
     }
 },
-
+created() {
+    this.overlayLoadingTemplate =
+      '<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>';
+    this.overlayNoRowsTemplate =
+      '<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">No rows to show. You may lack permissions or your filters/pagination removed all rows.</span>';
+},
 
 data () {
     return {
         loading: true, //main_loading modal
         loading_error: "", //if not empty display error message during loading screen
+        disable_navbar: false, // for pausing grid actions in navbar during loading
+        
+        /*
 
-
-        load_data: false, // for pausing grid actions 
+        */
         NODE_ENV: "", //test development production
         is_read_only: false,
 
@@ -89,7 +96,6 @@ computed: {
         return page_index + 1
     }
 },
-
 
 methods: {
     /*
@@ -158,8 +164,6 @@ methods: {
         this.filterParams   = queryParams['filterParams']
         this.orderByParams  = queryParams['orderByParams']
     },
-
-
     async ValuesObjectParser(gridIndex, columnDefs) {
         /*
             gridIndex: positions of columnDefs in pageParams array
@@ -168,6 +172,7 @@ methods: {
         */
         let lookupEditors = data_config.cellEditors.lookupEditors
         this.valuesObject[gridIndex] = {}
+        let baseUrl = axiosParams.baseUrl
         for(let i =0; i < columnDefs.length; i++) {
             let columnDef = columnDefs[i]
             let field      = columnDef['field']
@@ -176,19 +181,24 @@ methods: {
             if (! columnDef.hasOwnProperty('cellEditorParams')) {continue}
             let cep = columnDef['cellEditorParams']
             let vx        = cep['valuesObject'] || []
-            let api_route = cep['api_route']    || []
-            if (api_route === null) {
+            let api_route = cep['api_route']    || ""
+            if (api_route != null && api_route != "") {
                 this.valuesObject[gridIndex][field] = vx
                 continue
             }
-            let api_data = []
-            //get api_data
-            this.valuesObject[gridIndex][field] = vx.concat(api_data)
+            //relative route
+            if (! api_route.startsWith('http') ) { api_route = this.PathJoin(baseUrl, api_route ) }
+            try {
+                let axios_object = await this.axios.get(api_route)
+                let api_data = axios_object.data
+                this.valuesObject[gridIndex][field] = api_data['output_data']
+            } catch (e) {
+                console.error(e)
+                let api_data = []
+                this.valuesObject[gridIndex][field] = api_data
+            }
         }
     },
-
-
-
     NavHeaderParamsInit(navHeaderParams) {
         /*
             Initialization nav header params for navbar functionality
@@ -299,9 +309,6 @@ methods: {
         this.queryModal = true
         this.filter_active= false //if false use orderby
     },
-
-
-
     GetRowHeight(params) {
         /* 
             Returns row height
@@ -318,7 +325,6 @@ methods: {
     async GetGridConfigurations() {},
 
     async GetValueObject() {},
-
 
     AppendRows( rowDataArray, row_index=null ) {
         /*
@@ -383,7 +389,6 @@ methods: {
 
         // gf['Delete']       = this.DeleteRow()
         // gf['UndoDelete']   = this.DeleteUndoRow()
-
         try {
             let api = this.gridApi
             let rowRange = this.GetRangeSelection()
@@ -449,7 +454,6 @@ methods: {
             this.loading_error += String(e)
             //loading faild
         }
-
     },
     PullParamsObject () {
         /*
@@ -463,7 +467,6 @@ methods: {
         pullx.PullParamsInit()
         return pullx
     },
-
     async RunTableDataQuery(pullParams, route, req_body) {
         /*
         This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
@@ -487,7 +490,6 @@ methods: {
         }
         return tableData
     },
-
     LoadTestData(main_grid) {
         const updx = this.gridFunctions['Update']
         this.tableData  = main_grid['tableData']
@@ -497,7 +499,6 @@ methods: {
             updx(rdp)
         }
     },
-
     async PreviousPage() {
         if (this.page_index <=0 ) { return }
         let pullx = this.PullParamsObject()
@@ -512,7 +513,6 @@ methods: {
             this.loading_error += String(e)
         }
     },
-
     async NextPage() {
         let pullx = this.PullParamsObject()
         let req_body = pullx.NextPageParams()
@@ -538,10 +538,7 @@ methods: {
             console.error(e)
             this.loading_error += String(e)
         }
-
     },
-
-
     AssembleMutationQuery( ) {
         //combines req_body with routeParams
     },
@@ -561,18 +558,21 @@ methods: {
         let save_data = { 'insert': [], 'update': [], 'delete': [] }
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0}
         const deleteWarning = this.gridFunctions['deleteWarning'] 
-        const CrudStats     = this.gridFunctions['CrudStatus']
+        const CrudStatus     = this.gridFunctions['CrudStatus']
         for(let i =0; i <this.tableData.length; i++ ) {
             let rowData   = this.tableData[i]
-            let rowStatus = CrudStats(rowData)
+            let rowStatus = CrudStatus(rowData)
             this.SaveStatusCount(rowStatus, save_count)
             //insteadOfQuery for crudType
             let crudType = rowData[meta_column]['crudType']
             this.ReqDataAssembly(rowData, crudType, rowStatus, save_data)
-            await TimeOut(1, 1000)
+            await TimeOut(i, 1000)
         }
         //if is_changed but nothing to save
         //else if not is_changed no changes detected
+
+        //Create ReqBody.
+
 
         //else save rows
         //PushSaveData
@@ -626,7 +626,33 @@ methods: {
             console.error(`Invalid node_env ${envx} setting environment to development`)
             this.NODE_ENV ='development'
         }
+    },
+
+
+    AgridLoadingModal() {
+        this.disable_navbar = true
+        this.gridApi.showLoadingOverlay();
+    },
+    AgridNowRowsModal() {
+        this.gridApi.showNoRowsOverlay();
+        this.disable_navbar = false
+    },
+    AgridHideModal() {
+        this.gridApi.hideOverlay();
+        this.disable_navbar = false
+    },
+    PathJoin(base, new_path) {
+        let b_end     = base.charAt(base.length -1 )
+        let new_1 =    new_path.charAt(0)
+        if (b_end === '/') {
+            if (new_1 === '/') {return base + new_path.substring(1)
+            } else { return base  + new_path }
+        } else {
+            if (new_1 === '/') {return base + new_path
+            } else { return base +'/' + new_path }
+        }
     }
+
 }
 
 }

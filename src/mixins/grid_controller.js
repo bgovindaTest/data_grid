@@ -82,6 +82,9 @@ data () {
 
         valuesObject: {}, //contains values for lookups
         //boolean values for modal
+        saveParams: {},
+        saveData: [],
+
 
         queryModal: false,
         filter_active: true, //if false use orderby
@@ -554,6 +557,25 @@ methods: {
     AssembleMutationQuery( ) {
         //combines req_body with routeParams
     },
+    SaveParamsInit() {
+        //validation_complete
+        let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 
+            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0,
+            'saved': 0, 'rejected': 0, 'is_validating': false,
+            'is_saving': false,
+            'save_complete': false,
+            'is_delete_warning': false,
+            'delete_msg': ""
+        }
+        let keys = Object.keys(save_count)
+        for (let i =0; i < keys.length; i++) {
+            let kx = keys[i]
+            this.saveParams[kx] = save_count[kx]
+        }
+        //AssemblePushPayloads adds reqbody and route informations.
+        this.saveData = []
+    },
+
     async SaveData() {
         /*
         This funciton processes the rows for saving into the final form. Each row is sent to its specific saving route in
@@ -569,41 +591,46 @@ methods: {
     
         //clearSaveData
         try{
+            let save_data = { 'insert': [], 'update': [], 'delete': [] }
+            this.SaveParamsInit()
+            let save_count = this.saveParams
+            const deleteWarning    = this.gridFunctions['deleteWarning'] 
+            const CrudStatus       = this.gridFunctions['CrudStatus']
+            const SaveStatusCount  = this.SaveStatusCount
+            const SaveDataAssembly = this.SaveDataAssembly
 
-        
-        let save_data = { 'insert': [], 'update': [], 'delete': [] }
-        let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0}
-        const deleteWarning = this.gridFunctions['deleteWarning'] 
-        const CrudStatus     = this.gridFunctions['CrudStatus']
-        const SaveStatusCount  = this.SaveStatusCount
-        const SaveDataAssembly = this.SaveDataAssembly
+            let k = 0
+            this.gridOptions.api.forEachNode((rowNode, index) => {
+                k+=1
+                let rowData = rowNode.data
+                let rowStatus = CrudStatus(rowData)
+                SaveStatusCount(rowStatus, save_count)
+                SaveDataAssembly(rowData, rowStatus, save_data)
+                //add timeout?
 
-        let k = 0
-        this.gridOptions.api.forEachNode((rowNode, index) => {
-            k+=1
-            let rowData = rowNode.data
-            let rowStatus = CrudStatus(rowData)
-            SaveStatusCount(rowStatus, save_count)
-            SaveDataAssembly(rowData, rowStatus, save_data)
-            //add timeout?
+            });
+            await this.AssemblePushPayloads(save_data)
+            // console.log(req_bodies)
+            await this.PushSaveData()
 
-        });
-        // console.log(save_data)
-        // console.log(this.routeParams)
-        //assembleReqBody
-        //get save routes
-        let req_bodies = await this.AssemblePushPayloads(save_data)
-        // console.log(req_bodies)
-        await this.PushSaveData(req_bodies)
 
-        // let sx = save_count
-        // if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
-        //     if (deleteWarning === "" ) {
+            let sx = save_count
+            if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
+                if (deleteWarning === "" ) { await this.PushSaveData() }
+                else {
+                    save_count['delete_msg']        = deleteWarning
+                    save_count['is_delete_warning'] = true
+                }
+            } else if ( sx['is_save'] > 0 && ( sx['is_warning'] > 0 || sx['is_error'] > 0 ) ) {
 
-        //     }
-        // }
+            } else if ( sx['is_changed'] >  0) {
+
+            } else {
+                //nothing to change.
+            }
         } catch (e) {
             console.log(e)
+            alert(e)
         } 
 
     },
@@ -611,6 +638,8 @@ methods: {
         /*
             Process rows for saving. Mainly used for convert lookup columns 
             to an id or another single value.
+
+            adds rows to this.saveData
         */
         let columnDefs = this.columnDefs
         let pxv  = new Push(columnDefs)
@@ -633,12 +662,11 @@ methods: {
             save_data_processed[crudType] = tableData
         }
         // //assemble reqBody
-        let reqbody = []
+        let reqbody = this.saveData
         //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
         reqbody.push( pxv.CreatePushPayload(routeParams, 'insert', save_data_processed['insert'] )  )
         reqbody.push( pxv.CreatePushPayload(routeParams, 'update', save_data_processed['update'] )  )
         reqbody.push( pxv.CreatePushPayload(routeParams, 'delete', save_data_processed['delete'] )  )
-        return reqbody
     },
 
 
@@ -663,15 +691,31 @@ methods: {
         //clear save object.
         //close save modal
     },
-    async PushSaveData(req_bodies) {
+    async PushSaveData() {
         //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
-        for (let i =0; i < req_bodies.length; i+=1 ) {
-            let rx    = req_bodies[i]
-            let route     = rx['route']
-            let req_body  = rx['reqBody']
-            let data = req_body['data']
-            if (data.length === 0) {continue}
-            let axios_object = await this.axios.post(route, req_body)
+        try{
+            let req_bodies = this.saveData
+            let save_count = this.saveParams
+            for (let i =0; i < req_bodies.length; i+=1 ) {
+                let rx    = req_bodies[i]
+                let route     = rx['route']
+                let req_body  = rx['reqBody']
+                let data = req_body['data']
+                if (data.length === 0) {continue}
+                let axios_object = await this.axios.post(route, req_body)
+                let adata = axios_object.data
+
+                save_count['saved']     += adata['output_data'].length || 0
+                save_count['rejected']  += adata['error_data'].length || 0
+                if (adata['error_data'].length !== 0) {console.error( adata['error_data'] )}
+                if (adata['server_error'] !== "") {console.error( adata['server_error'] )}
+            }
+            save_count['is_validating'] = true 
+            save_count['is_saving']     = false
+            save_count['save_complete'] = true
+        } catch (e) {
+            console.log(e)
+            alert(e)
         }
 
         //continues save

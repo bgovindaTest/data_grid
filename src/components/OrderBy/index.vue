@@ -5,7 +5,7 @@ The possible column fields are stored in the columnSortNames array. The user sel
 order_by object. This information is parsed by get_route_params on RunQuery.
 
 
-  {'column_name': "a", "column_order": "" }
+  [{'column_name': "a", "order_by": "" }]
 -->
 <template>
 <div class="ml-5 mr-5">
@@ -33,7 +33,7 @@ order_by object. This information is parsed by get_route_params on RunQuery.
           </select>
         </div>
         <div class="select" >
-          <select class="is-inline-block ml-2" v-model="order_by[index].column_order">
+          <select class="is-inline-block ml-2" v-model="order_by[index].order_by">
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
           </select>
@@ -65,10 +65,10 @@ export default {
     return {
       order_by: null,  
       // [
-      //   {'column_name': "a", "column_order": "" },
-      //   {'column_name': "b", "column_order": "" },
-      //   {'column_name': "c", "column_order": "" },
-      //   {'column_name': "d", "column_order": "" }
+      //   {'column_name': "a", "order_by": "" },
+      //   {'column_name': "b", "order_by": "" },
+      //   {'column_name': "c", "order_by": "" },
+      //   {'column_name': "d", "order_by": "" }
       // ],
       columnSortNames: [],
       
@@ -83,7 +83,7 @@ export default {
   mounted() {
     this.order_by = this.orderByParams['new']
     if (this.order_by.length < 1) {
-      this.order_by.push({'headerName': "",'column_name': "", "column_order": "asc" })
+      this.order_by.push({'headerName': "",'column_name': "", "order_by": "asc" })
     }
     let orderByList = this.orderByParams['orderByList']
 
@@ -132,8 +132,8 @@ export default {
 
     SetDefaultSortOrder() {
       for(var i =0; i < this.order_by.length; i++) {
-        if (this.order_by[i].column_order.trim() === '') {
-          this.order_by[i].column_order = 'asc'
+        if (this.order_by[i].order_by.trim() === '') {
+          this.order_by[i].order_by = 'asc'
         }
       }
 
@@ -147,7 +147,7 @@ export default {
 
     AddRow() {
       if (this.order_by.length < this.columnSortNames.length) {
-        this.order_by.push({'column_name': "", "column_order": "asc" })
+        this.order_by.push({'column_name': "", "order_by": "asc" })
       }
     },
     ClearRows() {
@@ -155,20 +155,18 @@ export default {
         this.order_by.pop()
       }
       this.order_by[0]['column_name'] = ""
-      this.order_by[0]['column_order'] = "asc"
+      this.order_by[0]['order_by'] = "asc"
     },
     DeleteRowAtIndex(index) {
       if (this.order_by.length <= 1 ) {
         this.order_by[0]['column_name'] = ""
-        this.order_by[0]['column_order'] = "asc" 
+        this.order_by[0]['order_by'] = "asc" 
       }
       else if (index < 0 || index > this.order_by.length) {}
       else {
         this.order_by.splice(index, 1)
       }
-
     },
-
     DeleteRow() {
       if (this.order_by.length > 1) {
         this.order_by.pop()
@@ -176,7 +174,7 @@ export default {
       else if (this.order_by.length === 1) {
         let x = this.order_by[0]
         x.column_name = ""
-        x.column_order = "asc"
+        x.order_by = "asc"
       }
     },
     Accept() { this.$emit('accept') },

@@ -501,6 +501,7 @@ methods: {
     },
     async PreviousPage() {
         if (this.page_index <=0 ) { return }
+        this.AgridLoadingModal()
         let pullx = this.PullParamsObject()
         let req_body = pullx.PreviousPageParams()
         req_body['crud_type'] = 'select'
@@ -508,12 +509,16 @@ methods: {
         try{
             let tableData = await this.CreateTableDataArray(pullx, route, req_body)
             this.tableData = tableData
+            if (tableData.length === 0) {this.AgridNoRowsModal()
+            } else { this.AgridHideModal() }
         } catch (e) {
             console.error(e)
-            this.loading_error += String(e)
+            alert(String(e))
+            this.AgridHideModal()
         }
     },
     async NextPage() {
+        this.AgridLoadingModal()
         let pullx = this.PullParamsObject()
         let req_body = pullx.NextPageParams()
         req_body['crud_type'] = 'select'
@@ -521,12 +526,16 @@ methods: {
         try{
             let tableData = await this.CreateTableDataArray(pullx, route, req_body)
             this.tableData = tableData
+            if (tableData.length === 0) {this.AgridNoRowsModal()
+            } else { this.AgridHideModal() }
         } catch (e) {
             console.error(e)
-            this.loading_error += String(e)
+            alert(String(e))
+            this.AgridHideModal()
         }
     },
     async RunNewQuery() {
+        this.AgridLoadingModal()
         let pullx = this.PullParamsObject()
         let req_body = pullx.NewQueryParams()
         req_body['crud_type'] = 'select'
@@ -534,9 +543,12 @@ methods: {
         try{
             let tableData = await this.CreateTableDataArray(pullx, route, req_body)
             this.tableData = tableData
+            if (tableData.length === 0) {this.AgridNoRowsModal()
+            } else { this.AgridHideModal() }
         } catch (e) {
             console.error(e)
-            this.loading_error += String(e)
+            alert(String(e))
+            this.AgridHideModal()
         }
     },
     AssembleMutationQuery( ) {
@@ -633,7 +645,7 @@ methods: {
         this.disable_navbar = true
         this.gridApi.showLoadingOverlay();
     },
-    AgridNowRowsModal() {
+    AgridNoRowsModal() {
         this.gridApi.showNoRowsOverlay();
         this.disable_navbar = false
     },

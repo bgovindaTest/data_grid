@@ -43,6 +43,7 @@ const data_config  = require ('../../../lib/DataConfig')
 const type_check   = require('../../../lib/TypeCheck')
 const chmodFunc    = require('../../../lib/chmodFunc')
 const meta_column_name = data_config.meta_column_name
+const lodashCloneDeep = require('lodash.clonedeep')
 
 class Pull {
     /*
@@ -163,10 +164,10 @@ class Pull {
         //resets query params.
         let ftmp = this.filterParams['new']
         let otmp = this.orderByParams['new']
-        this.filterParams['current'] = ftmp
-        this.filterParams['new'] = []
-        this.orderByParams['current'] = otmp
-        this.orderByParams['new'] = []
+        this.filterParams['current'] = lodashCloneDeep(ftmp )
+        // this.filterParams['new'] = []
+        this.orderByParams['current'] = lodashCloneDeep( otmp )
+        // this.orderByParams['new'] = []
         this.pageParams['offset'] = 0
         this.pageParams['page_index'] = 0
     }

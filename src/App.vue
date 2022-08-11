@@ -44,9 +44,11 @@
       <div style ="position: relative; min-height: 450px;">
         <save-data />
       </div>
-      <div style="poistion: absolute; bottom: 0, left: 0">
-            <button class="button" type="button">Ok</button>
-            <button class="button" type="button">Cancel</button>
+      <div style="poistion: absolute; bottom: 0, left: 0; border-top: 1px solid #e5e5e5;">
+          <div style="padding-top: 5px;">
+              <button class="button is-success mr-1" type="button">Contiue</button>
+              <button class="button is-danger"       type="button">Cancel</button>
+          </div>
       </div>
     </Modal>
 

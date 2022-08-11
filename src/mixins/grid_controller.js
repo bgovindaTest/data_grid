@@ -626,7 +626,6 @@ methods: {
             for (let j=0; j < save_rows.length; j++ ) {
                 let rowData = save_rows[j]
                 let rd = pxv.CreateRowDataOut(rowData, routeParams)
-                console.log(rd)
                 tableData.push(rd)
                 index += 1
                 await this.TimeOut(index, 500)
@@ -672,10 +671,7 @@ methods: {
             let req_body  = rx['reqBody']
             let data = req_body['data']
             if (data.length === 0) {continue}
-            console.log(route)
-            console.log(rx)
             let axios_object = await this.axios.post(route, req_body)
-            console.log(axios_object)
         }
 
         //continues save

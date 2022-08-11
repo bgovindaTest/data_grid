@@ -73,7 +73,15 @@ class Push {
         let rowDataOut = {}
         if (crudType === 'delete') { 
             //for maps?
-            rowDataOut['id'] = String(rowData['id'] || '-1' )
+            if (this.pushLookupParams.hasOwnProperty('id') ) {
+                let mapx = this.pushLookupParams['id']
+                //default_values
+                let pullKey = mapx['pullKey']
+                let pushKey = mapx['pushKey']
+                this.AddValueToRow(pushKey, rowDataOut, rowData[field][pullKey] )    
+            } else {
+                rowDataOut['id'] = String(rowData['id'] || '-1' )
+            }
             return rowDataOut
         }
 

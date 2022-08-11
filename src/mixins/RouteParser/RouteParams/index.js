@@ -8,7 +8,8 @@ delete button defaults to delete
 may need to change default behavior
 
         'routeParams': //i.e. new row, update, delete, etc read/etc create default objects for query params?
-            { 
+            {
+                useSaveRoute: bool saveRoute is default_route/save combines all crud types into one payload
                 default_route: ->
                 select:  ->
                 insert:  -> //string or {'route': 'string', 'doInstead': 'update', 'crudParams': {}}
@@ -92,6 +93,11 @@ class RouteParams {
         if (! xCrudParams.hasOwnProperty('on_conflict'))      {xCrudParams['on_conflict']    = defaultParms['on_conflict'] || ""}
         if (! xCrudParams.hasOwnProperty('set_fields'))       {xCrudParams['set_fields']     = defaultParms['set_fields'] || [] }
         if (! xCrudParams.hasOwnProperty('set_filters'))      {xCrudParams['set_filters']    = defaultParms['set_filters'] || []}
+        if (! xCrudParams.hasOwnProperty('useSaveRoute'))     {xCrudParams['useSaveRoute']   = false }
+        else {
+            let usr = xCrudParams.hasOwnProperty('useSaveRoute')
+            if (typeof usr !== 'boolean') { xCrudParams['useSaveRoute']   = false }
+        }
         this.ClearInvalidParameters(xCrudParams)
     }
 

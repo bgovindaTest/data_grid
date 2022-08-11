@@ -22,6 +22,7 @@ let   testGrid       = require('./TestGrids/test_grid')
 const RouteParams    = require('./RouteParser/RouteParams')
 const axiosParams    = require('../axios_params')
 const Pull           = require('./RouteParser/Pull') 
+const Push           = require('./RouteParser/Push') 
 
 var GridController = {
 
@@ -567,14 +568,16 @@ methods: {
         */
     
         //clearSaveData
+        try{
+
+        
         let save_data = { 'insert': [], 'update': [], 'delete': [] }
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0}
         const deleteWarning = this.gridFunctions['deleteWarning'] 
         const CrudStatus     = this.gridFunctions['CrudStatus']
         const SaveStatusCount  = this.SaveStatusCount
         const SaveDataAssembly = this.SaveDataAssembly
-        // console.log(this.tableData.length)
-        // console.log(this.tableData)
+
         let k = 0
         this.gridOptions.api.forEachNode((rowNode, index) => {
             k+=1
@@ -582,32 +585,64 @@ methods: {
             let rowStatus = CrudStatus(rowData)
             SaveStatusCount(rowStatus, save_count)
             SaveDataAssembly(rowData, rowStatus, save_data)
-
+            //add timeout?
 
         });
-        console.log(save_data)
-
-        // for(let i =0; i <this.tableData.length; i++ ) {
-        //     let rowData   = this.tableData[i]
-        //     let rowStatus = CrudStatus(rowData)
-            // console.log(rowStatus)
-            // this.SaveStatusCount(rowStatus, save_count)
-            // //insteadOfQuery for crudType
-            // let crudType = rowData[meta_column]['crudType']
-            // this.ReqDataAssembly(rowData, crudType, rowStatus, save_data)
-            // await TimeOut(i, 1000)
-        //}
         // console.log(save_data)
-        // console.log(save_count)
-        //if is_changed but nothing to save
-        //else if not is_changed no changes detected
+        // console.log(this.routeParams)
+        //assembleReqBody
+        //get save routes
+        let req_bodies = await this.AssemblePushPayloads(save_data)
+        // console.log(req_bodies)
+        await this.PushSaveData(req_bodies)
 
-        //Create ReqBody.
+        // let sx = save_count
+        // if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
+        //     if (deleteWarning === "" ) {
 
+        //     }
+        // }
+        } catch (e) {
+            console.log(e)
+        } 
 
-        //else save rows
-        //PushSaveData
     },
+    async AssemblePushPayloads( save_data) {
+        /*
+            Process rows for saving. Mainly used for convert lookup columns 
+            to an id or another single value.
+        */
+        let columnDefs = this.columnDefs
+        let pxv  = new Push(columnDefs)
+        pxv.PushParamsInit()
+        let save_data_processed = {}
+        let crudTypes = Object.keys(save_data)
+        let index = 0
+        let routeParams = this.routeParams
+        for (let i=0 ; i < crudTypes.length; i++ ) {
+            let crudType = crudTypes[i]
+            let tableData = []
+            let save_rows = save_data[crudType]
+            for (let j=0; j < save_rows.length; j++ ) {
+                let rowData = save_rows[j]
+                let rd = pxv.CreateRowDataOut(rowData, routeParams)
+                console.log(rd)
+                tableData.push(rd)
+                index += 1
+                await this.TimeOut(index, 500)
+            }
+            save_data_processed[crudType] = tableData
+        }
+        // //assemble reqBody
+        let reqbody = []
+        //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
+        reqbody.push( pxv.CreatePushPayload(routeParams, 'insert', save_data_processed['insert'] )  )
+        reqbody.push( pxv.CreatePushPayload(routeParams, 'update', save_data_processed['update'] )  )
+        reqbody.push( pxv.CreatePushPayload(routeParams, 'delete', save_data_processed['delete'] )  )
+        return reqbody
+    },
+
+
     async TimeOut(index, batch_count) {
         /*
         Number of iterations before setting await. Allows UI to refresh. 
@@ -625,16 +660,27 @@ methods: {
             if (rowStatus[sp] === true) { save_count[sp] += 1 }
         }
     },
-    FixData() {
+    EndSave() {
         //clear save object.
         //close save modal
     },
-    PushSaveData() {
+    async PushSaveData(req_bodies) {
+        //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
+        for (let i =0; i < req_bodies.length; i+=1 ) {
+            let rx    = req_bodies[i]
+            let route     = rx['route']
+            let req_body  = rx['reqBody']
+            let data = req_body['data']
+            if (data.length === 0) {continue}
+            console.log(route)
+            console.log(rx)
+            let axios_object = await this.axios.post(route, req_body)
+            console.log(axios_object)
+        }
+
         //continues save
     },
-    EndSave() {
-        //reset save object
-    },
+
     async SaveDataAssembly(rowData, rowStatus, saveData) {
         /*
             Appends rowData ready to be saved to saveData object.

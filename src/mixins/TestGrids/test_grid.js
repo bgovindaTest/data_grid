@@ -7,7 +7,7 @@ let test_grid = {
         "columnDefs": [
 
             {"field": "id",  "editable": false, "showSort": true,
-                "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'r'
+                "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'rw'
             },
             {"field": "company_name","editable": true, "showSort": true, "showFilter": true  },
             {"field": "company_code","editable": true, "showSort": true, "showFilter": true  },

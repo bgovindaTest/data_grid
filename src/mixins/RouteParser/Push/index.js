@@ -72,6 +72,7 @@ class Push {
         */
         let rowDataOut = {}
         if (crudType === 'delete') { 
+            //for maps?
             rowDataOut['id'] = String(rowData['id'] || '-1' )
             return rowDataOut
         }
@@ -138,10 +139,12 @@ class Push {
         Creates main object to be sent to the server. Also returns
         the route to send the payload
         */
+
         let reqBody = lodashCloneDeep( reqBodyParams[uiCrudType] )
+        let crudType = reqBody['crudType']
         let route   = reqBody['route']
         reqBody['data'] = data
-        return {'reqBody': reqBody, 'route': route} 
+        return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
     }
     //error handling?
 }

@@ -562,6 +562,8 @@ methods: {
     
         Date fields are changed to YYYY-MM-DD format. Autocomplete fields are processed to return the value generally the
         id needed to save to the server.
+
+        use save route or individual routes.
         */
     
         //clearSaveData
@@ -569,15 +571,29 @@ methods: {
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0}
         const deleteWarning = this.gridFunctions['deleteWarning'] 
         const CrudStatus     = this.gridFunctions['CrudStatus']
+        // console.log(this.tableData.length)
+        // console.log(this.tableData)
+        let k = 0
+        this.gridOptions.api.forEachNode((rowNode, index) => {
+            k+=1
+            let rowData = rowNode.data
+            let rowStatus = CrudStatus(rowData)
+            console.log(rowStatus)
+        });
+
+
         for(let i =0; i <this.tableData.length; i++ ) {
             let rowData   = this.tableData[i]
             let rowStatus = CrudStatus(rowData)
-            this.SaveStatusCount(rowStatus, save_count)
-            //insteadOfQuery for crudType
-            let crudType = rowData[meta_column]['crudType']
-            this.ReqDataAssembly(rowData, crudType, rowStatus, save_data)
-            await TimeOut(i, 1000)
+            // console.log(rowStatus)
+            // this.SaveStatusCount(rowStatus, save_count)
+            // //insteadOfQuery for crudType
+            // let crudType = rowData[meta_column]['crudType']
+            // this.ReqDataAssembly(rowData, crudType, rowStatus, save_data)
+            // await TimeOut(i, 1000)
         }
+        // console.log(save_data)
+        // console.log(save_count)
         //if is_changed but nothing to save
         //else if not is_changed no changes detected
 

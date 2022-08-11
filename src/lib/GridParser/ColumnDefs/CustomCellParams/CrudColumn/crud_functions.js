@@ -445,7 +445,10 @@ class CrudColumnFunctions {
             let field = grid_column['field']
             let is_crud = grid_column['chmodParams']
 
-            if (is_crud['isChange']) { change_fields.push(field) }
+            if (is_crud['isChange']) { 
+                if (field === meta_column_name) {continue}
+                change_fields.push(field) 
+            }
             if (grid_column['isRequired']) {required_fields.push(field)}
 
 

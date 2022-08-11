@@ -568,9 +568,10 @@ methods: {
     
         //clearSaveData
         let save_data = { 'insert': [], 'update': [], 'delete': [] }
-        let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0}
+        let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0}
         const deleteWarning = this.gridFunctions['deleteWarning'] 
         const CrudStatus     = this.gridFunctions['CrudStatus']
+        const SaveStatusCount = this.SaveStatusCount
         // console.log(this.tableData.length)
         // console.log(this.tableData)
         let k = 0
@@ -578,20 +579,25 @@ methods: {
             k+=1
             let rowData = rowNode.data
             let rowStatus = CrudStatus(rowData)
-            console.log(rowStatus)
+            if (k === 1) {
+                // console.log(rowStatus)
+                SaveStatusCount(rowStatus, save_count)
+            }
+
         });
+        console.log(k)
+        console.log(save_count)
 
-
-        for(let i =0; i <this.tableData.length; i++ ) {
-            let rowData   = this.tableData[i]
-            let rowStatus = CrudStatus(rowData)
+        // for(let i =0; i <this.tableData.length; i++ ) {
+        //     let rowData   = this.tableData[i]
+        //     let rowStatus = CrudStatus(rowData)
             // console.log(rowStatus)
             // this.SaveStatusCount(rowStatus, save_count)
             // //insteadOfQuery for crudType
             // let crudType = rowData[meta_column]['crudType']
             // this.ReqDataAssembly(rowData, crudType, rowStatus, save_data)
             // await TimeOut(i, 1000)
-        }
+        //}
         // console.log(save_data)
         // console.log(save_count)
         //if is_changed but nothing to save
@@ -614,10 +620,10 @@ methods: {
         }
     },
     SaveStatusCount(rowStatus, save_count) {
-        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error']
+        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error', 'is_complete']
         for (let i =0; i < save_params.length; i++ ) {
             let sp = save_params[i]
-            if (rowStatus[sp]) { save_count[sp] += 1 }
+            if (rowStatus[sp] === true) { save_count[sp] += 1 }
         }
     },
     FixData() {
@@ -633,7 +639,7 @@ methods: {
     async ReqDataAssembly(rowData, crudType, rowStatus, saveData) {
 
         let isSave = rowStatus['is_save']
-        if (! isSave ) {return}
+        if (isSave === false ) {return}
         let validCrudTypes = ['insert', 'update', 'delete']
         if (validCrudTypes.includes(crudType) ) {
             // need to process data?

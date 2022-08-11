@@ -9,7 +9,7 @@
         @help="helpModal = true" @add-row="AddRow()"
         @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
         @pull-data="RunNewQuery()" @previous-page="PreviousPage()" @next-page="NextPage()"
-        @new-sheet="NewSheet()" @save="SaveData()"
+        @new-sheet="NewSheet()" @save="saveModal=true"
         :links="navHeaderParams.links"
         :page_number="page_number"
         :navHeaderParams="navHeaderParams"
@@ -41,7 +41,13 @@
     </Modal>
 
     <Modal v-model="saveModal" title="Save Modal" modal-class="modalsm">
-      <save-data />
+      <div style ="position: relative; min-height: 450px;">
+        <save-data />
+      </div>
+      <div style="poistion: absolute; bottom: 0, left: 0">
+            <button class="button" type="button">Ok</button>
+            <button class="button" type="button">Cancel</button>
+      </div>
     </Modal>
 
   </div>
@@ -127,4 +133,12 @@ export default {
   @import "./assets/bulma.scss";
   @import "./assets/vue_modal.scss";
   * { margin: 0 }
+
+  .modal-footer {
+    padding: 15px 0px 0px 0px;
+    border-top: 1px solid #e5e5e5;
+    margin-left: -14px;
+    margin-right: -14px;
+  }
+
 </style>

@@ -24,7 +24,10 @@ export default {
 
 props: {
     saveStatus: { type: Object} ,
-    deleteWarning: { type: String}, 
+    deleteWarning: { 
+      type: String,
+      default: ""
+    }, 
     validationComplete: { 
         type: Boolean,
         default: true
@@ -37,8 +40,8 @@ computed: {
     IsSave(){},
     NoChanges() {},
     ShowDeleteWarning() {
-        let deleteCount = this.saveStatus['is_delete']
-        if (deleteCount > 0 && deleteWarning != "") {return true}
+        // let deleteCount = this.saveStatus['is_delete'] || 0
+        // if (deleteCount > 0 && deleteWarning != "") {return true}
         return false
     }
 

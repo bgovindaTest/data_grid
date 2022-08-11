@@ -8,11 +8,12 @@
     <grid-header 
         @help="helpModal = true" @add-row="AddRow()"
         @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
-        @pull-data="Log()" @previous-page="Log()" @next-page="Log()"
-        @new-sheet="Log()" @save="saveModal = true"
+        @pull-data="RunNewQuery()" @previous-page="PreviousPage()" @next-page="NextPage()"
+        @new-sheet="NewSheet()" @save="saveModal = true"
         :links="navHeaderParams.links"
         :page_number="page_number"
         :navHeaderParams="navHeaderParams"
+        :disable_navbar="disable_navbar"
     />
 
     <ag-grid-vue
@@ -31,8 +32,8 @@
           <li :class="{'is-active': !filter_active  }"><a @click="OrderByModal">Order By</a></li>
         </ul>
       </div>
-      <filters v-if="filter_active" :filterParams="filterParams"/>
-      <order-by v-else :orderByParams="orderByParams"/>
+      <filters v-if="filter_active" :filterParams="filterParams" @run-query="RunNewQuery()" @close-modal="CloseQueryModal()"/>
+      <order-by v-else :orderByParams="orderByParams" @run-query="RunNewQuery()" @close-modal="CloseQueryModal()"/>
     </Modal>
 
     <Modal v-model="helpModal" title="Help Modal" modal-class="modalsm">

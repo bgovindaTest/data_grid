@@ -259,7 +259,6 @@ methods: {
             updx(rdp)
         }
         this.columnDefs = px['columnDefs']
-
     },
     UrlParams() {
         // https://flaviocopes.com/urlsearchparams/
@@ -338,7 +337,7 @@ methods: {
         //button push
         const insertf  = this.gridFunctions['Insert']
         let newRowData = insertf({})
-        this.gridApi.applyTransaction({'add':[newRowData]})
+        this.gridApi.applyTransaction({'add':[newRowData], 'addIndex': 0 })
     },
     NewSheet() {
         /* Creates blank sheet for adding data */
@@ -469,12 +468,10 @@ methods: {
     },
     async RunTableDataQuery(pullParams, route, req_body) {
         /*
-        This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
-        Query Types modal window. The where, order_by and pagination modules are pulled from the objects to create the query params object
-        to send to the server. field_variables contains parameters needed to process the data pulled for the server to be added to the
-        client grid. 
-    
-
+            This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
+            Query Types modal window. The where, order_by and pagination modules are pulled from the objects to create the query params object
+            to send to the server. field_variables contains parameters needed to process the data pulled for the server to be added to the
+            client grid. 
         */
         let gfu   = this.gridFunctions['Update']
         let axios_object = await this.axios.post(route, req_body)
@@ -535,6 +532,7 @@ methods: {
         }
     },
     async RunNewQuery() {
+        this.CloseQueryModal()
         this.AgridLoadingModal()
         let pullx = this.PullParamsObject()
         let req_body = pullx.NewQueryParams()
@@ -551,10 +549,10 @@ methods: {
             this.AgridHideModal()
         }
     },
+    CloseQueryModal() {this.queryModal = false},
     AssembleMutationQuery( ) {
         //combines req_body with routeParams
     },
-    
     async SaveData() {
         /*
         This funciton processes the rows for saving into the final form. Each row is sent to its specific saving route in

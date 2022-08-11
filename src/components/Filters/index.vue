@@ -95,6 +95,7 @@ mounted() {
         this.dataTypeMap[column_name]   = dataType
     }
     this.filterList = filterList
+    console.log(this.filterList)
 },
 
 methods: {

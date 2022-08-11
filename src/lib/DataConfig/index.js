@@ -131,9 +131,8 @@ let date_operators   = [
 ]
 
 let text_operators   = [
-    'ilike', 'not_ilike', 'in', 'not_in',
-    'between', 'not_between', 'is_null',
-    'is_not_null',
+    'ilike', 'not_ilike',
+    'is_null', 'is_not_null',
     '=','!='
 ]
 

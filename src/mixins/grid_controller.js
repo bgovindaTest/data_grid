@@ -571,7 +571,8 @@ methods: {
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0}
         const deleteWarning = this.gridFunctions['deleteWarning'] 
         const CrudStatus     = this.gridFunctions['CrudStatus']
-        const SaveStatusCount = this.SaveStatusCount
+        const SaveStatusCount  = this.SaveStatusCount
+        const SaveDataAssembly = this.SaveDataAssembly
         // console.log(this.tableData.length)
         // console.log(this.tableData)
         let k = 0
@@ -579,14 +580,12 @@ methods: {
             k+=1
             let rowData = rowNode.data
             let rowStatus = CrudStatus(rowData)
-            if (k === 1) {
-                // console.log(rowStatus)
-                SaveStatusCount(rowStatus, save_count)
-            }
+            SaveStatusCount(rowStatus, save_count)
+            SaveDataAssembly(rowData, rowStatus, save_data)
+
 
         });
-        console.log(k)
-        console.log(save_count)
+        console.log(save_data)
 
         // for(let i =0; i <this.tableData.length; i++ ) {
         //     let rowData   = this.tableData[i]
@@ -636,15 +635,18 @@ methods: {
     EndSave() {
         //reset save object
     },
-    async ReqDataAssembly(rowData, crudType, rowStatus, saveData) {
-
+    async SaveDataAssembly(rowData, rowStatus, saveData) {
+        /*
+            Appends rowData ready to be saved to saveData object.
+        */
         let isSave = rowStatus['is_save']
-        if (isSave === false ) {return}
+        if (isSave !== true ) {return}
         let validCrudTypes = ['insert', 'update', 'delete']
+        let crudType = rowStatus['crudType']
         if (validCrudTypes.includes(crudType) ) {
-            // need to process data?
-            let saveRowData = rowData //Push processing placeholder
-            saveData[crudType].push(saveRowData)
+            let is_delete = rowStatus['is_delete']
+            if (is_delete === true ) {saveData['delete'].push(rowData) } 
+            else { saveData[crudType].push(rowData) }
         } else { console.error('error processing data') }
     },
     SetEnvironment() {

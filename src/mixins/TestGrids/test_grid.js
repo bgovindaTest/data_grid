@@ -6,7 +6,7 @@ let test_grid = {
         },
         "columnDefs": [
 
-            {"field": "id", 'cellEditor': "autoCompleteEditor", "editable": false, "showSort": true,
+            {"field": "id",  "editable": false, "showSort": true,
                 "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'r'
             },
             {"field": "company_name","editable": true, "showSort": true, "showFilter": true  },

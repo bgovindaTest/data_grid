@@ -127,6 +127,8 @@ export default {
             let x = this.params.data
             //fn(rdp)
             fn({'data': x})
+            let dx = this.params.data[meta_column]['is_delete']
+            this.is_deleted = dx
             this.api.refreshCells()
         }
     }

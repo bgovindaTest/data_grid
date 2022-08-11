@@ -147,7 +147,9 @@ methods: {
     },
     DeleteRow() {
         if (this.filters.length >= 0) { this.filters.pop() }
-    }
+    },
+    Accept() { this.$emit('accept') },
+    Cancel() { this.$emit('cancel') }
 }
 
 }

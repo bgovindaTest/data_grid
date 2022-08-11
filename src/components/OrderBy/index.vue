@@ -178,7 +178,10 @@ export default {
         x.column_name = ""
         x.column_order = "asc"
       }
-    }
+    },
+    Accept() { this.$emit('accept') },
+    Cancel() { this.$emit('cancel') }
+
   }
 }
 

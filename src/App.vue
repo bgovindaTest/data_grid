@@ -32,8 +32,8 @@
           <li :class="{'is-active': !filter_active  }"><a @click="OrderByModal">Order By</a></li>
         </ul>
       </div>
-      <filters v-if="filter_active" :filterParams="filterParams" @run-query="RunNewQuery()" @close-modal="CloseQueryModal()"/>
-      <order-by v-else :orderByParams="orderByParams" @run-query="RunNewQuery()" @close-modal="CloseQueryModal()"/>
+      <filters v-if="filter_active" :filterParams="filterParams" @accept="RunNewQuery()" @cancel="CloseQueryModal()"/>
+      <order-by v-else :orderByParams="orderByParams" @accept="RunNewQuery()" @cancel="CloseQueryModal()"/>
     </Modal>
 
     <Modal v-model="helpModal" title="Help Modal" modal-class="modalsm">

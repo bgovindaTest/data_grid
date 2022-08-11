@@ -504,7 +504,7 @@ methods: {
         req_body['crud_type'] = 'select'
         let route = this.routeParams['select']['route']
         try{
-            let tableData = await this.CreateTableDataArray(pullx, route, req_body)
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
             this.tableData = tableData
             if (tableData.length === 0) {this.AgridNoRowsModal()
             } else { this.AgridHideModal() }
@@ -521,7 +521,7 @@ methods: {
         req_body['crud_type'] = 'select'
         let route = this.routeParams['select']['route']
         try{
-            let tableData = await this.CreateTableDataArray(pullx, route, req_body)
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
             this.tableData = tableData
             if (tableData.length === 0) {this.AgridNoRowsModal()
             } else { this.AgridHideModal() }
@@ -539,7 +539,7 @@ methods: {
         req_body['crud_type'] = 'select'
         let route = this.routeParams['select']['route']
         try{
-            let tableData = await this.CreateTableDataArray(pullx, route, req_body)
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
             this.tableData = tableData
             if (tableData.length === 0) {this.AgridNoRowsModal()
             } else { this.AgridHideModal() }

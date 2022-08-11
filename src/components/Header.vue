@@ -91,6 +91,10 @@ export default {
         page_number: {
             type: Number,
             default: -1
+        },
+        disable_navbar: {
+            type: Boolean,
+            default: false
         }
     },
     data () {
@@ -111,15 +115,15 @@ export default {
         }
     },
     methods: {
-        Help() { this.$emit('help') },
-        PullData() { this.$emit('pull-data') } ,
-        NextPage() { this.$emit('next-page') } ,
-        PreviousPage() { this.$emit('previous-page') },
-        Add() { this.$emit('add-row')},
-        NewSheet() { this.$emit('new-sheet')},
-        Save() {this.$emit('save')   },
-        FilterModal()  { this.$emit('filter-modal')},
-        OrderByModal() { this.$emit('orderby-modal')   },
+        Help() {         if (! this.disable_navbar) {this.$emit('help') } },
+        PullData() {     if (! this.disable_navbar) {this.$emit('pull-data') } },
+        NextPage() {     if (! this.disable_navbar) {this.$emit('next-page') } },
+        PreviousPage(){  if (! this.disable_navbar) { this.$emit('previous-page') } },
+        Add() {          if (! this.disable_navbar) { this.$emit('add-row')} },
+        NewSheet() {     if (! this.disable_navbar) {this.$emit('new-sheet')} },
+        Save() {         if (! this.disable_navbar) {this.$emit('save')   } },
+        FilterModal()  { if (! this.disable_navbar) {this.$emit('filter-modal')} },
+        OrderByModal() { if (! this.disable_navbar) {this.$emit('orderby-modal')   } },
         ToUrl(urlPath) { console.log(urlPath) }
     },
     mounted() {

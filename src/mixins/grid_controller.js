@@ -667,7 +667,7 @@ methods: {
             });
             await this.AssemblePushPayloads(save_data)
             this.MainSaveMessage("No changes detected.")
-            console.log(this.saveMainMessage)
+            // console.log(this.saveMainMessage)
 
             let sx = save_count
 
@@ -766,6 +766,9 @@ methods: {
         this.saveLock  = false
         this.saveModal = false
         this.ShowSnackBar()
+        let tmpFunc = this.HideSnackBar
+        setTimeout(tmpFunc, 5000)
+
         await this.RunNewQuery()
     },
     async PushSaveData() {

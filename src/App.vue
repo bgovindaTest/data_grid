@@ -44,7 +44,7 @@
       <div style ="position: relative; min-height: 450px;">
         <save-data />
       </div>
-      <div style="poistion: absolute; bottom: 0, left: 0; border-top: 1px solid #e5e5e5;">
+      <div style="poistion: absolute; bottom: 0, left: 0; border-top: 1px solid #e5e5e5;" v-if="false">
           <div style="padding-top: 5px;">
               <button class="button is-success mr-1" type="button">Contiue</button>
               <button class="button is-danger"       type="button">Cancel</button>

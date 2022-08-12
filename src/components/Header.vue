@@ -1,5 +1,5 @@
 <template>
-<nav class="navbar" role="navigation" aria-label="main navigation" style="height:20px;">
+<nav class="navbar is-info" role="navigation" aria-label="main navigation" style="height:20px;">
     <div id="navbarBasicExample" class="navbar-menu">
         <div class="navbar-start">
             <div class="navbar-item">
@@ -28,11 +28,11 @@
             </div>
 
             <!-- pull data -->
-            <!-- <div class="navbar-item">
+            <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" @click="PullData()"> <strong>Pull Data</strong> </a>
+                    <a class="button is-light" @click="PullData()"> <strong>Pull</strong> </a>
                 </div>
-            </div> -->
+            </div>
 
             <!-- end pull data -->
 
@@ -75,6 +75,8 @@
 </template>
 
 <script>
+
+// https://jsfiddle.net/sol_b/mndrLjzk/4/
 
 export default {
     props: {

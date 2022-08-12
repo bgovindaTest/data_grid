@@ -348,9 +348,12 @@ methods: {
         let pageSize = this.pageParams['limit']
         let rows = []
         const insertf  = this.gridFunctions['Insert']
+        let k = 0
         for (let i =0; i < pageSize; i++) {
             let newRowData = insertf({})
             rows.push( newRowData )
+            k += 1
+            if (k >= 1000) {break}
         }
         this.gridApi.setRowData(rows)
     },

@@ -2,7 +2,8 @@ let test_grid = {
 "grids": [
     {
         "navHeaderParams": {
-            "links": [{'name':'providers', 'url': '/providers'}]
+            "links": [{'name':'providers', 'url': '/providers'}],
+            'add_row':   true, 'new_sheet': true
         },
         "columnDefs": [
 

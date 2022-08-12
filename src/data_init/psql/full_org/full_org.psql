@@ -2,6 +2,7 @@
 
 --make entity_id lob_id. create new company_id based on company_code.
 --no id changes required.
+DROP VIEW IF EXISTS full_org;
 CREATE OR REPLACE VIEW full_org AS
  SELECT x.entity_name,
     x.entity_code,

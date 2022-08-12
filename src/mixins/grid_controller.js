@@ -90,7 +90,12 @@ data () {
         filter_active: true, //if false use orderby
         helpModal: false,
         saveModal: false,
-        help_msg: "# placeholder not implemented yet \n# No Help Message"
+        help_msg: "# placeholder not implemented yet \n# No Help Message",
+
+        //snackBar Params
+        saved: 0,
+        rejected: 0,
+        snackBarVisible: 'hidden' //'hidden' //must be hidden or visible
     }
 },
 computed: {
@@ -561,14 +566,22 @@ methods: {
         //combines req_body with routeParams
     },
     SaveParamsInit() {
+        /*
+
+            saveLock: locks save modal when true. Prevents it from closing. When false. Continue (if true)
+                and close buttons will show. And modal can be closed. 
+        */
         //validation_complete
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 
             'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0,
-            'saved': 0, 'rejected': 0, 'is_validating': false,
-            'is_saving': false,
-            'save_complete': false,
-            'is_delete_warning': false,
-            'delete_msg': ""
+            'saved': 0, 'rejected': 0, 
+            'is_validating': false,
+            'isSaving': false,
+            'saveLock': false,
+            'showContinue': false,
+            'mainMessage': "",
+            'deleteWarning': "",
+            'uniqueWarning': ""
         }
         let keys = Object.keys(save_count)
         for (let i =0; i < keys.length; i++) {
@@ -597,7 +610,8 @@ methods: {
             let save_data = { 'insert': [], 'update': [], 'delete': [] }
             this.SaveParamsInit()
             let save_count = this.saveParams
-            const deleteWarning    = this.gridFunctions['deleteWarning'] 
+            const deleteWarning    = this.gridFunctions['deleteWarning']
+            const uniqueWarning     = this.gridFunctions['uniqueWarning'] 
             const CrudStatus       = this.gridFunctions['CrudStatus']
             const SaveStatusCount  = this.SaveStatusCount
             const SaveDataAssembly = this.SaveDataAssembly
@@ -615,21 +629,38 @@ methods: {
             await this.AssemblePushPayloads(save_data)
             // console.log(req_bodies)
             await this.PushSaveData()
+            //close save modal
+            // await this.RunNewQuery()
 
 
             let sx = save_count
-            if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
-                if (deleteWarning === "" ) { await this.PushSaveData() }
-                else {
-                    save_count['delete_msg']        = deleteWarning
-                    save_count['is_delete_warning'] = true
+            //if is_changed === 0
+            if (sx['is_changed'] === 0) {
+                let msg = "No changes detected"
+
+            }
+            //continue save
+            else if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
+                if (deleteWarning === "" ) { 
+                    await this.PushSaveData() 
+                    //load data
+                    return
                 }
-            } else if ( sx['is_save'] > 0 && ( sx['is_warning'] > 0 || sx['is_error'] > 0 ) ) {
+                else {
+                    save_count['deleteWarning']        = deleteWarning
+                    save_count['uniqueWarning']        = uniqueWarning
+                }
+            } 
+            //pause save option to 
+            else if ( sx['is_save'] > 0 && ( sx['is_warning'] > 0 || sx['is_error'] > 0 ) ) {
 
             } else if ( sx['is_changed'] >  0) {
+                let msg = "Changes detected. All changed rows either have errors or are incomplete and not valid for saving."
 
             } else {
+                let msg = "Error: This message should display. Please contact admin"
                 //nothing to change.
+                //error should not fire.
             }
         } catch (e) {
             console.log(e)
@@ -774,7 +805,15 @@ methods: {
             if (new_1 === '/') {return base + new_path
             } else { return base +'/' + new_path }
         }
+    },
+    HideSnackBar() {
+        this.snackBarVisible = 'hidden'
+    },
+    ShowSnackBar() {
+        this.snackBarVisible = 'visible'
     }
+
+
 
 }
 

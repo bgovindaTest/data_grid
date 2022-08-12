@@ -51,8 +51,8 @@
           </div>
       </div>
     </Modal>
-
   </div>
+  <snack-bar @hide-snackbar="HideSnackBar()" :snackBarVisible="snackBarVisible" :saved="saved" :rejected="rejected" />
 </div>
 </template>
 
@@ -63,6 +63,8 @@ import AutoCompleteEditor from "./components/GridEditors/AutoCompleteEditor"
 import DateTimeEditor   from "./components/GridEditors/DateTimeSelector"
 import crudSelectEditor from "./components/GridEditors/CrudSelectEditor"
 // import SubGridSelector from "./components/GridEditors/SubGridSelector"
+import SnackBar from "./components/SnackBar"
+
 import GridHeader from "./components/Header"
 
 /*
@@ -93,7 +95,8 @@ export default {
     "filters":   Filters,
     "help": Help,
     'page-loader': PageLoader,
-    'save-data': SaveData
+    'save-data': SaveData,
+    'snack-bar': SnackBar
   },
 
   methods: {

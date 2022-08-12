@@ -86,6 +86,7 @@ class CrudColumnFunctions {
 
         //delete_warning
         gf['deleteWarning'] = grid['deleteWarning'] || ""
+        gf['uniqueWarning'] = grid['uniqueWarning'] || ""
         return gf
     }
 

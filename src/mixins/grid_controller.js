@@ -123,7 +123,7 @@ methods: {
     SubGridInit() {
         //parses props initializes fields
     },
-    MainGridInit() {
+    async MainGridInit() {
         /*
         This object is ran to initialize all the required data from the server. When all initial loading is complete the 
         main page with the nav bar, grid and footer will be displayed. The order of the initializations matter.
@@ -155,7 +155,7 @@ methods: {
 
         let navHeaderParams = main_grid['navHeaderParams'] || {}
         let columnDefConfig = main_grid['columnDefs']
-        this.ValuesObjectParser(0, columnDefConfig)
+        await this.ValuesObjectParser(0, columnDefConfig)
         let valuesObject = this.valuesObject[0]
         let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
         let px  = cdi.RunGridColumnsInit()
@@ -202,11 +202,10 @@ methods: {
             let cep = columnDef['cellEditorParams']
             let vx        = cep['valuesObject'] || []
             let api_route = cep['api_route']    || ""
-            if (api_route != null && api_route != "") {
+            if (api_route === null || api_route === "") {
                 this.valuesObject[gridIndex][field] = vx
                 continue
             }
-            //relative route
             if (! api_route.startsWith('http') ) { api_route = this.PathJoin(baseUrl, api_route ) }
             try {
                 let axios_object = await this.axios.get(api_route)
@@ -218,6 +217,7 @@ methods: {
                 this.valuesObject[gridIndex][field] = api_data
             }
         }
+
     },
     NavHeaderParamsInit(navHeaderParams) {
         /*
@@ -671,7 +671,6 @@ methods: {
 
             let sx = save_count
 
-            sx['is_warning'] = 1
             //continue save
             if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
 

@@ -16,9 +16,19 @@ let test_grid = {
             // {"field": "some_date","editable": true, "showSort": true, "showFilter": true, "dataType": "date",
             //     "cellEditor": 'dateTimeEditor', 'chmodParams': 'c'  },
 
-            // {"field": "msg",  "editable": false, "showSort": true, 'cellEditorParams': "autoCompleteEditor",
-            //     "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'rc'
-            // },
+            {"field": "msg",  "editable": true, "showSort": true, 'cellEditor': "autoCompleteEditor",
+                "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'rc',
+                'cellEditorParams': {
+                    "api_route": "/data/public/dropx"
+                    // "valuesObject": [
+                    //     {"msg": 'true', "id": "1"},
+                    //     {"msg": 'false',"id": "2"},
+                    //     {"msg": 'null',"id": "3"}
+                    // ]
+                }
+
+
+            }
 
         ],
         "routeParams": {

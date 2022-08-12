@@ -126,7 +126,7 @@ export default {
           3. LoadData
 
       */
-      this.MainGridInit()
+      await this.MainGridInit()
       // await new Promise(r => setTimeout(r, 1000))
       // this.loading = false
   }

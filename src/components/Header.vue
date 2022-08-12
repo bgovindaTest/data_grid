@@ -120,13 +120,13 @@ export default {
         Help() {         if (! this.disable_navbar) {this.$emit('help') } },
         PullData() {     if (! this.disable_navbar) {this.$emit('pull-data') } },
         NextPage() {     if (! this.disable_navbar) {this.$emit('next-page') } },
-        PreviousPage(){  if (! this.disable_navbar) { this.$emit('previous-page') } },
-        Add() {          if (! this.disable_navbar) { this.$emit('add-row')} },
+        PreviousPage(){  if (! this.disable_navbar) {this.$emit('previous-page') } },
+        Add() {          if (! this.disable_navbar) {this.$emit('add-row')} },
         NewSheet() {     if (! this.disable_navbar) {this.$emit('new-sheet')} },
         Save() {         if (! this.disable_navbar) {this.$emit('save')   } },
         FilterModal()  { if (! this.disable_navbar) {this.$emit('filter-modal')} },
         OrderByModal() { if (! this.disable_navbar) {this.$emit('orderby-modal')   } },
-        ToUrl(urlPath) { console.log(urlPath) }
+        ToUrl(urlPath) { if (! this.disable_navbar) { window.location.href = urlPath  }}
     },
     mounted() {
         let dx = Object.keys(this.display)

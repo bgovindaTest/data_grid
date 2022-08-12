@@ -1,0 +1,206 @@
+/*
+    Used to pull data from old server and create batch insert statements
+    for new server.
+
+
+*/
+
+--startread
+[ 
+    {"name": "company",
+    "query": """
+      SELECT  DISTINCT company_id as id, company_name, company_code, 1 as last_modified_userid,
+            CASE WHEN position('Lawson' in company_code) > 0 THEN false ELSE true END is_active 
+        FROM full_org
+        ORDER BY company_id asc;
+    """
+    },
+    {"name": "line_of_business",
+    "query": """
+        --lob
+        SELECT DISTINCT lob_id as id, lob_name, lob_code,1 as last_modified_userid, 
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active --is_active
+        FROM full_org
+        ORDER BY lob_id asc;
+    """
+    },
+    {"name": "department",
+     "query": """
+        --departmentq
+        SELECT DISTINCT department_id as id, lob_id, department_name, department_code,
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active --is_active
+        FROM full_org
+        ORDER BY department_id asc;
+     """
+    },
+
+    {"name": "specialty",
+     "query": """
+        --specialty
+        SELECT DISTINCT specialty_id as id, department_id, specialty_name, specialty_code,
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active--is_active
+        FROM full_org
+        ORDER BY specialty_id asc;
+     """
+    },
+    {"name": "time_units",
+     "query": """
+        --time units
+        SELECT id, time_unit_name, 1 as last_modified_userid
+        FROM time_units ORDER BY id;
+     """
+    },
+    {"name": "cost_center",
+     "query": """
+        --cost centers 
+        SELECT DISTINCT cost_center_id as id, specialty_id, cost_center_name, cost_center_code,
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active
+        FROM full_org
+        ORDER BY cost_center_id asc;
+     """
+    },
+    {"name": "company_cost_center",
+     "query": """
+        --company_cost_center
+        SELECT DISTINCT id, cost_center_id, company_id, 
+            1 as last_modified_userid,
+            CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active, --is_active
+            40 as cfte_time, 3 as time_unit_id
+        FROM full_org
+        ORDER BY cost_center_id asc;
+     """
+    },
+    {"name": "classifications",
+     "query": """
+        --classifications
+        SELECT id, classification_name, is_active, 1 as last_modified_userid
+        FROM classifications ORDER BY id;
+     """
+    },
+    {"name": "cpsc",
+     "query": """
+        --classifications
+        SELECT id, cpsc_code, cpsc_name, is_active, 1 as last_modified_userid
+        FROM cpscs ORDER BY id;
+     """
+    },
+    {"name": "lcg",
+     "query": """
+        --classifications
+        SELECT id, lcg_code,  lcg_name ,is_active, 1 as last_modified_userid
+        FROM lcgs ORDER BY id;
+     """
+    },
+    {"name": "cpsc_lcg_map",
+     "query": """
+        --classifications
+        SELECT id, cpsc_id,  lcg_id ,1 as last_modified_userid
+        FROM cpsc_to_lcg ORDER BY id;
+     """
+    },
+    {"name": "providers",
+     "query": """
+      SELECT id, npi, employee_number, first_name, last_name, classification_id,
+        last_modified_userid, is_active
+      FROM (
+        SELECT id, npi, employee_number, first_name, last_name, classification_id,
+        providers.last_modified_by_user_id as last_modified_userid, 
+        providers.is_active,
+        CASE WHEN a.lcg_id = 1 THEN null ELSE a.lcg_id  END as lcg_id, 
+        CASE WHEN a.cpsc_id =1 THEN null ELSE a.cpsc_id END as cpsc_id,
+        null as start_date, null as end_date,
+        ROW_NUMBER() OVER (PARTITION BY npi) as rx
+        FROM providers
+        LEFT JOIN (
+            SELECT lcg_id, cpsc_id, provider_id
+            FROM appointments
+         ) a  on a.provider_id = providers.id
+      ) x where x.rx = 1
+       ORDER BY id;
+     """
+    },
+    {"name": "appointments",
+     "query": """
+        --appointments
+        select id, provider_id, cost_center_id as company_cost_center_id,
+        CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  END as lcg_id, 
+        CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id END as cpsc_id,
+        last_modified_by_user_id as last_modified_userid, is_active, null as start_date, null as end_date
+        FROM appointments ORDER BY id;
+     """
+    },
+    {"name": "appointment_effort",
+     "query": """
+      SELECT id, appointment_id, effective_date, academic, veterans_affairs, administration,
+               contract, 
+               CASE WHEN ROUND( init_cfte, 3) = 0.999
+                  THEN 1.0::text
+               ELSE ROUND( init_cfte, 3)::text
+               END cfte
+      FROM (
+         select id, appointment_id, effective_date::text, academic::text, contract::text, 
+               veterans_affairs::text, administration::text,
+               (lawson_fte - (contract + academic + veterans_affairs + administration) )::numeric as init_cfte,
+               null as cfte_max_time,last_modified_by_user_id as last_modified_userid
+        FROM one_minus_cftes
+      ) x
+       ORDER BY id;
+     """
+    },
+    {"name": "oracle_effort",
+     "query": """
+      SELECT provider_id, effective_date, fte::text, last_modified_userid FROM (
+         select 
+            ROW_NUMBER() OVER (PARTITION BY a.provider_id, effective_date) as rn,
+            a.provider_id,        
+            effective_date::text , SUM(lawson_fte) OVER (PARTITION BY a.provider_id, effective_date) as fte,
+            one_minus_cftes.last_modified_by_user_id as last_modified_userid
+         FROM one_minus_cftes 
+         INNER JOIN appointments as a on a.id = one_minus_cftes.appointment_id
+         ORDER BY a.provider_id
+      ) x WHERE rn =1
+       ORDER BY provider_id;
+     """
+    },
+    {"name": "user_org_permission",
+     "query": """
+        --user permissions
+        SELECT user_id, company_cc_id as company_cost_center_id, true as is_active, 
+        1 as last_modified_userid, true as specialty_level FROM
+        (
+            SELECT user_id, specialty_permissions.id as id, 
+                specialty_permissions.last_modified_by_user_id as last_modified_userid,
+                current_status_id, specialty_permissions.created_at,
+                specialty_permissions.updated_at, 
+                specialty_permissions.specialty_id as specialty_id,
+                entities.entity_name as "uen"
+
+            FROM specialty_permissions
+            INNER JOIN specialties on specialties.id = specialty_permissions.specialty_id
+            INNER JOIN departments on specialties.department_id = departments.id
+            INNER JOIN entities    on entities.id = departments.entity_id
+        ) as x
+
+        INNER JOIN (
+            SELECT entity_name, old_specialty_id, company_cc_id FROM (
+                SELECT entity_name, old_specialty_id, id as company_cc_id, ROW_NUMBER() OVER( PARTITION BY entity_name, specialty_id) as rank
+                FROM full_org
+            ) tmp WHERE rank = 1
+        ) y
+        on 
+            y.old_specialty_id = x.specialty_id AND
+            y.entity_name      = x.uen 
+        ORDER BY user_id asc;
+     """
+    },
+    {"name": "full_org",
+    "query": """
+      SELECT * FROM full_org ORDER BY company_id asc;
+    """
+    }
+
+
+]

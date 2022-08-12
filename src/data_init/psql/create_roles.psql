@@ -1,0 +1,7 @@
+-- CREATE LOGIN ROLE bgovindara
+-- CREATE ROLE app_user
+-- GRANT PERMISSIONS to app_user
+-- GRANT LOGIIN TO app_user
+-- set max logins
+
+-- reset indexes

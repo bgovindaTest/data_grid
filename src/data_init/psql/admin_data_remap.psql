@@ -1,0 +1,16 @@
+--app_admin data
+--startread
+[ 
+    {"name": "users",
+    "query": """ 
+        SELECT id, email, first_name, last_name, oauth_id,
+            CASE WHEN role_id = 1
+                THEN true
+                ELSE false 
+            END is_admin,
+            true as is_active
+        FROM users
+        ORDER BY id asc;
+    """
+    }
+]

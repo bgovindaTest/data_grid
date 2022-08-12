@@ -21,7 +21,7 @@ Each grid_column_rule has the structure below. A more indepth description is in 
             {header: "website",header: "username", width: 100 }
         ]
         api_route: url_string
-            this is the route either full i.e. localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
+            this is the route either full i.e. http://localhost:3000/mapdata/appointments or relatvie /mapdata/appointments. This is the rest route
             to extract the selectValues array. 
             use post or get route?
         valuesObject (optional) if hardcoded into config pull from here

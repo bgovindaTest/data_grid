@@ -19,6 +19,10 @@ const ColumnDefsInit = require('../lib/GridParser')
 const data_config    = require('../lib/DataConfig')
 const meta_column    = data_config.meta_column_name
 let   testGrid       = require('./TestGrids/test_grid')
+const RouteParams    = require('./RouteParser/RouteParams')
+const axiosParams    = require('../axios_params')
+const Pull           = require('./RouteParser/Pull') 
+const Push           = require('./RouteParser/Push') 
 
 var GridController = {
 
@@ -33,45 +37,82 @@ props: {
         type: Object
     }
 },
-
+created() {
+    this.overlayLoadingTemplate =
+      '<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>';
+    this.overlayNoRowsTemplate =
+      '<span style="padding: 10px; border: 2px solid #444; background: lightgoldenrodyellow;">No rows to show. You may lack permissions or your filters/pagination removed all rows.</span>';
+},
 
 data () {
     return {
-        loading: true,
-        is_test: true,
-        is_development: true, //used file paths to laod data.
+        loading: true, //main_loading modal
+        loading_error: "", //if not empty display error message during loading screen
+        disable_navbar: false, // for pausing grid actions in navbar during loading
+        
+        /*
+
+        */
+        NODE_ENV: "", //test development production
         is_read_only: false,
 
 
-        url_params: {},
-        global_params: {},
+        url_params: {},    //not implemented
+        global_params: {}, //not implemented
 
         //main_grid_params
         tableData: null,
-        navHeaderParams: null,
+        navHeaderParams: {},
         columnDefs: null,
         gridApi: null,
         columnApi: null,
         gridOptions: null,
 
         //
-        queryParams: {},
+        routeParams: null,
+        pageParams: {},
         orderByParams: {},
         filterParams: {},
-        enforcedFilterParams: {},
 
-        //data ready for save stored here. allows for save to continue
-        toSave: [], //stores payload
 
         //functions created by gridParser
         gridFunctions: null,
 
         valuesObject: {}, //contains values for lookups
-        //modalParams
-        saveModal: false,
-        filterModal: false,
-        orderByModal: false,
+        //boolean values for modal
 
+        queryModal: false,
+        filter_active: true, //if false use orderby
+        helpModal: false,
+        help_msg: "# placeholder not implemented yet \n# No Help Message",
+
+        /*
+            Parameters below control save modal and corresponding messages and 
+            buttons displayed for it.
+        */
+        saveParams: {},
+        saveData: [],
+        saveModal: false, //launches saveModal
+        saveLock: false, //prevents modal from being closed
+        isValidating: false,
+        isSaving: false, //for displaying saving on loading button
+        showButtons: false,
+        showContinue: false,
+        saveMainMessage: "",
+        saveDeleteMessage: "",
+        saveUniqueMessage: "",
+
+        //for snackbar
+        saved: 0,
+        rejected: 0,
+        snackBarVisible: 'hidden' //'hidden' //must be hidden or visible
+    }
+},
+computed: {
+    page_number() {
+        //displayed in navbar to show current page
+        let page_index = this.pageParams['page_index']
+        return page_index + 1
     }
 },
 
@@ -82,7 +123,7 @@ methods: {
     SubGridInit() {
         //parses props initializes fields
     },
-    MainGridInit() {
+    async MainGridInit() {
         /*
         This object is ran to initialize all the required data from the server. When all initial loading is complete the 
         main page with the nav bar, grid and footer will be displayed. The order of the initializations matter.
@@ -100,26 +141,50 @@ methods: {
             3. LoadData
 
         */
-        let main_grid = testGrid['grids'][0]
+
+        //wrap in big try catch for loading screen
+
+        this.SetEnvironment()
+        this.SaveParamsInit()
+
+        //pull url params
+
+        let main_grid   = testGrid['grids'][0]
+        let routeParams = main_grid['routeParams'] || {}
+
+
+        let navHeaderParams = main_grid['navHeaderParams'] || {}
         let columnDefConfig = main_grid['columnDefs']
-        this.ValuesObjectParser(0, columnDefConfig)
+        await this.ValuesObjectParser(0, columnDefConfig)
         let valuesObject = this.valuesObject[0]
         let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
         let px  = cdi.RunGridColumnsInit()
-        // this.AddMetaColumnFunctions(px['gridFunctions'], px['columnDefs'])
   
-        const updx = px['gridFunctions']['Update']
-        // return {'columnDefs': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-        this.tableData  = main_grid['tableData']
-        for (let i=0; i < this.tableData.length; i++) {
-            let rdp = {}
-            rdp['data']      = this.tableData[i]
-            updx(rdp)
-        }
-        this.columnDefs = px['columnDefs']
-    },
+        //Initialize routes
+        let rpx = new RouteParams(routeParams, px['columnDefs'], axiosParams.baseUrl)
+        rpx.RouteParamsInit()
+        this.routeParams = routeParams
 
-    ValuesObjectParser(gridIndex, columnDefs) {
+
+        this.columnDefs    = px['columnDefs']
+        this.gridFunctions = px['gridFunctions']
+        this.LinkUIQueryParams(px['queryParams'])
+        this.NavHeaderParamsInit(navHeaderParams)
+        if (this.NODE_ENV === 'development' && main_grid.hasOwnProperty('tableData') ) {
+            this.LoadTestData(main_grid)
+        } else { this.LoadDataInit() }
+
+        this.loading = false
+    },
+    LinkUIQueryParams( queryParams ) {
+        /*
+            Adds query params to main grid
+        */
+        this.pageParams     = queryParams['pageParams']
+        this.filterParams   = queryParams['filterParams']
+        this.orderByParams  = queryParams['orderByParams']
+    },
+    async ValuesObjectParser(gridIndex, columnDefs) {
         /*
             gridIndex: positions of columnDefs in pageParams array
             columnDefs: definititions for a grid at the given index
@@ -127,6 +192,7 @@ methods: {
         */
         let lookupEditors = data_config.cellEditors.lookupEditors
         this.valuesObject[gridIndex] = {}
+        let baseUrl = axiosParams.baseUrl
         for(let i =0; i < columnDefs.length; i++) {
             let columnDef = columnDefs[i]
             let field      = columnDef['field']
@@ -135,48 +201,65 @@ methods: {
             if (! columnDef.hasOwnProperty('cellEditorParams')) {continue}
             let cep = columnDef['cellEditorParams']
             let vx        = cep['valuesObject'] || []
-            let api_route = cep['api_route']    || []
-            if (api_route === null) {
+            let api_route = cep['api_route']    || ""
+            if (api_route === null || api_route === "") {
                 this.valuesObject[gridIndex][field] = vx
                 continue
             }
-            let api_data = []
-            //get api_data
-            this.valuesObject[gridIndex][field] = vx.concat(api_data)
+            if (! api_route.startsWith('http') ) { api_route = this.PathJoin(baseUrl, api_route ) }
+            try {
+                let axios_object = await this.axios.get(api_route)
+                let api_data = axios_object.data
+                this.valuesObject[gridIndex][field] = api_data['output_data']
+            } catch (e) {
+                console.error(e)
+                let api_data = []
+                this.valuesObject[gridIndex][field] = api_data
+            }
         }
+
     },
-
-
-
     NavHeaderParamsInit(navHeaderParams) {
         /*
-            Initialization functions
-            navHeaderParams: {
-                name: 'x'
-                links: [{'name': xxx, 'url': xxx }],
-                help: "",
-                addRow:   false,
-                newSheet: false,
-                save: false,
-                showFilter: false,
-                showSort:   false,
-                showSearchBar: false //not implemented yet
-                showHome: true,
-                loadData: true
-            }
+            Initialization nav header params for navbar functionality
         */
-        let navParams ={'name': "", 'help': "", addRow:   false,
-            newSheet: false, save: false, showFilter: false,
-            showSort:   false,  showHome: false,
-            showSearchBar: false, loadData: true //not implemented yet
+        let defaultNavHeaderParams ={
+                'home': true,
+                'help': true,
+                'links': [],// or object array. 
+                'previous_page':  true, //for pagination
+                'next_page':  true, //for pagination
+                'pull_data':  false, //for pagination
+                'page_number': true,
+                'save':  true,
+                'add_row':   false,
+                'new_sheet': false,
+                'load_data_init': true,
         }
-        let keys = Object.keys(navParams)
+        let keys = Object.keys(defaultNavHeaderParams)
         for(let i =0; i < keys.length; i+=1 ) {
             let key = keys[i]
-            if (! navHeaderParams.hasOwnProperty(key)) {
-                navHeaderParams[key] = navParams[key]
-            }
+            if (! navHeaderParams.hasOwnProperty(key)) { navHeaderParams[key] = defaultNavHeaderParams[key] }
         }
+        let homeRoute = {'name': "Home", 'url': '/'}
+        if(navHeaderParams['links'] === null ) {
+            navHeaderParams['links'] = []
+            this.navHeaderParams = navHeaderParams
+            return
+        } else if (navHeaderParams['home'] === false ) {
+            this.navHeaderParams = navHeaderParams
+            return   
+        }
+        let links = navHeaderParams['links']
+        let home_hit = false
+        for(let i =0 ; i < links.length; i++ ) {
+            let link = links[i]
+            if (link.name === 'Home') { 
+                home_hit = true
+                break
+            }
+        }        
+        if (! home_hit ) { links.unshift(homeRoute) }
         this.navHeaderParams = navHeaderParams
     },
     RunColumnDefsInit() {
@@ -196,7 +279,6 @@ methods: {
             updx(rdp)
         }
         this.columnDefs = px['columnDefs']
-
     },
     UrlParams() {
         // https://flaviocopes.com/urlsearchparams/
@@ -238,7 +320,14 @@ methods: {
         //navbar
         //columnDef
     },
-
+    FilterModal() {
+        this.queryModal = true
+        this.filter_active= true //if false use orderby
+    },
+    OrderByModal() {
+        this.queryModal = true
+        this.filter_active= false //if false use orderby
+    },
     GetRowHeight(params) {
         /* 
             Returns row height
@@ -256,7 +345,6 @@ methods: {
 
     async GetValueObject() {},
 
-
     AppendRows( rowDataArray, row_index=null ) {
         /*
         This add new rows to the main tableData object in aggrid. array of rows
@@ -267,18 +355,21 @@ methods: {
     },
     AddRow() {
         //button push
-        const insertf  = gridFunctions['Insert']
+        const insertf  = this.gridFunctions['Insert']
         let newRowData = insertf({})
-        this.gridApi.applyTransaction({'add':[newRowData]})
+        this.gridApi.applyTransaction({'add':[newRowData], 'addIndex': 0 })
     },
     NewSheet() {
         /* Creates blank sheet for adding data */
         let pageSize = this.pageParams['limit']
         let rows = []
-        const insertf  = gridFunctions['Insert']
+        const insertf  = this.gridFunctions['Insert']
+        let k = 0
         for (let i =0; i < pageSize; i++) {
             let newRowData = insertf({})
             rows.push( newRowData )
+            k += 1
+            if (k >= 1000) {break}
         }
         this.gridApi.setRowData(rows)
     },
@@ -320,7 +411,6 @@ methods: {
 
         // gf['Delete']       = this.DeleteRow()
         // gf['UndoDelete']   = this.DeleteUndoRow()
-
         try {
             let api = this.gridApi
             let rowRange = this.GetRangeSelection()
@@ -370,42 +460,171 @@ methods: {
             console.log("remove failed. lingering selection the likely cause after using view")
         }
     },
-    //CRUD Operations
-    async RunPullQuery() {
+    async LoadDataInit() {
         /*
-        This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
-        Query Types modal window. The where, order_by and pagination modules are pulled from the objects to create the query params object
-        to send to the server. field_variables contains parameters needed to process the data pulled for the server to be added to the
-        client grid. 
-    
-    
-    
-        Errors handled in navbar component.
-    
-        initialize get_route_params when initial RunQuery is ran.
+            initial data pull based on grid configurations. runs on page load.
         */
-
-        //query_loading modal launch
-        //other buttons dont run during loading?
-
-
-    
-        var dx = await axios_object.post(server_route,server_params)
-
-        //push to table?
-        /*
-            Loops through all the data pulled from the server and appends default parameters needed to populate the
-            grid with the correct functionaliaty
-        */
-        var processedRowData = []
-        for (let i =0; i < serverRowData.length; i++ ) {
-            let rowx = ServerRowDefaultValues(serverRowData[i], input_params, field_variables)
-            processedRowData.push(rowx)
+        let pullx = this.PullParamsObject()
+        let req_body = pullx.GetRouteParams()
+        req_body['crud_type'] = 'select'
+        let route = this.routeParams['select']['route']
+        try{
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
+            this.tableData = tableData
+        } catch (e) {
+            console.error(e)
+            this.loading_error += String(e)
+            //loading faild
         }
-        this.gridApi.setRowData(processedRowData)
-
     },
-    
+    PullParamsObject () {
+        /*
+            Initializes object used to create parameters for select query
+        */
+        let cdef = this.columnDefs
+        let p    = this.pageParams
+        let o    = this.orderByParams
+        let f    = this.filterParams
+        let pullx = new Pull(cdef, f, o ,p)
+        pullx.PullParamsInit()
+        return pullx
+    },
+    async RunTableDataQuery(pullParams, route, req_body) {
+        /*
+            This is the first function needed to run data pull from the server. The query_names come from the selected query_route in the
+            Query Types modal window. The where, order_by and pagination modules are pulled from the objects to create the query params object
+            to send to the server. field_variables contains parameters needed to process the data pulled for the server to be added to the
+            client grid. 
+        */
+        let gfu   = this.gridFunctions['Update']
+        let axios_object = await this.axios.post(route, req_body)
+        let x = axios_object.data
+        let serverTableData = x['output_data']
+        let tableData = []
+        for(let i = 0; i < serverTableData.length; i++) {
+            let serverRow = serverTableData[i]
+            let rowData   = pullParams.QueryToRowData(serverRow)
+            gfu({'data': rowData})
+            tableData.push(rowData)
+            await this.TimeOut(i, 1000)
+        }
+        return tableData
+    },
+    LoadTestData(main_grid) {
+        const updx = this.gridFunctions['Update']
+        this.tableData  = main_grid['tableData']
+        for (let i=0; i < this.tableData.length; i++) {
+            let rdp = {}
+            rdp['data']      = this.tableData[i]
+            updx(rdp)
+        }
+    },
+    async PreviousPage() {
+        if (this.pageParams['page_index'] <=0 ) { 
+            return 
+        }
+        this.AgridLoadingModal()
+        let pullx = this.PullParamsObject()
+        let req_body = pullx.PreviousPageParams()
+        req_body['crud_type'] = 'select'
+        let route = this.routeParams['select']['route']
+        try{
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
+            this.tableData = tableData
+            if (tableData.length === 0) {this.AgridNoRowsModal()
+            } else { this.AgridHideModal() }
+        } catch (e) {
+            console.error(e)
+            alert(String(e))
+            this.AgridHideModal()
+        }
+    },
+    async NextPage() {
+        this.AgridLoadingModal()
+        let pullx = this.PullParamsObject()
+        let req_body = pullx.NextPageParams()
+        req_body['crud_type'] = 'select'
+        let route = this.routeParams['select']['route']
+        try{
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
+            this.tableData = tableData
+            if (tableData.length === 0) {this.AgridNoRowsModal()
+            } else { this.AgridHideModal() }
+        } catch (e) {
+            console.error(e)
+            alert(String(e))
+            this.AgridHideModal()
+        }
+    },
+    async RunNewQuery() {
+        this.CloseQueryModal()
+        this.AgridLoadingModal()
+        let pullx = this.PullParamsObject()
+        let req_body = pullx.NewQueryParams()
+        req_body['crud_type'] = 'select'
+        let route = this.routeParams['select']['route']
+        try{
+            let tableData = await this.RunTableDataQuery(pullx, route, req_body)
+            this.tableData = tableData
+            if (tableData.length === 0) {this.AgridNoRowsModal()
+            } else { this.AgridHideModal() }
+        } catch (e) {
+            console.error(e)
+            alert(String(e))
+            this.AgridHideModal()
+        }
+    },
+    CloseQueryModal() {this.queryModal = false},
+    AssembleMutationQuery( ) {
+        //combines req_body with routeParams
+    },
+    SaveParamsInit() {
+        /*
+
+            saveLock: locks save modal when true. Prevents it from closing. When false. Continue (if true)
+                and close buttons will show. And modal can be closed. 
+        */
+        //validation_complete
+        let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 
+            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0
+        }
+        let keys = Object.keys(save_count)
+        for (let i =0; i < keys.length; i++) {
+            let kx = keys[i]
+            this.saveParams[kx] = save_count[kx]
+        }
+        this.saveLock     = false
+        this.showContinue = false
+        this.isValidating = false
+        this.showButtons  = false
+        this.saveModal    = false
+
+        this.saveMainMessage = ""
+        this.saveDeleteMessage = ""
+        this.saveUniqueMessage = ""
+
+
+        //AssemblePushPayloads adds reqbody and route informations.
+        this.saveData = []
+    },
+    SnackBarInit() {
+        //reset snackbar parameters
+        this.saved = 0
+        this.rejected = 0
+        this.snackBarVisible = 'hidden'
+    },
+    MainSaveMessage(msg) { this.saveMainMessage = msg},
+    ChangeSaveState(showButtons, saveLock, showContinue, isValidating) {
+        //boolean values only controls save modal display
+        this.showButtons     = showButtons
+        this.saveLock        = saveLock
+        this.showContinue    = showContinue
+        this.isValidating    = isValidating
+    },
+    CloseSaveModal() {
+        this.saveLock  = false
+        this.saveModal = false
+    },
     async SaveData() {
         /*
         This funciton processes the rows for saving into the final form. Each row is sent to its specific saving route in
@@ -415,28 +634,115 @@ methods: {
     
         Date fields are changed to YYYY-MM-DD format. Autocomplete fields are processed to return the value generally the
         id needed to save to the server.
-        */
-    
-        //clearSaveData
-        let save_data = { 'insert': [], 'update': [], 'delete': [] }
-        let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0}
-        const deleteWarning = this.gridFunctions['deleteWarning'] 
-        const CrudStats     = this.gridFunctions['CrudStatus']
-        for(let i =0; i <this.tableData.length; i++ ) {
-            let rowData   = this.tableData[i]
-            let rowStatus = CrudStats(rowData)
-            this.SaveStatusCount(rowStatus, save_count)
-            //insteadOfQuery for crudType
-            let crudType = rowData[meta_column]['crudType']
-            this.ReqDataAssembly(rowData, crudType, rowStatus, save_data)
-            await TimeOut(1, 1000)
-        }
-        //if is_changed but nothing to save
-        //else if not is_changed no changes detected
 
-        //else save rows
-        //PushSaveData
+        use save route or individual routes.
+
+        //clearSaveData
+        */
+        try{
+            let save_data = { 'insert': [], 'update': [], 'delete': [] }
+            this.SaveParamsInit()
+            this.SnackBarInit()
+
+            this.saveModal    = true //launches saveModal
+            this.saveLock     = true //prevents modal from being closed
+            this.isValidating = true
+
+            let save_count = this.saveParams
+            const deleteWarning    = this.gridFunctions['deleteWarning']
+            const uniqueWarning    = this.gridFunctions['uniqueWarning'] 
+            const CrudStatus       = this.gridFunctions['CrudStatus']
+            const SaveStatusCount  = this.SaveStatusCount
+            const SaveDataAssembly = this.SaveDataAssembly
+
+            let k = 0
+            this.gridOptions.api.forEachNode((rowNode, index) => {
+                k+=1
+                let rowData = rowNode.data
+                let rowStatus = CrudStatus(rowData)
+                SaveStatusCount(rowStatus, save_count)
+                SaveDataAssembly(rowData, rowStatus, save_data)
+                //add timeout?
+
+            });
+            await this.AssemblePushPayloads(save_data)
+            this.MainSaveMessage("No changes detected.")
+            // console.log(this.saveMainMessage)
+
+            let sx = save_count
+
+            //continue save
+            if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
+
+                this.MainSaveMessage("Saving Rows")
+                this.saveDeleteMessage        = deleteWarning
+                this.saveUniqueMessage        = uniqueWarning
+                await new Promise(r => setTimeout(r, 500))
+                await this.SaveAndReload()
+            }
+            else if (sx['is_changed'] === 0) {
+                this.MainSaveMessage("No changes detected.")
+                this.ChangeSaveState(true, false, false, false)
+            }
+
+            //pause save option to 
+            else if ( sx['is_save'] > 0 && ( sx['is_warning'] > 0 || sx['is_error'] > 0 ) ) {
+                this.MainSaveMessage("Changes detected for saving. However, some rows either have errors or warnings. Press close to fix or continue to ignore. Rows with errors will be skipped")
+                this.saveDeleteMessage        = deleteWarning
+                this.saveUniqueMessage        = uniqueWarning
+                this.ChangeSaveState(true, false, true, false)
+
+            } else if ( sx['is_changed'] >  0 || sx['is_delete'] >  0  ) {
+                this.MainSaveMessage("Changes detected. However, all changed rows either have errors or are incomplete and not valid for saving.")
+                this.saveDeleteMessage        = deleteWarning
+                this.saveUniqueMessage        = uniqueWarning
+                this.ChangeSaveState(true, false, false, false)                
+
+            } else {
+                this.MainMessage("Error: This message should display. Please contact admin")
+            }
+        } catch (e) {
+            console.log(e)
+            alert(e)
+        } 
+
     },
+    async AssemblePushPayloads( save_data) {
+        /*
+            Process rows for saving. Mainly used for convert lookup columns 
+            to an id or another single value.
+
+            adds rows to this.saveData
+        */
+        let columnDefs = this.columnDefs
+        let pxv  = new Push(columnDefs)
+        pxv.PushParamsInit()
+        let save_data_processed = {}
+        let crudTypes = Object.keys(save_data)
+        let index = 0
+        let routeParams = this.routeParams
+        for (let i=0 ; i < crudTypes.length; i++ ) {
+            let crudType = crudTypes[i]
+            let tableData = []
+            let save_rows = save_data[crudType]
+            for (let j=0; j < save_rows.length; j++ ) {
+                let rowData = save_rows[j]
+                let rd = pxv.CreateRowDataOut(rowData, routeParams)
+                tableData.push(rd)
+                index += 1
+                await this.TimeOut(index, 500)
+            }
+            save_data_processed[crudType] = tableData
+        }
+        // //assemble reqBody
+        let reqbody = this.saveData
+        //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
+        reqbody.push( pxv.CreatePushPayload(routeParams, 'insert', save_data_processed['insert'] )  )
+        reqbody.push( pxv.CreatePushPayload(routeParams, 'update', save_data_processed['update'] )  )
+        reqbody.push( pxv.CreatePushPayload(routeParams, 'delete', save_data_processed['delete'] )  )
+    },
+
+
     async TimeOut(index, batch_count) {
         /*
         Number of iterations before setting await. Allows UI to refresh. 
@@ -448,33 +754,112 @@ methods: {
         }
     },
     SaveStatusCount(rowStatus, save_count) {
-        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error']
+        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error', 'is_complete']
         for (let i =0; i < save_params.length; i++ ) {
             let sp = save_params[i]
-            if (rowStatus[sp]) { save_count[sp] += 1 }
+            if (rowStatus[sp] === true) { save_count[sp] += 1 }
         }
     },
-    FixData() {
-        //clear save object.
-        //close save modal
+    async SaveAndReload() {
+        this.saveLock = true
+        await this.PushSaveData()
+        this.saveLock  = false
+        this.saveModal = false
+        this.ShowSnackBar()
+        let tmpFunc = this.HideSnackBar
+        setTimeout(tmpFunc, 5000)
+
+        await this.RunNewQuery()
     },
-    PushSaveData() {
+    async PushSaveData() {
+        //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
+        try{
+            let req_bodies = this.saveData
+            let save_count = this.saveParams
+            for (let i =0; i < req_bodies.length; i+=1 ) {
+                let rx    = req_bodies[i]
+                let route     = rx['route']
+                let req_body  = rx['reqBody']
+                let data = req_body['data']
+                if (data.length === 0) {continue}
+                let axios_object = await this.axios.post(route, req_body)
+                let adata = axios_object.data
+                this.saved     += adata['output_data'].length || 0
+                this.rejected  += adata['error_data'].length  || 0
+                if (adata['error_data'].length !== 0) {console.error( adata['error_data'] )}
+                if (adata['server_error'] !== "") {console.error( adata['server_error'] )}
+            }
+            save_count['is_validating'] = true 
+            save_count['is_saving']     = false
+            save_count['save_complete'] = true
+        } catch (e) {
+            console.log(e)
+            alert(e)
+        }
+
         //continues save
     },
-    EndSave() {
-        //reset save object
-    },
-    async ReqDataAssembly(rowData, crudType, rowStatus, saveData) {
 
+    async SaveDataAssembly(rowData, rowStatus, saveData) {
+        /*
+            Appends rowData ready to be saved to saveData object.
+        */
         let isSave = rowStatus['is_save']
-        if (! isSave ) {return}
+        if (isSave !== true ) {return}
         let validCrudTypes = ['insert', 'update', 'delete']
+        let crudType = rowStatus['crudType']
         if (validCrudTypes.includes(crudType) ) {
-            // need to process data?
-            let saveRowData = rowData //Push processing placeholder
-            saveData[crudType].push(saveRowData)
+            let is_delete = rowStatus['is_delete']
+            if (is_delete === true ) {saveData['delete'].push(rowData) } 
+            else { saveData[crudType].push(rowData) }
         } else { console.error('error processing data') }
+    },
+    SetEnvironment() {
+        /*
+            Sets behavior of grid based on node enviornment
+        */
+        let envx = process.env.NODE_ENV
+        if ( ['development','test','production'].includes(envx) ) {
+            this.NODE_ENV = envx
+        } else {
+            console.error(`Invalid node_env ${envx} setting environment to development`)
+            this.NODE_ENV ='development'
+        }
+    },
+
+
+    AgridLoadingModal() {
+        this.disable_navbar = true
+        this.gridApi.showLoadingOverlay();
+    },
+    AgridNoRowsModal() {
+        this.gridApi.showNoRowsOverlay();
+        this.disable_navbar = false
+    },
+    AgridHideModal() {
+        this.gridApi.hideOverlay();
+        this.disable_navbar = false
+    },
+    PathJoin(base, new_path) {
+        let b_end     = base.charAt(base.length -1 )
+        let new_1 =    new_path.charAt(0)
+        if (b_end === '/') {
+            if (new_1 === '/') {return base + new_path.substring(1)
+            } else { return base  + new_path }
+        } else {
+            if (new_1 === '/') {return base + new_path
+            } else { return base +'/' + new_path }
+        }
+    },
+    HideSnackBar() {
+        this.snackBarVisible = 'hidden'
+    },
+    ShowSnackBar() {
+        this.snackBarVisible = 'visible'
     }
+
+
+
 }
 
 }

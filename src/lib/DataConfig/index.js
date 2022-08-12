@@ -75,7 +75,7 @@ let boolean_default = 'false'
 
 //numbers
 let number_types = ['smallint', 'integer', 'int', 'bigint', 'decimal', 'numeric',
-    'real', 'double precision', 'money', 'numeric', 'float']
+    'real', 'double precision', 'money', 'float']
 let integer_types = ['smallint', 'integer', 'int', 'bigint']
 
 let serial_types = ['serial', 'bigseral'] //should be integers
@@ -131,9 +131,8 @@ let date_operators   = [
 ]
 
 let text_operators   = [
-    'ilike', 'not_ilike', 'in', 'not_in',
-    'between', 'not_between', 'is_null',
-    'is_not_null',
+    'ilike', 'not_ilike',
+    'is_null', 'is_not_null',
     '=','!='
 ]
 

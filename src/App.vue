@@ -1,50 +1,88 @@
 <template>
 <div>
-  <ag-grid-vue
-    style="width: 100%; height: calc(100vh - 3.25rem)"
-    class="ag-theme-alpine"
-    :columnDefs="columnDefs"
-    :rowData="tableData"
-    @grid-ready="onGridReady"
-  />
+  <div v-if="loading">
+    <!-- error msg change color display message i.e. permission denied contact xyz -->
+    <page-loader />
+  </div>
+  <div v-else>
+    <grid-header 
+        @help="helpModal = true" @add-row="AddRow()"
+        @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
+        @pull-data="RunNewQuery()" @previous-page="PreviousPage()" @next-page="NextPage()"
+        @new-sheet="NewSheet()" @save="SaveData()"
+        :links="navHeaderParams.links"
+        :page_number="page_number"
+        :navHeaderParams="navHeaderParams"
+        :disable_navbar="disable_navbar"
+    />
 
-  <!-- <h1>hola</h1>
-    @grid-ready="onGridReady"
+    <ag-grid-vue
+      style="width: 100%; height: calc(100vh - 3.25rem)"
+      class="ag-theme-alpine"
+      :columnDefs="columnDefs"
+      :rowData="tableData"
+      @grid-ready="onGridReady"
+      suppressPropertyNamesCheck="true"
+    />
 
-  <button @click="bxc()"> nada </button>
-  <div>
-    <button @click="json_pholder()"> call </button>
-    <div>{{ph}}</div>
-  </div> -->
-  <!-- <PageLoader /> -->
- <!-- <grid-header /> -->
-  <!-- <button @click="grid_hello">grid hello </button>
+    <Modal v-model="queryModal" modal-class="fullscreen-modal" title="Query parameters">
+      <div class="tabs">
+        <ul>
+          <li :class="{'is-active':  filter_active  }"><a @click="FilterModal">Filters</a></li>
+          <li :class="{'is-active': !filter_active  }"><a @click="OrderByModal">Order By</a></li>
+        </ul>
+      </div>
+      <filters v-if="filter_active" :filterParams="filterParams" @accept="RunNewQuery()" @cancel="CloseQueryModal()"/>
+      <order-by v-else :orderByParams="orderByParams" @accept="RunNewQuery()" @cancel="CloseQueryModal()"/>
+    </Modal>
 
+    <Modal v-model="helpModal" title="Help Modal" modal-class="modalsm">
+      <help :help_msg="help_msg" />
+    </Modal>
 
-  </ag-grid-vue>
-    <Modal v-model="modalx.modal1" modal-class="fullscreen-modal" title="My first modal">
-        <ag-grid-vue
-          style="width: 100%; height: 100%"
-          class="ag-theme-alpine"
-          :columnDefs="columnDefs2"
-          :rowData="rowData2"
-        >
-        </ag-grid-vue>
-    </Modal> -->
-
+    <Modal v-model="saveModal" title="Save Modal" modal-class="modalsm">
+      <div style ="position: relative; min-height: 450px;">
+        <save-data :isValidating="isValidating" :deleteWarning="saveDeleteMessage" 
+          :uniqueWarning="saveUniqueMessage" :mainMessage="saveMainMessage" :isSaving="isSaving"
+        />
+      </div>
+      <div style="poistion: absolute; bottom: 0, left: 0; border-top: 1px solid #e5e5e5;" v-if="showButtons">
+          <div style="padding-top: 5px;">
+              <button class="button is-success mr-1" type="button" v-if="showContinue" @click="SaveAndReload()">Contiue</button>
+              <button class="button is-danger"       type="button" @click="CloseSaveModal()">Cancel</button>
+          </div>
+      </div>
+    </Modal>
+  </div>
+  <snack-bar @hide-snackbar="HideSnackBar()" :snackBarVisible="snackBarVisible" :saved="saved" :rejected="rejected" />
 </div>
 </template>
 
 <script>
+
 import { AgGridVue } from "ag-grid-vue3";
-// import VueModal from '@kouts/vue-modal'
+import VueModal from '@kouts/vue-modal'
 import AutoCompleteEditor from "./components/GridEditors/AutoCompleteEditor"
 import DateTimeEditor   from "./components/GridEditors/DateTimeSelector"
 import crudSelectEditor from "./components/GridEditors/CrudSelectEditor"
 // import SubGridSelector from "./components/GridEditors/SubGridSelector"
-// import GridHeader from "./components/GridLayout/Header"
+import SnackBar from "./components/SnackBar"
 
+import GridHeader from "./components/Header"
+
+/*
+Modals
+*/
+import Filters    from "./components/Filters"
+import OrderBy    from "./components/OrderBy"
+import Help       from "./components/Help"
+import PageLoader from "./components/PageLoader"
+import SaveData   from "./components/Save"
+
+//main mixin
 import grid_controller from "@/mixins/grid_controller"
+
+
 export default {
   name: "App",
   mixins: [grid_controller],
@@ -52,11 +90,24 @@ export default {
     "ag-grid-vue":AgGridVue,
     "autoCompleteEditor": AutoCompleteEditor,
     "dateTimeEditor":   DateTimeEditor,
-    "crudSelectEditor": crudSelectEditor
-    // // "subGridSelector": SubGridSelector,
-    // "grid-header": GridHeader,
-    // "Modal": VueModal
+    "crudSelectEditor": crudSelectEditor,
+    "grid-header": GridHeader,
+
+    "Modal": VueModal,
+    "order-by": OrderBy,
+    "filters":   Filters,
+    "help": Help,
+    'page-loader': PageLoader,
+    'save-data': SaveData,
+    'snack-bar': SnackBar
   },
+
+  methods: {
+    Log() {
+      console.log('help from main')
+    }
+  },
+
   async mounted () {
       /*
       This object is ran to initialize all the required data from the server. When all initial loading is complete the 
@@ -75,20 +126,11 @@ export default {
           3. LoadData
 
       */
-      //if submodal else.
-      // if (this.is_development) {
-
-      // }
-      // this.RunColumnDefsInit()
-      this.MainGridInit()
+      await this.MainGridInit()
+      // await new Promise(r => setTimeout(r, 1000))
+      // this.loading = false
   }
-
-
 };
-
-
-
-
 
 
 </script>
@@ -96,31 +138,15 @@ export default {
 <style lang="scss">
   @import "~ag-grid-community/dist/styles/ag-grid.css";
   @import "~ag-grid-community/dist/styles/ag-theme-alpine.css";
-
-.rag-red {
-  background-color: lightcoral;
-}
-.rag-green {
-  background-color: lightgreen;
-}
-.rag-amber {
-  background-color: lightsalmon;
-}
-
-.rag-red-outer .rag-element {
-  background-color: lightcoral;
-}
-
-.rag-green-outer .rag-element {
-  background-color: lightgreen;
-}
-
-.rag-amber-outer .rag-element {
-  background-color: lightsalmon;
-}
-
-
+  @import "./assets/bulma.scss";
+  @import "./assets/vue_modal.scss";
   * { margin: 0 }
 
+  .modal-footer {
+    padding: 15px 0px 0px 0px;
+    border-top: 1px solid #e5e5e5;
+    margin-left: -14px;
+    margin-right: -14px;
+  }
 
 </style>

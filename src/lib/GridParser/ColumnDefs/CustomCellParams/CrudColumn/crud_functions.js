@@ -86,6 +86,7 @@ class CrudColumnFunctions {
 
         //delete_warning
         gf['deleteWarning'] = grid['deleteWarning'] || ""
+        gf['uniqueWarning'] = grid['uniqueWarning'] || ""
         return gf
     }
 
@@ -194,7 +195,14 @@ class CrudColumnFunctions {
 
             let rowData = rowDataParams.data
             //row_data is whats stored in server object
-            let rowBackup = lodashCloneDeep(rowData) //messes up column order probably?
+            //let rowBackup = lodashCloneDeep(rowData)
+            let rowBackup = {}
+            let keys = Object.keys(rowData)
+            for(let i =0; i < keys.length; i++ ) {
+                let key = keys[i]
+                if (key === meta_column_name) {continue}
+                rowBackup[key] = lodashCloneDeep(rowData[key])
+            }
             let meta_column = { 'crudType': 'update', 'is_delete': false}
             CreateMetaColumn(rowDataParams, meta_column)
             meta_column['backup'] = rowBackup 
@@ -438,7 +446,10 @@ class CrudColumnFunctions {
             let field = grid_column['field']
             let is_crud = grid_column['chmodParams']
 
-            if (is_crud['isChange']) { change_fields.push(field) }
+            if (is_crud['isChange']) { 
+                if (field === meta_column_name) {continue}
+                change_fields.push(field) 
+            }
             if (grid_column['isRequired']) {required_fields.push(field)}
 
 

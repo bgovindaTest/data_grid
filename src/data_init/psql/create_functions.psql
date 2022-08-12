@@ -1,0 +1,38 @@
+/*
+
+
+BEGIN;
+SET local app.userid   = 1;
+SET local app.is_admin = false;
+-- sql queries where app_userid() ;
+COMMIT;
+*/
+CREATE OR REPLACE FUNCTION trigger_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION app_userid() RETURNS bigint
+    AS $$select 1::bigint;$$
+    --AS $$select current_setting('app.user_id',true)::bigint;$$
+LANGUAGE SQL
+IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION is_appuser_admin() RETURNS boolean
+    AS $$select true;$$
+    --AS $$select current_setting('app.is_admin',true)::boolean;$$
+LANGUAGE SQL
+IMMUTABLE;
+
+
+
+CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.last_modified_by_user_id = app_userid();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;

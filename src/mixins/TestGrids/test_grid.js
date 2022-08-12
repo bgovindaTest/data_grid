@@ -1,50 +1,47 @@
 let test_grid = {
 "grids": [
     {
-        "columnDefs": [
-            {"field": "num", "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['num'] ,"validator":"ifnull(num,0)  > 0", 
-                "editable": true, "defaultFilter": true, "showFilter": false, "showSort": true},
-            {"field": "date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true},
-            {"field": "num_+_1",   "valueGetter": "ifnull(num,0) +1" , "validator": "ifnull(num,0) + 1 > 0"},
-            {"field": "full_name", "cellEditor": 'agRichSelectCellEditor', "editable": true, "isLookup": true,
-                "cellEditorParams": {
-                    "valuesObject": [
-                        {"full_name": "B G", "first_name": "B", "last_name": "G", "id": "1"},
-                        {"full_name": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2"},
-                        {"full_name": "Time Drake", "first_name": "Tim", "last_name": "Drake", "id": "3"},
-                    ]
-                }
-            },
-            {"field": "first_name_lookup", 'valueGetter': 'lookup(full_name, "first_name")' },
-            {"field": "links","cloneOnCopy": true, 'cellRenderer': "LinksRenderer" },
-            {"field": "full_namex", 'cellEditor': "autoCompleteEditor", "editable": true,
-                "validator": "islookup(full_namex)",
-                "cellEditorParams": {
-                    "valuesObject": [
-                        {"full_namex": "B G", "first_name": "B", "last_name": "G", "id": "1"},
-                        {"full_namex": "Peter Brunn", "first_name": "Peter", "last_name": "Brunn", "id": "2"},
-                        {"full_namex": "Time Drake", "first_name": "Tim", "last_name": "Drake", "id": "3"},
-                    ],
-                    "columnDefs": ["full_namex", "first_name", "last_name", "id"]
-                }
-            }
-        ],
-        "queryParams": {
-            "default": "localhost:8080"
+        "navHeaderParams": {
+            "links": [{'name':'providers', 'url': '/providereffort/providers'}],
+            'add_row':   true, 'new_sheet': true
         },
-        "tableData": [
-            {
-                "num": 0, "links": {"urlPath": "/fakePath/home", "urlName": "LinksTest"},
-                "full_name": {"full_name": "Sean Govi", "first_name": "Sean", "last_name": "Govi", "id": "5"},
-                "auto": null,
-                "full_namex": null,
-                "date": null
-            },
+        "columnDefs": [
 
-            // {"a": 1, "b":'x'},
-            // {"a": 2, "b":'y'},
-            // {"a":-4, "b":'z'}
-        ]
+            {"field": "id",  "editable": false, "showSort": true, 'cellEditorParams': "autoCompleteEditor",
+                "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'rw'
+            },
+            {"field": "company_name","editable": true, "showSort": true, "showFilter": true  },
+            {"field": "company_code","editable": true, "showSort": true, "showFilter": true  },
+            {"field": "is_active","editable": true, "showSort": true, "showFilter": true  },
+            // {"field": "some_date","editable": true, "showSort": true, "showFilter": true, "dataType": "date",
+            //     "cellEditor": 'dateTimeEditor', 'chmodParams': 'c'  },
+
+            {"field": "msg",  "editable": true, "showSort": true, 'cellEditor': "autoCompleteEditor",
+                "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'rc',
+                'cellEditorParams': {
+                    "api_route": "/data/public/dropx"
+                    // "valuesObject": [
+                    //     {"msg": 'true', "id": "1"},
+                    //     {"msg": 'false',"id": "2"},
+                    //     {"msg": 'null',"id": "3"}
+                    // ]
+                }
+
+
+            }
+
+        ],
+        "routeParams": {
+            "default_route": "data/public/company"
+        },
+        // "tableData": [
+        //     {
+        //         "id": '1',
+        //         "company_name": 'sup',
+        //         "company_code": '0',
+        //         "is_active": 'true'
+        //     },
+        // ]
     }
 ]}
 

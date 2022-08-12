@@ -1,0 +1,16 @@
+{
+    "comments": "This is the main landing page for the app. ProjectFolderName TableName (as link) Description",
+    "grids": [
+        {
+            "columnDefs": [
+                { "headerName": "ProjectName", "field": "project_name" },
+                { "headerName": "TableName",   "field": "table_name", "cellRenderer": "LinksRenderer" },
+                { "headerName": "Description",   "field": "description" }
+    
+            ],
+            "queryParams": {
+                "default": "/root/root"
+            }
+        }
+    ]
+}

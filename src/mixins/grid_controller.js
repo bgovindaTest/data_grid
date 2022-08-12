@@ -74,25 +74,35 @@ data () {
         orderByParams: {},
         filterParams: {},
 
-        //data ready for save stored here. allows for save to continue
-        toSave: [], //stores payload
 
         //functions created by gridParser
         gridFunctions: null,
 
         valuesObject: {}, //contains values for lookups
         //boolean values for modal
-        saveParams: {},
-        saveData: [],
-
 
         queryModal: false,
         filter_active: true, //if false use orderby
         helpModal: false,
-        saveModal: false,
         help_msg: "# placeholder not implemented yet \n# No Help Message",
 
-        //snackBar Params
+        /*
+            Parameters below control save modal and corresponding messages and 
+            buttons displayed for it.
+        */
+        saveParams: {},
+        saveData: [],
+        saveModal: false, //launches saveModal
+        saveLock: false, //prevents modal from being closed
+        isValidating: false,
+        isSaving: false, //for displaying saving on loading button
+        showButtons: false,
+        showContinue: false,
+        saveMainMessage: "",
+        saveDeleteMessage: "",
+        saveUniqueMessage: "",
+
+        //for snackbar
         saved: 0,
         rejected: 0,
         snackBarVisible: 'hidden' //'hidden' //must be hidden or visible
@@ -135,6 +145,7 @@ methods: {
         //wrap in big try catch for loading screen
 
         this.SetEnvironment()
+        this.SaveParamsInit()
 
         //pull url params
 
@@ -509,7 +520,9 @@ methods: {
         }
     },
     async PreviousPage() {
-        if (this.page_index <=0 ) { return }
+        if (this.pageParams['page_index'] <=0 ) { 
+            return 
+        }
         this.AgridLoadingModal()
         let pullx = this.PullParamsObject()
         let req_body = pullx.PreviousPageParams()
@@ -573,25 +586,45 @@ methods: {
         */
         //validation_complete
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 
-            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0,
-            'saved': 0, 'rejected': 0, 
-            'is_validating': false,
-            'isSaving': false,
-            'saveLock': false,
-            'showContinue': false,
-            'mainMessage': "",
-            'deleteWarning': "",
-            'uniqueWarning': ""
+            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0
         }
         let keys = Object.keys(save_count)
         for (let i =0; i < keys.length; i++) {
             let kx = keys[i]
             this.saveParams[kx] = save_count[kx]
         }
+        this.saveLock     = false
+        this.showContinue = false
+        this.isValidating = false
+        this.showButtons  = false
+        this.saveModal    = false
+
+        this.saveMainMessage = ""
+        this.saveDeleteMessage = ""
+        this.saveUniqueMessage = ""
+
+
         //AssemblePushPayloads adds reqbody and route informations.
         this.saveData = []
     },
-
+    SnackBarInit() {
+        //reset snackbar parameters
+        this.saved = 0
+        this.rejected = 0
+        this.snackBarVisible = 'hidden'
+    },
+    MainSaveMessage(msg) { this.saveMainMessage = msg},
+    ChangeSaveState(showButtons, saveLock, showContinue, isValidating) {
+        //boolean values only controls save modal display
+        this.showButtons     = showButtons
+        this.saveLock        = saveLock
+        this.showContinue    = showContinue
+        this.isValidating    = isValidating
+    },
+    CloseSaveModal() {
+        this.saveLock  = false
+        this.saveModal = false
+    },
     async SaveData() {
         /*
         This funciton processes the rows for saving into the final form. Each row is sent to its specific saving route in
@@ -603,15 +636,21 @@ methods: {
         id needed to save to the server.
 
         use save route or individual routes.
-        */
-    
+
         //clearSaveData
+        */
         try{
             let save_data = { 'insert': [], 'update': [], 'delete': [] }
             this.SaveParamsInit()
+            this.SnackBarInit()
+
+            this.saveModal    = true //launches saveModal
+            this.saveLock     = true //prevents modal from being closed
+            this.isValidating = true
+
             let save_count = this.saveParams
             const deleteWarning    = this.gridFunctions['deleteWarning']
-            const uniqueWarning     = this.gridFunctions['uniqueWarning'] 
+            const uniqueWarning    = this.gridFunctions['uniqueWarning'] 
             const CrudStatus       = this.gridFunctions['CrudStatus']
             const SaveStatusCount  = this.SaveStatusCount
             const SaveDataAssembly = this.SaveDataAssembly
@@ -627,40 +666,41 @@ methods: {
 
             });
             await this.AssemblePushPayloads(save_data)
-            // console.log(req_bodies)
-            await this.PushSaveData()
-            //close save modal
-            // await this.RunNewQuery()
-
+            this.MainSaveMessage("No changes detected.")
+            console.log(this.saveMainMessage)
 
             let sx = save_count
-            //if is_changed === 0
-            if (sx['is_changed'] === 0) {
-                let msg = "No changes detected"
 
-            }
+            sx['is_warning'] = 1
             //continue save
-            else if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
-                if (deleteWarning === "" ) { 
-                    await this.PushSaveData() 
-                    //load data
-                    return
-                }
-                else {
-                    save_count['deleteWarning']        = deleteWarning
-                    save_count['uniqueWarning']        = uniqueWarning
-                }
-            } 
+            if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
+
+                this.MainSaveMessage("Saving Rows")
+                this.saveDeleteMessage        = deleteWarning
+                this.saveUniqueMessage        = uniqueWarning
+                await new Promise(r => setTimeout(r, 500))
+                await this.SaveAndReload()
+            }
+            else if (sx['is_changed'] === 0) {
+                this.MainSaveMessage("No changes detected.")
+                this.ChangeSaveState(true, false, false, false)
+            }
+
             //pause save option to 
             else if ( sx['is_save'] > 0 && ( sx['is_warning'] > 0 || sx['is_error'] > 0 ) ) {
+                this.MainSaveMessage("Changes detected for saving. However, some rows either have errors or warnings. Press close to fix or continue to ignore. Rows with errors will be skipped")
+                this.saveDeleteMessage        = deleteWarning
+                this.saveUniqueMessage        = uniqueWarning
+                this.ChangeSaveState(true, false, true, false)
 
-            } else if ( sx['is_changed'] >  0) {
-                let msg = "Changes detected. All changed rows either have errors or are incomplete and not valid for saving."
+            } else if ( sx['is_changed'] >  0 || sx['is_delete'] >  0  ) {
+                this.MainSaveMessage("Changes detected. However, all changed rows either have errors or are incomplete and not valid for saving.")
+                this.saveDeleteMessage        = deleteWarning
+                this.saveUniqueMessage        = uniqueWarning
+                this.ChangeSaveState(true, false, false, false)                
 
             } else {
-                let msg = "Error: This message should display. Please contact admin"
-                //nothing to change.
-                //error should not fire.
+                this.MainMessage("Error: This message should display. Please contact admin")
             }
         } catch (e) {
             console.log(e)
@@ -721,9 +761,13 @@ methods: {
             if (rowStatus[sp] === true) { save_count[sp] += 1 }
         }
     },
-    EndSave() {
-        //clear save object.
-        //close save modal
+    async SaveAndReload() {
+        this.saveLock = true
+        await this.PushSaveData()
+        this.saveLock  = false
+        this.saveModal = false
+        this.ShowSnackBar()
+        await this.RunNewQuery()
     },
     async PushSaveData() {
         //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
@@ -738,9 +782,8 @@ methods: {
                 if (data.length === 0) {continue}
                 let axios_object = await this.axios.post(route, req_body)
                 let adata = axios_object.data
-
-                save_count['saved']     += adata['output_data'].length || 0
-                save_count['rejected']  += adata['error_data'].length || 0
+                this.saved     += adata['output_data'].length || 0
+                this.rejected  += adata['error_data'].length  || 0
                 if (adata['error_data'].length !== 0) {console.error( adata['error_data'] )}
                 if (adata['server_error'] !== "") {console.error( adata['server_error'] )}
             }

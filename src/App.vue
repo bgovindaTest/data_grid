@@ -9,7 +9,7 @@
         @help="helpModal = true" @add-row="AddRow()"
         @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
         @pull-data="RunNewQuery()" @previous-page="PreviousPage()" @next-page="NextPage()"
-        @new-sheet="NewSheet()" @save="saveModal=true"
+        @new-sheet="NewSheet()" @save="SaveData()"
         :links="navHeaderParams.links"
         :page_number="page_number"
         :navHeaderParams="navHeaderParams"
@@ -42,12 +42,14 @@
 
     <Modal v-model="saveModal" title="Save Modal" modal-class="modalsm">
       <div style ="position: relative; min-height: 450px;">
-        <save-data />
+        <save-data :isValidating="isValidating" :deleteWarning="saveDeleteMessage" 
+          :uniqueWarning="saveUniqueMessage" :mainMessage="saveMainMessage" :isSaving="isSaving"
+        />
       </div>
-      <div style="poistion: absolute; bottom: 0, left: 0; border-top: 1px solid #e5e5e5;" v-if="false">
+      <div style="poistion: absolute; bottom: 0, left: 0; border-top: 1px solid #e5e5e5;" v-if="showButtons">
           <div style="padding-top: 5px;">
-              <button class="button is-success mr-1" type="button">Contiue</button>
-              <button class="button is-danger"       type="button">Cancel</button>
+              <button class="button is-success mr-1" type="button" v-if="showContinue" @click="SaveAndReload()">Contiue</button>
+              <button class="button is-danger"       type="button" @click="CloseSaveModal()">Cancel</button>
           </div>
       </div>
     </Modal>
@@ -57,6 +59,7 @@
 </template>
 
 <script>
+
 import { AgGridVue } from "ag-grid-vue3";
 import VueModal from '@kouts/vue-modal'
 import AutoCompleteEditor from "./components/GridEditors/AutoCompleteEditor"

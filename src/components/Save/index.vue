@@ -1,15 +1,22 @@
 <template>
 <div>
 <!-- loading validation -->
-<div v-if="!validationComplete">
+<div v-if="isValidating">
     <p class="saving">Validating Data <span>.</span><span>.</span><span>.</span> </p>
 </div>
 
+<!-- validation complete -->
+
 <!-- validation results -->
 <div v-else>
+    <div >Validating Completed</div>
+    <div> {{mainMessage}} </div>
+    <div class="has-text-warning-dark is-size-4" v-if="uniqueWarning != ''"> {{uniqueWarning}} </div>
+    <div class="has-text-warning-dark is-size-4" v-if="deleteWarning != ''"> {{deleteWarning}} </div>
+    <div v-if="isSaving">
+        <p class="saving">Saving Data <span>.</span><span>.</span><span>.</span> </p>
+    </div>
 
-
-    <p class="has-text-warning-dark is-size-4" v-if="ShowDeleteWarning"> {{deleteWarning}} </p>
 
 </div>
 
@@ -20,51 +27,28 @@
 
 export default {
 
-//{'is_save': 0, 'is_warning': 0, 'is_delete': 0, 'is_empty': 0, 'is_changed': 0, 'is_error': 0}
-
-props: {
-    saveStatus: { type: Object} ,
-    deleteWarning: { 
-      type: String,
-      default: ""
-    }, 
-    validationComplete: { 
-        type: Boolean,
-        default: true
-    },
-    rowSent: { type: Object }
-},
-
-
-computed: {
-    IsSave(){},
-    NoChanges() {},
-    ShowDeleteWarning() {
-        // let deleteCount = this.saveStatus['is_delete'] || 0
-        // if (deleteCount > 0 && deleteWarning != "") {return true}
-        return false
-    }
-
-
-
-},
-
-mounted() {
-    this.SaveData()
-    //launch validations
-    console.log(this.validationComplete)
-    //display query state date
-
-    //show rows pushed to server
-},
-
-methods: {
-    SaveData()    { this.$emit('save-data') },
-    FixData()     { this.$emit('fix-data')},
-    Cancel()      { this.$emit('cancel')},
-    RemoveLock()  { this.$emit('remove-lock')},
-}
-
+  props: {
+      deleteWarning: { 
+        type: String,
+        default: ""
+      },
+      uniqueWarning: { 
+        type: String,
+        default: ""
+      },
+      mainMessage: {
+        type: String,
+        default: ""
+      },
+      isValidating: { 
+          type: Boolean,
+          default: true
+      },
+      isSaving: {
+          type: Boolean,
+          default: true
+      }
+  },
 }
 
 </script>

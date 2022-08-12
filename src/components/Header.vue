@@ -4,7 +4,7 @@
         <div class="navbar-start">
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" v-if="display.add_row" @click="Add()"> <strong>Add Row</strong> </a>
+                    <a class="button is-light" v-if="display.add_row" @click="Add()"> <strong>Add</strong> </a>
                 </div>
             </div>
 
@@ -39,7 +39,7 @@
             <!-- pagination -->
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" @click="PreviousPage()"> <strong>Previous Page</strong> </a>
+                    <a class="button is-light" @click="PreviousPage()"> <strong><font-awesome-icon :icon="['fas', 'arrow-left']" /></strong> </a>
                 </div>
             </div>
 
@@ -47,7 +47,7 @@
 
             <div class="navbar-item">
                 <div class="buttons">
-                    <a class="button is-light" @click="NextPage()"> <strong>Next Page</strong> </a>
+                    <a class="button is-light" @click="NextPage()"> <strong><font-awesome-icon :icon="['fas', 'arrow-right']" /></strong> </a>
                 </div>
             </div>
             <!--end paginaiont -->

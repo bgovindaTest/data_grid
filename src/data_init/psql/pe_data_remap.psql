@@ -18,7 +18,7 @@
     {"name": "line_of_business",
     "query": """
         --lob
-        SELECT DISTINCT lob_id as id, lob_name, lob_code,1 as last_modified_userid, 
+        SELECT DISTINCT lob_id as id, company_id, lob_name, lob_code,1 as last_modified_userid, 
             CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active --is_active
         FROM full_org
         ORDER BY lob_id asc;
@@ -62,12 +62,11 @@
         ORDER BY cost_center_id asc;
      """
     },
-    {"name": "company_cost_center",
+    {"name": "cost_center_time",
      "query": """
         --company_cost_center
         SELECT DISTINCT id, cost_center_id, company_id, 
             1 as last_modified_userid,
-            CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active, --is_active
             40 as cfte_time, 3 as time_unit_id
         FROM full_org
         ORDER BY cost_center_id asc;
@@ -201,6 +200,4 @@
       SELECT * FROM full_org ORDER BY company_id asc;
     """
     }
-
-
 ]

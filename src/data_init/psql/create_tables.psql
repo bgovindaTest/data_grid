@@ -142,6 +142,7 @@ $$;
 
 CREATE TABLE provider_effort.line_of_business (
     id bigserial PRIMARY KEY,
+    company_id bigint REFERENCES provider_effort.company (id),
     lob_name text,
     lob_code text NOT NULL UNIQUE,
     is_active boolean default true NOT NULL,
@@ -215,21 +216,19 @@ COMMENT ON TABLE provider_effort.cost_center IS $$
 billing
 $$;
 
-CREATE TABLE provider_effort.company_cost_center (
+CREATE TABLE provider_effort.cost_center_time (
     id bigserial   PRIMARY KEY,
     cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id),
-    company_id     bigint  NOT NULL REFERENCES provider_effort.company     (id),
-    is_active      boolean NOT NULL DEFAULT true,
     cfte_full_time numeric NOT NULL DEFAULT 40,
     time_unit_id   bigint  REFERENCES provider_effort.time_unit (id),
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),
-    UNIQUE(company_id, cost_center_id)
+    UNIQUE(cost_center_id)
 );
 
-COMMENT ON TABLE provider_effort.company_cost_center IS $$ 
-connects companies with billing centers
+COMMENT ON TABLE provider_effort.cost_center IS $$ 
+amount of time for cfte tracking.
 $$;
 
 CREATE TABLE provider_effort.classifications (
@@ -313,14 +312,14 @@ CREATE TABLE provider_effort.appointments (
     provider_id bigint REFERENCES provider_effort.providers,
     cpsc_id bigint REFERENCES provider_effort.cpsc (id),
     lcg_id  bigint REFERENCES provider_effort.lcg  (id),
-    company_cost_center_id bigint REFERENCES provider_effort.company_cost_center (id),
+    cost_center_id bigint REFERENCES provider_effort.cost_center (id),
     is_active boolean NOT NULL DEFAULT True,
     start_date date,
     end_date   date,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),
-    UNIQUE( provider_id, company_cost_center_id)
+    UNIQUE( provider_id, cost_center_id)
 );
 
 COMMENT ON TABLE provider_effort.appointments IS $$ 
@@ -366,7 +365,7 @@ $$;
 
 CREATE TABLE provider_effort.user_org_permissions (
     id bigserial PRIMARY KEY,
-    company_cost_center_id bigint NOT NULL REFERENCES provider_effort.company_cost_center (id),
+    cost_center_id bigint NOT NULL REFERENCES provider_effort.cost_center (id),
     user_id bigint REFERENCES app_admin.users (id),
     specialty_level boolean default false NOT NULL,
     --level
@@ -377,8 +376,6 @@ CREATE TABLE provider_effort.user_org_permissions (
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid()
 );
-
-CREATE INDEX "index_user_org_permissions_on_userid" on provider_effort.user_org_permissions using btree (user_id);
 
 COMMENT ON TABLE provider_effort.user_org_permissions IS $$ 
 data permissions for user based on location

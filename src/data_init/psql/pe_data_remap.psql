@@ -65,7 +65,7 @@
     {"name": "cost_center_time",
      "query": """
         --company_cost_center
-        SELECT DISTINCT id, cost_center_id, company_id, 
+        SELECT DISTINCT cost_center_id,
             1 as last_modified_userid,
             40 as cfte_time, 3 as time_unit_id
         FROM full_org
@@ -124,7 +124,7 @@
     {"name": "appointments",
      "query": """
         --appointments
-        select id, provider_id, cost_center_id as company_cost_center_id,
+        select id, provider_id, cost_center_id,
         CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  END as lcg_id, 
         CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id END as cpsc_id,
         last_modified_by_user_id as last_modified_userid, is_active, null as start_date, null as end_date

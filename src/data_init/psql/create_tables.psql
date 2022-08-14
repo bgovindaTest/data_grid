@@ -144,11 +144,12 @@ CREATE TABLE provider_effort.line_of_business (
     id bigserial PRIMARY KEY,
     company_id bigint REFERENCES provider_effort.company (id),
     lob_name text,
-    lob_code text NOT NULL UNIQUE,
+    lob_code text NOT NULL,
     is_active boolean default true NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid()
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE (company_id, lob_code)
 );
 
 COMMENT ON TABLE provider_effort.line_of_business IS $$ 
@@ -289,7 +290,7 @@ $$;
 CREATE TABLE provider_effort.providers (
     id bigserial PRIMARY KEY,
     employee_number text NOT NULL UNIQUE,
-    npi text NOT NULL,
+    npi text,
     first_name text NOT NULL,
     last_name text NOT NULL,
     classification_id bigint REFERENCES provider_effort.classifications (id),

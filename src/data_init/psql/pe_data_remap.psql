@@ -103,7 +103,7 @@
     {"name": "providers",
      "query": """
       SELECT id, npi, employee_number, first_name, last_name, classification_id,
-        last_modified_userid, is_active
+        last_modified_userid, is_active, lcg_id, cpsc_id
       FROM (
         SELECT id, npi, employee_number, first_name, last_name, classification_id,
         providers.last_modified_by_user_id as last_modified_userid, 
@@ -116,6 +116,7 @@
         LEFT JOIN (
             SELECT lcg_id, cpsc_id, provider_id
             FROM appointments
+            WHERE cpsc_id IS NOT NULL
          ) a  on a.provider_id = providers.id
       ) x where x.rx = 1
        ORDER BY id;

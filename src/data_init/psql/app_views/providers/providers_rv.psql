@@ -1,0 +1,21 @@
+/*
+Full expansion of providers information.
+
+
+*/
+CREATE VIEW provider_effort.providers_rv AS
+    SELECT providers.id as id, employee_number, npi, providers.first_name,
+        providers.last_name, classification_id, providers.is_active, cpsc_id,
+        lcg_id, start_date, end_date, 
+        providers.created_at, providers.updated_at, users.id as "last_modified_by_userid", users.email as "last_modified_by_user_email",
+        lcg_id  as "lcg_id.id",  lcg_name, lcg_name as "lcg_id.lcg_name",
+        cpsc_id as "cpsc_id.id", cpsc_name as "cpsc_id.cpsc_name",
+        classification_id as "classification_id.id",
+        classification_name as "classification_id.classification_name"  
+
+    FROM provider_effort.providers as providers
+    LEFT JOIN provider_effort.lcg  as lcg  on lcg.id  = providers.lcg_id
+    LEFT JOIN provider_effort.cpsc as cpsc on cpsc.id = providers.cpsc_id
+    LEFT JOIN provider_effort.classifications as classifications on providers.classification_id = classifications.id
+    LEFT JOIN app_admin.users as users on users.id = providers.last_modified_userid 
+    ; 

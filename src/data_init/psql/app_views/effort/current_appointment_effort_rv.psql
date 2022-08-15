@@ -1,0 +1,12 @@
+/*
+Creates main view for appointment effort.
+
+*/
+
+--appointment effort table
+CREATE VIEW provider_effort.appointment_effort_current AS
+    SELECT * FROM (
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY id, effective_date, ORDER BY effective_date, desc) as rn
+        FROM appointment_effort_rv
+        WHERE effective_date <= current_date
+    ) rn =1;

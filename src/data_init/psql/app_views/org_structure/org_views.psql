@@ -20,6 +20,8 @@ CREATE VIEW provider_effort.line_of_business_rv AS
     SELECT lob.id , c.company_name, c.company_code, lob.is_active, lob.created_at, 
         lob.updated_at, lob_name, lob_code, company_id,
         users.email as last_modified_user_email, users.id as last_modified_userid
+        --for mappings
+        company_name as "company_id.company_name", company_code as "company_id.company_code",
     FROM provider_effort.line_of_business as lob
     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
     LEFT JOIN  app_admin.users as users on lob.last_modified_userid = users.id;
@@ -31,6 +33,11 @@ CREATE VIEW provider_effort.department_rv AS
         d.updated_at, lob_name, lob_code, company_id, lob_id,
         department_name, department_code,
         users.email as last_modified_user_email, users.id as last_modified_userid
+        --for mappings
+        company_name as "lob_id.company_name", company_code as "lob_id.company_code", 
+        lob_name as "lob_id.lob_name", lob_code as "lob_id.lob_code" 
+
+
     FROM provider_effort.department as d
     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
@@ -43,6 +50,12 @@ CREATE VIEW provider_effort.specialty_rv AS
         specialty_name, specialty_code,
         department_name, department_code,
         users.email as last_modified_user_email, users.id as last_modified_userid
+        --for mappings
+        company_name as "department_id.company_name", company_code as "department_id.company_code", 
+        lob_name as "department_id.lob_name", lob_code as "department_id.lob_code" ,
+        department_name as "department_id.department_name", department_code as "department_id.department_code"
+
+
     FROM provider_effort.specialty as s
     INNER JOIN provider_effort.department as d on d.id = s.department_id
     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
@@ -52,14 +65,25 @@ CREATE VIEW provider_effort.specialty_rv AS
 -- --cc_view
 CREATE VIEW provider_effort.cost_center_rv AS
     SELECT cc.id , company_name, company_code, cc.is_active, cc.created_at,
-        cc.updated_at, lob_name, lob_code, company_id, lob_id, department_id,
+        cc.updated_at, lob_name, lob_code, company_id, lob_id, department_id, specialty_id,
         specialty_name, specialty_code, 
         department_name, department_code,
         cost_center_code, cost_center_name,
         users.email as last_modified_user_email, users.id as last_modified_userid
+        --for mappings
+        company_name as "specialty_id.company_name", company_code as "specialty_id.company_code", 
+        lob_name as "specialty_id.lob_name", lob_code as "specialty_id.lob_code",
+        specialty_name as  "specialty_id.specialty_name", specialty_code as   "specialty_id.specialty_code", 
+        department_name as "specialty_id.department_name", department_code as "specialty_id.department_code"
+
     FROM provider_effort.cost_center as cc
     INNER JOIN provider_effort.specialty as s on s.id = cc.specialty_id
     INNER JOIN provider_effort.department as d on d.id = s.department_id
     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
     LEFT JOIN  app_admin.users as users on d.last_modified_userid = users.id;
+
+CREATE VIEW provider_effort.cost_center_time_rv AS
+    SELECT id, cost_center_id , cfte_full_time, time_unit_id, time_unit_name
+    FROM cost_center_time
+    INNER JOIN provider_effort.time_unit as tu on tu.id = time_unit_id

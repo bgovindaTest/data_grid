@@ -19,7 +19,7 @@ provider_effort_tables = [  'provider_effort.company', 'provider_effort.line_of_
             'provider_effort.cost_center', 'provider_effort.cost_center_time', 'provider_effort.classifications',
             'provider_effort.lcg', 'provider_effort.cpsc', 'provider_effort.cpsc_lcg_map',
             'provider_effort.providers', 'provider_effort.appointments', 'provider_effort.appointment_effort',
-            'provider_effort.oracle_effort', 'provider_effort.user_org_permissions', 'provider_effort.refreshed_dates'
+            'provider_effort.oracle_effort', 'provider_effort.user_org_permission', 'provider_effort.refreshed_dates'
 ]
 
 admin_tables = [ 'app_admin.users', 'app_admin.registered_tables', 'app_admin.apps',

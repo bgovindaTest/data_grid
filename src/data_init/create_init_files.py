@@ -38,7 +38,7 @@ class BackupData:
         pass
 
     def RunInit(self):
-        self.RunFile('admin', admin_data)
+        self.RunFile('app_admin', admin_data)
         self.RunFile('provider_effort', pe_data)
 
     def RunFile(self, schema_name, file_path):

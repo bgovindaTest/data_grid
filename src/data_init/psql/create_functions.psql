@@ -32,7 +32,7 @@ IMMUTABLE;
 CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.last_modified_by_user_id = app_userid();
+  NEW.last_modified_by_userid = app_userid();
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

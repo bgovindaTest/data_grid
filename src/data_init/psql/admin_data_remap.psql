@@ -8,7 +8,8 @@
                 THEN true
                 ELSE false 
             END is_admin,
-            true as is_active
+            true as is_active,
+            1 as last_modified_userid
         FROM users
         ORDER BY id asc;
     """

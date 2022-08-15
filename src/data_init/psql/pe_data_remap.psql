@@ -45,7 +45,7 @@
         ORDER BY specialty_id asc;
      """
     },
-    {"name": "time_units",
+    {"name": "time_unit",
      "query": """
         --time units
         SELECT id, time_unit_name, 1 as last_modified_userid
@@ -67,7 +67,7 @@
         --company_cost_center
         SELECT DISTINCT cost_center_id,
             1 as last_modified_userid,
-            40 as cfte_time, 3 as time_unit_id
+            40 as cfte_full_time, 3 as time_unit_id
         FROM full_org
         ORDER BY cost_center_id asc;
      """

@@ -2,10 +2,10 @@
 Create schema provider_effort
 */
 BEGIN;
-DROP SCHEMA IF EXISTS provider_effort CASCADE;
-DROP SCHEMA IF EXISTS app_admin CASCADE;
+-- DROP SCHEMA IF EXISTS provider_effort CASCADE;
+-- DROP SCHEMA IF EXISTS app_admin CASCADE;
 
-CREATE SCHEMA app_admin;
+-- CREATE SCHEMA app_admin;
 
 COMMENT ON SCHEMA app_admin IS $$ 
 This contains data for users and page configurations
@@ -117,7 +117,7 @@ to check user_app_permissions if public
 $$;
 
 -- main app tables
-CREATE SCHEMA provider_effort;
+-- CREATE SCHEMA provider_effort;
 
 COMMENT ON SCHEMA provider_effort IS $$ 
 main tables for provider effort app.
@@ -220,7 +220,7 @@ $$;
 CREATE TABLE provider_effort.cost_center_time (
     id bigserial   PRIMARY KEY,
     cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id),
-    cfte_full_time numeric NOT NULL DEFAULT 40,
+    cfte_full_time      numeric NOT NULL DEFAULT 40,
     time_unit_id   bigint  REFERENCES provider_effort.time_unit (id),
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
@@ -228,7 +228,7 @@ CREATE TABLE provider_effort.cost_center_time (
     UNIQUE(cost_center_id)
 );
 
-COMMENT ON TABLE provider_effort.cost_center IS $$ 
+COMMENT ON TABLE provider_effort.cost_center_time IS $$ 
 amount of time for cfte tracking.
 $$;
 
@@ -364,7 +364,7 @@ COMMENT ON TABLE provider_effort.oracle_effort IS $$
 total effort of staff
 $$;
 
-CREATE TABLE provider_effort.user_org_permissions (
+CREATE TABLE provider_effort.user_org_permission (
     id bigserial PRIMARY KEY,
     cost_center_id bigint NOT NULL REFERENCES provider_effort.cost_center (id),
     user_id bigint REFERENCES app_admin.users (id),
@@ -378,7 +378,7 @@ CREATE TABLE provider_effort.user_org_permissions (
     last_modified_userid   bigint  DEFAULT app_userid()
 );
 
-COMMENT ON TABLE provider_effort.user_org_permissions IS $$ 
+COMMENT ON TABLE provider_effort.user_org_permission IS $$ 
 data permissions for user based on location
 permission_level based on what permission is worth ie check
 permisisons on company_cost_center or company_specialty

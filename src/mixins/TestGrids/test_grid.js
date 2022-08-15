@@ -32,7 +32,7 @@ let test_grid = {
 
         ],
         "routeParams": {
-            "default_route": "data/public/company"
+            "default_route": "data/provider_effort/company"
         },
         // "tableData": [
         //     {

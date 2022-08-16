@@ -1,0 +1,17 @@
+CREATE VIEW app_admin.app_crud_permissions_v AS
+SELECT schema_name, table_name,
+    ap.allow_select    AND rt.allow_select   as  allow_select,
+    ap.allow_insert    AND rt.allow_insert   AND is_read_only as allow_insert,
+    ap.allow_update    AND rt.allow_update   AND is_read_only as allow_update,
+    ap.allow_delete    AND rt.allow_delete   AND is_read_only as allow_delete,
+    ap.allow_execute   AND rt.allow_execute  AND is_read_only as allow_execute,
+    ap.allow_truncate  AND rt.allow_truncate AND is_read_only as allow_truncate
+
+FROM app_admin.app_permissions  ap
+INNER JOIN app_admin.user_app_permission_v uap on ap.app_id = uap.app_id
+INNER JOIN app_admin.registered_tables rt  on ap.registered_table_id = rt.id;
+
+CREATE VIEW app_admin.user_app_grid_config_v AS
+    SELECT     project_name, table_name, page_config
+    FROM app_admin.apps
+    WHERE is_public = true OR id IN (SELECT app_id FROM app_admin.user_app_permission_v );

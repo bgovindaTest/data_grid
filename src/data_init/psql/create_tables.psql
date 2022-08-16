@@ -76,7 +76,7 @@ $$;
 
 CREATE TABLE app_admin.app_permissions (
     id bigserial PRIMARY KEY,
-    apps_id bigint REFERENCES app_admin.apps (id) NOT NULL,
+    app_id bigint REFERENCES app_admin.apps (id) NOT NULL,
     registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
     allow_select   boolean default true NOT NULL,
     allow_insert   boolean default false NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE app_admin.app_permissions (
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),
 
-    UNIQUE(apps_id, registered_table_id)
+    UNIQUE(app_id, registered_table_id)
 );
 
 COMMENT ON TABLE app_admin.app_permissions IS $$ 

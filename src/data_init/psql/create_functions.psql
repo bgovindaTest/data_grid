@@ -27,8 +27,6 @@ CREATE OR REPLACE FUNCTION is_appuser_admin() RETURNS boolean
 LANGUAGE SQL
 IMMUTABLE;
 
-
-
 CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
 RETURNS TRIGGER AS $$
 BEGIN

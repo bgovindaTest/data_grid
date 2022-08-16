@@ -3,9 +3,8 @@ Appointment effort view.
 
 
 */
+CREATE VIEW provider_effort.appointment_effort_rv AS
 SELECT  aef.id as id, 
-
-        
         apprv.is_active,         
         effective_date, academic, contract, veterans_affairs, administration, cfte,
         CASE WHEN aef.cfte_full_time IS NULL and cct.cfte_full_time IS NULL THEN 40.0
@@ -45,10 +44,7 @@ SELECT  aef.id as id,
         department_name as "appointment_id.department_name", department_code as "appointment_id.department_code",
         cost_center_code as "appointment_id.cost_center_code", cost_center_name as "appointment_id.cost_center_name"
 
-
-
-
 FROM provider_effort.appointment_effort as aef
 INNER JOIN provider_effort.appointments_rv apprv on apprv.id = aef.appointment_id
 LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = apprv.cost_center_id
-LEFT JOIN app_admin.users on users.id = apprv.last_modified_by_userid
+LEFT JOIN app_admin.users on users.id = apprv.last_modified_by_userid;

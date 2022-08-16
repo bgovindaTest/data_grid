@@ -3,9 +3,10 @@ Appointment effort view.
 
 
 */
-SELECT  aef.id as id, employee_number, npi, first_name,
-        last_name, apprv.is_active, 
+SELECT  aef.id as id, 
+
         
+        apprv.is_active,         
         effective_date, academic, contract, veterans_affairs, administration, cfte,
         CASE WHEN aef.cfte_full_time IS NULL and cct.cfte_full_time IS NULL THEN 40.0
             WHEN  aef.cfte_full_time IS NULL THEN cct.cfte_full_time
@@ -28,25 +29,26 @@ SELECT  aef.id as id, employee_number, npi, first_name,
         npi, apprv.first_name,
         apprv.last_name,
 
-        ccrv.id as "cost_center_id", company_name, company_code, 
+        apprv.cost_center_id, company_name, company_code, 
         lob_name, lob_code, company_id, lob_id, department_id,
         specialty_name, specialty_code, specialty_id, 
         department_name, department_code,
         cost_center_code, cost_center_name,
 
-        employee_number || ':'|| ccrv.id as appointment_code
+        employee_number || ':'|| apprv.cost_center_id as appointment_code,
         --maps
         employee_number as "appointment_id.employee_number", npi as "appointment_id.npi", 
-        provider.first_name as "appointment_id.first_name", provider.last_name as "appointment_id.last_name",
+        apprv.first_name as "appointment_id.first_name", apprv.last_name as "appointment_id.last_name",
         company_name as "appointment_id.company_name", company_code as "appointment_id.company_code", 
-        lob_name as "appointment_id.lob_name", lob_code as "appointment_id.lob_code"
+        lob_name as "appointment_id.lob_name", lob_code as "appointment_id.lob_code",
         specialty_name as "appointment_id.specialty_name", specialty_code as "appointment_id.specialty_code", 
         department_name as "appointment_id.department_name", department_code as "appointment_id.department_code",
-        cost_center_code as "appointment_id.cost_center_code", cost_center_name as "appointment_id.cost_center_name",
+        cost_center_code as "appointment_id.cost_center_code", cost_center_name as "appointment_id.cost_center_name"
 
 
 
 
 FROM provider_effort.appointment_effort as aef
 INNER JOIN provider_effort.appointments_rv apprv on apprv.id = aef.appointment_id
-LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = aef.cost_center_id
+LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = apprv.cost_center_id
+LEFT JOIN app_admin.users on users.id = apprv.last_modified_by_userid

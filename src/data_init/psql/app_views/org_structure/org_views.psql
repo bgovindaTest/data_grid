@@ -2,11 +2,11 @@
 Creates views for organization
 
 */
-DROP VIEW IF EXISTS provider_effort.company_rv;
-DROP VIEW IF EXISTS provider_effort.line_of_business_rv;
-DROP VIEW IF EXISTS provider_effort.department_rv;
-DROP VIEW IF EXISTS provider_effort.specialty_rv;
-DROP VIEW IF EXISTS provider_effort.cost_center_rv;
+DROP VIEW IF EXISTS provider_effort.company_rv CASCADE;
+DROP VIEW IF EXISTS provider_effort.line_of_business_rv CASCADE;
+DROP VIEW IF EXISTS provider_effort.department_rv CASCADE;
+DROP VIEW IF EXISTS provider_effort.specialty_rv CASCADE;
+DROP VIEW IF EXISTS provider_effort.cost_center_rv CASCADE;
 
 --company view
 CREATE VIEW provider_effort.company_rv AS
@@ -19,9 +19,9 @@ CREATE VIEW provider_effort.company_rv AS
 CREATE VIEW provider_effort.line_of_business_rv AS
     SELECT lob.id , c.company_name, c.company_code, lob.is_active, lob.created_at, 
         lob.updated_at, lob_name, lob_code, company_id,
-        users.email as last_modified_user_email, users.id as last_modified_userid
+        users.email as last_modified_user_email, users.id as last_modified_userid,
         --for mappings
-        company_name as "company_id.company_name", company_code as "company_id.company_code",
+        company_name as "company_id.company_name", company_code as "company_id.company_code"
     FROM provider_effort.line_of_business as lob
     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
     LEFT JOIN  app_admin.users as users on lob.last_modified_userid = users.id;
@@ -32,7 +32,7 @@ CREATE VIEW provider_effort.department_rv AS
     SELECT d.id , company_name, company_code, d.is_active, d.created_at,
         d.updated_at, lob_name, lob_code, company_id, lob_id,
         department_name, department_code,
-        users.email as last_modified_user_email, users.id as last_modified_userid
+        users.email as last_modified_user_email, users.id as last_modified_userid,
         --for mappings
         company_name as "lob_id.company_name", company_code as "lob_id.company_code", 
         lob_name as "lob_id.lob_name", lob_code as "lob_id.lob_code" 
@@ -49,13 +49,11 @@ CREATE VIEW provider_effort.specialty_rv AS
         s.updated_at, lob_name, lob_code, company_id, lob_id, department_id,
         specialty_name, specialty_code,
         department_name, department_code,
-        users.email as last_modified_user_email, users.id as last_modified_userid
+        users.email as last_modified_user_email, users.id as last_modified_userid,
         --for mappings
         company_name as "department_id.company_name", company_code as "department_id.company_code", 
         lob_name as "department_id.lob_name", lob_code as "department_id.lob_code" ,
         department_name as "department_id.department_name", department_code as "department_id.department_code"
-
-
     FROM provider_effort.specialty as s
     INNER JOIN provider_effort.department as d on d.id = s.department_id
     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
@@ -69,7 +67,7 @@ CREATE VIEW provider_effort.cost_center_rv AS
         specialty_name, specialty_code, 
         department_name, department_code,
         cost_center_code, cost_center_name,
-        users.email as last_modified_user_email, users.id as last_modified_userid
+        users.email as last_modified_user_email, users.id as last_modified_userid,
         --for mappings
         company_name as "specialty_id.company_name", company_code as "specialty_id.company_code", 
         lob_name as "specialty_id.lob_name", lob_code as "specialty_id.lob_code",
@@ -84,6 +82,6 @@ CREATE VIEW provider_effort.cost_center_rv AS
     LEFT JOIN  app_admin.users as users on d.last_modified_userid = users.id;
 
 CREATE VIEW provider_effort.cost_center_time_rv AS
-    SELECT id, cost_center_id , cfte_full_time, time_unit_id, time_unit_name
-    FROM cost_center_time
+    SELECT cost_center_time.id, cost_center_id , cfte_full_time, time_unit_id, time_unit_name
+    FROM  provider_effort.cost_center_time
     INNER JOIN provider_effort.time_unit as tu on tu.id = time_unit_id

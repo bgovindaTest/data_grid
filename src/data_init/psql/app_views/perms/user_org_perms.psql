@@ -9,14 +9,14 @@ join to the views below return a hit the permissions is available.
 */
 -- company cost_center
 CREATE VIEW provider_effort.user_cost_center_permsissions AS 
-SELECT ccc.company_id as company_id, ccc.cost_center_id as cost_center_id
+SELECT ccc.cost_center_id as cost_center_id
 FROM provider_effort.company_cost_center ccc
 INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
 WHERE uop.user_id = app_userid() AND uop.is_active = true;
 
 --company specialty
 CREATE VIEW provider_effort.user_specialty_permsissions AS
-SELECT ccc.company_id as company_id, cc.specialty_id
+SELECT cc.specialty_id
 FROM provider_effort.company_cost_center ccc
 INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
 INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
@@ -24,7 +24,7 @@ WHERE uop.user_id = app_userid() AND uop.is_active = true AND uop.specialty_leve
 
 --company department
 CREATE VIEW provider_effort.user_department_permsissions AS
-SELECT ccc.company_id as company_id, sc.department_id
+SELECT sc.department_id
 FROM provider_effort.company_cost_center ccc
 INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
 INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
@@ -33,20 +33,10 @@ WHERE uop.user_id = app_userid() AND uop.is_active = true AND uop.department_lev
 
 --company lob
 CREATE VIEW provider_effort.user_lob_permsissions AS
-SELECT ccc.company_id as company_id, d.lob_id
+SELECT d.lob_id
 FROM provider_effort.company_cost_center ccc
 INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
 INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
 INNER JOIN provider_effort.specialty   as sc on sc.id   = cc.specialty_id
 INNER JOIN provider_effort.department  as d  on d.id    = sc.department_id 
 WHERE uop.user_id = app_userid() AND uop.is_active = true AND uop.department_level = true;
-
-CREATE VIEW provider_effort.user_all_permsissions AS
-SELECT ccc.company_id as company_id, d.lob_id, sc.department_id, cc.specialty_id, ccc.cost_center_id,
-    uop.specialty_level, uop.department_level, uop.lob_level
-FROM provider_effort.company_cost_center ccc
-INNER JOIN provider_effort.user_org_permissions uop on uop.company_cost_center_id = ccc.id
-INNER JOIN provider_effort.cost_center as cc on cc.id   = ccc.cost_center_id
-INNER JOIN provider_effort.specialty   as sc on sc.id   = cc.specialty_id
-INNER JOIN provider_effort.department  as d  on d.id    = sc.department_id 
-WHERE uop.user_id = app_userid() AND uop.is_active = true;

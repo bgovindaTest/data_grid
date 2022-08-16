@@ -4,9 +4,11 @@ Creates main view for appointment effort.
 */
 
 --appointment effort table
-CREATE VIEW provider_effort.appointment_effort_current AS
+DROP VIEW IF EXISTS provider_effort.appointment_effort_current_rv CASCADE;
+
+CREATE VIEW provider_effort.appointment_effort_current_rv AS
     SELECT * FROM (
-        SELECT *, ROW_NUMBER() OVER (PARTITION BY id, effective_date, ORDER BY effective_date, desc) as rn
-        FROM appointment_effort_rv
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY appointment_code ORDER BY effective_date desc) as rn
+        FROM provider_effort.appointment_effort_rv
         WHERE effective_date <= current_date
-    ) rn =1;
+    ) x WHERE rn =1;

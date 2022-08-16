@@ -3,6 +3,7 @@ Appointment effort view.
 
 
 */
+DROP VIEW IF EXISTS provider_effort.appointment_effort_rv CASCADE; 
 CREATE VIEW provider_effort.appointment_effort_rv AS
 SELECT  aef.id as id, 
         apprv.is_active,         
@@ -35,6 +36,7 @@ SELECT  aef.id as id,
         cost_center_code, cost_center_name,
 
         employee_number || ':'|| apprv.cost_center_id as appointment_code,
+        apprv.id as appointment_id,
         --maps
         employee_number as "appointment_id.employee_number", npi as "appointment_id.npi", 
         apprv.first_name as "appointment_id.first_name", apprv.last_name as "appointment_id.last_name",

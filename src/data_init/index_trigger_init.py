@@ -47,6 +47,38 @@ class IX:
             fout.write(x)
         fout.close()
 
+    def UpdatedAtTrigger(self):
+        """
+            Resets serial indexes to max_id
+        """
+        mkdir(sql_out)
+        fname = sql_out+'reset_index.psql'
+        fout = open(fname, 'w')
+        for tx in self.provider_effort_tables:
+            x = "SELECT SETVAL('{table_name}_id_seq', (SELECT MAX(id) + 1 FROM {table_name}));\n".format(table_name = tx)
+            fout.write(x)
+        for tx in self.admin_tables:
+            x = "SELECT SETVAL('{table_name}_id_seq', (SELECT MAX(id) + 1 FROM {table_name}));\n".format(table_name = tx)
+            fout.write(x)
+        fout.close() 
+
+# --
+# CREATE TRIGGER updated_at_timestamp
+# BEFORE UPDATE ON todos --schema.table_name
+# FOR EACH ROW
+# EXECUTE PROCEDURE trigger_updated_at();
+
+
+
+
+# --default app_userid()
+# CREATE TRIGGER set_app_userid
+# BEFORE UPDATE OR INSERT ON todos --schema.table_name
+# FOR EACH ROW
+# EXECUTE PROCEDURE trigger_last_modified_by_userid();
+
+
+
 if __name__ == "__main__":
     x = IX()
     x.ResetIndex()

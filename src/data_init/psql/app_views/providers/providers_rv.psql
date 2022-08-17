@@ -10,10 +10,13 @@ DROP VIEW IF EXISTS provider_effort.appointments_rv;
 CREATE VIEW provider_effort.providers_rv AS
     SELECT providers.id as id, employee_number, npi, providers.first_name,
         providers.last_name, classification_id, providers.is_active, cpsc_id,
+        providers.last_name||providers.first_name as full_name,
         lcg_id, start_date, end_date, 
         providers.created_at, providers.updated_at, users.id as "last_modified_by_userid", users.email as "last_modified_by_user_email",
-        lcg_id  as "lcg_id.id",  lcg_name, lcg_name as "lcg_id.lcg_name",
-        cpsc_id as "cpsc_id.id", cpsc_name as "cpsc_id.cpsc_name",
+        lcg_id  as "lcg_id.id",  lcg_name,  lcg_name as "lcg_id.lcg_name",   lcg_code,  lcg_code as  "lcg_id.lcg_code",
+        cpsc_id as "cpsc_id.id", cpsc_name, cpsc_name as "cpsc_id.cpsc_name",cpsc_code, cpsc_code as "cpsc_id.cpsc_code",
+
+
         classification_id as "classification_id.id",
         classification_name as "classification_id.classification_name"  
 
@@ -26,7 +29,7 @@ CREATE VIEW provider_effort.providers_rv AS
 
 CREATE VIEW provider_effort.appointments_rv AS
     SELECT app.id as id, employee_number, npi, provider.first_name,
-        provider.last_name, classification_id, app.is_active, app.cpsc_id,
+        provider.last_name, provider.full_name, classification_id, app.is_active, app.cpsc_id,
         app.lcg_id, app.start_date, app.end_date, 
         app.created_at, app.updated_at, users.id as "last_modified_by_userid", users.email as "last_modified_by_user_email",
         app.lcg_id  as "lcg_id.id",  lcg.lcg_name, lcg.lcg_code, lcg.lcg_code as "lcg_id.lcg_code",   lcg.lcg_name as "lcg_id.lcg_name",

@@ -1,34 +1,3 @@
-let test_grid = {
-"grids": [
-    {
-        "navHeaderParams": {
-            "links": [{'name':'providers', 'url': '/providereffort/providers'}],
-            'add_row':   true, 'new_sheet': true
-        },
-        "columnDefs": [
+const providers = require('./providers.js')
 
-            {"field": "id",  "editable": false, "showSort": true, 'cellEditorParams': "autoCompleteEditor",
-                "cloneOnCopy": false, "showFilter": true, 'chmodParams': 'rw'
-            },
-            {"field": "company_name","editable": true, "showSort": true, "showFilter": true  },
-            {"field": "company_code","editable": true, "showSort": true, "showFilter": true  },
-            {"field": "is_active","editable": true, "showSort": true, "showFilter": true  }
-            // {"field": "some_date","editable": true, "showSort": true, "showFilter": true, "dataType": "date",
-            //     "cellEditor": 'dateTimeEditor', 'chmodParams': 'c'  },
-
-        ],
-        "routeParams": {
-            "default_route": "data/provider_effort/company"
-        },
-        // "tableData": [
-        //     {
-        //         "id": '1',
-        //         "company_name": 'sup',
-        //         "company_code": '0',
-        //         "is_active": 'true'
-        //     },
-        // ]
-    }
-]}
-
-module.exports = test_grid
+module.exports = providers

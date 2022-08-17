@@ -7,11 +7,17 @@ DROP VIEW IF EXISTS provider_effort.appointment_effort_rv CASCADE;
 CREATE VIEW provider_effort.appointment_effort_rv AS
 SELECT  aef.id as id, 
         apprv.is_active,         
-        effective_date, academic, contract, veterans_affairs, administration, cfte,
+        effective_date::text, academic, contract, veterans_affairs, administration, cfte,
+        CASE WHEN aef.cfte_full_time IS NULL and cct.cfte_full_time IS NULL THEN 40.0*cfte
+            WHEN  aef.cfte_full_time IS NULL THEN cct.cfte_full_time*cfte
+            ELSE aef.cfte_full_time*cfte
+        END as cfte_time,
+
+
         CASE WHEN aef.cfte_full_time IS NULL and cct.cfte_full_time IS NULL THEN 40.0
             WHEN  aef.cfte_full_time IS NULL THEN cct.cfte_full_time
             ELSE aef.cfte_full_time
-        END,
+        END as cfte_full_time,
 
         time_unit_name,
         apprv.cpsc_id,
@@ -35,7 +41,7 @@ SELECT  aef.id as id,
         department_name, department_code,
         cost_center_code, cost_center_name,
 
-        employee_number || ':'|| apprv.cost_center_id as appointment_code,
+        appointment_code,
         apprv.id as appointment_id,
         --maps
         employee_number as "appointment_id.employee_number", npi as "appointment_id.npi", 
@@ -44,7 +50,8 @@ SELECT  aef.id as id,
         lob_name as "appointment_id.lob_name", lob_code as "appointment_id.lob_code",
         specialty_name as "appointment_id.specialty_name", specialty_code as "appointment_id.specialty_code", 
         department_name as "appointment_id.department_name", department_code as "appointment_id.department_code",
-        cost_center_code as "appointment_id.cost_center_code", cost_center_name as "appointment_id.cost_center_name"
+        cost_center_code as "appointment_id.cost_center_code", cost_center_name as "appointment_id.cost_center_name",
+        appointment_code as "appointment_id.appointment_code"
 
 FROM provider_effort.appointment_effort as aef
 INNER JOIN provider_effort.appointments_rv apprv on apprv.id = aef.appointment_id

@@ -3,8 +3,8 @@ Full expansion of providers information.
 
 
 */
-DROP VIEW IF EXISTS provider_effort.appointments_rv;
-DROP VIEW IF EXISTS provider_effort.providers_rv;
+DROP VIEW IF EXISTS provider_effort.appointments_rv CASCADE;
+DROP VIEW IF EXISTS provider_effort.providers_rv CASCADE;
 
 
 
@@ -57,7 +57,8 @@ CREATE VIEW provider_effort.appointments_rv AS
         department_name as "cost_center_id.department_name", department_code as "cost_center_id.department_code",
         cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name",
         org_code as "cost_center_id.org_code",
-        org_name as "cost_center_id.org_name"
+        org_name as "cost_center_id.org_name",
+        employee_number || ':' || org_code as  appointment_code 
 
     FROM provider_effort.appointments as app
     LEFT JOIN provider_effort.lcg             as lcg  on lcg.id  = app.lcg_id

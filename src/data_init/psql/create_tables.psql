@@ -353,7 +353,7 @@ CREATE TABLE provider_effort.oracle_effort (
     id bigserial PRIMARY KEY,
     provider_id  bigint REFERENCES provider_effort.providers (id),
     effective_date date NOT NULL,
-    fte numeric default 0,
+    fte numeric default 0 NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),

@@ -47,8 +47,8 @@ let providers = {
 
         ],
         "routeParams": {
-            "default_route": "data/provider_effort/providers_rv" //,
-            // "select": "data/provider_effort/providers_rv"
+            "default_route": "data/provider_effort/providers", //,
+            'select': {'route':"data/provider_effort/providers_rv/select"}
         },
     }
 ]}

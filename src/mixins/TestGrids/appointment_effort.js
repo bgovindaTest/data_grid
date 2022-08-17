@@ -5,9 +5,16 @@ let test_grid = {
             "links": [{'name':'providers', 'url': '/providers'}]
         },
         "columnDefs": [
-
-            {"field": "last_name", "valueGetter": "lookup(appointment_id,  'last_name')",  "editable": false, "showSort": true, "showFilter": true},
-            {"field": "first_name","valueGetter":"lookup(appointment_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true},
+            {"field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
+            'isRequired': true, "isLookup": true, "width": 120, "defaultSort": "desc",
+                'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
+                    {'is_active': 'true', 'id': 'true'} 
+                    ,{'is_active': 'false', 'id': 'false'}
+                
+                    ]}
+            },
+            {"field": "last_name", "valueGetter": "lookup(appointment_id,  'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
+            {"field": "first_name","valueGetter":"lookup(appointment_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
             {"field": "appointment_id", "headerName": "EmployeeNumCompanyCostCenter", "editable": true, "showSort": true, 
             "showFilter": true, "isRequired": true, "cloneOnCopy": true,
             "cellEditor": 'autoCompleteEditor', "width": 300, 
@@ -20,8 +27,8 @@ let test_grid = {
                     "displayKey": "appointment_code"
                 }
             },
-
-            {"field": "effective_date", "headerName": "EffectiveDate", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},
+            {"field": "effective_date", "headerName": "EffectiveDate", "cellEditor": 'dateTimeEditor',
+                "dataType": "date", "editable": true, "showSort": true, "showFilter": true, "defaultSort": "desc"},
             {"field": "cfte",  "cloneOnCopy": true, "dataType": "numeric","requiredFields": ['cfte'], "validator":"1 >= ifnull(cfte,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
 
@@ -48,10 +55,7 @@ let test_grid = {
                 "validator": "ifnull(cfte_full_time,0)  >=0"},
             {"field": "time_unit_name", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
 
-            {"field": "cfte_time",   "valueGetter": "ifnull(cfte_full_time,40.0) * ( ifnull(cfte,0) + ifnull(veterans_affairs,0) + ifnull(contract,0) + ifnull(academic,0) + ifnull(administration,0) )"},
-
-
-
+            {"field": "cfte_time",   "valueGetter": "ifnull(cfte_full_time,40.0) * ( ifnull(cfte,0) )"},
             {"field": "company_name", "valueGetter":"lookup(appointment_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true},
             {"field": "company_code", "valueGetter":"lookup(appointment_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true},
             {"field": "lob_name", "valueGetter":"lookup(appointment_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},                
@@ -62,10 +66,10 @@ let test_grid = {
             {"field": "specialty_code", "valueGetter":"lookup(appointment_id,     'specialty_code')", "editable": false, "showSort": true, "showFilter": true},
             {"field": "cost_center_name", "valueGetter":"lookup(appointment_id,   'cost_center_name')", "editable": false, "showSort": true, "showFilter": true},
             {"field": "cost_center_code", "valueGetter":"lookup(appointment_id,   'cost_center_code')", "editable": false, "showSort": true, "showFilter": true},
+            {"field": "npi", "valueGetter":"lookup(appointment_id,   'npi')", "editable": false, "showSort": true, "showFilter": true},
+            {"field": "employee_number", "valueGetter":"lookup(appointment_id,   'employee_number')", "editable": false, "showSort": true, "showFilter": true},
             {"field": "last_modified_by_user_email", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
             {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true }
-
-
         ],
         "routeParams": {
             "default_route":   "data/provider_effort/appointment_effort", //,

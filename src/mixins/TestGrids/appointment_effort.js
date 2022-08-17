@@ -5,13 +5,9 @@ let test_grid = {
             "links": [{'name':'providers', 'url': '/providers'}]
         },
         "columnDefs": [
-            {"field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
-            'isRequired': true, "isLookup": true, "width": 120, "defaultSort": "desc",
-                'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
-                    {'is_active': 'true', 'id': 'true'} 
-                    ,{'is_active': 'false', 'id': 'false'}
-                
-                    ]}
+            {"field": "is_active",   "dataType": "boolean", "editable": false, "showSort": true, "showFilter": true,
+            'isRequired': true, "isLookup": true, "width": 120, "defaultSort": "desc", "chmodParams": 'r'
+
             },
             {"field": "last_name", "valueGetter": "lookup(appointment_id,  'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
             {"field": "first_name","valueGetter":"lookup(appointment_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},

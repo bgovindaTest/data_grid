@@ -3,8 +3,9 @@ Full expansion of providers information.
 
 
 */
-DROP VIEW IF EXISTS provider_effort.providers_rv CASCADE;
 DROP VIEW IF EXISTS provider_effort.appointments_rv;
+DROP VIEW IF EXISTS provider_effort.providers_rv;
+
 
 
 CREATE VIEW provider_effort.providers_rv AS
@@ -48,12 +49,15 @@ CREATE VIEW provider_effort.appointments_rv AS
         specialty_name, specialty_code, 
         department_name, department_code,
         cost_center_code, cost_center_name,
+        org_code, org_name,
         --maps
         company_name as "cost_center_id.company_name", company_code as "cost_center_id.company_code", 
         lob_name as "cost_center_id.lob_name", lob_code as "cost_center_id.lob_code",
         specialty_name as "cost_center_id.specialty_name", specialty_code as "cost_center_id.specialty_code", 
         department_name as "cost_center_id.department_name", department_code as "cost_center_id.department_code",
-        cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name"
+        cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name",
+        org_code as "cost_center_id.org_code",
+        org_name as "cost_center_id.org_name"
 
     FROM provider_effort.appointments as app
     LEFT JOIN provider_effort.lcg             as lcg  on lcg.id  = app.lcg_id

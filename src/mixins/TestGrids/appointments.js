@@ -35,9 +35,13 @@ let appointments = {
                         "displayKey": "org_name"
                     }
                 },
-                {"field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true
-                
-            
+                {"field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
+                    'isRequired': true, "isLookup": true,
+                    'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
+                        {'is_active': 'true', 'id': 'true'} 
+                        ,{'is_active': 'false', 'id': 'false'}
+                    
+                    ]}
                 },
                 {"field": "start_date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},
                 {"field": "end_date",   "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},

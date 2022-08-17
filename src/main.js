@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-// import 'ag-grid-enterprise';
+import 'ag-grid-enterprise';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // // import { faPhone, faAngleDown } from "@fortawesome/free-solid-svg-icons";

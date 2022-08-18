@@ -1,6 +1,10 @@
 let test_grid = {
 "grids": [
     {
+
+        // {"id":"1","lcg_name":"Undefined","lcg_code":"9999","is_active":true,"created_at":"2022-08-15 17:45:19","updated_at":"2022-08-15 17:45:19","last_modified_userid":"1"}
+
+
         "navHeaderParams": {
             "links": [{'name':'providers', 'url': '/providers'}]
         },

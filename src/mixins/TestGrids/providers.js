@@ -19,7 +19,7 @@ let providers = {
                 }
             },
             {"field": "lcg_id", "headerName": "lcg_code", "editable": true, "showSort": true, 
-                "showFilter": true, "isRequired": true,
+                "showFilter": true, 
                 "cellEditor": 'autoCompleteEditor',
                 "cellEditorParams": {
                     "api_route": "data/provider_effort/lcg",
@@ -29,7 +29,7 @@ let providers = {
                 }
             },
             {"field": "cpsc_id", "headerName": "cpsc_code", "editable": true, "showSort": true, 
-                "showFilter": true, "isRequired": true,
+                "showFilter": true, 
                 "cellEditor": 'autoCompleteEditor',
                 "cellEditorParams": {
                     "api_route": "data/provider_effort/cpsc",
@@ -43,7 +43,8 @@ let providers = {
             {"field": "lcg_name",   "valueGetter":"lookup(lcg_id,   'lcg_name')",    "editable": false, "showSort": true, "showFilter": true },
             {"field": "cpsc_name",  "valueGetter":"lookup(cpsc_id, 'cpsc_name')", "editable": false, "showSort": true, "showFilter": true },
             {"field": "last_modified_by_user_email", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
-            {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true }
+            {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
+            {"field": "id", "chmodParams": 'rw', "editable": false, "showSort": true, "showFilter": true },
 
         ],
         "routeParams": {

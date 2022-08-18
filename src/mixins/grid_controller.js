@@ -232,7 +232,7 @@ methods: {
                 'pull_data':  false, //for pagination
                 'page_number': true,
                 'save':  true,
-                'add_row':   false,
+                'add_row':   true,
                 'new_sheet': false,
                 'load_data_init': true,
         }

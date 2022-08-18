@@ -92,7 +92,12 @@ CREATE VIEW app_admin.user_app_permission_v AS
 
 CREATE VIEW app_admin.user_app_permission_rv AS
     SELECT app_user.first_name, app_user.last_name, app_user.id as user_id, app_user.email, app_id, is_read_only, uap.id, 
-        last_user.email as last_modified_by_user_email, uap.updated_at
+        last_user.email as last_modified_by_user_email, uap.updated_at,
+
+        app_user.email     as "user_id.email",     app_user.first_name as "user_id.first_name",
+        app_user.last_name as "user_id.last_name", app_user.id as "user_id.id"
+
+
     FROM app_admin.user_app_permission uap
     INNER JOIN app_admin.users  as app_user  on app_user.id = uap.user_id
     LEFT JOIN  app_admin.users  as last_user on last_user.id = uap.last_modified_userid;

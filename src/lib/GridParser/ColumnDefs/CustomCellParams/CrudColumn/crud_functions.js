@@ -21,6 +21,7 @@ const type_check = require('../../../../TypeCheck')
 const data_config = require('../../../../DataConfig')
 const meta_column_name = data_config['meta_column_name']
 const lodashCloneDeep = require('lodash.clonedeep')
+const {isEqual} = require('lodash')
 
 class CrudColumnFunctions {
     constructor() {
@@ -277,7 +278,10 @@ class CrudColumnFunctions {
             for (var i=0; i< change_fields.length; i++) {
                 let field = change_fields[i]
                 var value = rowData[field]
-                if (value !== backup[field] ) {return true}
+                //if (value !== backup[field] ) {
+                if (! isEqual(value, backup[field] ) ) {
+                    return true
+                }
             }
             return false
         }

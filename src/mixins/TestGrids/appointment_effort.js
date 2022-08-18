@@ -5,8 +5,9 @@ let test_grid = {
             "links": [{'name':'providers', 'url': '/providers'}]
         },
         "columnDefs": [
+            {"field": "id", "chmodParams": 'rw', "editable": false, "showSort": true, "showFilter": true },
             {"field": "is_active",   "dataType": "boolean", "editable": false, "showSort": true, "showFilter": true,
-            'isRequired': true, "isLookup": true, "width": 120, "defaultSort": "desc", "chmodParams": 'r'
+             "isLookup": true, "width": 120, "defaultSort": "desc", "chmodParams": 'r'
 
             },
             {"field": "last_name", "valueGetter": "lookup(appointment_id,  'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},

@@ -670,6 +670,8 @@ methods: {
             // console.log(this.saveMainMessage)
 
             let sx = save_count
+            // console.log(sx)
+            // console.log(save_data)
 
             //continue save
             if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {

@@ -51,7 +51,8 @@ SELECT  aef.id as id,
         specialty_name as "appointment_id.specialty_name", specialty_code as "appointment_id.specialty_code", 
         department_name as "appointment_id.department_name", department_code as "appointment_id.department_code",
         cost_center_code as "appointment_id.cost_center_code", cost_center_name as "appointment_id.cost_center_name",
-        appointment_code as "appointment_id.appointment_code"
+        appointment_code as "appointment_id.appointment_code",
+        appointment_id   as "appointment_id.id"
 
 FROM provider_effort.appointment_effort as aef
 INNER JOIN provider_effort.appointments_rv apprv on apprv.id = aef.appointment_id

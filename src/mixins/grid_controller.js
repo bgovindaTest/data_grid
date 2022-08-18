@@ -471,6 +471,7 @@ methods: {
         try{
             let tableData = await this.RunTableDataQuery(pullx, route, req_body)
             this.tableData = tableData
+            // console.log(tableData)
         } catch (e) {
             console.error(e)
             this.loading_error += String(e)
@@ -784,14 +785,18 @@ methods: {
     },
     async SaveAndReload() {
         this.saveLock = true
-        await this.PushSaveData()
-        this.saveLock  = false
-        this.saveModal = false
-        this.ShowSnackBar()
-        let tmpFunc = this.HideSnackBar
-        setTimeout(tmpFunc, 5000)
+        let no_error = await this.PushSaveData()
+        if (no_error === true) {
+            this.saveLock  = false
+            this.saveModal = false
+            this.ShowSnackBar()
+            let tmpFunc = this.HideSnackBar
+            setTimeout(tmpFunc, 5000)
+            await this.RunNewQuery()
+        } else {
+            this.saveLock  = false
+        }
 
-        await this.RunNewQuery()
     },
     async PushSaveData() {
         //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
@@ -808,15 +813,17 @@ methods: {
                 let adata = axios_object.data
                 this.saved     += adata['output_data'].length || 0
                 this.rejected  += adata['error_data'].length  || 0
-                if (adata['error_data'].length !== 0) {console.error( adata['error_data'] )}
-                if (adata['server_error'] !== "") {console.error( adata['server_error'] )}
+                if (adata['error_data'].length !== 0) {console.log( adata['error_data'] )}
+                if (adata['server_error'] !== "") {console.log( adata['server_error'] )}
             }
             save_count['is_validating'] = true 
             save_count['is_saving']     = false
             save_count['save_complete'] = true
+            return true
         } catch (e) {
             console.log(e)
-            alert(e)
+            this.MainMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            return false
         }
 
         //continues save

@@ -586,7 +586,8 @@ methods: {
         */
         //validation_complete
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 
-            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0
+            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0,
+            'is_incomplete': 0, 'is_changed_error': 0, 'is_changed_warning': 0
         }
         let keys = Object.keys(save_count)
         for (let i =0; i < keys.length; i++) {
@@ -647,6 +648,8 @@ methods: {
             this.saveModal    = true //launches saveModal
             this.saveLock     = true //prevents modal from being closed
             this.isValidating = true
+            //allows ui to refresh
+            await new Promise(r => setTimeout(r, 50))
 
             let save_count = this.saveParams
             const deleteWarning    = this.gridFunctions['deleteWarning']
@@ -670,13 +673,17 @@ methods: {
             // console.log(this.saveMainMessage)
 
             let sx = save_count
-            // console.log(sx)
-            // console.log(save_data)
+            let changed_rows = `Rows Changed. changed: ${ sx['is_changed'] }
+                incomplete: ${sx['is_incomplete']}  warning: ${sx['is_changed_warning']} errors: ${sx['is_changed_error']} <br />
+            `
+            let all_rows = `All Displayed Rows. warning: ${sx['is_warning']} errors: ${sx['is_error']}`
 
-            //continue save
+
+            // let cstr = `changed: ${sx['is_changed']} saving: ${sx['is_save']}  warning: ${sx['is_warning']} errors: ${sx['is_error']} <br />`
+
             if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
 
-                this.MainSaveMessage("Saving Rows")
+                this.MainSaveMessage(`Number Saving Rows: ${ sx['is_save'] }`)
                 this.saveDeleteMessage        = deleteWarning
                 this.saveUniqueMessage        = uniqueWarning
                 await new Promise(r => setTimeout(r, 500))
@@ -689,22 +696,34 @@ methods: {
 
             //pause save option to 
             else if ( sx['is_save'] > 0 && ( sx['is_warning'] > 0 || sx['is_error'] > 0 ) ) {
-                this.MainSaveMessage("Changes detected for saving. However, some rows either have errors or warnings. Press close to fix or continue to ignore. Rows with errors will be skipped")
+                let wstr = `Changes detected for saving. However, some rows either have errors or warnings.
+                    Press close to fix or continue to ignore. Rows with errors will be skipped. <br />
+                    Number Saving Rows: ${ sx['is_save'] } <br />
+                    ${changed_rows}
+                    ${all_rows}
+                `
+                this.MainSaveMessage( wstr )
                 this.saveDeleteMessage        = deleteWarning
                 this.saveUniqueMessage        = uniqueWarning
                 this.ChangeSaveState(true, false, true, false)
 
             } else if ( sx['is_changed'] >  0 || sx['is_delete'] >  0  ) {
-                this.MainSaveMessage("Changes detected. However, all changed rows either have errors or are incomplete and not valid for saving.")
+                let wstr = `Changes detected. However, all changed rows either have errors or are incomplete and not valid for saving. <br />
+                    Number Saving Rows: ${ sx['is_save'] } <br />
+                    ${changed_rows}
+                    ${all_rows}
+                `
+                this.MainSaveMessage(wstr)
                 this.saveDeleteMessage        = deleteWarning
                 this.saveUniqueMessage        = uniqueWarning
                 this.ChangeSaveState(true, false, false, false)                
 
             } else {
-                this.MainMessage("Error: This message should display. Please contact admin")
+                this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             }
         } catch (e) {
             console.log(e)
+            this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             alert(e)
         } 
 
@@ -756,7 +775,8 @@ methods: {
         }
     },
     SaveStatusCount(rowStatus, save_count) {
-        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error', 'is_complete']
+        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed',
+            'is_error', 'is_complete','is_incomplete', 'is_changed_error', 'is_changed_warning']
         for (let i =0; i < save_params.length; i++ ) {
             let sp = save_params[i]
             if (rowStatus[sp] === true) { save_count[sp] += 1 }

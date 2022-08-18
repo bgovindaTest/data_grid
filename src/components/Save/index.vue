@@ -10,7 +10,7 @@
 <!-- validation results -->
 <div v-else>
     <div >Validating Completed</div>
-    <div> {{mainMessage}} </div>
+    <div > <span v-html="mainMessage" />  </div>
     <div class="has-text-warning-dark is-size-4" v-if="uniqueWarning != ''"> {{uniqueWarning}} </div>
     <div class="has-text-warning-dark is-size-4" v-if="deleteWarning != ''"> {{deleteWarning}} </div>
     <div v-if="isSaving">

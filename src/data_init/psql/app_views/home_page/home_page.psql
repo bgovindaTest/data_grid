@@ -1,0 +1,7 @@
+DROP VIEW IF EXISTS app_admin.home_page_rv;
+CREATE VIEW app_admin.home_page_rv AS
+SELECT * FROM (
+    VALUES 
+    ('app_admin', 'users', 'user information', 'grid/app_admin/users'), 
+    ('cfte', 'appointment_effort', 'cfte information', 'grid/provider_effort/appointment_effort')
+) AS t (project_name, table_name, description, url_link);

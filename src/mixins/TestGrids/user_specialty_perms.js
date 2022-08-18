@@ -1,4 +1,4 @@
-let providers = {
+let user_org_permission = {
     "grids": [
         {
             "navHeaderParams": {
@@ -6,8 +6,8 @@ let providers = {
             },
             "columnDefs": [
 
-                {"field": "last_name", "valueGetter":"lookup(provider_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true},
-                {"field": "first_name","valueGetter":"lookup(provider_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "last_name", "valueGetter":"lookup(user_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true},
+                {"field": "first_name","valueGetter":"lookup(user_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true},
                 {"field": "user_id", "headerName": "email", "editable": true, "showSort": true, 
                     "showFilter": true, "isRequired": true,
                     "cellEditor": 'autoCompleteEditor',
@@ -82,11 +82,9 @@ let providers = {
             ],
             "routeParams": {
                 "default_route":   "data/provider_effort/user_org_permission",
-                'select': {'route':"data/provider_effort/provider_effort/user_org_permission_rv/select"}
+                'select': {'route':"data/provider_effort/user_org_permissions_rv/select"}
             },
         }
     ]}
     
-    module.exports = providers
-
-    provider_effort.user_org_permission
+    module.exports = user_org_permission

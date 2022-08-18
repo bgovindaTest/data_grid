@@ -105,7 +105,7 @@ CREATE VIEW app_admin.user_app_permission_rv AS
 --user org permissions view
 CREATE VIEW provider_effort.user_org_permissions_rv AS
     SELECT uop.id as id, users.email, users.first_name,
-        users.last_name, users.id as user_id, 
+        users.last_name, users.id as user_id, uop.is_active,
         users.email     as "user_id.email", users.first_name as "user_id.first_name",
         users.last_name as "user_id.last_name", users.id as "user_id.id",
         luser.email as last_modified_by_user_email,

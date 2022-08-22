@@ -25,9 +25,6 @@ admin_tables = [ 'app_admin.users', 'app_admin.registered_tables', 'app_admin.ap
             'app_admin.app_permissions', 'app_admin.user_app_permission'
 ]
 
-apps = []
-
-
 class IX:
     def __init__(self):
         self.provider_effort_tables = provider_effort_tables
@@ -126,38 +123,31 @@ class IX:
             i+=1
             vals.push(x)
         #add views
-        viewsx = [
-# provider_effort.company_rv
-# provider_effort.line_of_business_rv
-# provider_effort.department_rv
-# provider_effort.specialty_rv 
-# provider_effort.cost_center_rv 
-# provider_effort.cost_center_time_rv
-# provider_effort.providers_rv
-# provider_effort.appointments_rv
+        viewsx = [ "provider_effort.company_rv", "provider_effort.line_of_business_rv", "provider_effort.department_rv",
+            "provider_effort.specialty_rv", "provider_effort.cost_center_rv",  "provider_effort.cost_center_time_rv",
+            "provider_effort.providers_rv", "provider_effort.appointments_rv"
         ]
-
-# provider_effort.appointment_effort_byuser_rv
-# provider_effort.appointment_effort_byuser_uv
-# provider_effort.appointments_byuser_rv
-# provider_effort.appointments_byuser_uv
-
-
+        for tx in viewsx:
+            self.table_perms_map[tx] = i
+            schema_name, table_name = tx.split('.')
+            x = tempStrR.format(table_name = table_name, schema_name = schema_name, id = i, description = tx)
+            i+=1
+            vals.push(x)
+        viewsx = [ "provider_effort.appointment_effort_byuser_rv", "provider_effort.appointment_effort_byuser_uv",
+            "provider_effort.appointments_byuser_rv", "provider_effort.appointments_byuser_uv"
+        ]
+        for tx in viewsx:
+            self.table_perms_map[tx] = i
+            schema_name, table_name = tx.split('.')
+            x = tempStr.format(table_name = table_name, schema_name = schema_name, id = i, description = tx)
+            i+=1
+            vals.push(x)
 
         fout.write(insertStr)
         fout.write(',\n'.join(vals))
         fout.write(';')
         fout.close()
 
-
-provider_effort.appointment_effort_current_rv
-
-# 1. const providers = require('../mixins/TestGrids/providers.js')
-# 2. const appointments = require('../mixins/TestGrids/appointments.js')
-# 3. const appointment_effort  = require('../mixins/TestGrids/appointment_effort.js')
-# 4. const user_app_perms      = require('../mixins/TestGrids/user_app_perms.js')
-# 5. const user_org_permission = require('../mixins/TestGrids/user_specialty_perms.js')
-# 6. const home_page           = require('../mixins/TestGrids/home_page.js')
 
 
 

@@ -6,7 +6,7 @@ let test_grid = {
 
 
         "navHeaderParams": {
-            "links": [{'name':'providers', 'url': '/providers'}]
+            "links": [{'name':'providers_cc', 'url': '/providers'}]
         },
         //table
         "columnDefs": [
@@ -55,7 +55,7 @@ let test_grid = {
 
             {"field": "cfte_full_time" , "cloneOnCopy": true, "editable":true,
                 "validator": "ifnull(cfte_full_time,0)  >=0"},
-            {"field": "time_unit_name", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
+            {"field": "time_unit_name", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true, "cloneOnCopy": true },
 
             {"field": "cfte_time",   "valueGetter": "ifnull(cfte_full_time,40.0) * ( ifnull(cfte,0) )"},
             {"field": "company_name", "valueGetter":"lookup(appointment_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true},

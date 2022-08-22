@@ -3,10 +3,14 @@
     "grids": [
         {
             "columnDefs": [
-                { "headerName": "id", "field": "id", "editable": false },
-                { "headerName": "CompanyName",   "field": "company_name", "cellRenderer": "LinksRenderer" },
-                { "headerName": "CompanyCode",   "field": "company_code" }
-    
+
+
+                { "headerName": "CompanyName",   "field": "company_name", "valueGetter":"lookup(company_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},
+                { "headerName": "CompanyCode",   "field": "company_code", "valueGetter":"lookup(company_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true },
+                { "headerName": "Companyid",     "field": "company_id",   "editable": true, "showSort": true, "showFilter": true },
+                { "headerName":  "LobName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true},                
+                { "headerName":  "LobCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},
+                { "field": "id", "editable": false }
             ],
             "queryParams": {
                 "default": "/provider_effort/company"

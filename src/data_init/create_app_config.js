@@ -16,3 +16,19 @@ const output_dir = './psql/app_configs'
 
 
 // const myJSON = JSON.stringify(obj);
+
+/*
+CREATE TABLE app_admin.apps(
+    id bigserial PRIMARY KEY,
+    project_name text NOT NULL,
+    table_name   text NOT NULL,
+    description  text,
+    page_config  json,
+    is_public    boolean default false NOT NULL, --anyone that can login has access
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+
+    UNIQUE(project_name, table_name)
+);
+*/

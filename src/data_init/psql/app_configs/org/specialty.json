@@ -3,10 +3,24 @@
     "grids": [
         {
             "columnDefs": [
-                { "headerName": "id", "field": "id", "editable": false },
-                { "headerName": "CompanyName",   "field": "company_name", "cellRenderer": "LinksRenderer" },
-                { "headerName": "CompanyCode",   "field": "company_code" }
+                { "headerName": "department_id", "field": "id", "editable": false },
+                { "headerName": "CompanyName",   "field": "company_name", "valueGetter":"lookup(cost_center_id,   'lob_name')" },
+                { "headerName": "CompanyCode",   "field": "company_code", "valueGetter":"lookup(cost_center_id,   'lob_name')" },
     
+
+                {"field": "lob_name", "valueGetter":"lookup(cost_center_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},                
+                {"field": "lob_code", "valueGetter":"lookup(cost_center_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "department_name", "valueGetter":"lookup(cost_center_id,    'department_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "department_code", "valueGetter":"lookup(cost_center_id,    'department_code')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "specialty_name", "valueGetter":"lookup(cost_center_id,     'specialty_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "specialty_code", "valueGetter":"lookup(cost_center_id,     'specialty_code')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "cost_center_name", "valueGetter":"lookup(cost_center_id,   'cost_center_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "cost_center_code", "valueGetter":"lookup(cost_center_id,   'cost_center_code')", "editable": false, "showSort": true, "showFilter": true},
+
+                {"field": "last_modified_by_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
+                {"field": "updated_at", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
+                {"field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
+
             ],
             "queryParams": {
                 "default": "/provider_effort/company"

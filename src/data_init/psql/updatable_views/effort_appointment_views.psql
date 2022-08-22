@@ -16,9 +16,9 @@ CREATE VIEW  provider_effort.appointment_effort_byuser_uv AS
 
 CREATE VIEW provider_effort.appointments_byuser_rv AS
   SELECT * FROM provider_effort.appointments_rv
-  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permsissions_v);
+  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v);
 
 CREATE VIEW provider_effort.appointments_byuser_uv AS
   SELECT * FROM provider_effort.appointments
-  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permsissions_v)
+  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v)
   WITH CHECK OPTION;

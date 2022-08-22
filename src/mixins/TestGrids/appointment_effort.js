@@ -8,6 +8,7 @@ let test_grid = {
         "navHeaderParams": {
             "links": [{'name':'providers', 'url': '/providers'}]
         },
+        //table
         "columnDefs": [
             {"field": "id", "chmodParams": 'rw', "editable": false, "showSort": true, "showFilter": true },
             {"field": "is_active",   "dataType": "boolean", "editable": false, "showSort": true, "showFilter": true,
@@ -78,5 +79,21 @@ let test_grid = {
         }
     }
 ]}
+
+/*
+Middle wear hooks
+
+send json to -> http://xxx before select/insert/update/delete
+send json to -> http://xxx after select/insert/update/delete
+
+valdiations
+
+x > 1 required before insert
+validation queries
+multi server joins
+
+
+*/
+
 
 module.exports = test_grid

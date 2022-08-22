@@ -1,9 +1,0 @@
--- DROP INDEX IF EXISTS "index_user_org_permissions_on_userid"; 
--- CREATE INDEX "index_user_org_permissions_on_userid" on provider_effort.user_org_permissions using btree (user_id);
-
--- reset sequence indexes
-
--- ALTER SEQUENCE product_id_seq RESTART WITH 1453;
--- setval('product_id_seq', 1453);
--- SELECT SETVAL('project_id_seq', (SELECT MAX(id) + 1 FROM project));
--- nextval('pe.testx_id_seq'::regclass)

@@ -52,7 +52,7 @@ let cellEditors = {
     'standardEditors' : ['agTextCellEditor', 'agLargeTextCellEditor', 'dateTimeEditor' ], //make popupTrue for agLargeTextCellEditor
     'defaultEditor': 'agTextCellEditor',
     //data is in an object instead of a base value
-    'lookupEditors': ['autoCompleteEditor', 'agRichSelectCellEditor']
+    'lookupEditors': ['autoCompleteEditor', 'agRichSelectCellEditor','LinksRenderer']
 }
 
 

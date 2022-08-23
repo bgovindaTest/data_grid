@@ -127,7 +127,8 @@ export default {
 
       */
       await this.MainGridInit()
-      // await new Promise(r => setTimeout(r, 1000))
+      await new Promise(r => setTimeout(r, 1000))
+      console.log(this.tableData)
       // this.loading = false
   }
 };

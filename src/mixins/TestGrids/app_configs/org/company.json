@@ -17,7 +17,7 @@
                 {"field": "updated_at", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
                 {"field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
             ],
-            "routeParams": {
+            "queryParams": {
                 "default": "/provider_effort/company"
             }
         }

@@ -11,7 +11,7 @@
 
     
             ],
-            "queryParams": {
+            "routeParams": {
                 "default": "data/app_admin/home_page_rv"
             }
         }

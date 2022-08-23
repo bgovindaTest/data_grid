@@ -1,7 +1,8 @@
 DROP VIEW IF EXISTS app_admin.home_page_rv;
 CREATE VIEW app_admin.home_page_rv AS
 SELECT 
-project_name, table_name, description, url_link as "url_link.urlPath", table_name as "url_link.urlName"
+project_name, table_name, description, 
+url_link as "url_link.urlPath", table_name as "url_link.urlName"
 
 FROM (
     VALUES 

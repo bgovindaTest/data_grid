@@ -9,7 +9,7 @@
                     "showFilter": true, "isRequired": true, "width": 380,
                     "cellEditor": "autoCompleteEditor",
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/cost_center_rv",
+                        "api_route": "data/provider_effort/company_rv",
                         "columnDefs": [
                                 {"field": "company_name"}, {"field": "company_code"},
                                 {"field": "id"} 
@@ -28,8 +28,9 @@
                 { "headerName":  "LobCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},
                 { "field": "id", "editable": false }
             ],
-            "queryParams": {
-                "default": "/provider_effort/company"
+            "routeParams": {
+                "default": "/provider_effort/line_of_business",
+                "select": {"route":"data/provider_effort/line_of_business_rv/select"}
             }
         }
     ]

@@ -4,12 +4,15 @@
         {
             "columnDefs": [
                 { "headerName": "ProjectName", "field": "project_name" },
-                { "headerName": "TableName",   "field": "table_name", "cellRenderer": "LinksRenderer" },
-                { "headerName": "Description",   "field": "description" }
+                { "headerName": "TableName",   "field": "table_name" },
+                { "headerName": "Description",   "field": "description" },
+
+                { "headerName": "UrlLink",   "field": "url_link", "cellRenderer": "LinksRenderer" }
+
     
             ],
             "queryParams": {
-                "default": "/root/root"
+                "default": "data/app_admin/home_page_rv"
             }
         }
     ]

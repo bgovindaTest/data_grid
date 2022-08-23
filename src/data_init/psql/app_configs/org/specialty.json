@@ -7,14 +7,14 @@
                     "showFilter": true, "isRequired": true, "width": 380,
                     "cellEditor": "autoCompleteEditor",
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/cost_center_rv",
+                        "api_route": "data/provider_effort/department_rv",
                         "columnDefs": [
                                 {"field": "company_name"}, {"field": "company_code"},
                                 {"field": "lob_name"},     {"field": "lob_code"},
                                 {"field": "department_name"},     {"field": "department_code"},
                                 {"field": "id"} 
                             ],
-                        "displayKey": "lob_name"
+                        "displayKey": "department_name"
                     }
                 },
                 { "headerName": "SpecialtyName", "field": "specialty_name",  "editable": true, "showSort": true, "showFilter": true},
@@ -40,9 +40,9 @@
                 {"field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
 
             ],
-            "queryParams": {
-                "default": "/provider_effort/company",
-                "select": {"route":"data/provider_effort/appointments_rv/select"}
+            "routeParams": {
+                "default": "/provider_effort/specialty",
+                "select": {"route":"data/provider_effort/specialty_rv/select"}
             }
         }
     ]

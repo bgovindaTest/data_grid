@@ -21,9 +21,9 @@ const cost_center_time = {
                         "displayKey": "time_unit_name"
                     }
                 },
-                {"headerName": "CompanyName","field": "company_name",     "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
+                {"headerName": "CompanyName","field": "company_name",     "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true,  "defaultSort": "asc" },
                 {"headerName": "CompanyCode","field": "company_code",     "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
-                {"headerName": "CostCenterName","field": "cost_center_name", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
+                {"headerName": "CostCenterName","field": "cost_center_name", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc" },
                 {"headerName": "CostCenterCode","field": "cost_center_code", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
                 {"headerName": "LobName","field": "lob_name",         "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},                
                 {"headerName": "LobCode","field": "lob_code",         "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
@@ -31,7 +31,8 @@ const cost_center_time = {
                 {"headerName": "DepartmentCode","field": "department_code",  "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
                 {"headerName": "SpecialtyName","field": "specialty_name",   "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
                 {"headerName": "SpecialtyCode","field": "specialty_code",   "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
-                {"headerName": "IsActive",    "field": "is_active",     "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true},
+                {"headerName": "IsActive",    "field": "is_active",     "chmodParams": "r", "editable": false,
+                    "showSort": true, "showFilter": true, "defaultFilter": "true"},
 
                 {"field": "last_modified_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
                 {"field": "updated_at",     "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },

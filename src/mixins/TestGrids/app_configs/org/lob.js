@@ -3,7 +3,7 @@ const lob = {
     "grids": [
         {
             "columnDefs": [
-                { "headerName": "CompanyName",   "field": "company_name", "valueGetter":"lookup(company_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true},
+                { "headerName": "CompanyName",   "field": "company_name", "valueGetter":"lookup(company_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true,  "defaultSort": "asc"},
                 { "headerName": "CompanyCode",   "field": "company_code", "valueGetter":"lookup(company_id,   'company_code')", "editable": false, "showSort": true, "showFilter": true },
                 { "headerName": "Companyid",     "field": "company_id",  "editable": true, "showSort": true, 
                     "showFilter": true, "isRequired": true,
@@ -18,13 +18,13 @@ const lob = {
                     }
                 },
                 { "field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
-                    "isRequired": true, "isLookup": true,
+                    "isRequired": true, "isLookup": true, "defaultFilter": "true",
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
                         {"is_active": "true", "id": "true"},
                         {"is_active": "false","id": "false"}
                     ]}
                 },
-                { "headerName":  "LobName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true},                
+                { "headerName":  "LobName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc"},                
                 { "headerName":  "LobCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},
                 {"field": "last_modified_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
                 {"field": "updated_at", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },

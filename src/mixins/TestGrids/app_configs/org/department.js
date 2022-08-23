@@ -3,10 +3,10 @@ const department = {
     "grids": [
         {
             "columnDefs": [
-                { "headerName": "CompanyName", "valueGetter":"lookup(lob_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true},
-                { "headerName": "CompanyCode", "valueGetter":"lookup(lob_id,   'company_code')", "editable": false, "showSort": true, "showFilter": true },
-                { "headerName": "LobName", "valueGetter":"lookup(lob_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},
-                { "headerName": "LobCode", "valueGetter":"lookup(lob_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true },
+                { "headerName": "CompanyName", "field": "company_name", "valueGetter":"lookup(lob_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true,  "defaultSort": "asc"},
+                { "headerName": "CompanyCode","field": "company_code", "valueGetter":"lookup(lob_id,   'company_code')", "editable": false, "showSort": true, "showFilter": true },
+                { "headerName": "LobName", "field": "lob_name", "valueGetter":"lookup(lob_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true,  "defaultSort": "asc"},
+                { "headerName": "LobCode", "field": "lob_code", "valueGetter":"lookup(lob_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true },
                 { "headerName": "Lobid",     "field": "lob_id",  "editable": true, "showSort": true, 
                     "showFilter": true, "isRequired": true,
                     "cellEditor": "autoCompleteEditor",
@@ -21,11 +21,10 @@ const department = {
                     }
                 },
 
-
-                { "headerName":  "DepartmentName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true},                
-                { "headerName":  "DepartmentCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},
+                { "headerName":  "DepartmentName","field": "department_name", "editable": true, "showSort": true, "showFilter": true,  "defaultSort": "asc"},                
+                { "headerName":  "DepartmentCode","field": "department_code", "editable": true, "showSort": true, "showFilter": true},
                 { "field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
-                    "isRequired": true, "isLookup": true,
+                    "isRequired": true, "isLookup": true, "defaultFilter": "true",
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
                         {"is_active": "true", "id": "true"},
                         {"is_active": "false","id": "false"}

@@ -3,10 +3,10 @@ const company = {
     "grids": [
         {
             "columnDefs": [
-                { "headerName": "CompanyName",   "field": "company_name", "isRequired": true, "editable": true, "showSort": true, "showFilter": true },
+                { "headerName": "CompanyName",   "field": "company_name", "isRequired": true, "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc" },
                 { "headerName": "CompanyCode",   "field": "company_code", "isRequired": true, "editable": true, "showSort": true, "showFilter": true },
                 { "field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
-                    "isRequired": true, "isLookup": true,
+                    "isRequired": true, "isLookup": true, "defaultFilter": "true",
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
                         {"is_active": "true", "id": "true"},
                         {"is_active": "false","id": "false"}

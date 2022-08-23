@@ -87,6 +87,20 @@ CREATE VIEW provider_effort.cost_center_rv AS
     LEFT JOIN  app_admin.users as users on d.last_modified_userid = users.id;
 
 CREATE VIEW provider_effort.cost_center_time_rv AS
-    SELECT cost_center_time.id, cost_center_id , cfte_full_time, time_unit_id, time_unit_name
-    FROM  provider_effort.cost_center_time
-    INNER JOIN provider_effort.time_unit as tu on tu.id = time_unit_id
+    SELECT cct.id, cost_center_id , cct.cfte_full_time, cct.time_unit_id, tu.time_unit_name,
+        users.email as last_modified_user_email, users.id as last_modified_userid,
+        lob_name, lob_code,
+        specialty_name, specialty_code, 
+        department_name, department_code,
+        cost_center_code, cost_center_name,
+        company_name, company_code, cc.is_active,
+        cct.updated_at,
+
+
+        tu.time_unit_name as "time_unit_id.time_unit_name",
+        cct.time_unit_id as "time_unit_id.time_unit_id"
+
+    FROM  provider_effort.cost_center_time as cct
+    INNER JOIN provider_effort.time_unit as tu on tu.id = cct.time_unit_id
+    INNER JOIN provider_effort.cost_center_rv cc on cc.id = cct.cost_center_id
+    LEFT JOIN  app_admin.users as users on cct.last_modified_userid = users.id;

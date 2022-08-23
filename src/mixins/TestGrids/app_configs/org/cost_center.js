@@ -40,7 +40,7 @@ const cost_center = {
                 { "headerName": "CostCenterName", "field": "cost_center_name", "editable": true, "showSort": true, "showFilter": true},
                 { "headerName": "CostCenterCode","field": "cost_center_code",  "editable": true, "showSort": true, "showFilter": true},
 
-                {"field": "last_modified_by_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
+                {"field": "last_modified_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
                 {"field": "updated_at", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
                 {"field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
     

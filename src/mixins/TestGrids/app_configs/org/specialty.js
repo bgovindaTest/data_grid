@@ -1,10 +1,17 @@
-{
+const specialty = {
     "comments": "This is the main landing page for the app. ProjectFolderName TableName (as link) Description",
     "grids": [
         {
             "columnDefs": [
-                { "headerName": "DepartmentName",     "field": "department_id",  "editable": true, "showSort": true, 
-                    "showFilter": true, "isRequired": true, "width": 380,
+                { "headerName": "CompanyName",   "field": "company_name", "valueGetter":"lookup(department_id,   'company_name')" },
+                { "headerName": "CompanyCode",   "field": "company_code", "valueGetter":"lookup(department_id,   'company_code')" },
+    
+                { "headerName": "LobName", "field": "lob_name", "valueGetter":"lookup(department_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},                
+                { "headerName": "LobCode", "field": "lob_code", "valueGetter":"lookup(department_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true},
+                { "headerName": "DepartmentName", "field": "department_name", "valueGetter":"lookup(department_id,    'department_name')", "editable": false, "showSort": true, "showFilter": true},
+                { "headerName": "DepartmentCode", "field": "department_code", "valueGetter":"lookup(department_id,    'department_code')", "editable": false, "showSort": true, "showFilter": true},
+                { "headerName": "DepartmentId",     "field": "department_id",  "editable": true, "showSort": true, 
+                    "showFilter": true, "isRequired": true,
                     "cellEditor": "autoCompleteEditor",
                     "cellEditorParams": {
                         "api_route": "data/provider_effort/department_rv",
@@ -14,7 +21,7 @@
                                 {"field": "department_name"},     {"field": "department_code"},
                                 {"field": "id"} 
                             ],
-                        "displayKey": "department_name"
+                        "displayKey": "id"
                     }
                 },
                 { "headerName": "SpecialtyName", "field": "specialty_name",  "editable": true, "showSort": true, "showFilter": true},
@@ -26,15 +33,6 @@
                         {"is_active": "false","id": "false"}
                     ]}
                 },
-
-                { "headerName": "CompanyName",   "field": "company_name", "valueGetter":"lookup(department_id,   'company_name')" },
-                { "headerName": "CompanyCode",   "field": "company_code", "valueGetter":"lookup(department_id,   'company_code')" },
-    
-                { "headerName": "LobName", "field": "lob_name", "valueGetter":"lookup(department_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},                
-                { "headerName": "LobCode", "field": "lob_code", "valueGetter":"lookup(department_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true},
-                { "headerName": "DepartmentName", "field": "department_name", "valueGetter":"lookup(department_id,    'department_name')", "editable": false, "showSort": true, "showFilter": true},
-                { "headerName": "DepartmentCode", "field": "department_code", "valueGetter":"lookup(department_id,    'department_code')", "editable": false, "showSort": true, "showFilter": true},
-
                 {"field": "last_modified_by_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
                 {"field": "updated_at", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
                 {"field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
@@ -47,3 +45,5 @@
         }
     ]
 }
+
+module.exports = specialty

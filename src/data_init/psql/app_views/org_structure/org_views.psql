@@ -54,7 +54,8 @@ CREATE VIEW provider_effort.specialty_rv AS
         --for mappings
         company_name as "department_id.company_name", company_code as "department_id.company_code", 
         lob_name as "department_id.lob_name", lob_code as "department_id.lob_code" ,
-        department_name as "department_id.department_name", department_code as "department_id.department_code"
+        department_name as "department_id.department_name", department_code as "department_id.department_code",
+        d.id as "department_id.id"
     FROM provider_effort.specialty as s
     INNER JOIN provider_effort.department as d on d.id = s.department_id
     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id

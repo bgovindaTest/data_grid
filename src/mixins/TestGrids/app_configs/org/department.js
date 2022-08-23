@@ -1,4 +1,4 @@
-{
+const department = {
     "comments": "This is the main landing page for the app. ProjectFolderName TableName (as link) Description",
     "grids": [
         {
@@ -8,7 +8,7 @@
                 { "headerName": "LobName", "valueGetter":"lookup(lob_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},
                 { "headerName": "LobCode", "valueGetter":"lookup(lob_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true },
                 { "headerName": "Lobid",     "field": "lob_id",  "editable": true, "showSort": true, 
-                    "showFilter": true, "isRequired": true, "width": 380,
+                    "showFilter": true, "isRequired": true,
                     "cellEditor": "autoCompleteEditor",
                     "cellEditorParams": {
                         "api_route": "data/provider_effort/line_of_business_rv",
@@ -17,9 +17,13 @@
                                 {"field": "lob_name"},     {"field": "lob_code"},
                                 {"field": "id"} 
                             ],
-                        "displayKey": "lob_name"
+                        "displayKey": "lob_id"
                     }
                 },
+
+
+                { "headerName":  "DepartmentName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true},                
+                { "headerName":  "DepartmentCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},
                 { "field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     "isRequired": true, "isLookup": true,
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
@@ -28,14 +32,16 @@
                     ]}
                 },
 
-                { "headerName":  "DepartmentName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true},                
-                { "headerName":  "DepartmentCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},
-                { "field": "id", "editable": false, "showSort": true, "showFilter": true }
+                {"field": "last_modified_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
+                {"field": "updated_at", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },
+                { "field": "id", "editable": false, "showSort": true, "showFilter": true, "chmodParams": "rw" }
             ],
             "routeParams": {
-                "default": "data/provider_effort/department",
+                "default_route": "data/provider_effort/department",
                 "select": {"route":"data/provider_effort/department_rv/select"}
             }
         }
     ]
 }
+
+module.exports = department

@@ -10,11 +10,6 @@ let test_grid = {
         },
         //table
         "columnDefs": [
-            {"field": "id", "chmodParams": 'rw', "editable": false, "showSort": true, "showFilter": true },
-            {"field": "is_active",   "dataType": "boolean", "editable": false, "showSort": true, "showFilter": true,
-             "isLookup": true, "width": 120, "defaultSort": "desc", "chmodParams": 'r'
-
-            },
             {"field": "last_name", "valueGetter": "lookup(appointment_id,  'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
             {"field": "first_name","valueGetter":"lookup(appointment_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
             {"field": "appointment_id", "headerName": "EmployeeNumCompanyCostCenter", "editable": true, "showSort": true, 
@@ -70,6 +65,9 @@ let test_grid = {
             {"field": "cost_center_code", "valueGetter":"lookup(appointment_id,   'cost_center_code')", "editable": false, "showSort": true, "showFilter": true},
             {"field": "npi", "valueGetter":"lookup(appointment_id,   'npi')", "editable": false, "showSort": true, "showFilter": true},
             {"field": "employee_number", "valueGetter":"lookup(appointment_id,   'employee_number')", "editable": false, "showSort": true, "showFilter": true},
+            {"field": "id", "chmodParams": 'rw', "editable": false, "showSort": true, "showFilter": true },
+            {"field": "is_active",   "dataType": "boolean", "editable": false, "showSort": true, "showFilter": true,
+                "defaultSort": "desc", "chmodParams": 'r', "defaultFilter": "true"},
             {"field": "last_modified_by_user_email", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
             {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true }
         ],

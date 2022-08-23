@@ -5,11 +5,11 @@ let appointments = {
                 "links": [{'name':'provider_cfte', 'url': '/providers'}]
             },
             "columnDefs": [
-                {"field": "last_name", "valueGetter":"lookup(provider_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true},
-                {"field": "first_name","valueGetter":"lookup(provider_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "last_name", "valueGetter":"lookup(provider_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
+                {"field": "first_name","valueGetter":"lookup(provider_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
                 {"field": "provider_id", "headerName": "employee_number", "editable": true, "showSort": true, 
                     "showFilter": true, "isRequired": true,
-                    "cellEditor": 'autoCompleteEditor',
+                    "cellEditor": 'autoCompleteEditor', "cloneOnCopy": true,
                     "cellEditorParams": {
                         "api_route": "data/provider_effort/providers_rv",
                         "columnDefs": [
@@ -35,7 +35,7 @@ let appointments = {
                     }
                 },
                 {"field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
-                    'isRequired': true, "isLookup": true,
+                    'isRequired': true, "isLookup": true, "defaultFilter": true,
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
                         {'is_active': 'true', 'id': 'true'} 
                         ,{'is_active': 'false', 'id': 'false'}

@@ -76,7 +76,8 @@ CREATE VIEW provider_effort.cost_center_rv AS
         company_name as "specialty_id.company_name", company_code as "specialty_id.company_code", 
         lob_name as "specialty_id.lob_name", lob_code as "specialty_id.lob_code",
         specialty_name as  "specialty_id.specialty_name", specialty_code as   "specialty_id.specialty_code", 
-        department_name as "specialty_id.department_name", department_code as "specialty_id.department_code"
+        department_name as "specialty_id.department_name", department_code as "specialty_id.department_code",
+        s.id as "specialty_id.id"
 
     FROM provider_effort.cost_center as cc
     INNER JOIN provider_effort.specialty as s on s.id = cc.specialty_id

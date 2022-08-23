@@ -98,7 +98,7 @@ CREATE VIEW provider_effort.cost_center_time_rv AS
 
 
         tu.time_unit_name as "time_unit_id.time_unit_name",
-        cct.time_unit_id as "time_unit_id.time_unit_id"
+        cct.time_unit_id as "time_unit_id.id"
 
     FROM  provider_effort.cost_center_time as cct
     INNER JOIN provider_effort.time_unit as tu on tu.id = cct.time_unit_id

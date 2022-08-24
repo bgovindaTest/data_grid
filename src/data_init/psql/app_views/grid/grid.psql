@@ -1,0 +1,16 @@
+/*
+returns grid config
+
+//project_name, table_name, is_public, is_read_only
+
+*/
+DROP VIEW IF EXISTS app_admin.grid_config_rv; 
+CREATE VIEW app_admin.grid_config_rv AS 
+
+SELECT page_config, project_name, table_name,
+    CASE WHEN is_public  = true THEN true
+        ELSE is_read_only
+    END as is_read_only
+FROM app_admin.user_app_permission as uap
+INNER JOIN app_admin.apps as app on (app.id = uap.app_id AND uap.user_id = app_userid()  ) OR app.is_public = true 
+    OR is_appuser_admin() = true;

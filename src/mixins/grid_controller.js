@@ -150,6 +150,7 @@ methods: {
         //pull url params
 
         let main_grid   = testGrid['grids'][0]
+        let is_read_only = true
         let routeParams = main_grid['routeParams'] || {}
 
 
@@ -169,12 +170,32 @@ methods: {
         this.columnDefs    = px['columnDefs']
         this.gridFunctions = px['gridFunctions']
         this.LinkUIQueryParams(px['queryParams'])
-        this.NavHeaderParamsInit(navHeaderParams)
+        this.NavHeaderParamsInit(navHeaderParams, is_read_only)
         if (this.NODE_ENV === 'development' && main_grid.hasOwnProperty('tableData') ) {
             this.LoadTestData(main_grid)
         } else { this.LoadDataInit() }
 
+        this.SetColumnsReadOnly(is_read_only)
+
         this.loading = false
+    },
+    SetColumnsReadOnly(is_read_only) {
+        //not change cell colors. Need to check.
+        if (! is_read_only) { return }
+        let cdefs = this.columnDefs
+        let mc = data_config['meta_column_name']
+        for( let i =0; i < cdefs.length; i++ ) {
+            let cdef = cdefs[i]
+            if (cdef['field'] === mc ) {
+                cdef['hide'] = true
+            }
+            if(!cdef.hasOwnProperty('editable')) { continue }
+
+            let ex = cdef['editable']
+            if (typeof ex === 'function') {
+                cdef['editable'] = function (params) {return false}
+            } else { cdef['editable'] = false }
+        }
     },
     LinkUIQueryParams( queryParams ) {
         /*
@@ -217,14 +238,13 @@ methods: {
                 this.valuesObject[gridIndex][field] = api_data
             }
         }
-
     },
-    NavHeaderParamsInit(navHeaderParams) {
+    NavHeaderParamsInit(navHeaderParams, is_read_only = false) {
         /*
             Initialization nav header params for navbar functionality
         */
         let defaultNavHeaderParams ={
-                'home': true,
+                'home': false,
                 'help': true,
                 'links': [],// or object array. 
                 'previous_page':  true, //for pagination
@@ -241,6 +261,14 @@ methods: {
             let key = keys[i]
             if (! navHeaderParams.hasOwnProperty(key)) { navHeaderParams[key] = defaultNavHeaderParams[key] }
         }
+        //remove buttons on read only
+        if (is_read_only) {
+            navHeaderParams['add_row'] = false
+            navHeaderParams['save'] = false
+            navHeaderParams['new_sheet'] = false
+        }
+
+        //add links
         let homeRoute = {'name': "Home", 'url': '/'}
         if(navHeaderParams['links'] === null ) {
             navHeaderParams['links'] = []
@@ -295,10 +323,12 @@ methods: {
             route = projectFolder +'/' + tableName
         } else if (tmp.length === 1) { 
             tableName = tmp[0] 
-            route = tableName
+            route = tableName +'/' + tableName
+        } else {
+            route = "home/home"
         }
         //if tmp.length === 0  //is_root
-        return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': route}
+        return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': 'grid/'+ route}
     },
     onGridReady(params) {
         this.gridApi     = params.api
@@ -316,7 +346,20 @@ methods: {
         let routeParams = this.UrlParams()
         let route = routeParams['route']
         //{'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-        let dx = await axios_object.post(route,{})
+        //project_name, table_name, is_public, is_read_only
+
+        try {
+            let dx = await axios_object.get(route)
+            //loading error
+            let axios_object = await this.axios.post(route, req_body)
+            let x = axios_object.data
+            let serverTableData = x['output_data']
+        }
+        catch (e) {
+
+        }
+
+
         //navbar
         //columnDef
     },

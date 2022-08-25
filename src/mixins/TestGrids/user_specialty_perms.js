@@ -9,7 +9,7 @@ let user_org_permission = {
                 {"field": "last_name", "valueGetter":"lookup(user_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true},
                 {"field": "first_name","valueGetter":"lookup(user_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true},
                 {"field": "user_id", "headerName": "email", "editable": true, "showSort": true, 
-                    "showFilter": true, "isRequired": true,
+                    "showFilter": true, "isRequired": true, "cloneOnCopy": true,
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
                         "api_route": "data/app_admin/users",
@@ -20,7 +20,7 @@ let user_org_permission = {
                 },
 
                 {"field": "cost_center_id", "headerName": "CompanyCostCenterCode", "editable": true, "showSort": true, 
-                    "showFilter": true, "isRequired": true, "width": 380,
+                    "showFilter": true, "isRequired": true, "width": 230,
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
                         "api_route": "data/provider_effort/cost_center_rv",
@@ -48,24 +48,24 @@ let user_org_permission = {
                 {"field": "specialty_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
-                        {'is_active': 'true', 'id': 'true'} 
-                        ,{'is_active': 'false', 'id': 'false'}
+                         {'specialty_level': 'true', 'id': 'true'} 
+                        ,{'specialty_level': 'false', 'id': 'false'}
                     
                     ]}
                 },
                 {"field": "department_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
-                        {'is_active': 'true', 'id': 'true'} 
-                        ,{'is_active': 'false', 'id': 'false'}
+                        {'department_level': 'true', 'id': 'true'} 
+                        ,{'department_level': 'false', 'id': 'false'}
                     
                     ]}
                 },
                 {"field": "lob_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
-                        {'is_active': 'true', 'id': 'true'} 
-                        ,{'is_active': 'false', 'id': 'false'}
+                        {'lob_level': 'true', 'id': 'true'} 
+                        ,{'lob_level': 'false', 'id': 'false'}
                     ]}
                 },
                 {"field": "lob_name", "valueGetter":"lookup(cost_center_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},                

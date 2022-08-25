@@ -82,6 +82,8 @@ CREATE TABLE app_admin.app_permissions (
     allow_insert   boolean default false NOT NULL,
     allow_update   boolean default false NOT NULL,
     allow_delete   boolean default false NOT NULL,
+    allow_save     boolean default false NOT NULL,
+    allow_exists   boolean default false NOT NULL,
     allow_execute  boolean default false NOT NULL,
     allow_truncate boolean default false NOT NULL,
 

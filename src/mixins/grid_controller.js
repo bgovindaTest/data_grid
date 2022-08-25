@@ -150,7 +150,7 @@ methods: {
         //pull url params
 
         let main_grid   = testGrid['grids'][0]
-        let is_read_only = true
+        let is_read_only = false //true
         let routeParams = main_grid['routeParams'] || {}
 
 

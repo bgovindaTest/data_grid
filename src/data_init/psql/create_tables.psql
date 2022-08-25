@@ -32,20 +32,23 @@ $$;
 
 CREATE TABLE app_admin.registered_tables (
     id bigserial PRIMARY KEY,
+    description text,
     schema_name text,
     table_name  text,
     allow_select boolean default true NOT NULL,
     allow_insert boolean default false NOT NULL,
     allow_update boolean default false NOT NULL,
     allow_delete boolean default false NOT NULL,
+    allow_save     boolean default false NOT NULL,
+    allow_exists   boolean default false NOT NULL,
     allow_execute  boolean default false NOT NULL,
     allow_truncate boolean default false NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),
-
-    UNIQUE(schema_name, table_name)
 );
+--add index?
+
 
 COMMENT ON TABLE app_admin.registered_tables IS $$ 
 Tables from postgres with schema and password determines what the front end
@@ -61,6 +64,7 @@ CREATE TABLE app_admin.apps(
     table_name   text NOT NULL,
     description  text,
     page_config  json,
+    is_test boolean default true, --in test mode no data saving can occur
     is_public    boolean default false NOT NULL, --anyone that can login has access
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
@@ -78,16 +82,6 @@ CREATE TABLE app_admin.app_permissions (
     id bigserial PRIMARY KEY,
     app_id bigint REFERENCES app_admin.apps (id) NOT NULL,
     registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
-    allow_select   boolean default true NOT NULL,
-    allow_insert   boolean default false NOT NULL,
-    allow_update   boolean default false NOT NULL,
-    allow_delete   boolean default false NOT NULL,
-    allow_save     boolean default false NOT NULL,
-    allow_exists   boolean default false NOT NULL,
-    allow_execute  boolean default false NOT NULL,
-    allow_truncate boolean default false NOT NULL,
-
-    is_test boolean default true, --in test mode no data saving can occur
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
     last_modified_userid   bigint  DEFAULT app_userid(),

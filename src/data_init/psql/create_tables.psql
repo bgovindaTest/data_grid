@@ -32,7 +32,7 @@ $$;
 
 CREATE TABLE app_admin.registered_tables (
     id bigserial PRIMARY KEY,
-    description text,
+    permission_name text NOT NULL UNIQUE,
     schema_name text,
     table_name  text,
     allow_select boolean default true NOT NULL,

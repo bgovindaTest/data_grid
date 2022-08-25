@@ -3,12 +3,23 @@ Creates main select views and updatable views for appointments and appointment_e
 
 */
 DROP VIEW IF EXISTS provider_effort.appointments_byuser_lv;
-DROP VIEW IF EXISTS provider_effort.cost_centers_lv;
 DROP VIEW IF EXISTS provider_effort.providers_lv;
 DROP VIEW IF EXISTS provider_effort.appointments_byuser_uv;
 DROP VIEW IF EXISTS provider_effort.appointments_byuser_rv;
 DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_rv;
 DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_uv;
+
+DROP VIEW IF EXISTS provider_effort.cost_centers_byuser_lv;
+DROP VIEW IF EXISTS provider_effort.lcg_lv;
+DROP VIEW IF EXISTS provider_effort.cpsc_lv;
+DROP VIEW IF EXISTS app_admin.users_lv;
+
+DROP VIEW IF EXISTS provider_effort.company_lv;
+DROP VIEW IF EXISTS provider_effort.line_of_business_lv;
+DROP VIEW IF EXISTS provider_effort.department_lv;
+DROP VIEW IF EXISTS provider_effort.specialty_lv;
+DROP VIEW IF EXISTS provider_effort.cost_center_lv;
+
 
 --main view
 CREATE VIEW provider_effort.appointment_effort_byuser_rv  AS
@@ -30,7 +41,6 @@ CREATE VIEW provider_effort.appointments_byuser_uv AS
   WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v)
   WITH CHECK OPTION;
 
-
 --lookup views
 CREATE VIEW  provider_effort.providers_lv AS
 SELECT * FROM provider_effort.providers_rv
@@ -49,103 +59,24 @@ CREATE VIEW provider_effort.lcg_lv AS
   WHERE is_active = true;
 
 CREATE VIEW provider_effort.cpsc_lv AS
-  SELECT * FROM provider_effort.cspc
+  SELECT * FROM provider_effort.cpsc
   WHERE is_active = true;
 
 CREATE VIEW app_admin.users_lv AS
   SELECT * FROM app_admin.users
   WHERE is_active = true;
 
--- CREATE VIEW 
+CREATE VIEW provider_effort.company_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;
 
--- CREATE VIEW provider_effort.appointments_byuser_lv AS
--- SELECT * FROM provider_effort.appointments_rv
--- WHERE is_active = true (is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v) );
+CREATE VIEW provider_effort.line_of_business_lv AS
+  SELECT * FROM provider_effort.line_of_business_rv where is_active = true;
 
--- CREATE VIEW provider_effort.providers_lv AS
--- SELECT * FROM provider_effort.providers_rv
--- WHERE is_active = true;
+CREATE VIEW provider_effort.department_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;
 
--- CREATE VIEW provider_effort.users_lv AS
--- SELECT * FROM provider_effort.providers_rv
--- WHERE is_active = true;
+CREATE VIEW provider_effort.specialty_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;
 
---company, department, specialty, cost_center
-
-
--- CREATE VIEW provider_effort.company_rv AS
---     SELECT c.id , company_name, company_code, c.is_active, c.created_at, c.updated_at,
---        users.email as last_modified_user_email, users.id as last_modified_userid
---     FROM provider_effort.company as c
---     LEFT JOIN app_admin.users as users on c.last_modified_userid = users.id;
-
--- --lob_view
--- CREATE VIEW provider_effort.line_of_business_rv AS
---     SELECT lob.id , c.company_name, c.company_code, lob.is_active, lob.created_at, 
---         lob.updated_at, lob_name, lob_code, company_id,
---         users.email as last_modified_user_email, users.id as last_modified_userid,
---         --for mappings
---         company_name as "company_id.company_name", company_code as "company_id.company_code",
---         c.id as "company_id.id"
---     FROM provider_effort.line_of_business as lob
---     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
---     LEFT JOIN  app_admin.users as users on lob.last_modified_userid = users.id;
-
-
--- -- --department_view
--- CREATE VIEW provider_effort.department_rv AS
---     SELECT d.id , company_name, company_code, d.is_active, d.created_at,
---         d.updated_at, lob_name, lob_code, company_id, lob_id,
---         department_name, department_code,
---         users.email as last_modified_user_email, users.id as last_modified_userid,
---         --for mappings
---         company_name as "lob_id.company_name", company_code as "lob_id.company_code", 
---         lob_name as "lob_id.lob_name", lob_code as "lob_id.lob_code" 
-
-
---     FROM provider_effort.department as d
---     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
---     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
---     LEFT JOIN  app_admin.users as users on d.last_modified_userid = users.id;
-
--- -- --specialty_view
--- CREATE VIEW provider_effort.specialty_rv AS
---     SELECT s.id , company_name, company_code, s.is_active, s.created_at,
---         s.updated_at, lob_name, lob_code, company_id, lob_id, department_id,
---         specialty_name, specialty_code,
---         department_name, department_code,
---         users.email as last_modified_user_email, users.id as last_modified_userid,
---         --for mappings
---         company_name as "department_id.company_name", company_code as "department_id.company_code", 
---         lob_name as "department_id.lob_name", lob_code as "department_id.lob_code" ,
---         department_name as "department_id.department_name", department_code as "department_id.department_code",
---         d.id as "department_id.id"
---     FROM provider_effort.specialty as s
---     INNER JOIN provider_effort.department as d on d.id = s.department_id
---     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
---     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
---     LEFT JOIN  app_admin.users as users on d.last_modified_userid = users.id;
-
--- -- --cc_view
--- CREATE VIEW provider_effort.cost_center_rv AS
---     SELECT cc.id , company_name, company_code, cc.is_active, cc.created_at,
---         cc.updated_at, lob_name, lob_code, company_id, lob_id, department_id, specialty_id,
---         specialty_name, specialty_code, 
---         department_name, department_code,
---         cost_center_code, cost_center_name,
---         company_code || ' ' || cost_center_code as org_code,
---         company_name || ' ' || cost_center_name as org_name,
---         users.email as last_modified_user_email, users.id as last_modified_userid,
---         --for mappings
---         company_name as "specialty_id.company_name", company_code as "specialty_id.company_code", 
---         lob_name as "specialty_id.lob_name", lob_code as "specialty_id.lob_code",
---         specialty_name as  "specialty_id.specialty_name", specialty_code as   "specialty_id.specialty_code", 
---         department_name as "specialty_id.department_name", department_code as "specialty_id.department_code",
---         s.id as "specialty_id.id"
-
---     FROM provider_effort.cost_center as cc
---     INNER JOIN provider_effort.specialty as s on s.id = cc.specialty_id
---     INNER JOIN provider_effort.department as d on d.id = s.department_id
---     INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
---     INNER JOIN provider_effort.company as c on c.id = lob.company_id  
---     LEFT JOIN  app_admin.users as users on d.last_modified_userid = users.id;
+CREATE VIEW provider_effort.cost_center_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;

@@ -11,7 +11,7 @@ const department = {
                     "showFilter": true, "isRequired": true,
                     "cellEditor": "autoCompleteEditor",
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/line_of_business_rv",
+                        "api_route": "data/provider_effort/line_of_business_lv",
                         "columnDefs": [
                                 {"field": "company_name"}, {"field": "company_code"},
                                 {"field": "lob_name"},     {"field": "lob_code"},

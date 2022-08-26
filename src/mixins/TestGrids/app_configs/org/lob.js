@@ -9,7 +9,7 @@ const lob = {
                     "showFilter": true, "isRequired": true,
                     "cellEditor": "autoCompleteEditor",
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/company_rv",
+                        "api_route": "data/provider_effort/company_lv",
                         "columnDefs": [
                                 {"field": "company_name"}, {"field": "company_code"},
                                 {"field": "id"} 

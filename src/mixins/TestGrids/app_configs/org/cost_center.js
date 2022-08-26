@@ -18,7 +18,7 @@ const cost_center = {
                     "showFilter": true, "isRequired": true,
                     "cellEditor": "autoCompleteEditor",
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/specialty_rv",
+                        "api_route": "data/provider_effort/specialty_lv",
                         "columnDefs": [
                                 {"field": "company_name"}, {"field": "company_code"},
                                 {"field": "lob_name"},     {"field": "lob_code"},

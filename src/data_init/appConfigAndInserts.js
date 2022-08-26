@@ -146,7 +146,7 @@ for (x of apps) {
     let permissions = pa.join(',')
     let tmpStr = `
     INSERT INTO app_admin.app_permissions (app_id , registered_table_id)
-    SELECT id as registered_table_id
+    SELECT app_id, id as registered_table_id
     FROM app_admin.registered_tables 
     CROSS JOIN (SELECT ${app_id} as app_id) x
     WHERE permission_name IN (${permissions});

@@ -1,7 +1,4 @@
-BEGIN;
 DROP SCHEMA IF EXISTS provider_effort CASCADE;
 DROP SCHEMA IF EXISTS app_admin CASCADE;
-
 CREATE SCHEMA app_admin;
 CREATE SCHEMA provider_effort;
-COMMIT;

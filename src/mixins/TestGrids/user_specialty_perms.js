@@ -12,18 +12,17 @@ let user_org_permission = {
                     "showFilter": true, "isRequired": true, "cloneOnCopy": true,
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
-                        "api_route": "data/app_admin/users",
+                        "api_route": "data/app_admin/users_lv",
                         "columnDefs": [
                             {"field":'id'}, {"field":'last_name'}, {"field": 'first_name'},{"field": 'email'} ],
                         "displayKey": "email"
                     }
                 },
-
                 {"field": "cost_center_id", "headerName": "CompanyCostCenterCode", "editable": true, "showSort": true, 
                     "showFilter": true, "isRequired": true, "width": 230,
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/cost_center_rv",
+                        "api_route": "data/provider_effort/cost_center_lv",
                         "columnDefs": [
                                 {"field": 'company_name'}, {"field": 'cost_center_name'},
                                 {"field": 'lob_name'}, {"field": 'lob_code'},

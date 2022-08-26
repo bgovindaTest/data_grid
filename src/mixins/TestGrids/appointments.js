@@ -89,8 +89,8 @@ let appointments = {
     
             ],
             "routeParams": {
-                "default_route": "data/provider_effort/appointments", //,
-                'select': {'route':"data/provider_effort/appointments_rv/select"}
+                "default_route": "data/provider_effort/appointments_byuser_uv", //,
+                'select': {'route':"data/provider_effort/appointments_byuser_rv/select"}
             },
         }
     ]}

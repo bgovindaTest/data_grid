@@ -1,7 +1,7 @@
 /*
 Create schema provider_effort
 */
-BEGIN;
+-- BEGIN;
 -- DROP SCHEMA IF EXISTS provider_effort CASCADE;
 -- DROP SCHEMA IF EXISTS app_admin CASCADE;
 
@@ -393,4 +393,4 @@ COMMENT ON TABLE provider_effort.refreshed_dates IS $$
 required dates for effort
 
 $$;
-COMMIT;
+-- COMMIT;

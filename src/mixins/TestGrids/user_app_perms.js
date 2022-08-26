@@ -12,7 +12,7 @@ let user_app_perms = {
                     "showFilter": true, "isRequired": true,
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
-                        "api_route": "data/app_admin/users",
+                        "api_route": "data/app_admin/users_lv",
                         "columnDefs": [
                             {"field":'id'}, {"field":'last_name'}, {"field": 'first_name'},{"field": 'email'} ],
                         "displayKey": "email"

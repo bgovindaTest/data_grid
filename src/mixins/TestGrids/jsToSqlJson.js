@@ -16,42 +16,72 @@ const cost_center_time  = require('./app_configs/org/cost_center_time.js')
 const fs = require('fs')
 
 let apps = [
-    //main
+    //main myapps
     {'id': '1', 'project_name': 'provider_effort', 'table_name': 'home_page',
         "page_config": JSON.stringify(home_page),  'is_public': 'true',  'description': "",
         'permissions': []
     },
     {'id': '2', 'project_name': 'provider_effort', 'table_name': 'providers', 
         "page_config":JSON.stringify(providers),    'is_public': 'false', 'description': "",
-        'permissions': ["provider_effort.providers.modify", "provider_effort.providers_lv.read_only", "provider_effort.providers_rv.read_only"]
+        'permissions': ["provider_effort.providers.modify",  "provider_effort.providers_rv.read_only",
+            "provider_effort.lcg_lv.read_only", "provider_effort.cpsc_lv.read_only", "provider_effort.classifications.read_only"
+        ]
     },
     {'id': '3', 'project_name': 'provider_effort', 'table_name': 'appointments', 
         "page_config":JSON.stringify(appointments), 'is_public': 'false', 'description': "",
         'permissions': [ "provider_effort.appointments_uv.modify", "provider_effort.appointments_rv.read_only",
             "provider_effort.lcg_lv.read_only", "provider_effort.cpsc_lv.read_only",
-            "provider_effort.cost_centers_byuser_lv.read_only"
+            "provider_effort.cost_centers_byuser_lv.read_only", "provider_effort.providers_lv.read_only",
         ]
     },
     {'id': '4', 'project_name': 'provider_effort', 'table_name': 'appointment_effort',
-        "page_config":JSON.stringify(appointment_effort), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(appointment_effort), 'is_public': 'false', 'description': "",
+        'permissions': [
+            "provider_effort.appointments_byuser_lv.read_only", "provider_effort.appointment_effort_byuser_uv.modify",
+            "provider_effort.appointment_effort_byuser_rv.read_only"
+        ]
+    },
     //org heirarchy
     {'id': '5',  'project_name': 'provider_effort', 'table_name': 'company',
-        "page_config":JSON.stringify(company), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(company), 'is_public': 'false', 'description': "",
+        "permissions": ["provider_effort.company_rv.read_only","provider_effort.company.modify" ]
+    },
     {'id': '6',  'project_name': 'provider_effort', 'table_name': 'lob',
-        "page_config":JSON.stringify(lob), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(lob), 'is_public': 'false', 'description': "",
+        "permissions": ["provider_effort.line_of_business_rv.read_only","provider_effort.line_of_business.modify",
+            "provider_effort.company_lv.read_only" ]
+    },
     {'id': '7',  'project_name': 'provider_effort', 'table_name': 'department',
-        "page_config":JSON.stringify(department), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(department), 'is_public': 'false', 'description': "",
+        "permissions": ["provider_effort.department_rv.read_only","provider_effort.department.modify",
+            "provider_effort.line_of_business_lv.read_only" ]
+    },
     {'id': '8',  'project_name': 'provider_effort', 'table_name': 'specialty',
-        "page_config":JSON.stringify(specialty), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(specialty), 'is_public': 'false', 'description': "",
+        "permissions": ["provider_effort.specialty_rv.read_only","provider_effort.specialty.modify",
+            "provider_effort.department_lv.read_only" ]
+    },
     {'id': '9',  'project_name': 'provider_effort', 'table_name': 'cost_center',
-        "page_config":JSON.stringify(cost_center), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(cost_center), 'is_public': 'false', 'description': "",
+        "permissions": ["provider_effort.cost_center_rv.read_only","provider_effort.cost_center.modify",
+            "provider_effort.specialty_lv.read_only" ]
+    },
     {'id': '10', 'project_name': 'provider_effort', 'table_name': 'cost_center_time',
-        "page_config":JSON.stringify(cost_center_time), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(cost_center_time), 'is_public': 'false', 'description': "",
+        "permissions": ["provider_effort.cost_center_time_rv.read_only","provider_effort.cost_center_time.modify" ]
+    },
     //perms
     {'id': '11', 'project_name': 'provider_effort', 'table_name': 'user_app_perms',
-        "page_config":JSON.stringify(user_app_perms), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(user_app_perms), 'is_public': 'false', 'description': "",
+        "permissions": ['app_admin.app_permission_rv.read_only', 'app_admin.app_permissions.modify', 'app_admin.users_lv.read_only']
+
+
+    },
     {'id': '12', 'project_name': 'provider_effort', 'table_name': 'user_org_permsission',
-        "page_config":JSON.stringify(user_org_permission), 'is_public': 'false', 'description': "" },
+        "page_config":JSON.stringify(user_org_permission), 'is_public': 'false', 'description': "",
+        "permissions": ['app_admin.user_org_permission_rv.read_only', 'app_admin.user_org_permission.modify', 'app_admin.users_lv.read_only',
+            "provider_effort.cost_center_lv"]
+    },
 ]
 
 let insertStr = "INSERT INTO app_admin.apps (id,project_name, table_name, description, page_config, is_test, is_public) VALUES\n"

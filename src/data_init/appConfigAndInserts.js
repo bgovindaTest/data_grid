@@ -86,26 +86,23 @@ let apps = [
 
 /*
 Add app configurations and descriptions
-
 */
-
 let insertStr = "INSERT INTO app_admin.apps (id,project_name, table_name, description, page_config, is_test, is_public) VALUES\n"
 let values = []
 
 for (x of apps) {
+
+
     console.log(x.id)
     let tmpStr = `( '${x.id}', '${x.project_name}', '${x.table_name}', '${x.description}', $$${x.page_config}$$, 'false', '${x.is_public}'  )`
     values.push(tmpStr)
 }
 let out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/apps.psql'
-
-
 let out_str = insertStr + values.join(',\n') + ';'
-console.log(out_str)
+fs.writeFileSync(out_path, out_str);
 
-//schema.table_read_only
-//schema.table_modify
-/*
+/*registered_tables*/
+let registeredTablesStr = `
 INSERT INTO app_admin.registered_tables (permission_name, schema_name, table_name,
     allow_select,allow_exists, allow_insert, allow_update, allow_delete, allow_save)
 
@@ -129,9 +126,38 @@ INSERT INTO app_admin.registered_tables (permission_name, schema_name, table_nam
     select schemaname|| '.'|| tablename || ".modify" as permission_name, schemaname, viewname as tablename, true as allow_select, true as allow_exists,
         true as allow_insert, true as allow_update , true as allow_delete, true as allow_save
     from pg_catalog.pg_tables
-    where schemaname IN ('provider_effort', 'app_admin')
+    where schemaname IN ('provider_effort', 'app_admin');
+`
+out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/registered_tables.psql'
+fs.writeFileSync(out_path, registeredTablesStr);
 
+/*
+app permissions
 */
+
+
+strsx = []
+
+for (x of apps) {
+    let app_id = x.id
+    let perms = x.permissions
+    let pa  = []
+    perms.forEach(perm => pa.push(`'${perm}'`))
+    let permissions = pa.join(',')
+    let tmpStr = `
+    INSERT INTO app_admin.app_permissions (app_id , registered_table_id)
+    SELECT id as registered_table_id
+    FROM app_admin.registered_tables 
+    CROSS JOIN (SELECT ${app_id} as app_id) x
+    WHERE permission_name IN (${permissions});
+    `
+    strsx.push(tmpStr)
+}
+out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/apps.psql'
+out_str = strsx.join('\n')
+fs.writeFileSync(out_path, out_str);
+
+
 
 /*
 INSERT INTO app_admin.app_permissions (app_id , registered_table_id)
@@ -139,8 +165,6 @@ SELECT id as registered_table_id
 FROM app_admin.registered_tables 
 CROSS JOIN (SELECT ${app_id} as app_id) x
 WHERE permission_name IN (${permissions});
-
-
 */
 
 

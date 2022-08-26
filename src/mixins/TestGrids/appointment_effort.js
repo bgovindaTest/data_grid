@@ -16,7 +16,7 @@ let test_grid = {
             "showFilter": true, "isRequired": true, "cloneOnCopy": true,
             "cellEditor": 'autoCompleteEditor', "width": 300, 
                 "cellEditorParams": {
-                    "api_route": "data/provider_effort/appointments_rv",
+                    "api_route": "data/provider_effort/appointments_byuser_lv",
                     "columnDefs": [
                         {"field":'id'}, {"field":'last_name'}, {"field": 'first_name'},{"field": 'org_name'},
                         {"field": 'org_code'}, {"field": 'employee_number'},{"field": 'npi'},{"field": 'appointment_code'}
@@ -72,8 +72,8 @@ let test_grid = {
             {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true }
         ],
         "routeParams": {
-            "default_route":   "data/provider_effort/appointment_effort", //,
-            'select': {'route':"data/provider_effort/appointment_effort_rv/select"}
+            "default_route":   "data/provider_effort/appointment_effort_byuser_uv", //,
+            'select': {'route':"data/provider_effort/appointment_effort_byuser_rv/select"}
         }
     }
 ]}

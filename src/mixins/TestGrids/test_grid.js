@@ -13,4 +13,4 @@ const specialty         = require('./app_configs/org/specialty.js')
 const cost_center       = require('./app_configs/org/cost_center.js')
 const cost_center_time  = require('./app_configs/org/cost_center_time.js')
 
-module.exports = appointments //user_org_permission  //user_app_perms //appointment_effort // appointments//cost_center_time//company//cost_center_time // specialty // company
+module.exports = appointment_effort //user_org_permission  //user_app_perms //appointment_effort // appointments//cost_center_time//company//cost_center_time // specialty // company

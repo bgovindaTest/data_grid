@@ -22,7 +22,7 @@ let providers = {
                 "showFilter": true, 
                 "cellEditor": 'autoCompleteEditor',
                 "cellEditorParams": {
-                    "api_route": "data/provider_effort/lcg",
+                    "api_route": "data/provider_effort/lcg_lv",
                     "columnDefs": [
                         {"field":'id'}, {"field":'lcg_name', "width": 250}, {"field": 'lcg_code'}],
                     "displayKey": "lcg_code"
@@ -32,7 +32,7 @@ let providers = {
                 "showFilter": true, 
                 "cellEditor": 'autoCompleteEditor',
                 "cellEditorParams": {
-                    "api_route": "data/provider_effort/cpsc",
+                    "api_route": "data/provider_effort/cpsc_lv",
                     "columnDefs": [
                         {"field":'id'}, {"field":'cpsc_name', "width": 250}, {"field": 'cpsc_code'}],
                     "displayKey": "cpsc_code"

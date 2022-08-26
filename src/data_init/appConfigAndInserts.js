@@ -132,7 +132,7 @@ out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/registered_tables.psql'
 fs.writeFileSync(out_path, registeredTablesStr);
 
 /*
-app permissions
+app and user permissions
 */
 
 
@@ -154,41 +154,15 @@ for (x of apps) {
     strsx.push(tmpStr)
 }
 out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/apps.psql'
-out_str = strsx.join('\n')
-fs.writeFileSync(out_path, out_str);
 
-
-
-/*
-INSERT INTO app_admin.app_permissions (app_id , registered_table_id)
-SELECT id as registered_table_id
-FROM app_admin.registered_tables 
-CROSS JOIN (SELECT ${app_id} as app_id) x
-WHERE permission_name IN (${permissions});
-*/
-
-
-// CREATE TABLE app_admin.app_permissions (
-//     id bigserial PRIMARY KEY,
-//     app_id bigint REFERENCES app_admin.apps (id) NOT NULL,
-//     registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
-//     created_at timestamptz default now(),
-//     updated_at timestamptz default now(),
-//     last_modified_userid   bigint  DEFAULT app_userid(),
-
-//     UNIQUE(app_id, registered_table_id)
-// );
-
-// COMMENT ON TABLE app_admin.app_permissions IS $$ 
-// permissions that are allowed by the apps configuration. This allows a registered table
-// to give different permissions for different apps.
-// $$;
-
-
-/*
---user perms
+strsx.push(
+`
 INSERT INTO app_admin.user_app_permissions(user_id, app_id, is_read_only)
 SELECT user_id, 2, false FROM app_admin.users
 UNION
 SELECT user_id, 3, false FROM app_admin.users;
-*/
+`
+)
+
+out_str = strsx.join('\n')
+fs.writeFileSync(out_path, out_str);

@@ -18,8 +18,8 @@ input_connect_string   = psql_cred.input_connect_string
 output_path = '/home/bgovi/PsqlCred/output_data'
 conn = psycopg2.connect(input_connect_string)
 
-pe_data    = './psql/pe_data_remap.psql'
-admin_data = './psql/admin_data_remap.psql'
+pe_data    = '/home/bgovi/Workspace/MultiGrid/data_grid/src/data_init/psql/pe_data_remap.psql'
+admin_data = '/home/bgovi/Workspace/MultiGrid/data_grid/src/data_init/psql/admin_data_remap.psql'
 
 sql_out = output_path +'/sql/'
 json_out = output_path +'/json_out/'

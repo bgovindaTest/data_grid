@@ -17,7 +17,7 @@ conn = psycopg2.connect(output_connect_string)
 
 sql_inserts = output_path +'/sql/'
 sql_admin   = output_path +'/sql_admin/'
-general     = './psql/'
+general     = '/home/bgovi/Workspace/MultiGrid/data_grid/src/data_init/psql/'
 
 class PEINIT:
 

@@ -1,18 +1,20 @@
-const home_page           = require('./app_configs/landing_page.js')
-const providers           = require('./providers.js')
-const appointments        = require('./appointments.js')
-const appointment_effort  = require('./appointment_effort.js')
-const user_app_perms      = require('./user_app_perms.js')
-const user_org_permission = require('./user_specialty_perms.js')
+let rx = '/home/bgovi/Workspace/MultiGrid/data_grid/src/mixins/TestGrids'
+
+const home_page           = require(rx+'/app_configs/landing_page.js')
+const providers           = require(rx+'/providers.js')
+const appointments        = require(rx+'/appointments.js')
+const appointment_effort  = require(rx+'/appointment_effort.js')
+const user_app_perms      = require(rx+'/user_app_perms.js')
+const user_org_permission = require(rx+'/user_specialty_perms.js')
 
 
 //org
-const company           = require('./app_configs/org/company.js')
-const lob               = require('./app_configs/org/lob.js')
-const department        = require('./app_configs/org/department.js')
-const specialty         = require('./app_configs/org/specialty.js')
-const cost_center       = require('./app_configs/org/cost_center.js')
-const cost_center_time  = require('./app_configs/org/cost_center_time.js')
+const company           = require(rx+'/app_configs/org/company.js')
+const lob               = require(rx+'/app_configs/org/lob.js')
+const department        = require(rx+'/app_configs/org/department.js')
+const specialty         = require(rx+'/app_configs/org/specialty.js')
+const cost_center       = require(rx+'/app_configs/org/cost_center.js')
+const cost_center_time  = require(rx+'/app_configs/org/cost_center_time.js')
 const fs = require('fs')
 
 let apps = [

@@ -2,12 +2,12 @@
 Creates views for organization
 
 */
-DROP VIEW IF EXISTS provider_effort.company_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.line_of_business_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.department_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.specialty_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.cost_center_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.cost_center_time_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.company_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.line_of_business_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.department_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.specialty_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.cost_center_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.cost_center_time_rv CASCADE;
 --company view
 CREATE VIEW provider_effort.company_rv AS
     SELECT c.id , company_name, company_code, c.is_active, c.created_at, c.updated_at,

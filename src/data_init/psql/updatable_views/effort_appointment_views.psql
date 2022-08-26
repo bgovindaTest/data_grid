@@ -2,23 +2,23 @@
 Creates main select views and updatable views for appointments and appointment_effort.
 
 */
-DROP VIEW IF EXISTS provider_effort.appointments_byuser_lv;
-DROP VIEW IF EXISTS provider_effort.providers_lv;
-DROP VIEW IF EXISTS provider_effort.appointments_byuser_uv;
-DROP VIEW IF EXISTS provider_effort.appointments_byuser_rv;
-DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_rv;
-DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_uv;
+-- DROP VIEW IF EXISTS provider_effort.appointments_byuser_lv;
+-- DROP VIEW IF EXISTS provider_effort.providers_lv;
+-- DROP VIEW IF EXISTS provider_effort.appointments_byuser_uv;
+-- DROP VIEW IF EXISTS provider_effort.appointments_byuser_rv;
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_rv;
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_uv;
 
-DROP VIEW IF EXISTS provider_effort.cost_centers_byuser_lv;
-DROP VIEW IF EXISTS provider_effort.lcg_lv;
-DROP VIEW IF EXISTS provider_effort.cpsc_lv;
-DROP VIEW IF EXISTS app_admin.users_lv;
+-- DROP VIEW IF EXISTS provider_effort.cost_centers_byuser_lv;
+-- DROP VIEW IF EXISTS provider_effort.lcg_lv;
+-- DROP VIEW IF EXISTS provider_effort.cpsc_lv;
+-- DROP VIEW IF EXISTS app_admin.users_lv;
 
-DROP VIEW IF EXISTS provider_effort.company_lv;
-DROP VIEW IF EXISTS provider_effort.line_of_business_lv;
-DROP VIEW IF EXISTS provider_effort.department_lv;
-DROP VIEW IF EXISTS provider_effort.specialty_lv;
-DROP VIEW IF EXISTS provider_effort.cost_center_lv;
+-- DROP VIEW IF EXISTS provider_effort.company_lv;
+-- DROP VIEW IF EXISTS provider_effort.line_of_business_lv;
+-- DROP VIEW IF EXISTS provider_effort.department_lv;
+-- DROP VIEW IF EXISTS provider_effort.specialty_lv;
+-- DROP VIEW IF EXISTS provider_effort.cost_center_lv;
 
 
 --main view

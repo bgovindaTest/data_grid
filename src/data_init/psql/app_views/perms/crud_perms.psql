@@ -1,19 +1,21 @@
 CREATE VIEW app_admin.app_crud_permissions_v AS
 SELECT schema_name, table_name,
-    rt.allow_select, rt.allow_exists,
+    rt.allow_select, 
+    
+    --rt.allow_exists,
     rt.allow_insert   AND NOT is_read_only as allow_insert,
     rt.allow_update   AND NOT is_read_only as allow_update,
-    rt.allow_delete   AND NOT is_read_only as allow_delete,
-    rt.allow_save     AND NOT is_read_only as allow_save,
-
-    rt.allow_execute  AND NOT is_read_only as allow_execute,
-    rt.allow_truncate AND NOT is_read_only as allow_truncate
+    rt.allow_delete   AND NOT is_read_only as allow_delete
+    -- ,
+    -- rt.allow_save     AND NOT is_read_only as allow_save,
+    -- rt.allow_execute  AND NOT is_read_only as allow_execute,
+    -- rt.allow_truncate AND NOT is_read_only as allow_truncate
 
     FROM app_admin.app_permissions  ap
     INNER JOIN app_admin.user_app_permission_v uap on ap.app_id = uap.app_id
     INNER JOIN app_admin.registered_tables rt  on ap.registered_table_id = rt.id;
 
 CREATE VIEW app_admin.user_app_grid_config_v AS
-    SELECT     project_name, table_name, page_config
+    SELECT project_name, table_name, page_config, is_test
     FROM app_admin.apps
     WHERE is_public = true OR id IN (SELECT app_id FROM app_admin.user_app_permission_v );

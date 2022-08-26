@@ -1,12 +1,8 @@
 /*
 Full expansion of providers information.
-
-
 */
-DROP VIEW IF EXISTS provider_effort.appointments_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.providers_rv CASCADE;
-
-
+-- DROP VIEW IF EXISTS provider_effort.appointments_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.providers_rv CASCADE;
 
 CREATE VIEW provider_effort.providers_rv AS
     SELECT providers.id as id, employee_number, npi, providers.first_name,

@@ -8,17 +8,17 @@ join to the views below return a hit the permissions is available.
 */
 
 -- provider_effort.user_org_permission
-DROP VIEW IF EXISTS provider_effort.user_org_permissions_rv CASCADE;
-DROP VIEW IF EXISTS app_admin.user_app_permission_rv CASCADE;
-DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_org_permissions_rv CASCADE;
+-- DROP VIEW IF EXISTS app_admin.user_app_permission_rv CASCADE;
+-- DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
 
-DROP VIEW IF EXISTS provider_effort.user_appointment_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_org_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_lob_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_department_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_specialty_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_cost_center_permsissions_v CASCADE;
-DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_appointment_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_org_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_lob_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_department_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_specialty_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_cost_center_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
 
 
 -- user cost_center permissions

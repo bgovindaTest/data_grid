@@ -4,11 +4,11 @@ returns grid config
 //project_name, table_name, is_public, is_read_only
 
 */
-DROP VIEW IF EXISTS app_admin.grid_config_rv; 
+-- DROP VIEW IF EXISTS app_admin.grid_config_rv; 
 CREATE VIEW app_admin.grid_config_rv AS 
 
-SELECT page_config, project_name, table_name,
-    CASE WHEN is_public  = true THEN true
+SELECT page_config, project_name, table_name, is_test,
+    CASE WHEN is_public  = true THEN false
         ELSE is_read_only
     END as is_read_only
 FROM app_admin.user_app_permission as uap

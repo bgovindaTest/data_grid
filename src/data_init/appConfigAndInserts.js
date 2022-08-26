@@ -97,7 +97,7 @@ for (x of apps) {
     let tmpStr = `( '${x.id}', '${x.project_name}', '${x.table_name}', '${x.description}', $$${x.page_config}$$, 'false', '${x.is_public}'  )`
     values.push(tmpStr)
 }
-let out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/apps.psql'
+let out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/apps_inserts.psql'
 let out_str = insertStr + values.join(',\n') + ';'
 fs.writeFileSync(out_path, out_str);
 
@@ -128,7 +128,7 @@ INSERT INTO app_admin.registered_tables (permission_name, schema_name, table_nam
     from pg_catalog.pg_tables
     where schemaname IN ('provider_effort', 'app_admin');
 `
-out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/registered_tables.psql'
+out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/registered_table_inserts.psql'
 fs.writeFileSync(out_path, registeredTablesStr);
 
 /*
@@ -153,7 +153,7 @@ for (x of apps) {
     `
     strsx.push(tmpStr)
 }
-out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/apps.psql'
+out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/app_and_user_perms_inserts.psql'
 
 strsx.push(
 `

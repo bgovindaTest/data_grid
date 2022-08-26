@@ -4,7 +4,7 @@ Creates main view for appointment effort.
 */
 
 --appointment effort table
-DROP VIEW IF EXISTS provider_effort.appointment_effort_current_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_current_rv CASCADE;
 
 CREATE VIEW provider_effort.appointment_effort_current_rv AS
     SELECT * FROM (

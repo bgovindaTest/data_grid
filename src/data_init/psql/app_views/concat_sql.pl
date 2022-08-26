@@ -1,0 +1,2 @@
+#concats app_views folder.
+`cat ./org_structure/org_views.psql ./providers/providers_rv.psql ./perms/user_org_perms.psql ./perms/crud_perms.psql ./effort/appointment_effort_rv.psql ./effort/current_appointment_effort_rv.psql ./home_page/home_page.psql ./grid/grid.psql > app_views.psql`

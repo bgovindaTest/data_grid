@@ -1,0 +1,437 @@
+BEGIN;
+DROP SCHEMA IF EXISTS provider_effort CASCADE;
+DROP SCHEMA IF EXISTS app_admin CASCADE;
+
+CREATE SCHEMA app_admin;
+CREATE SCHEMA provider_effort;
+COMMIT;/*
+
+
+BEGIN;
+SET local app.userid   = 1;
+SET local app.is_admin = false;
+-- sql queries where app_userid() ;
+COMMIT;
+*/
+CREATE OR REPLACE FUNCTION trigger_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION app_userid() RETURNS bigint
+    AS $$select 1::bigint;$$
+    --AS $$select current_setting('app.user_id',true)::bigint;$$
+LANGUAGE SQL
+IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION is_appuser_admin() RETURNS boolean
+    AS $$select true;$$
+    --AS $$select current_setting('app.is_admin',true)::boolean;$$
+LANGUAGE SQL
+IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.last_modified_by_userid = app_userid();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;/*
+Create schema provider_effort
+*/
+BEGIN;
+-- DROP SCHEMA IF EXISTS provider_effort CASCADE;
+-- DROP SCHEMA IF EXISTS app_admin CASCADE;
+
+-- CREATE SCHEMA app_admin;
+
+COMMENT ON SCHEMA app_admin IS $$ 
+This contains data for users and page configurations
+
+$$;
+
+CREATE TABLE app_admin.users (
+    id bigserial PRIMARY KEY,
+    email        text,
+    first_name   text,
+    last_name    text,
+    oauth_id     text NOT NULL UNIQUE,
+    -- as_user ?
+    is_admin      boolean default false NOT NULL,
+    is_active     boolean default true  NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE app_admin.users IS $$ 
+User information and credentials
+$$;
+
+CREATE TABLE app_admin.registered_tables (
+    id bigserial PRIMARY KEY,
+    permission_name text NOT NULL UNIQUE,
+    schema_name text,
+    table_name  text,
+    allow_select boolean default true NOT NULL,
+    allow_insert boolean default false NOT NULL,
+    allow_update boolean default false NOT NULL,
+    allow_delete boolean default false NOT NULL,
+    allow_save     boolean default false NOT NULL,
+    allow_exists   boolean default false NOT NULL,
+    allow_execute  boolean default false NOT NULL,
+    allow_truncate boolean default false NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+);
+--add index?
+
+
+COMMENT ON TABLE app_admin.registered_tables IS $$ 
+Tables from postgres with schema and password determines what the front end
+shoudl be allowed to do. The app_user role must also have the necessary postgres
+permissions set in the postgres server.
+
+This table mainly exists to assign permission to the a given apps UI.
+$$;
+
+CREATE TABLE app_admin.apps(
+    id bigserial PRIMARY KEY,
+    project_name text NOT NULL,
+    table_name   text NOT NULL,
+    description  text,
+    page_config  json,
+    is_test boolean default true, --in test mode no data saving can occur
+    is_public    boolean default false NOT NULL, --anyone that can login has access
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+
+    UNIQUE(project_name, table_name)
+);
+
+COMMENT ON TABLE app_admin.apps IS $$ 
+App name and page_configurations config for the UI. page_config is where teh
+data is pulled to load the UI
+$$;
+
+CREATE TABLE app_admin.app_permissions (
+    id bigserial PRIMARY KEY,
+    app_id bigint REFERENCES app_admin.apps (id) NOT NULL,
+    registered_table_id bigint REFERENCES app_admin.registered_tables (id) NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+
+    UNIQUE(app_id, registered_table_id)
+);
+
+COMMENT ON TABLE app_admin.app_permissions IS $$ 
+permissions that are allowed by the apps configuration. This allows a registered table
+to give different permissions for different apps.
+$$;
+
+CREATE TABLE app_admin.user_app_permission (
+    id bigserial PRIMARY KEY,
+    user_id bigint REFERENCES app_admin.users (id)  NOT NULL,
+    app_id bigint  REFERENCES app_admin.apps  (id)  NOT NULL,
+    is_read_only   boolean default true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(user_id, app_id)
+);
+
+COMMENT ON TABLE app_admin.user_app_permission IS $$ 
+Links user_id to app_id. Determine if user can view page. Needs to join
+with app_admin.apps, app_permissions and user_app_permisisons. Dont need
+to check user_app_permissions if public
+
+$$;
+
+-- main app tables
+-- CREATE SCHEMA provider_effort;
+
+COMMENT ON SCHEMA provider_effort IS $$ 
+main tables for provider effort app.
+
+$$;
+
+CREATE TABLE provider_effort.company (
+    id bigserial PRIMARY KEY,
+    company_name text NOT NULL,
+    company_code text NOT NULL UNIQUE,
+    is_active boolean default true NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.company IS $$ 
+company data
+
+$$;
+
+
+CREATE TABLE provider_effort.line_of_business (
+    id bigserial PRIMARY KEY,
+    company_id bigint REFERENCES provider_effort.company (id),
+    lob_name text,
+    lob_code text NOT NULL,
+    is_active boolean default true NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE (company_id, lob_code)
+);
+
+COMMENT ON TABLE provider_effort.line_of_business IS $$ 
+root heirarchy for practices
+
+$$;
+
+CREATE TABLE provider_effort.department (
+    id bigserial PRIMARY KEY,
+    department_name text NOT NULL,
+    department_code text NOT NULL,
+    lob_id          bigint REFERENCES provider_effort.line_of_business (id),
+    is_active  boolean default true NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(lob_id, department_code)
+);
+
+COMMENT ON TABLE provider_effort.department IS $$ 
+owned by line of business contains specialties and cc
+$$;
+
+
+CREATE TABLE provider_effort.specialty (
+    id bigserial PRIMARY KEY,
+    specialty_name text,
+    specialty_code text NOT NULL,
+    department_id  bigint REFERENCES provider_effort.department (id),
+    is_active boolean NOT NULL DEFAULT TRUE,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(department_id, specialty_code)
+);
+
+COMMENT ON TABLE provider_effort.specialty IS $$ 
+main grouping for staff
+$$;
+
+CREATE TABLE provider_effort.time_unit (
+    id bigserial PRIMARY KEY,
+    time_unit_name text NOT NULL UNIQUE,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+COMMENT ON TABLE provider_effort.time_unit IS $$ 
+time units ie seconds, minutes hours. used for queries
+$$;
+
+CREATE TABLE provider_effort.cost_center (
+    id bigserial PRIMARY KEY,
+    cost_center_name text,
+    cost_center_code text NOT NULL,
+    specialty_id bigint REFERENCES provider_effort.specialty (id),
+    is_active boolean NOT NULL default TRUE,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE (specialty_id, cost_center_code)
+);
+
+COMMENT ON TABLE provider_effort.cost_center IS $$ 
+billing
+$$;
+
+CREATE TABLE provider_effort.cost_center_time (
+    id bigserial   PRIMARY KEY,
+    cost_center_id bigint  NOT NULL REFERENCES provider_effort.cost_center (id),
+    cfte_full_time      numeric NOT NULL DEFAULT 40,
+    time_unit_id   bigint  REFERENCES provider_effort.time_unit (id),
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(cost_center_id)
+);
+
+COMMENT ON TABLE provider_effort.cost_center_time IS $$ 
+amount of time for cfte tracking.
+$$;
+
+CREATE TABLE provider_effort.classifications (
+    id bigserial PRIMARY KEY,
+    classification_name text NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.classifications IS $$ 
+describes staff roles
+$$;
+
+CREATE TABLE provider_effort.lcg (
+    id bigserial PRIMARY KEY,
+    lcg_name text NOT NULL,
+    lcg_code text NOT NULL UNIQUE,
+    is_active boolean DEFAULT true NOT NULL,    
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.lcg IS $$ 
+staff skill set defined by lcg
+$$;
+
+CREATE TABLE provider_effort.cpsc (
+    id bigserial PRIMARY KEY,
+    cpsc_name text NOT NULL,
+    cpsc_code text NOT NULL UNIQUE,
+    is_active boolean NOT NULL DEFAULT true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.cpsc IS $$ 
+staff skill set by cpsc
+$$;
+
+CREATE TABLE provider_effort.cpsc_lcg_map (
+    id bigserial PRIMARY KEY,
+    cpsc_id   bigint NOT NULL REFERENCES provider_effort.cpsc (id),
+    lcg_id    bigint NOT NULL REFERENCES provider_effort.lcg  (id),
+    is_active boolean NOT NULL DEFAULT true,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.cpsc_lcg_map IS $$ 
+1:1 connection between cpsc and lcg
+$$;
+
+CREATE TABLE provider_effort.providers (
+    id bigserial PRIMARY KEY,
+    employee_number text NOT NULL UNIQUE,
+    npi text,
+    first_name text NOT NULL,
+    last_name text NOT NULL,
+    classification_id bigint REFERENCES provider_effort.classifications (id),
+    is_active boolean NOT NULL DEFAULT true,
+    cpsc_id bigint REFERENCES provider_effort.cpsc (id),
+    lcg_id  bigint REFERENCES provider_effort.lcg  (id),
+    start_date date,
+    end_date date,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.providers IS $$ 
+names and company info on employees
+$$;
+
+CREATE TABLE provider_effort.appointments (
+    id bigserial PRIMARY KEY,
+    provider_id bigint REFERENCES provider_effort.providers,
+    cpsc_id bigint REFERENCES provider_effort.cpsc (id),
+    lcg_id  bigint REFERENCES provider_effort.lcg  (id),
+    cost_center_id bigint REFERENCES provider_effort.cost_center (id),
+    is_active boolean NOT NULL DEFAULT True,
+    start_date date,
+    end_date   date,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE( provider_id, cost_center_id)
+);
+
+COMMENT ON TABLE provider_effort.appointments IS $$ 
+where staff are located
+$$;
+
+
+CREATE TABLE provider_effort.appointment_effort (
+    id bigserial PRIMARY KEY,
+    appointment_id bigint REFERENCES provider_effort.appointments (id),
+    effective_date date NOT NULL,
+    academic numeric NOT NULL default 0,
+    contract numeric NOT NULL default 0,
+    veterans_affairs numeric NOT NULL default 0,
+    administration numeric NOT NULL default 0,
+    cfte numeric NOT NULL default 0,
+    cfte_full_time numeric,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(appointment_id, effective_date)
+);
+
+COMMENT ON TABLE provider_effort.appointment_effort IS $$ 
+staff worklevel at location
+
+$$;
+
+CREATE TABLE provider_effort.oracle_effort (
+    id bigserial PRIMARY KEY,
+    provider_id  bigint REFERENCES provider_effort.providers (id),
+    effective_date date NOT NULL,
+    fte numeric default 0 NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid(),
+    UNIQUE(provider_id, effective_date)
+);
+
+COMMENT ON TABLE provider_effort.oracle_effort IS $$ 
+total effort of staff
+$$;
+
+CREATE TABLE provider_effort.user_org_permission (
+    id bigserial PRIMARY KEY,
+    cost_center_id bigint NOT NULL REFERENCES provider_effort.cost_center (id),
+    user_id bigint REFERENCES app_admin.users (id),
+    specialty_level boolean default false NOT NULL,
+    --level
+    department_level boolean default false NOT NULL,
+    lob_level boolean default false NOT NULL,
+    is_active boolean DEFAULT FALSE NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.user_org_permission IS $$ 
+data permissions for user based on location
+permission_level based on what permission is worth ie check
+permisisons on company_cost_center or company_specialty
+$$;
+
+CREATE TABLE provider_effort.refreshed_dates (
+    id bigserial PRIMARY KEY,
+    check_date date NOT NULL,
+    is_approved_date boolean DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    updated_at timestamptz NOT NULL DEFAULT NOW() ,
+    last_modified_userid   bigint  DEFAULT app_userid()
+);
+
+COMMENT ON TABLE provider_effort.refreshed_dates IS $$ 
+required dates for effort
+
+$$;
+COMMIT;

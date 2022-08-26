@@ -11,7 +11,7 @@ let appointments = {
                     "showFilter": true, "isRequired": true,
                     "cellEditor": 'autoCompleteEditor', "cloneOnCopy": true,
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/providers_rv",
+                        "api_route": "data/provider_effort/providers_lv",
                         "columnDefs": [
                             {"field":'id'}, {"field":'last_name'}, {"field": 'first_name'},{"field": 'employee_number'},{"field": 'npi'}, ],
                         "displayKey": "employee_number"
@@ -21,7 +21,7 @@ let appointments = {
                     "showFilter": true, "isRequired": true, "width": 380,
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/cost_center_rv",
+                        "api_route": "data/provider_effort/cost_centers_byuser_lv",
                         "columnDefs": [
                                 {"field": 'company_name'}, {"field": 'cost_center_name'},
                                 {"field": 'lob_name'}, {"field": 'lob_code'},
@@ -51,7 +51,7 @@ let appointments = {
                     "showFilter": true,
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/lcg",
+                        "api_route": "data/provider_effort/lcg_lv",
                         "columnDefs": [
                             {"field":'id'}, {"field":'lcg_name', "width": 250}, {"field": 'lcg_code'}],
                         "displayKey": "lcg_code"
@@ -61,7 +61,7 @@ let appointments = {
                     "showFilter": true, 
                     "cellEditor": 'autoCompleteEditor',
                     "cellEditorParams": {
-                        "api_route": "data/provider_effort/cpsc",
+                        "api_route": "data/provider_effort/cpsc_lv",
                         "columnDefs": [
                             {"field":'id'}, {"field":'cpsc_name', "width": 250}, {"field": 'cpsc_code'}],
                         "displayKey": "cpsc_code"

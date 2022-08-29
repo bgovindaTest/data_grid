@@ -2,12 +2,12 @@
 Creates views for organization
 
 */
-DROP VIEW IF EXISTS provider_effort.company_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.line_of_business_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.department_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.specialty_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.cost_center_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.cost_center_time_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.company_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.line_of_business_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.department_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.specialty_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.cost_center_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.cost_center_time_rv CASCADE;
 --company view
 CREATE VIEW provider_effort.company_rv AS
     SELECT c.id , company_name, company_code, c.is_active, c.created_at, c.updated_at,
@@ -105,13 +105,9 @@ CREATE VIEW provider_effort.cost_center_time_rv AS
     INNER JOIN provider_effort.cost_center_rv cc on cc.id = cct.cost_center_id
     LEFT JOIN  app_admin.users as users on cct.last_modified_userid = users.id;/*
 Full expansion of providers information.
-
-
 */
-DROP VIEW IF EXISTS provider_effort.appointments_rv CASCADE;
-DROP VIEW IF EXISTS provider_effort.providers_rv CASCADE;
-
-
+-- DROP VIEW IF EXISTS provider_effort.appointments_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.providers_rv CASCADE;
 
 CREATE VIEW provider_effort.providers_rv AS
     SELECT providers.id as id, employee_number, npi, providers.first_name,
@@ -181,17 +177,17 @@ join to the views below return a hit the permissions is available.
 */
 
 -- provider_effort.user_org_permission
-DROP VIEW IF EXISTS provider_effort.user_org_permissions_rv CASCADE;
-DROP VIEW IF EXISTS app_admin.user_app_permission_rv CASCADE;
-DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_org_permissions_rv CASCADE;
+-- DROP VIEW IF EXISTS app_admin.user_app_permission_rv CASCADE;
+-- DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
 
-DROP VIEW IF EXISTS provider_effort.user_appointment_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_org_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_lob_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_department_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_specialty_permsissions_v CASCADE;
-DROP VIEW IF EXISTS provider_effort.user_cost_center_permsissions_v CASCADE;
-DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_appointment_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_org_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_lob_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_department_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_specialty_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.user_cost_center_permsissions_v CASCADE;
+-- DROP VIEW IF EXISTS app_admin.user_app_permission_v CASCADE;
 
 
 -- user cost_center permissions
@@ -304,28 +300,30 @@ CREATE VIEW provider_effort.user_org_permissions_rv AS
     LEFT JOIN  app_admin.users                 as luser on luser.id   = uop.last_modified_userid
     INNER JOIN provider_effort.cost_center_rv  as ccrv  on ccrv.id     = uop.cost_center_id;CREATE VIEW app_admin.app_crud_permissions_v AS
 SELECT schema_name, table_name,
-    rt.allow_select, rt.allow_exists,
+    rt.allow_select, 
+    
+    --rt.allow_exists,
     rt.allow_insert   AND NOT is_read_only as allow_insert,
     rt.allow_update   AND NOT is_read_only as allow_update,
-    rt.allow_delete   AND NOT is_read_only as allow_delete,
-    rt.allow_save     AND NOT is_read_only as allow_save,
-
-    rt.allow_execute  AND NOT is_read_only as allow_execute,
-    rt.allow_truncate AND NOT is_read_only as allow_truncate
+    rt.allow_delete   AND NOT is_read_only as allow_delete
+    -- ,
+    -- rt.allow_save     AND NOT is_read_only as allow_save,
+    -- rt.allow_execute  AND NOT is_read_only as allow_execute,
+    -- rt.allow_truncate AND NOT is_read_only as allow_truncate
 
     FROM app_admin.app_permissions  ap
     INNER JOIN app_admin.user_app_permission_v uap on ap.app_id = uap.app_id
     INNER JOIN app_admin.registered_tables rt  on ap.registered_table_id = rt.id;
 
 CREATE VIEW app_admin.user_app_grid_config_v AS
-    SELECT     project_name, table_name, page_config
+    SELECT project_name, table_name, page_config, is_test
     FROM app_admin.apps
     WHERE is_public = true OR id IN (SELECT app_id FROM app_admin.user_app_permission_v );/*
 Appointment effort view.
 
 
 */
-DROP VIEW IF EXISTS provider_effort.appointment_effort_rv CASCADE; 
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_rv CASCADE; 
 CREATE VIEW provider_effort.appointment_effort_rv AS
 SELECT  aef.id as id, 
         apprv.is_active,         
@@ -385,14 +383,14 @@ Creates main view for appointment effort.
 */
 
 --appointment effort table
-DROP VIEW IF EXISTS provider_effort.appointment_effort_current_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_current_rv CASCADE;
 
 CREATE VIEW provider_effort.appointment_effort_current_rv AS
     SELECT * FROM (
         SELECT *, ROW_NUMBER() OVER (PARTITION BY appointment_code ORDER BY effective_date desc) as rn
         FROM provider_effort.appointment_effort_rv
         WHERE effective_date <= current_date
-    ) x WHERE rn =1;DROP VIEW IF EXISTS app_admin.home_page_rv;
+    ) x WHERE rn =1;-- DROP VIEW IF EXISTS app_admin.home_page_rv;
 CREATE VIEW app_admin.home_page_rv AS
 SELECT 
 project_name, table_name, description, 
@@ -408,13 +406,94 @@ returns grid config
 //project_name, table_name, is_public, is_read_only
 
 */
-DROP VIEW IF EXISTS app_admin.grid_config_rv; 
+-- DROP VIEW IF EXISTS app_admin.grid_config_rv; 
 CREATE VIEW app_admin.grid_config_rv AS 
 
-SELECT page_config, project_name, table_name,
-    CASE WHEN is_public  = true THEN true
+SELECT page_config, project_name, table_name, is_test,
+    CASE WHEN is_public  = true THEN false
         ELSE is_read_only
     END as is_read_only
 FROM app_admin.user_app_permission as uap
 INNER JOIN app_admin.apps as app on (app.id = uap.app_id AND uap.user_id = app_userid()  ) OR app.is_public = true 
-    OR is_appuser_admin() = true;
+    OR is_appuser_admin() = true;/*
+Creates main select views and updatable views for appointments and appointment_effort.
+
+*/
+-- DROP VIEW IF EXISTS provider_effort.appointments_byuser_lv;
+-- DROP VIEW IF EXISTS provider_effort.providers_lv;
+-- DROP VIEW IF EXISTS provider_effort.appointments_byuser_uv;
+-- DROP VIEW IF EXISTS provider_effort.appointments_byuser_rv;
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_rv;
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_uv;
+
+-- DROP VIEW IF EXISTS provider_effort.cost_centers_byuser_lv;
+-- DROP VIEW IF EXISTS provider_effort.lcg_lv;
+-- DROP VIEW IF EXISTS provider_effort.cpsc_lv;
+-- DROP VIEW IF EXISTS app_admin.users_lv;
+
+-- DROP VIEW IF EXISTS provider_effort.company_lv;
+-- DROP VIEW IF EXISTS provider_effort.line_of_business_lv;
+-- DROP VIEW IF EXISTS provider_effort.department_lv;
+-- DROP VIEW IF EXISTS provider_effort.specialty_lv;
+-- DROP VIEW IF EXISTS provider_effort.cost_center_lv;
+
+
+--main view
+CREATE VIEW provider_effort.appointment_effort_byuser_rv  AS
+  SELECT * FROM provider_effort.appointment_effort_rv
+  WHERE is_appuser_admin() = true OR appointment_id IN (SELECT id from provider_effort.user_appointment_permsissions_v);
+
+--updatable view
+CREATE VIEW  provider_effort.appointment_effort_byuser_uv AS 
+  SELECT * FROM provider_effort.appointment_effort
+  WHERE is_appuser_admin() = true OR appointment_id IN (SELECT id from provider_effort.user_appointment_permsissions_v)
+  WITH CHECK OPTION;
+
+CREATE VIEW provider_effort.appointments_byuser_rv AS
+  SELECT * FROM provider_effort.appointments_rv
+  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v);
+
+CREATE VIEW provider_effort.appointments_byuser_uv AS
+  SELECT * FROM provider_effort.appointments
+  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v)
+  WITH CHECK OPTION;
+
+--lookup views
+CREATE VIEW  provider_effort.providers_lv AS
+SELECT * FROM provider_effort.providers_rv
+WHERE is_active = true;
+
+CREATE VIEW  provider_effort.cost_centers_byuser_lv AS
+SELECT * FROM provider_effort.cost_center_rv
+WHERE is_active = true AND (is_appuser_admin() = true OR id IN (select id from provider_effort.user_org_permissions_v) ) ;
+
+CREATE VIEW provider_effort.appointments_byuser_lv AS
+  SELECT * FROM provider_effort.appointments_rv
+  WHERE is_active = true AND (is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v) );
+
+CREATE VIEW provider_effort.lcg_lv AS
+  SELECT * FROM provider_effort.lcg
+  WHERE is_active = true;
+
+CREATE VIEW provider_effort.cpsc_lv AS
+  SELECT * FROM provider_effort.cpsc
+  WHERE is_active = true;
+
+CREATE VIEW app_admin.users_lv AS
+  SELECT * FROM app_admin.users
+  WHERE is_active = true;
+
+CREATE VIEW provider_effort.company_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;
+
+CREATE VIEW provider_effort.line_of_business_lv AS
+  SELECT * FROM provider_effort.line_of_business_rv where is_active = true;
+
+CREATE VIEW provider_effort.department_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;
+
+CREATE VIEW provider_effort.specialty_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;
+
+CREATE VIEW provider_effort.cost_center_lv AS
+  SELECT * FROM provider_effort.company_rv where is_active = true;

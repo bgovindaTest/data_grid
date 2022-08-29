@@ -89,6 +89,7 @@ Add app configurations and descriptions
 */
 let insertStr = "INSERT INTO app_admin.apps (id,project_name, table_name, description, page_config, is_test, is_public) VALUES\n"
 let values = []
+let full_str = ""
 
 for (x of apps) {
 
@@ -99,6 +100,7 @@ for (x of apps) {
 }
 let out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/apps_inserts.psql'
 let out_str = insertStr + values.join(',\n') + ';'
+full_str = out_str +'\n'
 fs.writeFileSync(out_path, out_str);
 
 /*registered_tables*/
@@ -129,6 +131,7 @@ INSERT INTO app_admin.registered_tables (permission_name, schema_name, table_nam
     where schemaname IN ('provider_effort', 'app_admin');
 `
 out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/registered_table_inserts.psql'
+full_str += registeredTablesStr +'\n'
 fs.writeFileSync(out_path, registeredTablesStr);
 
 /*
@@ -165,4 +168,7 @@ SELECT user_id, 3, false FROM app_admin.users;
 )
 
 out_str = strsx.join('\n')
+full_str += out_str
 fs.writeFileSync(out_path, out_str);
+
+fs.writeFileSync('/home/bgovi/PsqlCred/output_data/sql_admin/app_inserts_all.psql', full_str);

@@ -100,11 +100,11 @@ class IX:
         insertStr = """
             INSERT INTO app_admin.registered_tables (id, description, schema_name, table_name, allow_select, allow_insert, allow_update, allow_delete) VALUES\n
         """
-        tmpStr = """
+        tempStr = """
             ({id}, {description}, {schema_name}, {table_name}, true, true, true, true )
         """
 
-        tmpStrR = """
+        tempStrR = """
             ({id}, {description}, {schema_name}, {table_name}, true, false, false, false )
         """
 
@@ -115,13 +115,13 @@ class IX:
             schema_name, table_name = tx.split('.')
             x = tempStr.format(table_name = table_name, schema_name = schema_name, id = i, description = tx)
             i+=1
-            vals.push(x)
+            vals.append(x)
         for tx in self.admin_tables:
             self.table_perms_map[tx] = i
             schema_name, table_name = tx.split('.')
             x = tempStr.format(table_name = table_name, schema_name = schema_name, id = i, description = tx)
             i+=1
-            vals.push(x)
+            vals.append(x)
         #add views
         viewsx = [ "provider_effort.company_rv", "provider_effort.line_of_business_rv", "provider_effort.department_rv",
             "provider_effort.specialty_rv", "provider_effort.cost_center_rv",  "provider_effort.cost_center_time_rv",
@@ -132,7 +132,7 @@ class IX:
             schema_name, table_name = tx.split('.')
             x = tempStrR.format(table_name = table_name, schema_name = schema_name, id = i, description = tx)
             i+=1
-            vals.push(x)
+            vals.append(x)
         viewsx = [ "provider_effort.appointment_effort_byuser_rv", "provider_effort.appointment_effort_byuser_uv",
             "provider_effort.appointments_byuser_rv", "provider_effort.appointments_byuser_uv"
         ]
@@ -141,7 +141,7 @@ class IX:
             schema_name, table_name = tx.split('.')
             x = tempStr.format(table_name = table_name, schema_name = schema_name, id = i, description = tx)
             i+=1
-            vals.push(x)
+            vals.append(x)
 
         fout.write(insertStr)
         fout.write(',\n'.join(vals))

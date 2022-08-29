@@ -1,7 +1,8 @@
--- CREATE LOGIN ROLE bgovindara
--- CREATE ROLE app_user
--- GRANT PERMISSIONS to app_user
--- GRANT LOGIIN TO app_user
--- set max logins
 
--- reset indexes
+DROP ROLE IF EXISTS app_user;
+CREATE ROLE app_user;
+GRANT CONNECT ON DATABASE bgovi to app_user;
+GRANT USAGE ON SCHEMA provider_effort to app_user;
+GRANT USAGE ON SCHEMA app_admin to app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA provider_effort to app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app_admin to app_user;

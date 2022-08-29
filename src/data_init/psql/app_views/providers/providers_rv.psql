@@ -1,0 +1,64 @@
+/*
+Full expansion of providers information.
+*/
+-- DROP VIEW IF EXISTS provider_effort.appointments_rv CASCADE;
+-- DROP VIEW IF EXISTS provider_effort.providers_rv CASCADE;
+
+CREATE VIEW provider_effort.providers_rv AS
+    SELECT providers.id as id, employee_number, npi, providers.first_name,
+        providers.last_name, classification_id, providers.is_active, cpsc_id,
+        providers.last_name||providers.first_name as full_name,
+        lcg_id, start_date, end_date, 
+        providers.created_at, providers.updated_at, users.id as "last_modified_by_userid", users.email as "last_modified_by_user_email",
+        lcg_id  as "lcg_id.id",  lcg_name,  lcg_name as "lcg_id.lcg_name",   lcg_code,  lcg_code as  "lcg_id.lcg_code",
+        cpsc_id as "cpsc_id.id", cpsc_name, cpsc_name as "cpsc_id.cpsc_name",cpsc_code, cpsc_code as "cpsc_id.cpsc_code",
+
+
+        classification_id as "classification_id.id",
+        classification_name as "classification_id.classification_name"  
+
+    FROM provider_effort.providers as providers
+    LEFT JOIN provider_effort.lcg  as lcg  on lcg.id  = providers.lcg_id
+    LEFT JOIN provider_effort.cpsc as cpsc on cpsc.id = providers.cpsc_id
+    LEFT JOIN provider_effort.classifications as classifications on providers.classification_id = classifications.id
+    LEFT JOIN app_admin.users as users on users.id = providers.last_modified_userid ;
+
+CREATE VIEW provider_effort.appointments_rv AS
+    SELECT app.id as id, employee_number, npi, provider.first_name,
+        provider.last_name, provider.full_name, classification_id, app.is_active, app.cpsc_id,
+        app.lcg_id, app.start_date, app.end_date, 
+        app.created_at, app.updated_at, users.id as "last_modified_by_userid", users.email as "last_modified_by_user_email",
+        app.lcg_id  as "lcg_id.id",  lcg.lcg_name, lcg.lcg_code, lcg.lcg_code as "lcg_id.lcg_code",   lcg.lcg_name as "lcg_id.lcg_name",
+        app.cpsc_id as "cpsc_id.id", cpsc.cpsc_name, cpsc.cpsc_name as "cpsc_id.cpsc_name", cpsc.cpsc_code, cpsc.cpsc_code as "cpsc_id.cpsc_code",
+        classification_id as "classification_id.id",
+        classification_name as "classification_id.classification_name",
+        classification_name,
+
+        provider_id,
+        provider_id as "provider_id.id", employee_number as "provider_id.employee_number", 
+        npi as "provider_id.npi", provider.first_name as "provider_id.first_name",
+        provider.last_name as "provider_id.last_name",
+
+        ccrv.id as "cost_center_id", company_name, company_code, 
+        lob_name, lob_code, company_id, lob_id, department_id, specialty_id,
+        specialty_name, specialty_code, 
+        department_name, department_code,
+        cost_center_code, cost_center_name,
+        org_code, org_name,
+        --maps
+        company_name as "cost_center_id.company_name", company_code as "cost_center_id.company_code", 
+        lob_name as "cost_center_id.lob_name", lob_code as "cost_center_id.lob_code",
+        specialty_name as "cost_center_id.specialty_name", specialty_code as "cost_center_id.specialty_code", 
+        department_name as "cost_center_id.department_name", department_code as "cost_center_id.department_code",
+        cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name",
+        org_code as "cost_center_id.org_code",
+        org_name as "cost_center_id.org_name",
+        employee_number || ':' || org_code as  appointment_code 
+
+    FROM provider_effort.appointments as app
+    LEFT JOIN provider_effort.lcg             as lcg  on lcg.id  = app.lcg_id
+    LEFT JOIN provider_effort.cpsc            as cpsc on cpsc.id = app.cpsc_id
+    INNER JOIN provider_effort.providers_rv   as provider on provider.id = app.provider_id
+    LEFT JOIN provider_effort.classifications as classifications on provider.classification_id = classifications.id
+    LEFT JOIN app_admin.users                 as users on users.id = app.last_modified_userid
+    LEFT JOIN provider_effort.cost_center_rv  as ccrv on ccrv.id   = app.cost_center_id;

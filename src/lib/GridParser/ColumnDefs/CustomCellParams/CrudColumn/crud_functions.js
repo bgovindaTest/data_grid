@@ -21,6 +21,7 @@ const type_check = require('../../../../TypeCheck')
 const data_config = require('../../../../DataConfig')
 const meta_column_name = data_config['meta_column_name']
 const lodashCloneDeep = require('lodash.clonedeep')
+const {isEqual} = require('lodash')
 
 class CrudColumnFunctions {
     constructor() {
@@ -277,7 +278,10 @@ class CrudColumnFunctions {
             for (var i=0; i< change_fields.length; i++) {
                 let field = change_fields[i]
                 var value = rowData[field]
-                if (value !== backup[field] ) {return true}
+                //if (value !== backup[field] ) {
+                if (! isEqual(value, backup[field] ) ) {
+                    return true
+                }
             }
             return false
         }
@@ -411,7 +415,12 @@ class CrudColumnFunctions {
     
         return function CrudStatus (rowData) {
             let crud_status = {'crudType': null, 'is_complete': false, 'is_error': false, 'is_save': false,
-                'is_warning': false, 'is_delete': false, 'is_empty': false, 'is_changed': false}
+                'is_warning': false, 'is_delete': false, 'is_empty': false, 'is_changed': false,
+                //for changes
+                'is_incomplete': false, 'is_changed_error': false, 'is_changed_warning': false
+            
+            
+            }
 
             crud_status['is_delete']  = IsDeleted(rowData)
             crud_status['crudType']   = IsCrudType(rowData)
@@ -420,6 +429,14 @@ class CrudColumnFunctions {
             crud_status['is_empty']   = IsEmpty(rowData)
             crud_status['is_warning'] = IsWarning(rowData)
             crud_status['is_complete']= IsCompleted(rowData)
+
+
+            crud_status['is_incomplete']      = crud_status['is_changed'] && ( !crud_status['is_complete'] || crud_status['is_empty'] )
+            crud_status['is_changed_error']   = crud_status['is_changed'] && ( crud_status['is_error'] )
+            crud_status['is_changed_warning'] = crud_status['is_changed'] && ( crud_status['is_warning'] )
+
+
+
 
             if (crud_status['is_delete']) { crud_status['is_save'] = true }
             else {

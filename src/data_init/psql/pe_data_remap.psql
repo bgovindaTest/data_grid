@@ -18,7 +18,7 @@
     {"name": "line_of_business",
     "query": """
         --lob
-        SELECT DISTINCT lob_id as id, lob_name, lob_code,1 as last_modified_userid, 
+        SELECT DISTINCT lob_id as id, company_id, lob_name, lob_code,1 as last_modified_userid, 
             CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active --is_active
         FROM full_org
         ORDER BY lob_id asc;
@@ -45,7 +45,7 @@
         ORDER BY specialty_id asc;
      """
     },
-    {"name": "time_units",
+    {"name": "time_unit",
      "query": """
         --time units
         SELECT id, time_unit_name, 1 as last_modified_userid
@@ -62,13 +62,12 @@
         ORDER BY cost_center_id asc;
      """
     },
-    {"name": "company_cost_center",
+    {"name": "cost_center_time",
      "query": """
         --company_cost_center
-        SELECT DISTINCT id, cost_center_id, company_id, 
+        SELECT DISTINCT cost_center_id,
             1 as last_modified_userid,
-            CASE WHEN position('Lawson' in lob_code) > 0 THEN false ELSE true END is_active, --is_active
-            40 as cfte_time, 3 as time_unit_id
+            40 as cfte_full_time, 3 as time_unit_id
         FROM full_org
         ORDER BY cost_center_id asc;
      """
@@ -104,7 +103,7 @@
     {"name": "providers",
      "query": """
       SELECT id, npi, employee_number, first_name, last_name, classification_id,
-        last_modified_userid, is_active
+        last_modified_userid, is_active, lcg_id, cpsc_id
       FROM (
         SELECT id, npi, employee_number, first_name, last_name, classification_id,
         providers.last_modified_by_user_id as last_modified_userid, 
@@ -117,6 +116,7 @@
         LEFT JOIN (
             SELECT lcg_id, cpsc_id, provider_id
             FROM appointments
+            WHERE cpsc_id IS NOT NULL
          ) a  on a.provider_id = providers.id
       ) x where x.rx = 1
        ORDER BY id;
@@ -125,7 +125,7 @@
     {"name": "appointments",
      "query": """
         --appointments
-        select id, provider_id, cost_center_id as company_cost_center_id,
+        select id, provider_id, cost_center_id,
         CASE WHEN lcg_id =1 THEN null ELSE  lcg_id  END as lcg_id, 
         CASE WHEN cpsc_id =1 THEN null ELSE cpsc_id END as cpsc_id,
         last_modified_by_user_id as last_modified_userid, is_active, null as start_date, null as end_date
@@ -168,32 +168,17 @@
     {"name": "user_org_permission",
      "query": """
         --user permissions
-        SELECT user_id, company_cc_id as company_cost_center_id, true as is_active, 
-        1 as last_modified_userid, true as specialty_level FROM
-        (
-            SELECT user_id, specialty_permissions.id as id, 
-                specialty_permissions.last_modified_by_user_id as last_modified_userid,
-                current_status_id, specialty_permissions.created_at,
-                specialty_permissions.updated_at, 
-                specialty_permissions.specialty_id as specialty_id,
-                entities.entity_name as "uen"
-
+      SELECT user_id, cost_center_id, is_active, department_level, specialty_level, lob_level,
+         last_modified_userid
+      FROM (
+            SELECT user_id, cost_center_id, true as is_active, false as department_level,
+               1 as last_modified_userid, true as specialty_level, false as lob_level,
+               ROW_NUMBER() OVER (PARTITION BY user_id, specialty_id) as rn
             FROM specialty_permissions
-            INNER JOIN specialties on specialties.id = specialty_permissions.specialty_id
-            INNER JOIN departments on specialties.department_id = departments.id
-            INNER JOIN entities    on entities.id = departments.entity_id
-        ) as x
-
-        INNER JOIN (
-            SELECT entity_name, old_specialty_id, company_cc_id FROM (
-                SELECT entity_name, old_specialty_id, id as company_cc_id, ROW_NUMBER() OVER( PARTITION BY entity_name, specialty_id) as rank
-                FROM full_org
-            ) tmp WHERE rank = 1
-        ) y
-        on 
-            y.old_specialty_id = x.specialty_id AND
-            y.entity_name      = x.uen 
-        ORDER BY user_id asc;
+            INNER JOIN ( SELECT id as cost_center_id, specialty_id as cc_sid
+                  FROM cost_centers
+            ) as cc on cc.cc_sid = specialty_id
+      ) x where rn=1;
      """
     },
     {"name": "full_org",
@@ -201,6 +186,4 @@
       SELECT * FROM full_org ORDER BY company_id asc;
     """
     }
-
-
 ]

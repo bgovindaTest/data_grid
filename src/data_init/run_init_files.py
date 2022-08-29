@@ -6,61 +6,75 @@ import json
 import psycopg2
 import psycopg2.extras
 import sys
-sys.path.append('~/PsqlCred')
+sys.path.append('/home/bgovi/PsqlCred/')
 import psql_cred
+import index_admin_init
+import os
 
 output_connect_string = psql_cred.output_connect_string
-output_path = '~/PsqlCred/output_data'
+output_path = '/home/bgovi/PsqlCred/output_data'
 conn = psycopg2.connect(output_connect_string)
 
-class BackupData:
+sql_inserts = output_path +'/sql/'
+sql_admin   = output_path +'/sql_admin/'
+general     = '/home/bgovi/Workspace/MultiGrid/data_grid/src/data_init/psql/'
+
+class PEINIT:
 
     def __init__(self):
-        pass
+        self.provider_effort_tables = index_admin_init.provider_effort_tables
+        self.admin_tables           = index_admin_init.admin_tables
 
     def Run(self):
         """
-            1. create functions
-            2. create admin tables
-            3. create provider_effort tables
-            4. add triggers
-            5. create_views
-            6. insert data
-            7. reset indexes
-            8. create policies
-            9. create roles
-            10. insert config files (for deployment component)
+            Order of script calls matters:
+            drop/create schema
+            create functions
+            create admin tables
+            create provider_effort tables
+            insert data
+            reset indexes
+            add triggers
+            create_views
+            create policies
+            create roles
+            insert config files (for deployment component)
         """
-        pass
+        self.RunSqlFile(general+'schema_init.psql')
+        self.RunSqlFile(general+'create_functions.psql')
+        self.RunSqlFile(general+'create_tables.psql')
+        admin_list    = self.admin_tables
+        self.InsertData(sql_inserts, admin_list )
+        provider_list = self.provider_effort_tables
+        self.InsertData(sql_inserts, provider_list )
 
+    def RunSqlFile(self, file_name, is_commit = False):
+        print(file_name)
+        sql_str = self.ReadSqlFile(file_name)
+        self.RunQuery(sql_str, is_commit)
+
+    def InsertData(self, base_path, table_list):
+        for tx in table_list:
+            fx = base_path+tx+'.psql'
+            if not os.path.exists(fx):
+                print('Skipping', fx)
+                continue
+            self.RunSqlFile(base_path+tx+'.psql', True)
 
         #run sepearte queries
-    def RunQuery(self, sql_query):
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    def RunQuery(self, sql_query, is_commit):
+        cur = conn.cursor() #(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute(sql_query)
-        rows = cur.fetchall()
-        for row in rows:
-            row['updated_at'] = str(row['updated_at'])
-            if 'effective_date' in row:
-                row['effective_date'] = str(row['effective_date'])
-        return rows
-
-    def ResetIndexes(self, schema_name):
-        """
-        -- ALTER SEQUENCE product_id_seq RESTART WITH 1453;
-        -- setval('product_id_seq', 1453);
-        -- SELECT SETVAL('project_id_seq', (SELECT MAX(id) + 1 FROM project));
-        """
-        sql_query = """select table_schema, table_name, table_schema ||'.'||table_name|| '_id_seq' as seq 
-            from information_schema.tables WHERE table_schema = {table_schema};""".format(table_schema=schema_name)
-        rows = self.RunQuery(sql_query)
-        for row in rows:
-            sql_query = """SELECT SETVAL({seq}, (SELECT MAX(id) + 1 FROM "{schema_name}"."{table_name}"));""".format(schema_name=row['table_schema'], 
-                table_name=row['table_name'], seq_name=row['seq'])
-            self.RunQuery(sql_query)
+        if is_commit:
+            conn.commit()
 
 
-        pass
+    def ReadSqlFile(self, file_path):
+        f = open(file_path)
+        sql_str = f.read()
+        f.close()
+        return sql_str
+
 
 # company
 # line_of_business
@@ -84,5 +98,5 @@ class BackupData:
 
 
 if __name__ == "__main__":
-    x = BackupData()
-    x.BuildJsonFiles()
+    x = PEINIT()
+    x.Run()

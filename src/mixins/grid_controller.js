@@ -150,6 +150,7 @@ methods: {
         //pull url params
 
         let main_grid   = testGrid['grids'][0]
+        let is_read_only = false //true
         let routeParams = main_grid['routeParams'] || {}
 
 
@@ -169,12 +170,32 @@ methods: {
         this.columnDefs    = px['columnDefs']
         this.gridFunctions = px['gridFunctions']
         this.LinkUIQueryParams(px['queryParams'])
-        this.NavHeaderParamsInit(navHeaderParams)
+        this.NavHeaderParamsInit(navHeaderParams, is_read_only)
         if (this.NODE_ENV === 'development' && main_grid.hasOwnProperty('tableData') ) {
             this.LoadTestData(main_grid)
         } else { this.LoadDataInit() }
 
+        this.SetColumnsReadOnly(is_read_only)
+
         this.loading = false
+    },
+    SetColumnsReadOnly(is_read_only) {
+        //not change cell colors. Need to check.
+        if (! is_read_only) { return }
+        let cdefs = this.columnDefs
+        let mc = data_config['meta_column_name']
+        for( let i =0; i < cdefs.length; i++ ) {
+            let cdef = cdefs[i]
+            if (cdef['field'] === mc ) {
+                cdef['hide'] = true
+            }
+            if(!cdef.hasOwnProperty('editable')) { continue }
+
+            let ex = cdef['editable']
+            if (typeof ex === 'function') {
+                cdef['editable'] = function (params) {return false}
+            } else { cdef['editable'] = false }
+        }
     },
     LinkUIQueryParams( queryParams ) {
         /*
@@ -217,14 +238,13 @@ methods: {
                 this.valuesObject[gridIndex][field] = api_data
             }
         }
-
     },
-    NavHeaderParamsInit(navHeaderParams) {
+    NavHeaderParamsInit(navHeaderParams, is_read_only = false) {
         /*
             Initialization nav header params for navbar functionality
         */
         let defaultNavHeaderParams ={
-                'home': true,
+                'home': false,
                 'help': true,
                 'links': [],// or object array. 
                 'previous_page':  true, //for pagination
@@ -232,7 +252,7 @@ methods: {
                 'pull_data':  false, //for pagination
                 'page_number': true,
                 'save':  true,
-                'add_row':   false,
+                'add_row':   true,
                 'new_sheet': false,
                 'load_data_init': true,
         }
@@ -241,6 +261,14 @@ methods: {
             let key = keys[i]
             if (! navHeaderParams.hasOwnProperty(key)) { navHeaderParams[key] = defaultNavHeaderParams[key] }
         }
+        //remove buttons on read only
+        if (is_read_only) {
+            navHeaderParams['add_row'] = false
+            navHeaderParams['save'] = false
+            navHeaderParams['new_sheet'] = false
+        }
+
+        //add links
         let homeRoute = {'name': "Home", 'url': '/'}
         if(navHeaderParams['links'] === null ) {
             navHeaderParams['links'] = []
@@ -295,10 +323,12 @@ methods: {
             route = projectFolder +'/' + tableName
         } else if (tmp.length === 1) { 
             tableName = tmp[0] 
-            route = tableName
+            route = tableName +'/' + tableName
+        } else {
+            route = "home/home"
         }
         //if tmp.length === 0  //is_root
-        return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': route}
+        return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': 'grid/'+ route}
     },
     onGridReady(params) {
         this.gridApi     = params.api
@@ -316,7 +346,20 @@ methods: {
         let routeParams = this.UrlParams()
         let route = routeParams['route']
         //{'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-        let dx = await axios_object.post(route,{})
+        //project_name, table_name, is_public, is_read_only
+
+        try {
+            let dx = await axios_object.get(route)
+            //loading error
+            let axios_object = await this.axios.post(route, req_body)
+            let x = axios_object.data
+            let serverTableData = x['output_data']
+        }
+        catch (e) {
+
+        }
+
+
         //navbar
         //columnDef
     },
@@ -471,6 +514,7 @@ methods: {
         try{
             let tableData = await this.RunTableDataQuery(pullx, route, req_body)
             this.tableData = tableData
+            // console.log(tableData)
         } catch (e) {
             console.error(e)
             this.loading_error += String(e)
@@ -586,7 +630,8 @@ methods: {
         */
         //validation_complete
         let save_count = {'is_save': 0, 'is_warning': 0, 'is_delete': 0, 
-            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0
+            'is_empty': 0, 'is_changed': 0, 'is_error': 0, 'is_complete': 0,
+            'is_incomplete': 0, 'is_changed_error': 0, 'is_changed_warning': 0
         }
         let keys = Object.keys(save_count)
         for (let i =0; i < keys.length; i++) {
@@ -647,6 +692,8 @@ methods: {
             this.saveModal    = true //launches saveModal
             this.saveLock     = true //prevents modal from being closed
             this.isValidating = true
+            //allows ui to refresh
+            await new Promise(r => setTimeout(r, 50))
 
             let save_count = this.saveParams
             const deleteWarning    = this.gridFunctions['deleteWarning']
@@ -670,11 +717,17 @@ methods: {
             // console.log(this.saveMainMessage)
 
             let sx = save_count
+            let changed_rows = `Rows Changed. changed: ${ sx['is_changed'] }
+                incomplete: ${sx['is_incomplete']}  warning: ${sx['is_changed_warning']} errors: ${sx['is_changed_error']} <br />
+            `
+            let all_rows = `All Displayed Rows. warning: ${sx['is_warning']} errors: ${sx['is_error']}`
 
-            //continue save
+
+            // let cstr = `changed: ${sx['is_changed']} saving: ${sx['is_save']}  warning: ${sx['is_warning']} errors: ${sx['is_error']} <br />`
+
             if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
 
-                this.MainSaveMessage("Saving Rows")
+                this.MainSaveMessage(`Number Saving Rows: ${ sx['is_save'] }`)
                 this.saveDeleteMessage        = deleteWarning
                 this.saveUniqueMessage        = uniqueWarning
                 await new Promise(r => setTimeout(r, 500))
@@ -687,22 +740,34 @@ methods: {
 
             //pause save option to 
             else if ( sx['is_save'] > 0 && ( sx['is_warning'] > 0 || sx['is_error'] > 0 ) ) {
-                this.MainSaveMessage("Changes detected for saving. However, some rows either have errors or warnings. Press close to fix or continue to ignore. Rows with errors will be skipped")
+                let wstr = `Changes detected for saving. However, some rows either have errors or warnings.
+                    Press close to fix or continue to ignore. Rows with errors will be skipped. <br />
+                    Number Saving Rows: ${ sx['is_save'] } <br />
+                    ${changed_rows}
+                    ${all_rows}
+                `
+                this.MainSaveMessage( wstr )
                 this.saveDeleteMessage        = deleteWarning
                 this.saveUniqueMessage        = uniqueWarning
                 this.ChangeSaveState(true, false, true, false)
 
             } else if ( sx['is_changed'] >  0 || sx['is_delete'] >  0  ) {
-                this.MainSaveMessage("Changes detected. However, all changed rows either have errors or are incomplete and not valid for saving.")
+                let wstr = `Changes detected. However, all changed rows either have errors or are incomplete and not valid for saving. <br />
+                    Number Saving Rows: ${ sx['is_save'] } <br />
+                    ${changed_rows}
+                    ${all_rows}
+                `
+                this.MainSaveMessage(wstr)
                 this.saveDeleteMessage        = deleteWarning
                 this.saveUniqueMessage        = uniqueWarning
                 this.ChangeSaveState(true, false, false, false)                
 
             } else {
-                this.MainMessage("Error: This message should display. Please contact admin")
+                this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             }
         } catch (e) {
             console.log(e)
+            this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             alert(e)
         } 
 
@@ -754,7 +819,8 @@ methods: {
         }
     },
     SaveStatusCount(rowStatus, save_count) {
-        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed', 'is_error', 'is_complete']
+        let save_params = ['is_save', 'is_warning', 'is_delete', 'is_empty', 'is_changed',
+            'is_error', 'is_complete','is_incomplete', 'is_changed_error', 'is_changed_warning']
         for (let i =0; i < save_params.length; i++ ) {
             let sp = save_params[i]
             if (rowStatus[sp] === true) { save_count[sp] += 1 }
@@ -762,14 +828,18 @@ methods: {
     },
     async SaveAndReload() {
         this.saveLock = true
-        await this.PushSaveData()
-        this.saveLock  = false
-        this.saveModal = false
-        this.ShowSnackBar()
-        let tmpFunc = this.HideSnackBar
-        setTimeout(tmpFunc, 5000)
+        let no_error = await this.PushSaveData()
+        if (no_error === true) {
+            this.saveLock  = false
+            this.saveModal = false
+            this.ShowSnackBar()
+            let tmpFunc = this.HideSnackBar
+            setTimeout(tmpFunc, 5000)
+            await this.RunNewQuery()
+        } else {
+            this.saveLock  = false
+        }
 
-        await this.RunNewQuery()
     },
     async PushSaveData() {
         //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
@@ -786,15 +856,17 @@ methods: {
                 let adata = axios_object.data
                 this.saved     += adata['output_data'].length || 0
                 this.rejected  += adata['error_data'].length  || 0
-                if (adata['error_data'].length !== 0) {console.error( adata['error_data'] )}
-                if (adata['server_error'] !== "") {console.error( adata['server_error'] )}
+                if (adata['error_data'].length !== 0) {console.log( adata['error_data'] )}
+                if (adata['server_error'] !== "") {console.log( adata['server_error'] )}
             }
             save_count['is_validating'] = true 
             save_count['is_saving']     = false
             save_count['save_complete'] = true
+            return true
         } catch (e) {
             console.log(e)
-            alert(e)
+            this.MainMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            return false
         }
 
         //continues save

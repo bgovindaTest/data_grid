@@ -1,0 +1,60 @@
+/*
+Appointment effort view.
+
+
+*/
+-- DROP VIEW IF EXISTS provider_effort.appointment_effort_rv CASCADE; 
+CREATE VIEW provider_effort.appointment_effort_rv AS
+SELECT  aef.id as id, 
+        apprv.is_active,         
+        effective_date::text, academic, contract, veterans_affairs, administration, cfte,
+        CASE WHEN aef.cfte_full_time IS NULL and cct.cfte_full_time IS NULL THEN 40.0*cfte
+            WHEN  aef.cfte_full_time IS NULL THEN cct.cfte_full_time*cfte
+            ELSE aef.cfte_full_time*cfte
+        END as cfte_time,
+
+
+        CASE WHEN aef.cfte_full_time IS NULL and cct.cfte_full_time IS NULL THEN 40.0
+            WHEN  aef.cfte_full_time IS NULL THEN cct.cfte_full_time
+            ELSE aef.cfte_full_time
+        END as cfte_full_time,
+
+        time_unit_name,
+        apprv.cpsc_id,
+        apprv.lcg_id, 
+        apprv.start_date,
+        apprv.end_date, 
+        aef.created_at,
+        aef.updated_at, users.id as "last_modified_by_userid", users.email as "last_modified_by_user_email",
+        lcg_name, lcg_code,
+        cpsc_name, cpsc_code,
+        classification_id,
+        classification_name,
+
+        provider_id, employee_number, 
+        npi, apprv.first_name,
+        apprv.last_name,
+
+        apprv.cost_center_id, apprv.company_name, apprv.company_code, 
+        apprv.lob_name, apprv.lob_code, company_id, lob_id, department_id,
+        apprv.specialty_name, apprv.specialty_code, specialty_id, 
+        apprv.department_name, apprv.department_code,
+        apprv.cost_center_code, apprv.cost_center_name,
+
+        appointment_code,
+        apprv.id as appointment_id,
+        --maps
+        employee_number as "appointment_id.employee_number", npi as "appointment_id.npi", 
+        apprv.first_name as "appointment_id.first_name", apprv.last_name as "appointment_id.last_name",
+        apprv.company_name as "appointment_id.company_name", apprv.company_code as "appointment_id.company_code", 
+        apprv.lob_name as "appointment_id.lob_name", apprv.lob_code as "appointment_id.lob_code",
+        apprv.specialty_name as "appointment_id.specialty_name", apprv.specialty_code as "appointment_id.specialty_code", 
+        apprv.department_name as "appointment_id.department_name", apprv.department_code as "appointment_id.department_code",
+        apprv.cost_center_code as "appointment_id.cost_center_code", apprv.cost_center_name as "appointment_id.cost_center_name",
+        appointment_code as "appointment_id.appointment_code",
+        appointment_id   as "appointment_id.id"
+
+FROM provider_effort.appointment_effort as aef
+INNER JOIN provider_effort.appointments_rv apprv on apprv.id = aef.appointment_id
+LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = apprv.cost_center_id
+LEFT JOIN app_admin.users on users.id = apprv.last_modified_by_userid;

@@ -89,7 +89,8 @@ class AgRichParams {
             if (this.grid_column['cellEditorParams']['allowNull'] || false ) { values.push(null) }
             for(let i=0; i<valuesObject.length; i++) {
                 let x = valuesObject[i]
-                let dk = x[displayKey]
+                let dk =  {} //x[displayKey]
+                dk[displayKey] = x
                 values.push(dk)
             }
         }

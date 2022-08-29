@@ -18,8 +18,8 @@ input_connect_string   = psql_cred.input_connect_string
 output_path = '/home/bgovi/PsqlCred/output_data'
 conn = psycopg2.connect(input_connect_string)
 
-pe_data    = './psql/pe_data_remap.psql'
-admin_data = './psql/admin_data_remap.psql'
+pe_data    = '/home/bgovi/Workspace/MultiGrid/data_grid/src/data_init/psql/pe_data_remap.psql'
+admin_data = '/home/bgovi/Workspace/MultiGrid/data_grid/src/data_init/psql/admin_data_remap.psql'
 
 sql_out = output_path +'/sql/'
 json_out = output_path +'/json_out/'
@@ -38,7 +38,7 @@ class BackupData:
         pass
 
     def RunInit(self):
-        self.RunFile('admin', admin_data)
+        self.RunFile('app_admin', admin_data)
         self.RunFile('provider_effort', pe_data)
 
     def RunFile(self, schema_name, file_path):
@@ -46,6 +46,8 @@ class BackupData:
         for i in range(0, len(x)):
             table_name = x[i]['name']
             sql_query = x[i]['query']
+            # if table_name == "full_org":
+            #     continue
             print(table_name)
             full_name = schema_name +'.'+table_name
             rows = self.RunQuery(sql_query)

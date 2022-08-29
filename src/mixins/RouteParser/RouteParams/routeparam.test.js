@@ -28,6 +28,7 @@ test('reqbody set_fields instead of', () => {
     let columnDefs = [{'field': 'x', 'ifNull': 'null'}, {'field':'y', 'ifNull': 'null'} ]
     let routeParams = { 
         'default_route': 'localhost',
+        'select': {'route':'/localhostxx/select'},
         'set_fields': ['x'],
         'constraint': 'unique',
         'set_filters': ['y'],

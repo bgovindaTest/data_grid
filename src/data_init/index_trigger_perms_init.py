@@ -58,7 +58,7 @@ class IX:
             CREATE TRIGGER set_app_userid
             BEFORE UPDATE OR INSERT ON {table_name}
             FOR EACH ROW
-            EXECUTE PROCEDURE trigger_last_modified_by_userid();\n
+            EXECUTE PROCEDURE trigger_last_modified_userid();\n
         """
 
 

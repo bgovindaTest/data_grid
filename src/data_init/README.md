@@ -1,4 +1,5 @@
 # Initializes database for app must be in same directory as script
+0.) run python initialization scripts in data_init/
 1.) perl data_init/psql/app_views/concat_sql.pl
 2.) perl data_init/psql/concat_sql.pl
 3.) perl data_init/full_concat.pl

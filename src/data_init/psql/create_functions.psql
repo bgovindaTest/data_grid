@@ -27,10 +27,10 @@ CREATE OR REPLACE FUNCTION is_appuser_admin() RETURNS boolean
 LANGUAGE SQL
 IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION trigger_last_modified_by_userid()
+CREATE OR REPLACE FUNCTION trigger_last_modified_userid()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.last_modified_by_userid = app_userid();
+  NEW.last_modified_userid = app_userid();
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

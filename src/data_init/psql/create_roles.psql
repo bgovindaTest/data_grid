@@ -1,3 +1,4 @@
+
 DROP ROLE IF EXISTS app_user;
 CREATE ROLE app_user;
 GRANT CONNECT ON DATABASE bgovi to app_user;

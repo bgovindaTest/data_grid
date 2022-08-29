@@ -8,7 +8,7 @@ Creates main view for appointment effort.
 
 CREATE VIEW provider_effort.appointment_effort_current_rv AS
     SELECT * FROM (
-        SELECT *, ROW_NUMBER() OVER (PARTITION BY appointment_code ORDER BY effective_date desc) as rn
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY appointment_code ORDER BY effective_date::date desc) as rn
         FROM provider_effort.appointment_effort_rv
-        WHERE effective_date <= current_date
+        WHERE effective_date::date <= current_date
     ) x WHERE rn =1;

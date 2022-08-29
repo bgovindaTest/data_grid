@@ -83,7 +83,7 @@ CREATE TABLE app_admin.registered_tables (
     allow_truncate boolean default false NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid(),
+    last_modified_userid   bigint  DEFAULT app_userid()
 );
 --add index?
 
@@ -431,7 +431,8 @@ COMMENT ON TABLE provider_effort.refreshed_dates IS $$
 required dates for effort
 
 $$;
--- COMMIT;/*
+-- COMMIT;
+/*
 Creates views for organization
 
 */
@@ -536,7 +537,8 @@ CREATE VIEW provider_effort.cost_center_time_rv AS
     FROM  provider_effort.cost_center_time as cct
     INNER JOIN provider_effort.time_unit as tu on tu.id = cct.time_unit_id
     INNER JOIN provider_effort.cost_center_rv cc on cc.id = cct.cost_center_id
-    LEFT JOIN  app_admin.users as users on cct.last_modified_userid = users.id;/*
+    LEFT JOIN  app_admin.users as users on cct.last_modified_userid = users.id;
+/*
 Full expansion of providers information.
 */
 -- DROP VIEW IF EXISTS provider_effort.appointments_rv CASCADE;
@@ -559,8 +561,7 @@ CREATE VIEW provider_effort.providers_rv AS
     LEFT JOIN provider_effort.lcg  as lcg  on lcg.id  = providers.lcg_id
     LEFT JOIN provider_effort.cpsc as cpsc on cpsc.id = providers.cpsc_id
     LEFT JOIN provider_effort.classifications as classifications on providers.classification_id = classifications.id
-    LEFT JOIN app_admin.users as users on users.id = providers.last_modified_userid 
-;
+    LEFT JOIN app_admin.users as users on users.id = providers.last_modified_userid ;
 
 CREATE VIEW provider_effort.appointments_rv AS
     SELECT app.id as id, employee_number, npi, provider.first_name,
@@ -600,7 +601,8 @@ CREATE VIEW provider_effort.appointments_rv AS
     INNER JOIN provider_effort.providers_rv   as provider on provider.id = app.provider_id
     LEFT JOIN provider_effort.classifications as classifications on provider.classification_id = classifications.id
     LEFT JOIN app_admin.users                 as users on users.id = app.last_modified_userid
-    LEFT JOIN provider_effort.cost_center_rv  as ccrv on ccrv.id   = app.cost_center_id/*
+    LEFT JOIN provider_effort.cost_center_rv  as ccrv on ccrv.id   = app.cost_center_id;
+/*
 Used in policy to determine if user has permissions.
 
 The cost_center permissions are expaded to
@@ -731,7 +733,8 @@ CREATE VIEW provider_effort.user_org_permissions_rv AS
     FROM provider_effort.user_org_permission as uop
     INNER JOIN app_admin.users                 as users on users.id   = uop.user_id
     LEFT JOIN  app_admin.users                 as luser on luser.id   = uop.last_modified_userid
-    INNER JOIN provider_effort.cost_center_rv  as ccrv  on ccrv.id     = uop.cost_center_id;CREATE VIEW app_admin.app_crud_permissions_v AS
+    INNER JOIN provider_effort.cost_center_rv  as ccrv  on ccrv.id     = uop.cost_center_id;
+CREATE VIEW app_admin.app_crud_permissions_v AS
 SELECT schema_name, table_name,
     rt.allow_select, 
     
@@ -751,7 +754,8 @@ SELECT schema_name, table_name,
 CREATE VIEW app_admin.user_app_grid_config_v AS
     SELECT project_name, table_name, page_config, is_test
     FROM app_admin.apps
-    WHERE is_public = true OR id IN (SELECT app_id FROM app_admin.user_app_permission_v );/*
+    WHERE is_public = true OR id IN (SELECT app_id FROM app_admin.user_app_permission_v );
+/*
 Appointment effort view.
 
 
@@ -810,7 +814,8 @@ SELECT  aef.id as id,
 FROM provider_effort.appointment_effort as aef
 INNER JOIN provider_effort.appointments_rv apprv on apprv.id = aef.appointment_id
 LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = apprv.cost_center_id
-LEFT JOIN app_admin.users on users.id = apprv.last_modified_by_userid;/*
+LEFT JOIN app_admin.users on users.id = apprv.last_modified_by_userid;
+/*
 Creates main view for appointment effort.
 
 */
@@ -833,7 +838,8 @@ FROM (
     VALUES 
     ('app_admin', 'users', 'user information', 'grid/app_admin/users'), 
     ('cfte', 'appointment_effort', 'cfte information', 'grid/provider_effort/appointment_effort')
-) AS t (project_name, table_name, description, url_link );/*
+) AS t (project_name, table_name, description, url_link );
+/*
 returns grid config
 
 //project_name, table_name, is_public, is_read_only
@@ -848,7 +854,8 @@ SELECT page_config, project_name, table_name, is_test,
     END as is_read_only
 FROM app_admin.user_app_permission as uap
 INNER JOIN app_admin.apps as app on (app.id = uap.app_id AND uap.user_id = app_userid()  ) OR app.is_public = true 
-    OR is_appuser_admin() = true;/*
+    OR is_appuser_admin() = true;
+/*
 Creates main select views and updatable views for appointments and appointment_effort.
 
 */

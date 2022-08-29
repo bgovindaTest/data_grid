@@ -45,7 +45,7 @@ CREATE TABLE app_admin.registered_tables (
     allow_truncate boolean default false NOT NULL,
     created_at timestamptz default now(),
     updated_at timestamptz default now(),
-    last_modified_userid   bigint  DEFAULT app_userid(),
+    last_modified_userid   bigint  DEFAULT app_userid()
 );
 --add index?
 

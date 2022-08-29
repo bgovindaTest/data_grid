@@ -50,6 +50,9 @@ class BackupData:
         x = CreateSqlJson(file_path)
         for i in range(0, len(x)):
             table_name = x[i]['name']
+            if table_name == "full_org":
+                continue
+
             print(table_name)
             full_name = schema_name +'.'+table_name
             file_path = sql_out + full_name +'.psql'

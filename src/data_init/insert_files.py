@@ -46,6 +46,8 @@ class BackupData:
         for i in range(0, len(x)):
             table_name = x[i]['name']
             sql_query = x[i]['query']
+            # if table_name == "full_org":
+            #     continue
             print(table_name)
             full_name = schema_name +'.'+table_name
             rows = self.RunQuery(sql_query)

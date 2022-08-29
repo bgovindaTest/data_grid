@@ -825,9 +825,9 @@ Creates main view for appointment effort.
 
 CREATE VIEW provider_effort.appointment_effort_current_rv AS
     SELECT * FROM (
-        SELECT *, ROW_NUMBER() OVER (PARTITION BY appointment_code ORDER BY effective_date desc) as rn
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY appointment_code ORDER BY effective_date::date desc) as rn
         FROM provider_effort.appointment_effort_rv
-        WHERE effective_date <= current_date
+        WHERE effective_date::date <= current_date
     ) x WHERE rn =1;-- DROP VIEW IF EXISTS app_admin.home_page_rv;
 CREATE VIEW app_admin.home_page_rv AS
 SELECT 
@@ -855,88 +855,6 @@ SELECT page_config, project_name, table_name, is_test,
 FROM app_admin.user_app_permission as uap
 INNER JOIN app_admin.apps as app on (app.id = uap.app_id AND uap.user_id = app_userid()  ) OR app.is_public = true 
     OR is_appuser_admin() = true;
-/*
-Creates main select views and updatable views for appointments and appointment_effort.
-
-*/
--- DROP VIEW IF EXISTS provider_effort.appointments_byuser_lv;
--- DROP VIEW IF EXISTS provider_effort.providers_lv;
--- DROP VIEW IF EXISTS provider_effort.appointments_byuser_uv;
--- DROP VIEW IF EXISTS provider_effort.appointments_byuser_rv;
--- DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_rv;
--- DROP VIEW IF EXISTS provider_effort.appointment_effort_byuser_uv;
-
--- DROP VIEW IF EXISTS provider_effort.cost_centers_byuser_lv;
--- DROP VIEW IF EXISTS provider_effort.lcg_lv;
--- DROP VIEW IF EXISTS provider_effort.cpsc_lv;
--- DROP VIEW IF EXISTS app_admin.users_lv;
-
--- DROP VIEW IF EXISTS provider_effort.company_lv;
--- DROP VIEW IF EXISTS provider_effort.line_of_business_lv;
--- DROP VIEW IF EXISTS provider_effort.department_lv;
--- DROP VIEW IF EXISTS provider_effort.specialty_lv;
--- DROP VIEW IF EXISTS provider_effort.cost_center_lv;
-
-
---main view
-CREATE VIEW provider_effort.appointment_effort_byuser_rv  AS
-  SELECT * FROM provider_effort.appointment_effort_rv
-  WHERE is_appuser_admin() = true OR appointment_id IN (SELECT id from provider_effort.user_appointment_permsissions_v);
-
---updatable view
-CREATE VIEW  provider_effort.appointment_effort_byuser_uv AS 
-  SELECT * FROM provider_effort.appointment_effort
-  WHERE is_appuser_admin() = true OR appointment_id IN (SELECT id from provider_effort.user_appointment_permsissions_v)
-  WITH CHECK OPTION;
-
-CREATE VIEW provider_effort.appointments_byuser_rv AS
-  SELECT * FROM provider_effort.appointments_rv
-  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v);
-
-CREATE VIEW provider_effort.appointments_byuser_uv AS
-  SELECT * FROM provider_effort.appointments
-  WHERE is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v)
-  WITH CHECK OPTION;
-
---lookup views
-CREATE VIEW  provider_effort.providers_lv AS
-SELECT * FROM provider_effort.providers_rv
-WHERE is_active = true;
-
-CREATE VIEW  provider_effort.cost_centers_byuser_lv AS
-SELECT * FROM provider_effort.cost_center_rv
-WHERE is_active = true AND (is_appuser_admin() = true OR id IN (select id from provider_effort.user_org_permissions_v) ) ;
-
-CREATE VIEW provider_effort.appointments_byuser_lv AS
-  SELECT * FROM provider_effort.appointments_rv
-  WHERE is_active = true AND (is_appuser_admin() = true OR cost_center_id IN (select id from provider_effort.user_org_permissions_v) );
-
-CREATE VIEW provider_effort.lcg_lv AS
-  SELECT * FROM provider_effort.lcg
-  WHERE is_active = true;
-
-CREATE VIEW provider_effort.cpsc_lv AS
-  SELECT * FROM provider_effort.cpsc
-  WHERE is_active = true;
-
-CREATE VIEW app_admin.users_lv AS
-  SELECT * FROM app_admin.users
-  WHERE is_active = true;
-
-CREATE VIEW provider_effort.company_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
-
-CREATE VIEW provider_effort.line_of_business_lv AS
-  SELECT * FROM provider_effort.line_of_business_rv where is_active = true;
-
-CREATE VIEW provider_effort.department_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
-
-CREATE VIEW provider_effort.specialty_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
-
-CREATE VIEW provider_effort.cost_center_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
 /*
 Creates main select views and updatable views for appointments and appointment_effort.
 

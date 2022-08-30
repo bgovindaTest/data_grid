@@ -4,13 +4,31 @@ returns grid config
 //project_name, table_name, is_public, is_read_only
 
 */
--- DROP VIEW IF EXISTS app_admin.grid_config_rv; 
+DROP VIEW IF EXISTS app_admin.grid_config_rv; 
 CREATE VIEW app_admin.grid_config_rv AS 
 
+--all non public configs where user given permissions
 SELECT page_config, project_name, table_name, is_test,
-    CASE WHEN is_public  = true THEN false
+    CASE WHEN is_appuser_admin() = true THEN false
         ELSE is_read_only
-    END as is_read_only
-FROM app_admin.user_app_permission as uap
-INNER JOIN app_admin.apps as app on (app.id = uap.app_id AND uap.user_id = app_userid()  ) OR app.is_public = true 
-    OR is_appuser_admin() = true;
+    END as is_read_only --app_id not hit yet
+FROM app_admin.apps as app
+INNER JOIN app_admin.user_app_permission as uap on app.id = uap.app_id AND uap.user_id = app_userid() AND app.is_public = false
+UNION ALL
+--all public configs
+SELECT page_config, project_name, table_name, is_test,
+    false as is_read_only --app_id not hit yet
+FROM app_admin.apps as app
+WHERE app.is_public = true
+UNION ALL
+
+--remainder configs if admin and not public and not direclty assigned to user
+SELECT page_config, project_name, table_name, is_test,
+    false as is_read_only
+FROM app_admin.apps as app
+WHERE is_appuser_admin() = true 
+AND app.id NOT IN (
+    select app_id from app_admin.user_app_permission
+    where user_id = app_userid()
+) AND app.is_public = false
+;

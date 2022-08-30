@@ -108,28 +108,27 @@ let registeredTablesStr = `
 INSERT INTO app_admin.registered_tables (permission_name, schema_name, table_name,
     allow_select,allow_exists, allow_insert, allow_update, allow_delete, allow_save)
 
-(
-    select table_schema || '.'|| table_name || '.read_only' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+
+    select table_schema || '.'|| table_name || '.read_only' as permission_name, schemaname, viewname as tablename, true as allow_select, true as allow_exists,
         false as allow_insert, false as allow_update , false as allow_delete, false as allow_save
     from information_schema.views
-    where table_schema IN ('provider_effort', 'app_admin')
+    where schemaname IN ('provider_effort', 'app_admin')
     UNION ALL
-    select table_schema|| '.'|| table_name || '.read_only' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+    select schemaname|| '.'|| tablename || '.read_only' as permission_name, schemaname, viewname as tablename, true as allow_select, true as allow_exists,
         false as allow_insert, false as allow_update , false as allow_delete, false as allow_save
-    from information_schema.tables
-    where table_schema IN ('provider_effort', 'app_admin')
+    from pg_catalog.pg_tables
+    where schemaname IN ('provider_effort', 'app_admin')
 
     UNION ALL
-    select table_schema|| '.'|| table_name || '.modify' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+    select schemaname|| '.'|| tablename || '.modify' as permission_name, schemaname, tablename, true as allow_select, true as allow_exists,
         true as allow_insert, true as allow_update , true as allow_delete, true as allow_save
-    from ( VALUES ( 'provider_effort','appointment_effort_byuser_uv'), ('provider_effort' , 'appointments_byuser_uv' ) ) as x (table_schema, table_name)
+    from ( VALUES ( 'provider_effort','appointment_effort_byuser_uv'), ('provider_effort' , 'appointments_byuser_uv' ) ) as x (schemaname, tablename)
     
     UNION ALL
-    select table_schema|| '.'|| table_name || '.modify' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+    select schemaname|| '.'|| tablename || '.modify' as permission_name, schemaname, viewname as tablename, true as allow_select, true as allow_exists,
         true as allow_insert, true as allow_update , true as allow_delete, true as allow_save
-    from information_schema.tables
-    where table_schema IN ('provider_effort', 'app_admin')
-) ON CONFLICT DO NOTHING;
+    from pg_catalog.pg_tables
+    where schemaname IN ('provider_effort', 'app_admin');
 `
 out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/registered_table_inserts.psql'
 full_str += registeredTablesStr +'\n'
@@ -161,10 +160,10 @@ out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/app_and_user_perms_insert
 
 strsx.push(
 `
-INSERT INTO app_admin.user_app_permission(user_id, app_id, is_read_only)
-SELECT id, 2, false FROM app_admin.users
+INSERT INTO app_admin.user_app_permissions(user_id, app_id, is_read_only)
+SELECT user_id, 2, false FROM app_admin.users
 UNION
-SELECT id, 3, false FROM app_admin.users;
+SELECT user_id, 3, false FROM app_admin.users;
 `
 )
 

@@ -1,2 +1,2 @@
 #concats app_views folder.
-`cat ./org_structure/org_views.psql ./providers/providers_rv.psql ./perms/user_org_perms.psql ./perms/crud_perms.psql ./effort/appointment_effort_rv.psql ./effort/current_appointment_effort_rv.psql ./home_page/home_page.psql ./grid/grid.psql ../updatable_views/effort_appointment_views.psql > app_views.psql`
+`cat ./org_structure/org_views.psql ./providers/providers_rv.psql ./perms/user_org_perms.psql ./perms/crud_perms.psql ./effort/appointment_effort_rv.psql ./effort/current_appointment_effort_rv.psql  ./grid/grid.psql ../updatable_views/effort_appointment_views.psql ./home_page/home_page.psql > app_views.psql`

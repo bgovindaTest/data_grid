@@ -301,26 +301,32 @@ CREATE VIEW provider_effort.user_org_permissions_rv AS
     LEFT JOIN  app_admin.users                 as luser on luser.id   = uop.last_modified_userid
     INNER JOIN provider_effort.cost_center_rv  as ccrv  on ccrv.id     = uop.cost_center_id;
 CREATE VIEW app_admin.app_crud_permissions_v AS
-SELECT schema_name, table_name,
+SELECT rt.schema_name, rt.table_name,
     rt.allow_select, 
     
-    --rt.allow_exists,
-    rt.allow_insert   AND NOT is_read_only as allow_insert,
-    rt.allow_update   AND NOT is_read_only as allow_update,
-    rt.allow_delete   AND NOT is_read_only as allow_delete
-    -- ,
-    -- rt.allow_save     AND NOT is_read_only as allow_save,
-    -- rt.allow_execute  AND NOT is_read_only as allow_execute,
-    -- rt.allow_truncate AND NOT is_read_only as allow_truncate
+    rt.allow_exists,
+    rt.allow_insert   AND (is_read_only != true OR is_test != true ) as allow_insert,
+    rt.allow_update   AND (is_read_only != true OR is_test != true ) as allow_update,
+    rt.allow_delete   AND (is_read_only != true OR is_test != true ) as allow_delete,
+    rt.allow_save     AND (is_read_only != true OR is_test != true ) as allow_save,
+    rt.allow_execute  AND (is_read_only != true OR is_test != true ) as allow_execute,
+    rt.allow_truncate AND (is_read_only != true OR is_test != true ) as allow_truncate,
+    user_id,
+    is_public, is_test, uap.app_id
 
-    FROM app_admin.app_permissions  ap
-    INNER JOIN app_admin.user_app_permission_v uap on ap.app_id = uap.app_id
-    INNER JOIN app_admin.registered_tables rt  on ap.registered_table_id = rt.id;
+    FROM app_admin.registered_tables rt
+    LEFT JOIN app_admin.app_permissions ap on ap.registered_table_id = rt.id
+    LEFT JOIN app_admin.user_app_permission_rv uap on ap.app_id = uap.app_id
+    INNER JOIN app_admin.apps app on app.id = uap.app_id;
 
-CREATE VIEW app_admin.user_app_grid_config_v AS
-    SELECT project_name, table_name, page_config, is_test
-    FROM app_admin.apps
-    WHERE is_public = true OR id IN (SELECT app_id FROM app_admin.user_app_permission_v );
+
+CREATE VIEW app_admin.user_app_crud_permissions_v AS
+    SELECT schema_name, table_name, allow_select, allow_exists, allow_insert, allow_update,
+        allow_delete, allow_execute, allow_truncate
+    FROM app_admin.app_crud_permissions_v
+    WHERE is_public = true OR app_id IN (SELECT app_id FROM app_admin.user_app_permission_rv )
+    OR is_appuser_admin() = true
+;
 /*
 Appointment effort view.
 
@@ -394,17 +400,7 @@ CREATE VIEW provider_effort.appointment_effort_current_rv AS
         SELECT *, ROW_NUMBER() OVER (PARTITION BY appointment_code ORDER BY effective_date::date desc) as rn
         FROM provider_effort.appointment_effort_rv
         WHERE effective_date::date <= current_date
-    ) x WHERE rn =1;-- DROP VIEW IF EXISTS app_admin.home_page_rv;
-CREATE VIEW app_admin.home_page_rv AS
-SELECT 
-project_name, table_name, description, 
-url_link as "url_link.urlPath", table_name as "url_link.urlName"
-
-FROM (
-    VALUES 
-    ('app_admin', 'users', 'user information', 'grid/app_admin/users'), 
-    ('cfte', 'appointment_effort', 'cfte information', 'grid/provider_effort/appointment_effort')
-) AS t (project_name, table_name, description, url_link );
+    ) x WHERE rn =1;
 /*
 returns grid config
 
@@ -414,13 +410,31 @@ returns grid config
 -- DROP VIEW IF EXISTS app_admin.grid_config_rv; 
 CREATE VIEW app_admin.grid_config_rv AS 
 
-SELECT page_config, project_name, table_name, is_test,
-    CASE WHEN is_public  = true THEN false
+--all non public configs where user given permissions
+SELECT page_config, project_name, table_name, is_test, description,
+    CASE WHEN is_appuser_admin() = true THEN false
         ELSE is_read_only
-    END as is_read_only
-FROM app_admin.user_app_permission as uap
-INNER JOIN app_admin.apps as app on (app.id = uap.app_id AND uap.user_id = app_userid()  ) OR app.is_public = true 
-    OR is_appuser_admin() = true;
+    END as is_read_only, app.id --app_id not hit yet
+FROM app_admin.apps as app
+INNER JOIN app_admin.user_app_permission as uap on app.id = uap.app_id AND uap.user_id = app_userid() AND app.is_public = false
+UNION ALL
+--all public configs
+SELECT page_config, project_name, table_name, is_test, description,
+    false as is_read_only, app.id --app_id not hit yet
+FROM app_admin.apps as app
+WHERE app.is_public = true
+UNION ALL
+
+--remainder configs if admin and not public and not direclty assigned to user
+SELECT page_config, project_name, table_name, is_test, description,
+    false as is_read_only, app.id
+FROM app_admin.apps as app
+WHERE is_appuser_admin() = true 
+AND app.id NOT IN (
+    select app_id from app_admin.user_app_permission
+    where user_id = app_userid()
+) AND app.is_public = false
+;
 /*
 Creates main select views and updatable views for appointments and appointment_effort.
 
@@ -503,3 +517,16 @@ CREATE VIEW provider_effort.specialty_lv AS
 
 CREATE VIEW provider_effort.cost_center_lv AS
   SELECT * FROM provider_effort.company_rv where is_active = true;
+
+-- DROP VIEW IF EXISTS app_admin.home_page_rv;
+CREATE VIEW app_admin.home_page_rv AS
+SELECT project_name, table_name, description,
+
+CASE when project_name = 'home_page' AND table_name = 'home_page'
+    THEN 'https://iuhpcbia.azurewebsites.net/'
+    ELSE 'https://iuhpcbia.azurewebsites.net/' || project_name || '/' || table_name
+END as "url_link.urlPath", 
+table_name as "url_link.urlName", is_test, is_read_only
+
+FROM app_admin.grid_config_rv
+ORDER BY project_name asc, table_name asc;

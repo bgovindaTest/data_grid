@@ -19,7 +19,7 @@ const fs = require('fs')
 
 let apps = [
     //main myapps
-    {'id': '1', 'project_name': 'provider_effort', 'table_name': 'home_page',
+    {'id': '1', 'project_name': 'home_page', 'table_name': 'home_page',
         "page_config": JSON.stringify(home_page),  'is_public': 'true',  'description': "Urls to other tables you have permisisons for",
         'permissions': ['app_admin.home_page_rv.read_only']
     },
@@ -73,11 +73,11 @@ let apps = [
         "permissions": ["provider_effort.cost_center_time_rv.read_only","provider_effort.cost_center_time.modify" ]
     },
     //perms
-    {'id': '11', 'project_name': 'provider_effort', 'table_name': 'user_app_perms',
+    {'id': '11', 'project_name': 'admin', 'table_name': 'user_app_perms',
         "page_config":JSON.stringify(user_app_perms), 'is_public': 'false', 'description': "users permissions for table access",
         "permissions": ['app_admin.app_permission_rv.read_only', 'app_admin.app_permissions.modify', 'app_admin.users_lv.read_only']
     },
-    {'id': '12', 'project_name': 'provider_effort', 'table_name': 'user_org_permsission',
+    {'id': '12', 'project_name': 'admin', 'table_name': 'user_org_permsission',
         "page_config":JSON.stringify(user_org_permission), 'is_public': 'false', 'description': "user responsibilites based on company/lob/dept/specialty/cost_center",
         "permissions": ['app_admin.user_org_permission_rv.read_only', 'app_admin.user_org_permission.modify', 'app_admin.users_lv.read_only',
             "provider_effort.cost_center_lv"]

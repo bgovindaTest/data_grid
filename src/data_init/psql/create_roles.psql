@@ -1,7 +1,7 @@
 
 DROP ROLE IF EXISTS app_user;
 CREATE ROLE app_user;
-GRANT CONNECT ON DATABASE bgovi to app_user;
+GRANT CONNECT ON DATABASE app to app_user;
 GRANT USAGE ON SCHEMA provider_effort to app_user;
 GRANT USAGE ON SCHEMA app_admin to app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA provider_effort to app_user;

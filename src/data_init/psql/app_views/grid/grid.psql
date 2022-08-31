@@ -30,6 +30,6 @@ FROM app_admin.apps as app
 WHERE is_appuser_admin() = true 
 AND app.id NOT IN (
     select app_id from app_admin.user_app_permission
-    where user_id = app_userid()
+    where user_id != app_userid()
 ) AND app.is_public = false
 ;

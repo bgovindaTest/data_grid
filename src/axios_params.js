@@ -14,7 +14,6 @@ if ( ['test','production'].includes(envx)  ) {
         loginRoute: 'https://iuhpcbia.azurewebsites.net/login',
         logoutRoute: `https://iuhpcbia.azurewebsites.net/logout`,
         tutorialRoute: `https://iuhpcbia.azurewebsites.net/data/tutorial`,
-        tutorialRoute: `http://localhost:8081/data/tutorial`,
         baseUrl: `https://iuhpcbia.azurewebsites.net`,
         axiosConfig: { withCredentials: true }
     }

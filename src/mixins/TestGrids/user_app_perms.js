@@ -2,12 +2,14 @@ let user_app_perms = {
     "grids": [
         {
             "navHeaderParams": {
-                "links": [{'name':'providers', 'url': '/providers'}]
+                "links": [
+                    {'name':'user_org_perms', 'url': '/admin/user_org_permsission'},
+                ]
             },
             "columnDefs": [
 
-                {"field": "last_name", "valueGetter":"lookup(user_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true},
-                {"field": "first_name","valueGetter":"lookup(user_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "last_name", "valueGetter":"lookup(user_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
+                {"field": "first_name","valueGetter":"lookup(user_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
                 {"field": "user_id", "headerName": "email", "editable": true, "showSort": true, 
                     "showFilter": true, "isRequired": true,
                     "cellEditor": 'autoCompleteEditor',

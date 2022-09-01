@@ -156,7 +156,7 @@ methods: {
 
             // let main_grid   = testGrid['grids'][0]
             let is_read_only = this.is_read_only//false //true
-            this.is_test = true
+            // this.is_test = true
 
 
             let routeParams = main_grid['routeParams'] || {}
@@ -262,7 +262,7 @@ methods: {
             Initialization nav header params for navbar functionality
         */
         let defaultNavHeaderParams ={
-                'home': false,
+                'home': true,
                 'help': true,
                 'links': [],// or object array. 
                 'previous_page':  true, //for pagination
@@ -273,7 +273,10 @@ methods: {
                 'add_row':   true,
                 'new_sheet': false,
                 'load_data_init': true,
+                'is_test': false
         }
+        navHeaderParams['is_test'] = this.is_test
+
         let keys = Object.keys(defaultNavHeaderParams)
         for(let i =0; i < keys.length; i+=1 ) {
             let key = keys[i]
@@ -394,11 +397,14 @@ methods: {
 
             */
             let page_config = px['page_config'] || {}
-            this.help_msg = page_config['comments'] || "# No Help Message"
+            console.log(page_config)
+
             this.is_read_only = px['is_read_only'] || false
             this.is_test      = px['is_test']      || false
 
             let main_grid = page_config['grids'][0] || {}
+            this.help_msg = main_grid['comments'] || "# No Help Message"
+
             return main_grid
         }
         catch (e) {
@@ -607,6 +613,16 @@ methods: {
             updx(rdp)
         }
     },
+    LogTestData() {
+        try {
+            let x = []
+            this.gridOptions.api.forEachNode((rowNode, index) => { x.push(rowNode.data) })
+            console.log(x)
+        } catch (e) {
+            console.log(e)
+        }
+    },
+
     async PreviousPage() {
         if (this.pageParams['page_index'] <=0 ) { 
             return 

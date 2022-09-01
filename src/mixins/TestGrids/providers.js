@@ -1,13 +1,23 @@
 let providers = {
 "grids": [
     {
+        "comments": "List of providers name, npi, classificaiton etc.",
         "navHeaderParams": {
             "links": [{'name':'providers', 'url': '/providers'}]
         },
         "columnDefs": [
 
-            {"field": "last_name",  "editable": true, "showSort": true, "showFilter": true, "isRequired": true},
-            {"field": "first_name", "editable": true, "showSort": true, "showFilter": true, "isRequired": true},
+            {"field": "last_name",  "editable": true, "showSort": true, "showFilter": true, "isRequired": true, "defaultSort": "asc"},
+            {"field": "first_name", "editable": true, "showSort": true, "showFilter": true, "isRequired": true, "defaultSort": "asc"},
+            {"field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
+                'isRequired': true, "isLookup": true, "defaultFilter": true,
+                'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
+                    {'is_active': 'true', 'id': 'true'} 
+                    ,{'is_active': 'false', 'id': 'false'}
+                ]}
+            },
+
+
             {"field": "npi",        "editable": true, "showSort": true, "showFilter": true, "isRequired": true},
             {"field": "employee_number", "editable": true, "showSort": true, "showFilter": true, "isRequired": true},
             {"field": "classification_id", "headerName": "classification", "editable": true, "showSort": true, 

@@ -9,7 +9,7 @@
         @help="helpModal = true" @add-row="AddRow()"
         @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
         @pull-data="RunNewQuery()" @previous-page="PreviousPage()" @next-page="NextPage()"
-        @new-sheet="NewSheet()" @save="SaveData()"
+        @new-sheet="NewSheet()" @save="SaveData()" @log-data="LogTestData()"
         :links="navHeaderParams.links"
         :page_number="page_number"
         :navHeaderParams="navHeaderParams"

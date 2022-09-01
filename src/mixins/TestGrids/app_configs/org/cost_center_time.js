@@ -1,8 +1,17 @@
 const cost_center_time = {
+    "comments": "cost centers default time effort value",
     "grids": [
         {    
             "navHeaderParams": {
-                "links": [{"name":"providers_cc", "url": "/providers"}]
+                "links": [
+                    {'name':'company',          'url': '/provider_effort/company'},
+                    {'name':'lob',              'url': '/provider_effort/lob'},
+                    {'name':'department',       'url': '/provider_effort/department'},
+                    {'name':'specialty',        'url': '/provider_effort/specialty'},
+                    {'name':'cost_center',      'url': '/provider_effort/cost_center'},
+                    {'name':'cost_center_time', 'url': '/provider_effort/cost_center_time'}                
+                
+                ]
             },
             "columnDefs": [
 

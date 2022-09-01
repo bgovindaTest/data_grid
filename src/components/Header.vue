@@ -57,6 +57,7 @@
                 <div class="buttons">
                     <a class="button is-light" @click="FilterModal()" ><strong>Filter</strong> </a>
                     <a class="button is-light" @click="OrderByModal()"><strong> Sort </strong> </a>
+                    <a class="button is-light" @click="LogData()" v-if="display.is_test"><strong> Log </strong> </a>
                 </div>
             </div>
             <!-- end filter and sort -->
@@ -66,6 +67,7 @@
         <div class="navbar-end">
             <div class="navbar-item">
                 <div class="buttons">
+                    <a class="button is-light" @click="LogOut()"><strong>LogOut</strong> </a>
                     <a class="button is-light" @click="Help()"><strong>Help</strong> </a>
                 </div>
             </div>
@@ -77,6 +79,7 @@
 <script>
 
 // https://jsfiddle.net/sol_b/mndrLjzk/4/
+const axiosParams    = require('../axios_params')
 
 export default {
     props: {
@@ -112,7 +115,8 @@ export default {
                 'page_number': true,
                 'save':  false,
                 'add_row':   true,
-                'new_sheet': false
+                'new_sheet': false,
+                'is_test': false
             }
         }
     },
@@ -126,7 +130,9 @@ export default {
         Save() {         if (! this.disable_navbar) {this.$emit('save')   } },
         FilterModal()  { if (! this.disable_navbar) {this.$emit('filter-modal')} },
         OrderByModal() { if (! this.disable_navbar) {this.$emit('orderby-modal')   } },
-        ToUrl(urlPath) { if (! this.disable_navbar) { window.location.href = urlPath  }}
+        LogData()      { if (! this.disable_navbar) {this.$emit('log-data')   } },
+        ToUrl(urlPath) { if (! this.disable_navbar) { window.location.href = urlPath  }},
+        LogOut() { window.location.href = axiosParams.logoutRoute }
     },
     mounted() {
         let dx = Object.keys(this.display)

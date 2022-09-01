@@ -2,7 +2,7 @@ let appointments = {
     "grids": [
         {
             "navHeaderParams": {
-                "links": [{'name':'provider_cfte', 'url': '/providers'}]
+                "links": [{'name':'provider_cfte', 'url': '/provider_effort/appointment_effort'}]
             },
             "columnDefs": [
                 {"field": "last_name", "valueGetter":"lookup(provider_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},

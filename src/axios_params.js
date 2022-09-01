@@ -10,12 +10,12 @@ let axiosParams = null
 
 if ( ['test','production'].includes(envx)  ) {
     axiosParams = {
-        axiosUrl: `https://provider-effort.eastus.cloudapp.azure.com`,
-        loginRoute: 'https://provider-effort.eastus.cloudapp.azure.com/login',
-        logoutRoute: `https://provider-effort.eastus.cloudapp.azure.com/logout`,
-        tutorialRoute: `https://provider-effort.eastus.cloudapp.azure.com/data/tutorial`,
+        axiosUrl: `https://iuhpcbia.azurewebsites.net`,
+        loginRoute: 'https://iuhpcbia.azurewebsites.net/login',
+        logoutRoute: `https://iuhpcbia.azurewebsites.net/logout`,
+        tutorialRoute: `https://iuhpcbia.azurewebsites.net/data/tutorial`,
         tutorialRoute: `http://localhost:8081/data/tutorial`,
-        baseUrl: `https://provider-effort.eastus.cloudapp.azure.com`,
+        baseUrl: `https://iuhpcbia.azurewebsites.net`,
         axiosConfig: { withCredentials: true }
     }
 }

@@ -2,7 +2,7 @@
 <div>
   <div v-if="loading">
     <!-- error msg change color display message i.e. permission denied contact xyz -->
-    <page-loader />
+    <page-loader :error_msg="loading_error" />
   </div>
   <div v-else>
     <grid-header 
@@ -128,6 +128,7 @@ export default {
       */
       await this.MainGridInit()
       // await new Promise(r => setTimeout(r, 1000))
+
       // this.loading = false
   }
 };

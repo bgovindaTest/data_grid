@@ -43,7 +43,7 @@ const lob = {
                 { "field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
             ],
             "routeParams": {
-                "default_route": "/provider_effort/line_of_business",
+                "default_route": "data/provider_effort/line_of_business",
                 "select": {"route":"data/provider_effort/line_of_business_rv/select"}
             }
         }

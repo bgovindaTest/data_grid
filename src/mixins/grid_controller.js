@@ -830,11 +830,11 @@ methods: {
                 this.ChangeSaveState(true, false, false, false)                
 
             } else {
-                this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
+                this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             }
         } catch (e) {
             console.log(e)
-            this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
+            this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             alert(e)
         } 
 
@@ -909,7 +909,7 @@ methods: {
             this.saveModal = false
             this.ShowSnackBar()
             let tmpFunc = this.HideSnackBar
-            setTimeout(tmpFunc, 5000)
+            setTimeout(tmpFunc, 1000)
             await this.RunNewQuery()
         } else {
             this.saveLock  = false
@@ -929,7 +929,8 @@ methods: {
             return true
         } catch (e) {
             console.log(e)
-            this.MainMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            this.MainSaveMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            this.ChangeSaveState(true, false, false, false)
             return false
         }
     },
@@ -958,7 +959,8 @@ methods: {
             return true
         } catch (e) {
             console.log(e)
-            this.MainMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            this.MainSaveMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            this.ChangeSaveState(true, false, false, false)
             return false
         }
 

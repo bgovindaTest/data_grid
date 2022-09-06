@@ -50,7 +50,7 @@ const specialty = {
 
             ],
             "routeParams": {
-                "default": "/provider_effort/specialty",
+                "default": "data/provider_effort/specialty",
                 "select": {"route":"data/provider_effort/specialty_rv/select"}
             }
         }

@@ -53,6 +53,7 @@ CREATE VIEW provider_effort.appointments_rv AS
         cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name",
         org_code as "cost_center_id.org_code",
         org_name as "cost_center_id.org_name",
+        ccrv.id as "cost_center_id.id",
         employee_number || ':' || org_code as  appointment_code 
 
     FROM provider_effort.appointments as app

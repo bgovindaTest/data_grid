@@ -18,7 +18,7 @@ last column. All other grid functions will be disabled.
 const ColumnDefsInit = require('../lib/GridParser')
 const data_config    = require('../lib/DataConfig')
 const meta_column    = data_config.meta_column_name
-let   testGrid       = require('./TestGrids/test_grid')
+// let   testGrid       = require('./TestGrids/test_grid')
 const RouteParams    = require('./RouteParser/RouteParams')
 const axiosParams    = require('../axios_params')
 const Pull           = require('./RouteParser/Pull') 
@@ -158,9 +158,7 @@ methods: {
             let is_read_only = this.is_read_only//false //true
             // this.is_test = true
 
-
             let routeParams = main_grid['routeParams'] || {}
-
 
             let navHeaderParams = main_grid['navHeaderParams'] || {}
             let columnDefConfig = main_grid['columnDefs']
@@ -341,14 +339,14 @@ methods: {
         let projectFolder = "" //tmp[0]
         let tableName     = "" //tmp[1]
         let route = ""
-        console.log('url_params')
-        console.log(path)
+        // console.log('url_params')
+        // console.log(path)
         if (tmp.length >= 2) {
             projectFolder = tmp[0]
             tableName = tmp[1]
             route = projectFolder +'/' + tableName
-            console.log(tmp)
-            console.log(route)
+            // console.log(tmp)
+            // console.log(route)
         } else { route = "home_page/home_page" }
         //if tmp.length === 0  //is_root
         return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': 'grid/'+ route}
@@ -375,13 +373,13 @@ methods: {
             route = baseUrl + route
         } else { route = baseUrl + '/' + route}
 
-        console.log(route)
+        // console.log(route)
 
         try {
             let dx = await this.axios.get(route)
             let x = dx.data
-            console.log(typeof x)
-            console.log(x)
+            // console.log(typeof x)
+            // console.log(x)
             if (typeof x === 'string' || x instanceof String) {
                 this.loading_error = x 
             } 
@@ -397,7 +395,7 @@ methods: {
 
             */
             let page_config = px['page_config'] || {}
-            console.log(page_config)
+            // console.log(page_config)
 
             this.is_read_only = px['is_read_only'] || false
             this.is_test      = px['is_test']      || false
@@ -851,6 +849,14 @@ methods: {
         let columnDefs = this.columnDefs
         let pxv  = new Push(columnDefs)
         pxv.PushParamsInit()
+
+        // console.log('pushParams')
+        // console.log(pxv.pushFieldParams)
+        // console.log(pxv.pushLookupParams)
+        // console.log(pxv.pushValueGetters)
+        // console.log(pxv.defaultValues)
+        // console.log('EndPushParams')
+
         let save_data_processed = {}
         let crudTypes = Object.keys(save_data)
         let index = 0

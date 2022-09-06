@@ -41,8 +41,7 @@ let user_org_permission = {
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
                         {'is_active': 'true', 'id': 'true'} 
                         ,{'is_active': 'false', 'id': 'false'}
-                    
-                    ]}
+                    ],'pullKey': "is_active"}
                 },
                 {"field": "specialty_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,

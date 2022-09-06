@@ -40,7 +40,7 @@ const department = {
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
                         {"is_active": "true", "id": "true"},
                         {"is_active": "false","id": "false"}
-                    ]}
+                    ],'pullKey': "is_active"}
                 },
 
                 {"field": "last_modified_user_email", "chmodParams": "r", "editable": false, "showSort": true, "showFilter": true },

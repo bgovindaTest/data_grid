@@ -33,7 +33,7 @@ const lob = {
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
                         {"is_active": "true", "id": "true"},
                         {"is_active": "false","id": "false"}
-                    ]}
+                    ], 'pullKey': "is_active"}
                 },
                 { "headerName":  "LobName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc"},                
                 { "headerName":  "LobCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},

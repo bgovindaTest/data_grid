@@ -1,5 +1,6 @@
 const gp = require('../../../lib/GridParser')
-const rb = require('../ReqBodyHeaderParams')
+// const rb = require('../ReqBodyHeaderParams')
+const rb = require('../RouteParams')
 const px = require('./index.js')
 
 
@@ -30,7 +31,7 @@ function ReturnTableData() {
 function ReturnCrudParams(columnDefs, set_filters) {
     let crudParams = { 'default_route': 'localhost', 'set_filters': set_filters }
     let x = new rb(crudParams, columnDefs)
-    x.CrudParamsInit()
+    x.RouteParamsInit()
     return crudParams
 
 }
@@ -40,7 +41,7 @@ test('pushParams Init', () => {
 
     let x = new gp(columnDefs,{}, 0)
     let grid = x.RunGridColumnsInit()
-    let pxv  = new px(grid['columnDef'])
+    let pxv  = new px(grid['columnDefs'])
     pxv.PushParamsInit()
     let res = {
         pushFieldParams: [ 'a', 'b', 'c', 'd', 'id' ],
@@ -61,8 +62,8 @@ test('pushParams CreateRow', () => {
     let x = new gp(columnDefs,{}, 0)
     let grid = x.RunGridColumnsInit()
     let tableData = ReturnTableData()
-    let reqBody = ReturnCrudParams(grid['columnDef'], [])
-    let pxv  = new px(grid['columnDef'])
+    let reqBody = ReturnCrudParams(grid['columnDefs'], [])
+    let pxv  = new px(grid['columnDefs'])
     pxv.PushParamsInit()
     let rowData = tableData[0]
     let rd = pxv.CreateRowDataOut(rowData, reqBody)
@@ -77,8 +78,8 @@ test('pushParams CreateRow editable false', () => {
     let x = new gp(columnDefs,{}, 0)
     let grid = x.RunGridColumnsInit()
     let tableData = ReturnTableData()
-    let reqBody = ReturnCrudParams(grid['columnDef'], [])
-    let pxv  = new px(grid['columnDef'])
+    let reqBody = ReturnCrudParams(grid['columnDefs'], [])
+    let pxv  = new px(grid['columnDefs'])
     pxv.PushParamsInit()
     let rowData = tableData[0]
     let rd = pxv.CreateRowDataOut(rowData, reqBody)
@@ -93,8 +94,8 @@ test('update column a only', () => {
     let x = new gp(columnDefs,{}, 0)
     let grid = x.RunGridColumnsInit()
     let tableData = ReturnTableData()
-    let reqBody = ReturnCrudParams(grid['columnDef'], set_filters)
-    let pxv  = new px(grid['columnDef'])
+    let reqBody = ReturnCrudParams(grid['columnDefs'], set_filters)
+    let pxv  = new px(grid['columnDefs'])
     pxv.PushParamsInit()
     let rowData = tableData[0]
     rowData['_ag-meta_']['crudType'] = 'update'
@@ -109,8 +110,8 @@ test('update all when set filters empty', () => {
     let x = new gp(columnDefs,{}, 0)
     let grid = x.RunGridColumnsInit()
     let tableData = ReturnTableData()
-    let reqBody = ReturnCrudParams(grid['columnDef'], set_filters)
-    let pxv  = new px(grid['columnDef'])
+    let reqBody = ReturnCrudParams(grid['columnDefs'], set_filters)
+    let pxv  = new px(grid['columnDefs'])
     pxv.PushParamsInit()
     let rowData = tableData[0]
     rowData['_ag-meta_']['crudType'] = 'update'
@@ -125,8 +126,8 @@ test('is delete', () => {
     let x = new gp(columnDefs,{}, 0)
     let grid = x.RunGridColumnsInit()
     let tableData = ReturnTableData()
-    let reqBody = ReturnCrudParams(grid['columnDef'], set_filters)
-    let pxv  = new px(grid['columnDef'])
+    let reqBody = ReturnCrudParams(grid['columnDefs'], set_filters)
+    let pxv  = new px(grid['columnDefs'])
     pxv.PushParamsInit()
     let rowData = tableData[0]
     rowData['_ag-meta_']['crudType']  = 'insert'

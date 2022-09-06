@@ -14,7 +14,9 @@ let providers = {
                 'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
                     {'is_active': 'true', 'id': 'true'} 
                     ,{'is_active': 'false', 'id': 'false'}
-                ]}
+                ],
+                'pullKey': "is_active"
+            }
             },
 
 

@@ -47,7 +47,7 @@ const cost_center = {
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
                         {"is_active": "true", "id": "true"},
                         {"is_active": "false","id": "false"}
-                    ]}
+                    ],'pullKey': "is_active"}
                 },
 
                 { "headerName": "CostCenterName", "field": "cost_center_name", "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc" },

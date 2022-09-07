@@ -162,9 +162,9 @@ out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/app_and_user_perms_insert
 strsx.push(
 `
 INSERT INTO app_admin.user_app_permission(user_id, app_id, is_read_only)
-SELECT id, 2, false FROM app_admin.users
+SELECT id, 3, false FROM app_admin.users
 UNION
-SELECT id, 3, false FROM app_admin.users;
+SELECT id, 4, false FROM app_admin.users;
 `
 )
 

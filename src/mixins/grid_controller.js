@@ -792,6 +792,9 @@ methods: {
 
             // let cstr = `changed: ${sx['is_changed']} saving: ${sx['is_save']}  warning: ${sx['is_warning']} errors: ${sx['is_error']} <br />`
 
+            // console.log(sx)
+
+
             if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
 
                 this.MainSaveMessage(`Number Saving Rows: ${ sx['is_save'] }`)
@@ -800,7 +803,7 @@ methods: {
                 await new Promise(r => setTimeout(r, 500))
                 await this.SaveAndReload()
             }
-            else if (sx['is_changed'] === 0) {
+            else if (sx['is_changed'] === 0 && sx['is_delete'] === 0 ) {
                 this.MainSaveMessage("No changes detected.")
                 this.ChangeSaveState(true, false, false, false)
             }

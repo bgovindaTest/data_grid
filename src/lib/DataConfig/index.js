@@ -133,7 +133,7 @@ let date_operators   = [
 let text_operators   = [
     'ilike', 'not_ilike',
     'is_null', 'is_not_null',
-    '=','!='
+    '=','!=','in', 'not_in'
 ]
 
 let number_operators = [

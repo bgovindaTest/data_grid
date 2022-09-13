@@ -2,14 +2,14 @@
 <div>
   <div v-if="loading">
     <!-- error msg change color display message i.e. permission denied contact xyz -->
-    <page-loader />
+    <page-loader :error_msg="loading_error" />
   </div>
   <div v-else>
     <grid-header 
         @help="helpModal = true" @add-row="AddRow()"
         @filter-modal="FilterModal()" @orderby-modal="OrderByModal()"
         @pull-data="RunNewQuery()" @previous-page="PreviousPage()" @next-page="NextPage()"
-        @new-sheet="NewSheet()" @save="SaveData()"
+        @new-sheet="NewSheet()" @save="SaveData()" @log-data="LogTestData()"
         :links="navHeaderParams.links"
         :page_number="page_number"
         :navHeaderParams="navHeaderParams"
@@ -128,6 +128,7 @@ export default {
       */
       await this.MainGridInit()
       // await new Promise(r => setTimeout(r, 1000))
+
       // this.loading = false
   }
 };

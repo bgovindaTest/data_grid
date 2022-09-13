@@ -1,10 +1,11 @@
 {
-  "name": "autocomplete",
+  "name": "data_grid",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "dev": "vue-cli-service build --mode development",
     "test": "jest"
   },
   "dependencies": {

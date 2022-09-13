@@ -1,11 +1,13 @@
+
 -- DROP VIEW IF EXISTS app_admin.home_page_rv;
 CREATE VIEW app_admin.home_page_rv AS
-SELECT 
-project_name, table_name, description, 
-url_link as "url_link.urlPath", table_name as "url_link.urlName"
+SELECT project_name, table_name, description,
 
-FROM (
-    VALUES 
-    ('app_admin', 'users', 'user information', 'grid/app_admin/users'), 
-    ('cfte', 'appointment_effort', 'cfte information', 'grid/provider_effort/appointment_effort')
-) AS t (project_name, table_name, description, url_link );
+CASE when project_name = 'home_page' AND table_name = 'home_page'
+    THEN 'https://iuhpcbia.azurewebsites.net/'
+    ELSE 'https://iuhpcbia.azurewebsites.net/' || project_name || '/' || table_name
+END as "url_link.urlPath", 
+table_name as "url_link.urlName", is_test, is_read_only
+
+FROM app_admin.grid_config_rv
+ORDER BY project_name asc, table_name asc;

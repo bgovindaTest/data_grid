@@ -1,7 +1,18 @@
 const lob = {
-    "comments": "This is the main landing page for the app. ProjectFolderName TableName (as link) Description",
+    "comments": "List of line of business attached to company",
     "grids": [
         {
+            "navHeaderParams": {
+                "links": [
+                    {'name':'company',          'url': '/provider_effort/company'},
+                    {'name':'lob',              'url': '/provider_effort/lob'},
+                    {'name':'department',       'url': '/provider_effort/department'},
+                    {'name':'specialty',        'url': '/provider_effort/specialty'},
+                    {'name':'cost_center',      'url': '/provider_effort/cost_center'},
+                    {'name':'cost_center_time', 'url': '/provider_effort/cost_center_time'}                
+                
+                ]
+            },
             "columnDefs": [
                 { "headerName": "CompanyName",   "field": "company_name", "valueGetter":"lookup(company_id,   'company_name')", "editable": false, "showSort": true, "showFilter": true,  "defaultSort": "asc"},
                 { "headerName": "CompanyCode",   "field": "company_code", "valueGetter":"lookup(company_id,   'company_code')", "editable": false, "showSort": true, "showFilter": true },
@@ -22,7 +33,7 @@ const lob = {
                     "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
                         {"is_active": "true", "id": "true"},
                         {"is_active": "false","id": "false"}
-                    ]}
+                    ], 'pullKey': "is_active"}
                 },
                 { "headerName":  "LobName","field": "lob_name", "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc"},                
                 { "headerName":  "LobCode","field": "lob_code", "editable": true, "showSort": true, "showFilter": true},
@@ -32,7 +43,7 @@ const lob = {
                 { "field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
             ],
             "routeParams": {
-                "default_route": "/provider_effort/line_of_business",
+                "default_route": "data/provider_effort/line_of_business",
                 "select": {"route":"data/provider_effort/line_of_business_rv/select"}
             }
         }

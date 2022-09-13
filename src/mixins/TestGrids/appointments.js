@@ -2,7 +2,7 @@ let appointments = {
     "grids": [
         {
             "navHeaderParams": {
-                "links": [{'name':'provider_cfte', 'url': '/providers'}]
+                "links": [{'name':'provider_cfte', 'url': '/provider_effort/appointment_effort'}]
             },
             "columnDefs": [
                 {"field": "last_name", "valueGetter":"lookup(provider_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
@@ -40,7 +40,7 @@ let appointments = {
                         {'is_active': 'true', 'id': 'true'} 
                         ,{'is_active': 'false', 'id': 'false'}
                     
-                    ]}
+                    ],'pullKey': "is_active"}
                 },
                 {"field": "start_date", "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},
                 {"field": "end_date",   "cellEditor": 'dateTimeEditor', "dataType": "date", "editable": true, "showSort": true, "showFilter": true},

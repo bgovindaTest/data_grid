@@ -6,7 +6,7 @@ let test_grid = {
 
 
         "navHeaderParams": {
-            "links": [{'name':'providers_cc', 'url': '/providers'}]
+            "links": [{'name':'providers_cc', 'url': '/provider_effort/appointments'}]
         },
         //table
         "columnDefs": [

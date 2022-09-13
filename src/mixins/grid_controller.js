@@ -18,7 +18,7 @@ last column. All other grid functions will be disabled.
 const ColumnDefsInit = require('../lib/GridParser')
 const data_config    = require('../lib/DataConfig')
 const meta_column    = data_config.meta_column_name
-let   testGrid       = require('./TestGrids/test_grid')
+// let   testGrid       = require('./TestGrids/test_grid')
 const RouteParams    = require('./RouteParser/RouteParams')
 const axiosParams    = require('../axios_params')
 const Pull           = require('./RouteParser/Pull') 
@@ -55,6 +55,7 @@ data () {
         */
         NODE_ENV: "", //test development production
         is_read_only: false,
+        is_test: false,
 
 
         url_params: {},    //not implemented
@@ -84,7 +85,7 @@ data () {
         queryModal: false,
         filter_active: true, //if false use orderby
         helpModal: false,
-        help_msg: "# placeholder not implemented yet \n# No Help Message",
+        help_msg: "# No Help Message",
 
         /*
             Parameters below control save modal and corresponding messages and 
@@ -143,41 +144,56 @@ methods: {
         */
 
         //wrap in big try catch for loading screen
+        try {
+            this.SetEnvironment()
+            this.SaveParamsInit()
+            let main_grid = await this.PullAndParsePageConfig()
+            if (this.loading_error != "") {
+                // stop loading display error mesage
+                return
+            }
+            //pull url params
 
-        this.SetEnvironment()
-        this.SaveParamsInit()
+            // let main_grid   = testGrid['grids'][0]
+            let is_read_only = this.is_read_only//false //true
+            // this.is_test = true
 
-        //pull url params
+            let routeParams = main_grid['routeParams'] || {}
 
-        let main_grid   = testGrid['grids'][0]
-        let is_read_only = false //true
-        let routeParams = main_grid['routeParams'] || {}
-
-
-        let navHeaderParams = main_grid['navHeaderParams'] || {}
-        let columnDefConfig = main_grid['columnDefs']
-        await this.ValuesObjectParser(0, columnDefConfig)
-        let valuesObject = this.valuesObject[0]
-        let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
-        let px  = cdi.RunGridColumnsInit()
-  
-        //Initialize routes
-        let rpx = new RouteParams(routeParams, px['columnDefs'], axiosParams.baseUrl)
-        rpx.RouteParamsInit()
-        this.routeParams = routeParams
+            let navHeaderParams = main_grid['navHeaderParams'] || {}
+            let columnDefConfig = main_grid['columnDefs']
+            await this.ValuesObjectParser(0, columnDefConfig)
+            let valuesObject = this.valuesObject[0]
+            let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
+            let px  = cdi.RunGridColumnsInit()
+    
+            //Initialize routes
+            let rpx = new RouteParams(routeParams, px['columnDefs'], axiosParams.baseUrl)
+            rpx.RouteParamsInit()
+            this.routeParams = routeParams
 
 
-        this.columnDefs    = px['columnDefs']
-        this.gridFunctions = px['gridFunctions']
-        this.LinkUIQueryParams(px['queryParams'])
-        this.NavHeaderParamsInit(navHeaderParams, is_read_only)
-        if (this.NODE_ENV === 'development' && main_grid.hasOwnProperty('tableData') ) {
-            this.LoadTestData(main_grid)
-        } else { this.LoadDataInit() }
+            this.columnDefs    = px['columnDefs']
+            this.gridFunctions = px['gridFunctions']
+            this.LinkUIQueryParams(px['queryParams'])
+            this.NavHeaderParamsInit(navHeaderParams, is_read_only)
+            if (this.NODE_ENV === 'development' && main_grid.hasOwnProperty('tableData') ) {
+                this.LoadTestData(main_grid)
+            } else { this.LoadDataInit() }
 
-        this.SetColumnsReadOnly(is_read_only)
+            this.SetColumnsReadOnly(is_read_only)
 
-        this.loading = false
+            if (this.loading_error === "") {
+                // load grid
+                this.loading = false
+                if (this.is_test) {
+                    alert('grid in test mode no saving will occur. Data will be logged to console')
+                }
+            }
+        } catch (e) {
+            console.log(e)
+            this.loading_error = String(e)
+        }
     },
     SetColumnsReadOnly(is_read_only) {
         //not change cell colors. Need to check.
@@ -244,7 +260,7 @@ methods: {
             Initialization nav header params for navbar functionality
         */
         let defaultNavHeaderParams ={
-                'home': false,
+                'home': true,
                 'help': true,
                 'links': [],// or object array. 
                 'previous_page':  true, //for pagination
@@ -255,7 +271,10 @@ methods: {
                 'add_row':   true,
                 'new_sheet': false,
                 'load_data_init': true,
+                'is_test': false
         }
+        navHeaderParams['is_test'] = this.is_test
+
         let keys = Object.keys(defaultNavHeaderParams)
         for(let i =0; i < keys.length; i+=1 ) {
             let key = keys[i]
@@ -313,20 +332,22 @@ methods: {
         let url = window.location.href
         let urlx = new URL(url)
         let path = urlx.pathname
-        let tmp  = path.split('/')
+        let tmpx  = path.split('/')
+        let tmp = []
+        for (z of tmpx) { if (z != "") { tmp.push(z) } }
+
         let projectFolder = "" //tmp[0]
         let tableName     = "" //tmp[1]
         let route = ""
+        // console.log('url_params')
+        // console.log(path)
         if (tmp.length >= 2) {
             projectFolder = tmp[0]
             tableName = tmp[1]
             route = projectFolder +'/' + tableName
-        } else if (tmp.length === 1) { 
-            tableName = tmp[0] 
-            route = tableName +'/' + tableName
-        } else {
-            route = "home/home"
-        }
+            // console.log(tmp)
+            // console.log(route)
+        } else { route = "home_page/home_page" }
         //if tmp.length === 0  //is_root
         return {'projectFoldect': projectFolder, 'tableName': tableName, 'route': 'grid/'+ route}
     },
@@ -341,27 +362,54 @@ methods: {
             navHeaderParams:
             'queryParams'
             'columnDefs'
-
+            //{'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
+            //project_name, table_name, is_public, is_read_only
         */
         let routeParams = this.UrlParams()
         let route = routeParams['route']
-        //{'columnDef': grid, 'gridFunctions': gridFunctions, 'queryParams': query_params}
-        //project_name, table_name, is_public, is_read_only
+
+        let baseUrl = axiosParams.baseUrl
+        if (baseUrl.slice(-1) === '/') {
+            route = baseUrl + route
+        } else { route = baseUrl + '/' + route}
+
+        // console.log(route)
 
         try {
-            let dx = await axios_object.get(route)
-            //loading error
-            let axios_object = await this.axios.post(route, req_body)
-            let x = axios_object.data
-            let serverTableData = x['output_data']
+            let dx = await this.axios.get(route)
+            let x = dx.data
+            // console.log(typeof x)
+            // console.log(x)
+            if (typeof x === 'string' || x instanceof String) {
+                this.loading_error = x 
+            } 
+            if( Array.isArray(x) ) {
+                if (x.length === 0) {
+                    throw "Permission denied. No configurations sent. Check route is valid other wise contact admin"
+                }
+            }
+            let px = x[0]
+            /*
+            id, is_read_only, is_test, page_config, page_config.comments === help_msg
+
+
+            */
+            let page_config = px['page_config'] || {}
+            // console.log(page_config)
+
+            this.is_read_only = px['is_read_only'] || false
+            this.is_test      = px['is_test']      || false
+
+            let main_grid = page_config['grids'][0] || {}
+            this.help_msg = main_grid['comments'] || "# No Help Message"
+
+            return main_grid
         }
         catch (e) {
-
+            console.log(e)
+            this.loading_error = String(e)
         }
 
-
-        //navbar
-        //columnDef
     },
     FilterModal() {
         this.queryModal = true
@@ -563,6 +611,16 @@ methods: {
             updx(rdp)
         }
     },
+    LogTestData() {
+        try {
+            let x = []
+            this.gridOptions.api.forEachNode((rowNode, index) => { x.push(rowNode.data) })
+            console.log(x)
+        } catch (e) {
+            console.log(e)
+        }
+    },
+
     async PreviousPage() {
         if (this.pageParams['page_index'] <=0 ) { 
             return 
@@ -722,8 +780,20 @@ methods: {
             `
             let all_rows = `All Displayed Rows. warning: ${sx['is_warning']} errors: ${sx['is_error']}`
 
+            if (this.is_test) {
+                let test_msg = `Number Saving Rows: ${ sx['is_save'] } <br .> Deleted ${sx['is_delete']} <br />` + changed_rows + all_rows
+                this.MainSaveMessage(`Test Saving Rows: ${ test_msg }.  Potentially saved data logged to console. Press pull to reset.`)
+                this.TestSaveData()
+                this.ChangeSaveState(true, false, false, false)
+                return
+            }
+            if (this.is_read_only) { return }
+
 
             // let cstr = `changed: ${sx['is_changed']} saving: ${sx['is_save']}  warning: ${sx['is_warning']} errors: ${sx['is_error']} <br />`
+
+            // console.log(sx)
+
 
             if (sx['is_save'] > 0 && sx['is_warning'] === 0 && sx['is_error'] ===0 ) {
 
@@ -733,7 +803,7 @@ methods: {
                 await new Promise(r => setTimeout(r, 500))
                 await this.SaveAndReload()
             }
-            else if (sx['is_changed'] === 0) {
+            else if (sx['is_changed'] === 0 && sx['is_delete'] === 0 ) {
                 this.MainSaveMessage("No changes detected.")
                 this.ChangeSaveState(true, false, false, false)
             }
@@ -763,11 +833,11 @@ methods: {
                 this.ChangeSaveState(true, false, false, false)                
 
             } else {
-                this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
+                this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             }
         } catch (e) {
             console.log(e)
-            this.MainMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
+            this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
             alert(e)
         } 
 
@@ -782,6 +852,14 @@ methods: {
         let columnDefs = this.columnDefs
         let pxv  = new Push(columnDefs)
         pxv.PushParamsInit()
+
+        // console.log('pushParams')
+        // console.log(pxv.pushFieldParams)
+        // console.log(pxv.pushLookupParams)
+        // console.log(pxv.pushValueGetters)
+        // console.log(pxv.defaultValues)
+        // console.log('EndPushParams')
+
         let save_data_processed = {}
         let crudTypes = Object.keys(save_data)
         let index = 0
@@ -834,13 +912,32 @@ methods: {
             this.saveModal = false
             this.ShowSnackBar()
             let tmpFunc = this.HideSnackBar
-            setTimeout(tmpFunc, 5000)
+            setTimeout(tmpFunc, 1000)
             await this.RunNewQuery()
         } else {
             this.saveLock  = false
         }
-
     },
+    TestSaveData() {
+        //mocks PushSaveData. logs data to console. check if saving is working
+        try{
+            let req_bodies = this.saveData
+            let save_count = this.saveParams
+            console.log(req_bodies)
+            console.log(save_count)
+            this.saveLock = false
+            // save_count['is_validating'] = false 
+            // save_count['is_saving']     = false
+            // save_count['save_complete'] = true
+            return true
+        } catch (e) {
+            console.log(e)
+            this.MainSaveMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            this.ChangeSaveState(true, false, false, false)
+            return false
+        }
+    },
+
     async PushSaveData() {
         //return {'reqBody': reqBody, 'route': route, 'crudType': crudType}
         try{
@@ -865,7 +962,8 @@ methods: {
             return true
         } catch (e) {
             console.log(e)
-            this.MainMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            this.MainSaveMessage("Error: This message should not display. Please contact admin. Run pull to repull data<br />"+String(e))
+            this.ChangeSaveState(true, false, false, false)
             return false
         }
 

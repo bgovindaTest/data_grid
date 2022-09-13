@@ -2,12 +2,12 @@ let user_org_permission = {
     "grids": [
         {
             "navHeaderParams": {
-                "links": [{'name':'providers', 'url': '/providers'}]
+                "links": [{'name':'app_permissions', 'url': '/admin/user_app_perms'}]
             },
             "columnDefs": [
 
-                {"field": "last_name", "valueGetter":"lookup(user_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true},
-                {"field": "first_name","valueGetter":"lookup(user_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "last_name", "valueGetter":"lookup(user_id,   'last_name')",  "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
+                {"field": "first_name","valueGetter":"lookup(user_id,   'first_name')", "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
                 {"field": "user_id", "headerName": "email", "editable": true, "showSort": true, 
                     "showFilter": true, "isRequired": true, "cloneOnCopy": true,
                     "cellEditor": 'autoCompleteEditor',
@@ -41,8 +41,7 @@ let user_org_permission = {
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
                         {'is_active': 'true', 'id': 'true'} 
                         ,{'is_active': 'false', 'id': 'false'}
-                    
-                    ]}
+                    ],'pullKey': "is_active"}
                 },
                 {"field": "specialty_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,

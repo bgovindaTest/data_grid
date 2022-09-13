@@ -109,7 +109,7 @@ class Pull {
                 //if xyz else if
                 let field = qKey
                 let value = queryRowData[qKey]
-                if (type_check.IsObject(value)) {
+                if (type_check.IsObject(value) || type_check.IsNull(value)) {
                     lookupMapData[field][qKey] = value                    
                 } else {
                     lookupMapData[field][qKey] = String(queryRowData[qKey])
@@ -122,7 +122,11 @@ class Pull {
                 let subFieldKey = keyx[1].trim() 
                 if (fieldKey === "" || subFieldKey === "")   { continue }
                 if (! this.lookupFields.includes(fieldKey) ) { continue }
-                lookupMapData[fieldKey][subFieldKey] = String( queryRowData[qKey] )
+                if (type_check.IsNull( queryRowData[qKey] )) {
+                    lookupMapData[fieldKey][subFieldKey] = queryRowData[qKey]
+                } else {
+                    lookupMapData[fieldKey][subFieldKey] = String( queryRowData[qKey] )
+                }
                 continue
             }
             if (this.pullFields.includes(qKey) ) {

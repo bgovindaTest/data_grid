@@ -19,7 +19,7 @@ const fs = require('fs')
 
 let apps = [
     //main myapps
-    {'id': '1', 'project_name': 'home_page', 'table_name': 'home_page',
+    {'id': '1', 'project_name': 'provider_effort', 'table_name': 'home_page',
         "page_config": JSON.stringify(home_page),  'is_public': 'true',  'description': "Urls to other tables you have permisisons for",
         'permissions': ['app_admin.home_page_rv.read_only']
     },
@@ -73,11 +73,11 @@ let apps = [
         "permissions": ["provider_effort.cost_center_time_rv.read_only","provider_effort.cost_center_time.modify" ]
     },
     //perms
-    {'id': '11', 'project_name': 'admin', 'table_name': 'user_app_perms',
+    {'id': '11', 'project_name': 'provider_effort', 'table_name': 'user_app_perms',
         "page_config":JSON.stringify(user_app_perms), 'is_public': 'false', 'description': "users permissions for table access",
         "permissions": ['app_admin.app_permission_rv.read_only', 'app_admin.app_permissions.modify', 'app_admin.users_lv.read_only']
     },
-    {'id': '12', 'project_name': 'admin', 'table_name': 'user_org_permsission',
+    {'id': '12', 'project_name': 'provider_effort', 'table_name': 'user_org_permsission',
         "page_config":JSON.stringify(user_org_permission), 'is_public': 'false', 'description': "user responsibilites based on company/lob/dept/specialty/cost_center",
         "permissions": ['app_admin.user_org_permission_rv.read_only', 'app_admin.user_org_permission.modify', 'app_admin.users_lv.read_only',
             "provider_effort.cost_center_lv"]
@@ -108,28 +108,27 @@ let registeredTablesStr = `
 INSERT INTO app_admin.registered_tables (permission_name, schema_name, table_name,
     allow_select,allow_exists, allow_insert, allow_update, allow_delete, allow_save)
 
-(
-    select table_schema || '.'|| table_name || '.read_only' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+
+    select table_schema || '.'|| table_name || '.read_only' as permission_name, schemaname, viewname as tablename, true as allow_select, true as allow_exists,
         false as allow_insert, false as allow_update , false as allow_delete, false as allow_save
     from information_schema.views
-    where table_schema IN ('provider_effort', 'app_admin')
+    where schemaname IN ('provider_effort', 'app_admin')
     UNION ALL
-    select table_schema|| '.'|| table_name || '.read_only' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+    select schemaname|| '.'|| tablename || '.read_only' as permission_name, schemaname, viewname as tablename, true as allow_select, true as allow_exists,
         false as allow_insert, false as allow_update , false as allow_delete, false as allow_save
-    from information_schema.tables
-    where table_schema IN ('provider_effort', 'app_admin')
+    from pg_catalog.pg_tables
+    where schemaname IN ('provider_effort', 'app_admin')
 
     UNION ALL
-    select table_schema|| '.'|| table_name || '.modify' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+    select schemaname|| '.'|| tablename || '.modify' as permission_name, schemaname, tablename, true as allow_select, true as allow_exists,
         true as allow_insert, true as allow_update , true as allow_delete, true as allow_save
-    from ( VALUES ( 'provider_effort','appointment_effort_byuser_uv'), ('provider_effort' , 'appointments_byuser_uv' ) ) as x (table_schema, table_name)
+    from ( VALUES ( 'provider_effort','appointment_effort_byuser_uv'), ('provider_effort' , 'appointments_byuser_uv' ) ) as x (schemaname, tablename)
     
     UNION ALL
-    select table_schema|| '.'|| table_name || '.modify' as permission_name, table_schema, table_name, true as allow_select, true as allow_exists,
+    select schemaname|| '.'|| tablename || '.modify' as permission_name, schemaname, viewname as tablename, true as allow_select, true as allow_exists,
         true as allow_insert, true as allow_update , true as allow_delete, true as allow_save
-    from information_schema.tables
-    where table_schema IN ('provider_effort', 'app_admin')
-) ON CONFLICT DO NOTHING;
+    from pg_catalog.pg_tables
+    where schemaname IN ('provider_effort', 'app_admin');
 `
 out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/registered_table_inserts.psql'
 full_str += registeredTablesStr +'\n'
@@ -161,10 +160,10 @@ out_path = '/home/bgovi/PsqlCred/output_data/sql_admin/app_and_user_perms_insert
 
 strsx.push(
 `
-INSERT INTO app_admin.user_app_permission(user_id, app_id, is_read_only)
-SELECT id, 3, false FROM app_admin.users
+INSERT INTO app_admin.user_app_permissions(user_id, app_id, is_read_only)
+SELECT user_id, 2, false FROM app_admin.users
 UNION
-SELECT id, 4, false FROM app_admin.users;
+SELECT user_id, 3, false FROM app_admin.users;
 `
 )
 

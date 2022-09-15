@@ -148,6 +148,7 @@ methods: {
             this.SetEnvironment()
             this.SaveParamsInit()
             let main_grid = await this.PullAndParsePageConfig()
+            console.log(main_grid)
             if (this.loading_error != "") {
                 // stop loading display error mesage
                 return
@@ -162,6 +163,9 @@ methods: {
 
             let navHeaderParams = main_grid['navHeaderParams'] || {}
             let columnDefConfig = main_grid['columnDefs']
+
+            // console.log( main_grid['columnDefs']  )
+
             await this.ValuesObjectParser(0, columnDefConfig)
             let valuesObject = this.valuesObject[0]
             let cdi = new ColumnDefsInit(columnDefConfig, valuesObject)
@@ -174,8 +178,11 @@ methods: {
 
 
             this.columnDefs    = px['columnDefs']
+            // console.log(this.columnDefs)
             this.gridFunctions = px['gridFunctions']
             this.LinkUIQueryParams(px['queryParams'])
+
+
             this.NavHeaderParamsInit(navHeaderParams, is_read_only)
             if (this.NODE_ENV === 'development' && main_grid.hasOwnProperty('tableData') ) {
                 this.LoadTestData(main_grid)

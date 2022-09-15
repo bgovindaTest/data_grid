@@ -38,6 +38,7 @@ function CrudColumnInit(grid) {
             break
         }
     }
+
     du_column['field'] = meta_column_name
     // du_column['cellEditor'] = "crudSelectEditor"
     du_column['cellRenderer'] = "crudSelectEditor"
@@ -76,6 +77,9 @@ function SetDefaults(grid_column) {
     du_column['ignoreError'] = true
 
     //hide button if all false dont show
+    // console.log('meta_init')
+    // console.log(du_column)
+
     if (du_column.hasOwnProperty('allowAction') ) { 
         if (du_column['allowAction'] === false) {
             du_column['hide'] = true

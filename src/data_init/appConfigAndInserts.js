@@ -15,6 +15,8 @@ const department        = require(rx+'/app_configs/org/department.js')
 const specialty         = require(rx+'/app_configs/org/specialty.js')
 const cost_center       = require(rx+'/app_configs/org/cost_center.js')
 const cost_center_time  = require(rx+'/app_configs/org/cost_center_time.js')
+
+const user_config       = require(rx+'/app_user.js')
 const fs = require('fs')
 
 let apps = [
@@ -82,6 +84,10 @@ let apps = [
         "permissions": ['app_admin.user_org_permission_rv.read_only', 'app_admin.user_org_permission.modify', 'app_admin.users_lv.read_only',
             "provider_effort.cost_center_lv"]
     },
+    {'id': '13', 'project_name': 'admin', 'table_name': 'users',
+        "page_config":JSON.stringify(user_org_permission), 'is_public': 'false', 'description': "users table",
+        "permissions": ['app_admin.users.read_only', 'app_admin.users.modify']
+    }
 ]
 
 /*

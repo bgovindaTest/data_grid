@@ -85,7 +85,7 @@ let apps = [
             "provider_effort.cost_center_lv"]
     },
     {'id': '13', 'project_name': 'admin', 'table_name': 'users',
-        "page_config":JSON.stringify(user_org_permission), 'is_public': 'false', 'description': "users table",
+        "page_config":JSON.stringify(user_config), 'is_public': 'false', 'description': "users table",
         "permissions": ['app_admin.users.read_only', 'app_admin.users.modify']
     }
 ]

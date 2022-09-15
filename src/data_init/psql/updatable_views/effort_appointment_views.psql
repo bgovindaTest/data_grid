@@ -73,10 +73,10 @@ CREATE VIEW provider_effort.line_of_business_lv AS
   SELECT * FROM provider_effort.line_of_business_rv where is_active = true;
 
 CREATE VIEW provider_effort.department_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
+  SELECT * FROM provider_effort.department_rv where is_active = true;
 
 CREATE VIEW provider_effort.specialty_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
+  SELECT * FROM provider_effort.specialty_rv where is_active = true;
 
 CREATE VIEW provider_effort.cost_center_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
+  SELECT * FROM provider_effort.cost_center_rv where is_active = true;

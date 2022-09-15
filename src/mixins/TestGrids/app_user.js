@@ -4,7 +4,8 @@ let app_user = {
             "navHeaderParams": {
                 "links": [
                     {'name':'user_org_perms', 'url': '/admin/user_org_permsission'},
-                ]
+                ],
+                "add_row": false
             },
             "columnDefs": [
 
@@ -15,9 +16,9 @@ let app_user = {
                 {"field": "is_admin",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
-                        {'is_active': 'true', 'id': 'true'} 
-                        ,{'is_active': 'false', 'id': 'false'}
-                    ],'pullKey': "is_active"}
+                        {'is_admin': 'true', 'id': 'true'} 
+                        ,{'is_admin': 'false', 'id': 'false'}
+                    ],'pullKey': "is_admin"}
                 },
 
                 {"field": "is_active",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,

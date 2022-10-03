@@ -5,8 +5,8 @@ const home_page = {
             "navHeaderParams": { 'save':  false, 'add_row':  false },
 
             "columnDefs": [
-                { "headerName": "ProjectName", "field": "project_name", "chmodParams": "r" },
-                { "headerName": "TableName",   "field": "table_name", "chmodParams": "r" },
+                { "headerName": "ProjectName", "field": "project_name","showSort": true, "showFilter": true, "chmodParams": "r" },
+                { "headerName": "TableName",   "field": "table_name", "showSort": true, "showFilter": true, "chmodParams": "r" },
                 { "headerName": "Description",   "field": "description", "chmodParams": "r" },
 
                 { "headerName": "UrlLink",   "field": "url_link", "cellRenderer": "LinksRenderer", "cellEditor": "LinksRenderer", "chmodParams": "r" },

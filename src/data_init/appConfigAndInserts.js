@@ -79,7 +79,7 @@ let apps = [
         "page_config":JSON.stringify(user_app_perms), 'is_public': 'false', 'description': "users permissions for table access",
         "permissions": ['app_admin.app_permission_rv.read_only', 'app_admin.app_permissions.modify', 'app_admin.users_lv.read_only']
     },
-    {'id': '12', 'project_name': 'admin', 'table_name': 'user_org_permsission',
+    {'id': '12', 'project_name': 'admin', 'table_name': 'user_org_permission',
         "page_config":JSON.stringify(user_org_permission), 'is_public': 'false', 'description': "user responsibilites based on company/lob/dept/specialty/cost_center",
         "permissions": ['app_admin.user_org_permission_rv.read_only', 'app_admin.user_org_permission.modify', 'app_admin.users_lv.read_only',
             "provider_effort.cost_center_lv"]

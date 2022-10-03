@@ -30,6 +30,7 @@ Not implemented for live searching yet. api_route is fired during initialization
         :style="{ height: gridHeight + 'px', 'max-width': gridWidth + 'px' }"
         class="ag-theme-alpine"
         :columnDefs="columnDefs"
+        :defaultColDef="defaultColDef"
         :rowData="rowData"
         :rowSelection="rowSelection"
         :overlayLoadingTemplate="overlayLoadingTemplate"
@@ -40,6 +41,7 @@ Not implemented for live searching yet. api_route is fired during initialization
         @keydown.up = 'onKeydown'
         @keydown.enter = 'onKeydown'
         @keydown = 'onKeydown'
+        :suppressDragLeaveHidesColumns="true"
 
     ></ag-grid-vue>
   </div>
@@ -66,6 +68,7 @@ export default {
             displayKey: null,
             is_async: false,
             columnDefs: null,
+            defaultColDef: { resizable: true, suppressMenu: true },
             rowData: null,
             overlayNoRowsTemplate: '<span class="ag-overlay-loading-center">No Rows</span>',
             overlayLoadingTemplate: '<span class="ag-overlay-loading-center">Please wait while your rows are loading</span>'

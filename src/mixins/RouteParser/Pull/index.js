@@ -270,6 +270,11 @@ class Pull {
         }
 
         else if (data_config.null_parse_types.includes(operator)) { }
+        else if (operator === 'ilike' || operator === 'not_ilike' || operator === 'like' || operator === 'not_like') {
+            let valuex = String(filterRow['value'])
+            value = '%'+valuex+'%'
+        }
+
         else { 
             //if null?
             let valuex = filterRow['value']
@@ -278,7 +283,7 @@ class Pull {
         }
         fr['column_name'] = filterRow['column_name']
         fr['operator']    = operator
-        fr['value']       = value
+        fr['value'] = value
         fout.push(fr)
     }
     ArrayValueParse(filterRow) {

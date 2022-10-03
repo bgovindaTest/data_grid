@@ -109,7 +109,7 @@ methods: {
         let fx = filter_row
         let column_name = fx['column_name']
         let dataType    = this.dataTypeMap[column_name]
-        let operator    = '='
+        let operator    = data_config.DefaultOperator(dataType)
         fx['value'] = null
         fx['valu2'] = null
         fx['delimiterType'] =  data_config.ReturnDelimiterType(null) 

@@ -23,6 +23,7 @@
       :rowData="tableData"
       @grid-ready="onGridReady"
       suppressPropertyNamesCheck="true"
+      :suppressDragLeaveHidesColumns="true"
     />
 
     <Modal v-model="queryModal" modal-class="fullscreen-modal" title="Query parameters">

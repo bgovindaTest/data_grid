@@ -21,7 +21,16 @@ let user_app_perms = {
                     }
                 },
                 {"field": "app_id", "dataType": "integer", "editable": true, "showSort": true, "showFilter": true, "isRequired": true},
-                {"field": "is_read_only", "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true},
+                {"field": "is_read_only", "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
+                    'isRequired': true, "isLookup": true,
+                    'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
+                        {'is_read_only': 'true', 'id': 'true'} 
+                        ,{'is_read_only': 'false', 'id': 'false'}
+                    ],'pullKey': "is_read_only"}
+                },
+
+
+
                 {"field": "last_modified_by_user_email", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
                 {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
                 {"field": "id", "chmodParams": 'rw', "editable": false, "showSort": true, "showFilter": true },

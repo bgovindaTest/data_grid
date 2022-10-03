@@ -16,6 +16,10 @@ const specialty         = require(rx+'/app_configs/org/specialty.js')
 const cost_center       = require(rx+'/app_configs/org/cost_center.js')
 const cost_center_time  = require(rx+'/app_configs/org/cost_center_time.js')
 
+const lcg   = require(rx+'/app_configs/org/lcg.js')
+const cpsc  = require(rx+'/app_configs/org/cpsc.js')
+
+
 const user_config       = require(rx+'/app_user.js')
 const fs = require('fs')
 
@@ -87,7 +91,19 @@ let apps = [
     {'id': '13', 'project_name': 'admin', 'table_name': 'users',
         "page_config":JSON.stringify(user_config), 'is_public': 'false', 'description': "users table",
         "permissions": ['app_admin.users.read_only', 'app_admin.users.modify']
-    }
+    },
+
+    {'id': '14',  'project_name': 'provider_effort', 'table_name': 'cpsc',
+        "page_config":JSON.stringify(cpsc), 'is_public': 'false', 'description': "all cpscs",
+        "permissions": ["provider_effort.cpsc.read_only","provider_effort.cpsc.modify" ]
+    },
+
+    {'id': '15',  'project_name': 'provider_effort', 'table_name': 'lcg',
+        "page_config":JSON.stringify(lcg), 'is_public': 'false', 'description': "all lcgs",
+        "permissions": ["provider_effort.lcg.read_only","provider_effort.lcg.modify" ]
+    },
+
+
 ]
 
 /*

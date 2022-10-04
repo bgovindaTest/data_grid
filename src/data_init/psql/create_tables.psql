@@ -382,15 +382,11 @@ $$;
 
 CREATE TABLE provider_effort.refreshed_dates (
     id bigserial PRIMARY KEY,
-    check_date date NOT NULL,
-    is_approved_date boolean DEFAULT false,
-    created_at timestamptz NOT NULL DEFAULT NOW(),
-    updated_at timestamptz NOT NULL DEFAULT NOW() ,
-    last_modified_userid   bigint  DEFAULT app_userid()
+    effective_date date NOT NULL
 );
 
 COMMENT ON TABLE provider_effort.refreshed_dates IS $$ 
-required dates for effort
+required dates for effort refresh. The greates date value is used
 
 $$;
 -- COMMIT;

@@ -18,9 +18,13 @@ const cost_center_time  = require(rx+'/app_configs/org/cost_center_time.js')
 
 const lcg   = require(rx+'/app_configs/org/lcg.js')
 const cpsc  = require(rx+'/app_configs/org/cpsc.js')
-
-
 const user_config       = require(rx+'/app_user.js')
+
+
+const refreshed_dates            = require(rx+'/effort_refresh/refreshed_dates')
+const appointment_effort_dateset = require(rx+'/effort_refresh/appointment_effort_dateset')
+const current_effort             = require(rx+'/effort_refresh/current_effort')
+
 const fs = require('fs')
 
 let apps = [
@@ -102,6 +106,22 @@ let apps = [
         "page_config":JSON.stringify(lcg), 'is_public': 'false', 'description': "all lcgs",
         "permissions": ["provider_effort.lcg.read_only","provider_effort.lcg.modify" ]
     },
+
+    {'id': '16',  'project_name': 'provider_effort', 'table_name': 'refreshed_dates',
+        "page_config":JSON.stringify(refreshed_dates), 'is_public': 'false', 'description': "the greatest date is used to set new cfte values for that date in appointment_effort_dateset",
+        "permissions": ["provider_effort.refreshed_dates.read_only","provider_effort.refreshed_dates.modify" ]
+    },
+
+    {'id': '17',  'project_name': 'provider_effort', 'table_name': 'appointment_effort_dateset',
+        "page_config":JSON.stringify(appointment_effort_dateset), 'is_public': 'false', 'description': "set cftes for a specified date. Used to add and revalidate cftes",
+        "permissions": ["provider_effort.appointment_effort_dateset.read_only","provider_effort.appointment_effort_dateset.modify" ]
+    },
+    {'id': '18',  'project_name': 'provider_effort', 'table_name': 'current_effort',
+        "page_config":JSON.stringify(current_effort), 'is_public': 'false', 'description': "shows current effort of providers",
+        "permissions": ["provider_effort.appointment_effort_dateset.read_only","provider_effort.appointment_effort_dateset.modify" ]
+    }
+
+
 
 
 ]
@@ -186,7 +206,11 @@ strsx.push(
 INSERT INTO app_admin.user_app_permission(user_id, app_id, is_read_only)
 SELECT id, 3, false FROM app_admin.users
 UNION
-SELECT id, 4, false FROM app_admin.users;
+SELECT id, 4, false FROM app_admin.users
+UNION
+SELECT id, 17, false FROM app_admin.users
+UNION
+SELECT id, 18, false FROM app_admin.users;
 `
 )
 

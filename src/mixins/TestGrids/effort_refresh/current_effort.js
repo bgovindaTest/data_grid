@@ -65,8 +65,9 @@ let current_effort = {
                 {"field": "npi","chmodParams": 'r',              "editable": false, "showSort": true, "showFilter": true},
                 {"field": "employee_number", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true},
     
-    
-    
+                {"field": "is_active",   "dataType": "boolean", "editable": false, "showSort": true, "showFilter": true,
+                    "chmodParams": 'r', "defaultFilter": "true"},
+
                 {"field": "appointment_id", "headerName": "AppointmentId", "editable": false, "showSort": true, 
                     "showFilter": true, "isRequired": true, "chmodParams": 'r',
                 },

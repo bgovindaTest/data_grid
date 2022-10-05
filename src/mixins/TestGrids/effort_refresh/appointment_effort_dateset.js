@@ -11,6 +11,16 @@ let appointment_effort_dateset = {
         },
         //table
         "columnDefs": [
+            {"field": "_ag-meta_", 
+                'cellEditorParams': {
+                    "allowDelete": {'update': false,  'insert': false}, //shows delete for pulled data only (has precedence)
+                    "allowUndo":   {'update': true,  'insert':  true}, //shows undo for insert and update  (has precedence)
+                    "allowCopy":   {'update': false,  'insert': false}, //show + for copy row.
+                    "allowRemove": {'update': false,  'insert': false}
+                }
+            },
+
+
             {"field": "last_name",  "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
             {"field": "first_name", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true, "defaultSort": "asc"},
 
@@ -75,17 +85,7 @@ let appointment_effort_dateset = {
             },
             {"field": "last_modified_by_user_email", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
             {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
-            {"field": "is_active",   "dataType": "boolean", "editable": false, "chmodParams": 'r', "defaultFilter": "true"},
-
-
-            {"field": "_ag-meta_", 
-                'cellEditorParams': {
-                    "allowDelete": {'update': false,  'insert': false}, //shows delete for pulled data only (has precedence)
-                    "allowUndo":   {'update': true,  'insert':  true}, //shows undo for insert and update  (has precedence)
-                    "allowCopy":   {'update': false,  'insert': false}, //show + for copy row.
-                    "allowRemove": {'update': false,  'insert': false}
-                }
-            },
+            {"field": "is_active",   "dataType": "boolean", "editable": false, "chmodParams": 'r', "defaultFilter": "true"}
         ],
         "routeParams": {
             "default_route":   "data/provider_effort/appointment_effort_byuser_uv", //,

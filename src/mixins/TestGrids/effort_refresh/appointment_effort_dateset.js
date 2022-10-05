@@ -9,7 +9,8 @@ let test_grid = {
             "links": [
                 {'name':'providers_cc', 'url': '/provider_effort/appointments'},
                 {'name':'provider_cfte', 'url': '/provider_effort/appointment_effort'}
-            ]
+            ],
+            'add_row': false,
 
         },
         //table

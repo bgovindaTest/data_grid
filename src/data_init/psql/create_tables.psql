@@ -382,7 +382,7 @@ $$;
 
 CREATE TABLE provider_effort.refreshed_dates (
     id bigserial PRIMARY KEY,
-    effective_date date NOT NULL
+    check_date date NOT NULL
 );
 
 COMMENT ON TABLE provider_effort.refreshed_dates IS $$ 

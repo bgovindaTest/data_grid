@@ -840,11 +840,11 @@ methods: {
                 this.ChangeSaveState(true, false, false, false)                
 
             } else {
-                this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
+                this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />")
             }
         } catch (e) {
             console.log(e)
-            this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />"+cstr)
+            this.MainSaveMessage("Error: This message should not display. Please contact admin. <br />")
             alert(e)
         } 
 

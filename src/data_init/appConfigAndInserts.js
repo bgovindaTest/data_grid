@@ -210,7 +210,7 @@ SELECT id, 4, false FROM app_admin.users
 UNION
 SELECT id, 17, false FROM app_admin.users
 UNION
-SELECT id, 18, false FROM app_admin.users;
+SELECT id, 18, true FROM app_admin.users;
 `
 )
 

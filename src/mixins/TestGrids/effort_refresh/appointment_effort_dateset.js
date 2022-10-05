@@ -23,8 +23,9 @@ let appointment_effort_dateset = {
                 "cellEditor": 'autoCompleteEditor', "width": 200, 
                     "cellEditorParams": {
                         "api_route": "data/provider_effort/max_refreshed_date",
-                        "columnDefs": [ {"field":'effective_date'}],
-                        "pushKey": "effective_date"
+                        "columnDefs": [ {"field":'effective_date'} , {"field":"id", "hide": true}],
+                        "pushKey": "effective_date",
+                        "pullKey": "effective_date",
                     }
             },
             {"field": "cfte",  "dataType": "numeric","requiredFields": ['cfte'], "validator":"1 >= ifnull(cfte,0)  >= 0", 
@@ -74,6 +75,8 @@ let appointment_effort_dateset = {
             },
             {"field": "last_modified_by_user_email", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
             {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
+            {"field": "is_active",   "dataType": "boolean", "editable": false, "chmodParams": 'r', "defaultFilter": "true"},
+
 
             {"field": "_ag-meta_", 
                 'cellEditorParams': {
@@ -87,9 +90,9 @@ let appointment_effort_dateset = {
         "routeParams": {
             "default_route":   "data/provider_effort/appointment_effort_byuser_uv", //,
             'select': {'route':"data/provider_effort/appointment_effort_dateset_byuser_rv/select"},
-            'insert': "",
+            'insert': {'route':""},
             'update': {'route':"data/provider_effort/appointment_effort_byuser_uv/insert", "crudType": 'insert'},
-            'delete': ""
+            'delete': {'route':""}
         }
     }
 ]}

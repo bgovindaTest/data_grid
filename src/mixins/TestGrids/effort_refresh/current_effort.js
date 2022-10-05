@@ -47,7 +47,7 @@ let current_effort = {
                 {"field": "full_effort", "showFilter": true, "showSort": true,  "valueGetter": "ifnull(cfte,0) + ifnull(veterans_affairs,0) + ifnull(contract,0) + ifnull(academic,0) + ifnull(administration,0) " ,
                     "validator": "1>= ifnull(cfte,0) + ifnull(veterans_affairs,0) + ifnull(contract,0) + ifnull(academic,0) + ifnull(administration,0)  >=0"},
     
-                {"field": "cfte_full_time" , "chmodParams": 'r',  "editable":true,
+                {"field": "cfte_full_time" , "chmodParams": 'r',  "editable":false,
                     "validator": "ifnull(cfte_full_time,0)  >=0"},
                 {"field": "time_unit_name", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true, },
     
@@ -76,10 +76,7 @@ let current_effort = {
             ],
             "routeParams": {
                 "default_route":   "", //,
-                'select': {'route':"data/provider_effort/appointment_effort_current_rv/select"},
-                'insert': "",
-                'update': "",
-                'delete': ""
+                'select': {'route':"data/provider_effort/appointment_effort_current_rv/select"}
             }
         }
     ]}

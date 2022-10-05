@@ -382,7 +382,11 @@ $$;
 
 CREATE TABLE provider_effort.refreshed_dates (
     id bigserial PRIMARY KEY,
-    check_date date NOT NULL
+    check_date date NOT NULL,
+    created_at timestamptz default now(),
+    updated_at timestamptz default now(),
+    last_modified_userid   bigint  DEFAULT app_userid()
+
 );
 
 COMMENT ON TABLE provider_effort.refreshed_dates IS $$ 

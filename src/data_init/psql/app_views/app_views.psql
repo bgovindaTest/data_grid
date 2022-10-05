@@ -296,7 +296,8 @@ CREATE VIEW provider_effort.user_org_permissions_rv AS
         department_name as "cost_center_id.department_name", department_code as "cost_center_id.department_code",
         cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name",
         org_code as "cost_center_id.org_code",
-        org_name as "cost_center_id.org_name"
+        org_name as "cost_center_id.org_name",
+        ccrv.id as "cost_center_id.id"
 
     FROM provider_effort.user_org_permission as uop
     INNER JOIN app_admin.users                 as users on users.id   = uop.user_id
@@ -520,6 +521,75 @@ CREATE VIEW provider_effort.specialty_lv AS
 CREATE VIEW provider_effort.cost_center_lv AS
   SELECT * FROM provider_effort.cost_center_rv where is_active = true;
 
+-- max_effective_date_set
+
+
+/*
+Select all appointments that are active. 
+
+*/
+
+CREATE VIEW provider_effort.max_refreshed_date AS
+  SELECT MAX(check_date) as effective_date FROM provider_effort.refreshed_dates;
+
+CREATE VIEW provider_effort.appointment_effort_current_byuser_rv AS
+  SELECT * FROM provider_effort.appointment_effort_current_rv
+  WHERE is_appuser_admin() = true OR appointment_id IN (SELECT id from provider_effort.user_appointment_permsissions_v);
+
+
+--refresh 
+CREATE VIEW provider_effort.appointment_effort_dateset_byuser_rv AS
+--new entries
+  SELECT last_name, first_name, appointment_code, null::date effective_date, null::numeric cfte, null::numeric veterans_affairs,
+    null::numeric contract, null::numeric academic, null::numeric administration,     
+    a.company_name, a.company_code, a.lob_name, a.lob_code, a.department_name,
+    a.department_code, a.specialty_name, a.specialty_code, a.cost_center_name,
+    a.cost_center_code, npi, employee_number, a.id as appointment_id,
+    a.is_active, 
+    null::numeric cfte_time, 
+
+    CASE WHEN cfte_full_time IS NULL THEN 40.0 ELSE cfte_full_time END as cfte_full_time,
+
+
+    time_unit_name
+    FROM provider_effort.appointments_byuser_rv as a
+    LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = a.cost_center_id
+    WHERE a.id NOT IN ( SELECT appointment_id FROM provider_effort.appointment_effort )
+-- missing effort date entries and not in current_effort
+  UNION
+  SELECT
+    last_name, first_name, appointment_code, null::date effective_date, null::numeric cfte, null::numeric veterans_affairs,
+    null::numeric contract, null::numeric academic, null::numeric administration,     
+    a.company_name, a.company_code, a.lob_name, a.lob_code, 
+    a.department_name, a.department_code, a.specialty_name, a.specialty_code, 
+    a.cost_center_name,
+    a.cost_center_code, npi, employee_number, a.id as appointment_id,
+    a.is_active,
+    null::numeric cfte_time,
+
+    CASE WHEN cfte_full_time IS NULL THEN 40.0 ELSE cfte_full_time END as cfte_full_time,
+
+    time_unit_name
+    FROM provider_effort.appointments_byuser_rv as a
+    LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = a.cost_center_id
+
+
+    WHERE a.id NOT IN 
+    ( 
+      SELECT appointment_id FROM provider_effort.appointment_effort 
+        WHERE effective_date NOT IN ( SELECT effective_date FROM provider_effort.max_refreshed_date)
+        AND appointment_id NOT IN (SELECT appointment_id FROM provider_effort.appointment_effort_current_rv ) 
+    )
+  UNION
+  SELECT 
+    last_name, first_name, appointment_code, null::date effective_date, cfte, veterans_affairs,
+    contract, academic, administration, company_name, company_code,
+    lob_name, lob_code, department_name, department_code, specialty_name, specialty_code, cost_center_name,
+    cost_center_code, npi, employee_number, appointment_id,
+    is_active, 
+    cfte_time, cfte_full_time, time_unit_name
+    FROM provider_effort.appointment_effort_current_byuser_rv;
+ 
 -- DROP VIEW IF EXISTS app_admin.home_page_rv;
 CREATE VIEW app_admin.home_page_rv AS
 SELECT project_name, table_name, description,

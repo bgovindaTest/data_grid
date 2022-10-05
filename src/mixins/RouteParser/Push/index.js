@@ -99,7 +99,11 @@ class Push {
                 //default_values
                 let pullKey = mapx['pullKey']
                 let pushKey = mapx['pushKey']
-                this.AddValueToRow(pushKey, rowDataOut, rowData[field][pullKey] )    
+                if (rowData[field] === null) {
+                    this.AddValueToRow(pushKey, rowDataOut, rowData[field] )    
+                } else {
+                    this.AddValueToRow(pushKey, rowDataOut, rowData[field][pullKey] )    
+                }
             } else if (this.pushValueGetters.hasOwnProperty(field)) {
                 let valueGetter = this.pushValueGetters[field]
                 let val = valueGetter({'data': rowData })

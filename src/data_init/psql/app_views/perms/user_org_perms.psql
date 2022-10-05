@@ -124,7 +124,8 @@ CREATE VIEW provider_effort.user_org_permissions_rv AS
         department_name as "cost_center_id.department_name", department_code as "cost_center_id.department_code",
         cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name",
         org_code as "cost_center_id.org_code",
-        org_name as "cost_center_id.org_name"
+        org_name as "cost_center_id.org_name",
+        ccrv.id as "cost_center_id.id"
 
     FROM provider_effort.user_org_permission as uop
     INNER JOIN app_admin.users                 as users on users.id   = uop.user_id

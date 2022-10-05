@@ -45,7 +45,7 @@ let test_grid = {
                 "validator":"1 >= ifnull(administration,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
 
-            {"field": "full_effort",   "valueGetter": "ifnull(cfte,0) + ifnull(veterans_affairs,0) + ifnull(contract,0) + ifnull(academic,0) + ifnull(administration,0) " ,
+            {"field": "full_effort", "showFilter": true, "showSort": true,  "valueGetter": "ifnull(cfte,0) + ifnull(veterans_affairs,0) + ifnull(contract,0) + ifnull(academic,0) + ifnull(administration,0) " ,
                 "validator": "1>= ifnull(cfte,0) + ifnull(veterans_affairs,0) + ifnull(contract,0) + ifnull(academic,0) + ifnull(administration,0)  >=0"},
 
             {"field": "cfte_full_time" , "cloneOnCopy": true, "editable":true,

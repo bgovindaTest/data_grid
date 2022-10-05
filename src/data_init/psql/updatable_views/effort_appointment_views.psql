@@ -73,10 +73,76 @@ CREATE VIEW provider_effort.line_of_business_lv AS
   SELECT * FROM provider_effort.line_of_business_rv where is_active = true;
 
 CREATE VIEW provider_effort.department_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
+  SELECT * FROM provider_effort.department_rv where is_active = true;
 
 CREATE VIEW provider_effort.specialty_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
+  SELECT * FROM provider_effort.specialty_rv where is_active = true;
 
 CREATE VIEW provider_effort.cost_center_lv AS
-  SELECT * FROM provider_effort.company_rv where is_active = true;
+  SELECT * FROM provider_effort.cost_center_rv where is_active = true;
+
+-- max_effective_date_set
+
+
+/*
+Select all appointments that are active. 
+
+*/
+
+CREATE VIEW provider_effort.max_refreshed_date AS
+  SELECT MAX(check_date) as effective_date FROM provider_effort.refreshed_dates;
+
+CREATE VIEW provider_effort.appointment_effort_current_byuser_rv AS
+  SELECT * FROM provider_effort.appointment_effort_current_rv
+  WHERE is_appuser_admin() = true OR appointment_id IN (SELECT id from provider_effort.user_appointment_permsissions_v);
+
+
+ 
+CREATE VIEW provider_effort.appointment_effort_dateset_byuser_rv AS
+  SELECT
+    last_name, first_name, appointment_code, null::date effective_date, null::numeric cfte, null::numeric veterans_affairs,
+    null::numeric contract, null::numeric academic, null::numeric administration,     
+    a.company_name, a.company_code, a.lob_name, a.lob_code, 
+    a.department_name, a.department_code, a.specialty_name, a.specialty_code, 
+    a.cost_center_name,
+    a.cost_center_code, npi, employee_number, a.id as appointment_id,
+    a.is_active,
+    null::numeric cfte_time,
+
+    CASE WHEN cfte_full_time IS NULL THEN 40.0 ELSE cfte_full_time END as cfte_full_time,
+
+    time_unit_name
+    FROM provider_effort.appointments_byuser_rv as a
+    LEFT JOIN provider_effort.cost_center_time_rv as cct on cct.cost_center_id = a.cost_center_id
+
+    --not set date entry
+    WHERE 
+    EXISTS ( SELECT effective_date FROM provider_effort.max_refreshed_date WHERE effective_date IS NOT NULL)
+        AND
+    --effort row does not exists
+    -- not in current effort. current effort populated by uinion join below
+    a.id NOT IN 
+    (   
+        SELECT appointment_id FROM provider_effort.appointment_effort 
+        WHERE effective_date IN ( SELECT effective_date FROM provider_effort.max_refreshed_date)
+    )
+    AND a.id NOT IN (  SELECT appointment_id FROM provider_effort.appointment_effort_current_rv  )
+
+  UNION
+
+  -- appointment_id doesnt have set effective_date
+  SELECT 
+    last_name, first_name, appointment_code, null::date effective_date, cfte, veterans_affairs,
+    contract, academic, administration, company_name, company_code,
+    lob_name, lob_code, department_name, department_code, specialty_name, specialty_code, cost_center_name,
+    cost_center_code, npi, employee_number, appointment_id,
+    is_active, 
+    cfte_time, cfte_full_time, time_unit_name
+    FROM provider_effort.appointment_effort_current_byuser_rv
+    WHERE appointment_id  NOT IN 
+        (   
+            SELECT appointment_id FROM provider_effort.appointment_effort 
+            WHERE effective_date IN ( SELECT effective_date FROM provider_effort.max_refreshed_date)
+        )
+    AND EXISTS ( SELECT effective_date FROM provider_effort.max_refreshed_date WHERE effective_date IS NOT NULL)  
+;

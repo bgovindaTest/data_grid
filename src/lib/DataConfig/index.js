@@ -205,6 +205,7 @@ function ReturnDataClass(data_type_name) {
 
 //for filters returns default filter type
 function DefaultOperator(data_type_name) {
+    if (data_type_name === null) {return '='}
     let class_name = ReturnDataClass(data_type_name)
     if (class_name === 'text') {return 'ilike'}
     else {return '='}

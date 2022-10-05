@@ -3,6 +3,9 @@ import App from './App.vue'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import 'ag-grid-enterprise';
+import { LicenseManager } from  'ag-grid-enterprise'
+
+LicenseManager.setLicenseKey("CompanyName=Indiana University Health Care Associates, Inc.,LicensedApplication=BrandonGovindarajooProviderEffort,LicenseType=SingleApplication,LicensedConcurrentDeveloperCount=1,LicensedProductionInstancesCount=0,AssetReference=AG-024945,ExpiryDate=4_March_2023_[v2]_MTY3Nzg4ODAwMDAwMA==840127285fa2aec9778d1d1e2ce4c6c6")
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 // // import { faPhone, faAngleDown } from "@fortawesome/free-solid-svg-icons";

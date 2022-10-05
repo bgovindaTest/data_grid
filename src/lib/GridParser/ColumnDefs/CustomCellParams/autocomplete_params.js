@@ -214,7 +214,7 @@ class AutoCompleteParams {
         }
 
         if (valuesObject.length > 0) {
-            if (! type_check.IsObject(valuesObject[1]) ) {
+            if (! type_check.IsObject(valuesObject[0]) ) {
                 let field = this.grid_column['field']
                 console.error(`${field} values is not a json object returning empty object`)
                 return values

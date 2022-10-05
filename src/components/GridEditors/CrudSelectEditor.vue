@@ -84,6 +84,7 @@ export default {
         this.is_deleted = this.params.data[meta_column]['is_delete']
         let mc          = this.params.data[meta_column]
         let crudType = mc['crudType']
+        //for row level is insert or is update
 
         this.allow_delete = cep['allowDelete'][crudType]
         this.allow_undo   = cep['allowUndo'][crudType]

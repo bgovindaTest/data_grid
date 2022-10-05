@@ -72,9 +72,23 @@ test('grid column valid dtype', () => {
 
 test('grid column valid cell editor', () => {
     //creates a function
-    let is_valid1  = dc.GridColumnValidCellEditor('col1', 'autoComplete')
+    let is_valid1  = dc.GridColumnValidCellEditor('col1', 'autoCompleteEditor')
     let is_valid2  = dc.GridColumnValidCellEditor('col2', 'agTextCellEditor')
     let not_valid  = dc.GridColumnValidCellEditor('col3', 'error_example')
     let res = is_valid1 && is_valid2 && ! not_valid 
     expect(res).toBe(true)
+})
+
+test('default text operator', () => {
+    //creates a function
+    let res  = dc.DefaultOperator('text')
+    let exp = 'ilike'
+    expect(res).toBe(exp)
+})
+
+test('default null operator', () => {
+    //creates a function
+    let res  = dc.DefaultOperator(null)
+    let exp = '='
+    expect(res).toBe(exp)
 })

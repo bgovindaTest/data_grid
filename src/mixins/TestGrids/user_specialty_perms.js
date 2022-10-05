@@ -49,7 +49,7 @@ let user_org_permission = {
                          {'specialty_level': 'true', 'id': 'true'} 
                         ,{'specialty_level': 'false', 'id': 'false'}
                     
-                    ]}
+                    ],'pullKey': "specialty_level"}
                 },
                 {"field": "department_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,
@@ -57,14 +57,14 @@ let user_org_permission = {
                         {'department_level': 'true', 'id': 'true'} 
                         ,{'department_level': 'false', 'id': 'false'}
                     
-                    ]}
+                    ],'pullKey': "department_level"}
                 },
                 {"field": "lob_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
                     'isRequired': true, "isLookup": true,
                     'cellEditor': 'agRichSelectCellEditor', 'cellEditorParams': {'valuesObject': [
                         {'lob_level': 'true', 'id': 'true'} 
                         ,{'lob_level': 'false', 'id': 'false'}
-                    ]}
+                    ],'pullKey': "lob_level"}
                 },
                 {"field": "lob_name", "valueGetter":"lookup(cost_center_id,   'lob_name')", "editable": false, "showSort": true, "showFilter": true},                
                 {"field": "lob_code", "valueGetter":"lookup(cost_center_id,   'lob_code')", "editable": false, "showSort": true, "showFilter": true},

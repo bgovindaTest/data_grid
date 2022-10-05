@@ -1,4 +1,5 @@
 let current_effort = {
+    "comments": "Read only used to pull all current cftes",
     "grids": [
         {
     

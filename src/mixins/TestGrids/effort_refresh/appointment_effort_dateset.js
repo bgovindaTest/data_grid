@@ -1,17 +1,13 @@
-let test_grid = {
+let appointment_effort_dateset = {
+"comments": "Used to update cfte based on greatest reset date.",
 "grids": [
     {
-
-        // {"id":"1","lcg_name":"Undefined","lcg_code":"9999","is_active":true,"created_at":"2022-08-15 17:45:19","updated_at":"2022-08-15 17:45:19","last_modified_userid":"1"}
-
-
         "navHeaderParams": {
             "links": [
                 {'name':'providers_cc', 'url': '/provider_effort/appointments'},
                 {'name':'provider_cfte', 'url': '/provider_effort/appointment_effort'}
             ],
-            'add_row': false,
-
+            'add_row': false
         },
         //table
         "columnDefs": [
@@ -31,8 +27,6 @@ let test_grid = {
                         "pushKey": "effective_date"
                     }
             },
-
-
             {"field": "cfte",  "dataType": "numeric","requiredFields": ['cfte'], "validator":"1 >= ifnull(cfte,0)  >= 0", 
                 "editable": true,  "showFilter": true, "showSort": true},
 
@@ -79,11 +73,20 @@ let test_grid = {
                 "showFilter": true, "isRequired": true, "chmodParams": 'rw',
             },
             {"field": "last_modified_by_user_email", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
-            {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true }
+            {"field": "updated_at", "chmodParams": 'r', "editable": false, "showSort": true, "showFilter": true },
+
+            {"field": "_ag-meta_", 
+                'cellEditorParams': {
+                    "allowDelete": {'update': false,  'insert': false}, //shows delete for pulled data only (has precedence)
+                    "allowUndo":   {'update': true,  'insert':  true}, //shows undo for insert and update  (has precedence)
+                    "allowCopy":   {'update': false,  'insert': false}, //show + for copy row.
+                    "allowRemove": {'update': false,  'insert': false}
+                }
+            },
         ],
         "routeParams": {
             "default_route":   "data/provider_effort/appointment_effort_byuser_uv", //,
-            'select': {'route':"data/provider_effort/appointment_effort_byuser_rv/select"},
+            'select': {'route':"data/provider_effort/appointment_effort_dateset_byuser_rv/select"},
             'insert': "",
             'update': {'route':"data/provider_effort/appointment_effort_byuser_uv/insert", "crudType": 'insert'},
             'delete': ""
@@ -91,4 +94,4 @@ let test_grid = {
     }
 ]}
 
-module.exports = test_grid
+module.exports = appointment_effort_dateset

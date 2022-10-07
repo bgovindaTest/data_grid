@@ -278,7 +278,8 @@ methods: {
                 'add_row':   true,
                 'new_sheet': false,
                 'load_data_init': true,
-                'is_test': false
+                'is_test': false,
+                'ignore_unchanged': true //used as flag to ignore unchanged rows during save from displaying.
         }
         navHeaderParams['is_test'] = this.is_test
 
@@ -768,13 +769,24 @@ methods: {
             const SaveDataAssembly = this.SaveDataAssembly
 
             let k = 0
+            // 'ignore_unchanged'
+            let ignore_unchanged = this.navHeaderParams['ignore_unchanged']
             this.gridOptions.api.forEachNode((rowNode, index) => {
-                k+=1
+                //k+=1
                 let rowData = rowNode.data
                 let rowStatus = CrudStatus(rowData)
-                SaveStatusCount(rowStatus, save_count)
-                SaveDataAssembly(rowData, rowStatus, save_data)
-                //add timeout?
+                let is_delete  = rowStatus['is_delete']
+                let is_changed = rowStatus['is_changed']
+                if (! ignore_unchanged ) {
+                    SaveStatusCount(rowStatus, save_count)
+                    SaveDataAssembly(rowData, rowStatus, save_data)
+                    k+=1
+                } else if ( ignore_unchanged && (is_delete || is_changed) ) {
+                    SaveStatusCount(rowStatus, save_count)
+                    SaveDataAssembly(rowData, rowStatus, save_data)
+                    k+=1
+                }
+
 
             });
             await this.AssemblePushPayloads(save_data)

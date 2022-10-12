@@ -394,3 +394,116 @@ required dates for effort refresh. The greates date value is used
 
 $$;
 -- COMMIT;
+
+--backups
+CREATE TABLE provider_effort.providers_backup (
+    id bigserial PRIMARY KEY,
+    old_id bigint,
+    employee_number text,
+    npi text,
+    first_name text,
+    last_name text,
+    classification_id bigint,
+    is_active boolean,
+    cpsc_id bigint ,
+    lcg_id  bigint ,
+    start_date date,
+    end_date date,
+    created_at timestamptz default now()
+);
+CREATE INDEX employee_number_key ON provider_effort.providers_backup USING btree (employee_number);
+CREATE INDEX npi_key             ON provider_effort.providers_backup USING btree (npi);
+
+CREATE TABLE provider_effort.appointments_backup (
+    id bigserial PRIMARY KEY,
+    provider_id bigint,
+    cpsc_id bigint,
+    lcg_id  bigint,
+    cost_center_id bigint,
+    is_active boolean,
+    start_date date,
+    end_date   date,
+    created_at timestamptz default now()
+);
+CREATE INDEX provider_id_key ON provider_effort.appointments_backup USING btree (provider_id);
+
+CREATE TABLE provider_effort.appointment_effort_backup (
+    id bigserial PRIMARY KEY,
+    appointment_id bigint,
+    effective_date date ,
+    academic numeric default 0,
+    contract numeric default 0,
+    veterans_affairs numeric default 0,
+    administration numeric default 0,
+    cfte numeric default 0,
+    cfte_full_time numeric,
+    created_at timestamptz default now()
+);
+CREATE INDEX appointment_id_key ON provider_effort.appointment_effort_backup USING btree (appointment_id);
+
+
+--backup triggers
+CREATE OR REPLACE FUNCTION provider_effort.providers_fnbackup()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO provider_effort.providers_backup ( old_id,
+        employee_number, npi, first_name, last_name,
+        classification_id, is_active, cpsc_id, lcg_id,
+        start_date, end_date
+    ) VALUES( NEW.id, NEW.employee_number, NEW.npi, NEW.first_name,
+        NEW.last_name, NEW.classification_id, NEW.is_active,
+        NEW.cpsc_id, NEW.lcg_id, NEW.start_date, NEW.end_date
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_backup
+AFTER INSERT OR UPDATE ON provider_effort.providers
+FOR EACH ROW
+EXECUTE PROCEDURE provider_effort.providers_fnbackup();
+
+
+CREATE OR REPLACE FUNCTION provider_effort.appointments_fnbackup()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO provider_effort.appointments_backup (
+        provider_id, cpsc_id, lcg_id, cost_center_id,
+        is_active, start_date, end_date
+    ) VALUES( NEW.provider_id, NEW.cpsc_id,
+        NEW.lcg_id, NEW.cost_center_id,
+        NEW.is_active, NEW.start_date,
+        NEW.end_date
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_backup
+AFTER INSERT OR UPDATE ON provider_effort.appointments
+FOR EACH ROW
+EXECUTE PROCEDURE provider_effort.appointments_fnbackup();
+
+
+
+
+CREATE OR REPLACE FUNCTION provider_effort.appointment_effort_fnbackup()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO provider_effort.appointment_effort_backup (
+        appointment_id, effective_date, academic,
+        contract, veterans_affairs, administration,
+        cfte, cfte_full_time
+    ) VALUES(
+        NEW.appointment_id, NEW.effective_date, NEW.academic,
+        NEW.contract, NEW.veterans_affairs, NEW.administration,
+        NEW.cfte, NEW.cfte_full_time
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_backup
+AFTER INSERT OR UPDATE ON provider_effort.appointment_effort
+FOR EACH ROW
+EXECUTE PROCEDURE provider_effort.appointment_effort_fnbackup();

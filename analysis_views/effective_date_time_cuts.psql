@@ -1,4 +1,4 @@
-DROP FUNCTION IF EXISTS provider_effort.appointment_effort_timecuts;
+DROP FUNCTION IF EXISTS provider_effort.appointment_effort_timecuts(date,date,interval);
 CREATE OR REPLACE FUNCTION provider_effort.appointment_effort_timecuts (
     report_start_date date, report_end_date date, report_interval interval
 
@@ -18,7 +18,7 @@ RETURNS TABLE (
     --regular
     cfte numeric,  veterans_affairs numeric, academic numeric, administration numeric, 
     contract numeric, full_effort numeric, cfte_time numeric, cfte_time_hrs numeric,
-    cfte_full_time text, time_unit_name text, cfte_full_time_hrs text,
+    cfte_full_time numeric, time_unit_name text, cfte_full_time_hrs numeric,
     provider_id bigint, npi text, employee_number text, company_name text, company_code text, 
     lob_name text, lob_code text, department_name text, department_code text, specialty_name text,
     specialty_code text, cost_center_name text, cost_center_code text,

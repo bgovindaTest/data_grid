@@ -155,14 +155,24 @@ SELECT
 FROM appointment_effort_cuts;
 $$;
 
--- COMMENT ON FUNCTION provider_effort.appointment_effort_timecuts ( date, date, interval ) IS $$
+COMMENT ON FUNCTION provider_effort.appointment_effort_timecuts ( date, date, interval ) IS $$
 
--- Example: SELECT * FROM provider_effort.appointment_effort_timecuts('2020-02-01', '2020-04-01', '1 week' )
--- SELECT * FROM provider_effort.appointment_effort_timecuts('2020-02-01', '2020-04-01', '1 month' )
+Example: SELECT * FROM provider_effort.appointment_effort_timecuts('2020-02-01', '2020-04-01', '1 week' )
+SELECT * FROM provider_effort.appointment_effort_timecuts('2020-02-01', '2020-04-01', '1 month' )
 
--- Interval data type suggestions '1 week' or '1 month'. When using week or month you want to make sure the inputs
--- start and end dates start/stop at the begginning/end of the week/month respectively.
+Date Truncations: now is returns current datetime. any date string can be put in its place
+SELECT date_trunc('month', now()); --beginning of month
+SELECT date_trunc('week', now()); --beginning of work week starts on Monday
+SELECT (date_trunc('month', '2017-01-05'::date) + interval '1 month' - interval '1 day')::date; --end of month
+SELECT (date_trunc('week', now())+ '6 days'::interval)::date; --end of week
 
--- -- SELECT * FROM provider_effort.appointment_effort_timecuts('2020-02-01', '2020-04-01', '1 week' )
+Interval data type suggestions '1 week' or '1 month'. When using week or month you want to make sure the inputs
+start and end dates start/stop at the begginning/end of the week/month respectively.
 
--- $$
+norm_x are normalized by the start and stop dates. i.e. if 1.0 cfte starts in middle of month and the reporting period 
+starts at beginning of month the norm_cfte = 0.5.
+
+If the reporting period occurs outside of the appointments start and stop dates the appointment will not be included in
+the query. If the effort_date occurs before the appointment_start it will be set to start at the appointment_start date.
+If the effort_date is after the appointment_end_date. It is excluded from the query.
+$$;

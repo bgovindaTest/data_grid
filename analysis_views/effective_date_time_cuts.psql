@@ -7,6 +7,7 @@ RETURNS TABLE (
     appointment_effort_id bigint, appointment_id bigint,
     appointment_start_date date, appointment_end_date date,
     start_cut date, end_cut date, effective_begin_date date, effective_end_date date,
+    effective_date date,
     active_start date, active_end date, active_days integer, total_period_days  integer,
     percent_days numeric,
     --normalization
@@ -91,7 +92,7 @@ appointment_effort_cuts as (
     END cfte_full_time_hrs,
 
 
-
+    x.effective_date,
     x.provider_id, x.npi, x.employee_number, x.company_name, x.company_code, x.lob_name, x.lob_code,
     x.department_name, x.department_code, x.specialty_name, x.specialty_code, x.cost_center_name, x.cost_center_code,
     x.company_id, x.lob_id, x.department_id, x.specialty_id, x.cost_center_id
@@ -115,7 +116,7 @@ appointment_effort_cuts as (
 SELECT 
     appointment_effort_id::bigint, appointment_id::bigint,
     appointment_start_date::date, appointment_end_date::date,
-    start_cut::date, end_cut::date, effective_begin_date::date, effective_end_date::date,
+    start_cut::date, end_cut::date, effective_begin_date::date, effective_end_date::date, effective_date::date,
     active_start::date, active_end::date, active_days::integer, total_period_days::integer,
     percent_days::numeric,
     --normalization
@@ -148,11 +149,6 @@ SELECT
 
 
     cfte_full_time, time_unit_name, cfte_full_time_hrs,
-
-
-
-
-
     provider_id, npi, employee_number, company_name, company_code, lob_name, lob_code,
     department_name, department_code, specialty_name, specialty_code, cost_center_name, cost_center_code,
     company_id, lob_id, department_id, specialty_id, cost_center_id

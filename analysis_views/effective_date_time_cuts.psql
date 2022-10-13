@@ -1,26 +1,24 @@
-DROP FUNCTION IF EXISTS provider_effort.appointment_effort_timecuts;
-CREATE OR REPLACE FUNCTION provider_effort.appointment_effort_timecuts ()
-RETURNS TABLE (
-    id bigint, effective_date DATE,
-    appointment_start_date DATE, appointment_end_date DATE, effective_begin_date DATE,
-    effective_end_date DATE
+-- DROP FUNCTION IF EXISTS provider_effort.appointment_effort_timecuts;
+-- CREATE OR REPLACE FUNCTION provider_effort.appointment_effort_timecuts ()
+-- RETURNS TABLE (
+--     id bigint, appointment_id bigint, effective_date DATE,
+--     appointment_start_date DATE, appointment_end_date DATE, effective_begin_date DATE,
+--     effective_end_date DATE, start_cut DATE, end_cut DATE, day_diff integer
 
-    -- , academic numeric, veterans_affairs numeric, administration numeric,
-    -- cfte numeric, cfte_time numeric, cfte_full_time numeric, time_unit_name text,
-    -- appointment_id bigint, provider_id bigint, npi text, employee_number text,
-    -- cpsc_code text, cpsc_name text, lcg_name text, lcg_code text, classification_name text,
-    -- first_name text, last_name text, company_name text, company_code text, lob_name text, lob_code text, 
-    -- department_name text, department_code text, specialty_name text, specialty_code text, 
-    -- cost_center_name text, cost_center_code text, company_id text,
-    -- lob_id text, department_id text, specialty_id text, cost_center_id text
-)
-language plpgsql
-AS $$
-BEGIN
+--     -- , academic numeric, veterans_affairs numeric, administration numeric,
+--     -- cfte numeric, cfte_time numeric, cfte_full_time numeric, time_unit_name text,
+--     -- appointment_id bigint, provider_id bigint, npi text, employee_number text,
+--     -- cpsc_code text, cpsc_name text, lcg_name text, lcg_code text, classification_name text,
+--     -- first_name text, last_name text, company_name text, company_code text, lob_name text, lob_code text, 
+--     -- department_name text, department_code text, specialty_name text, specialty_code text, 
+--     -- cost_center_name text, cost_center_code text, company_id text,
+--     -- lob_id text, department_id text, specialty_id text, cost_center_id text
+-- )
+-- language sql
+-- AS $$
 
-RETURN QUERY
 WITH date_cuts as (
-    SELECT start_cut, end_cut, end_cut - start_cut as day_diff FROM 
+    SELECT start_cut, end_cut -1 as end_cut, end_cut - start_cut as day_diff FROM 
     (
         SELECT start_cut, LEAD(start_cut, 1) OVER (  ) as end_cut 
         FROM (
@@ -48,12 +46,47 @@ appointment_effort_start_end as (
         AND
         (  (SELECT begin_date FROM begin_end_dates) <= COALESCE(a.end_date, '9999-12-31'::DATE) )
     )
+),
+appointment_effort_cuts as (
+    SELECT  x.id::bigint as appointment_effort_id,  x.appointment_id::bigint,
+    x.appointment_start_date::date, x.appointment_end_date::date,
+    dx.start_cut, dx.end_cut, x.effective_begin_date, x.effective_end_date,
+    GREATEST(dx.start_cut, COALESCE(x.effective_begin_date::date,dx.start_cut::date) )::date as active_start,
+    LEAST( dx.end_cut, COALESCE(x.effective_end_date::date, dx.end_cut::date  )::date ) active_end,
+    LEAST( dx.end_cut, COALESCE(x.effective_end_date::date, dx.end_cut::date  )::date ) - GREATEST(dx.start_cut, COALESCE(x.effective_begin_date::date,dx.start_cut::date) )::date  + 1 as active_days,
+    dx.end_cut - dx.start_cut + 1 as total_period_days,
+    (    
+        LEAST( dx.end_cut, COALESCE(x.effective_end_date::date, dx.end_cut::date  )::date ) - 
+        GREATEST(dx.start_cut, COALESCE(x.effective_begin_date::date,dx.start_cut::date) )::date  + 1
+    )/( dx.end_cut - dx.start_cut + 1 ) as percent_days,
+
+    x.cfte, x.veterans_affairs, x.academic, x.administration, x.contract, cfte_time, cfte_full_time, time_unit_name,
+    CASE WHEN time_unit_name = 'hours' THEN cfte_time
+    ELSE cfte_time/60.0
+    END cfte_full_time_hrs,
+    x.provider_id, x.npi, x.employee_number, x.company_name, x.company_code, x.lob_name, x.lob_code,
+    x.department_name, x.department_code, x.specialty_name, x.specialty_code, x.cost_center_name, x.cost_center_code,
+    x.company_id, x.lob_id, x.department_id, x.specialty_id, x.cost_center_id
+
+    --need to convert ovearl time to hours
+
+    --fractional value
+
+    from date_cuts as dx 
+    inner join appointment_effort_start_end as x on
+        (  COALESCE(x.appointment_start_date, '0001-01-01'::DATE) <= dx.end_cut )
+        AND
+        (  dx.start_cut <= COALESCE(x.appointment_end_date, '9999-12-31'::DATE) )
+    WHERE x.appointment_id < 5 AND ( 
+            (  
+                dx.start_cut <= COALESCE(x.effective_end_date::date, '9999-12-31'::DATE )
+            )
+            AND
+            (  
+                x.effective_begin_date::date <= dx.end_cut
+            )
+        )
+    ORDER BY x.appointment_id, dx.start_cut
 )
-
-select x.id::bigint, x.effective_date::date,
-x.appointment_start_date::date, x.appointment_end_date::date,
-x.effective_begin_date::date, x.effective_end_date::date 
-
-from appointment_effort_start_end as x;
-
-END;$$
+SELECT * FROM appointment_effort_cuts;
+-- $$

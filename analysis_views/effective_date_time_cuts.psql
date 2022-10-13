@@ -24,7 +24,7 @@ WITH date_cuts as (
         FROM (
             SELECT dd::date as start_cut
             FROM generate_series
-                    ( '2007-02-01'::timestamp 
+                    ( '2020-02-01'::timestamp 
                     , '2020-04-01'::timestamp
                     , '1 week'::interval) dd
         ) dx 
@@ -61,9 +61,18 @@ appointment_effort_cuts as (
     )/( dx.end_cut - dx.start_cut + 1 ) as percent_days,
 
     x.cfte, x.veterans_affairs, x.academic, x.administration, x.contract, cfte_time, cfte_full_time, time_unit_name,
+    (x.cfte + x.veterans_affairs + x.academic + x.administration + x.contract) as full_effort,
+
     CASE WHEN time_unit_name = 'hours' THEN cfte_time
     ELSE cfte_time/60.0
+    END cfte_time_hrs,
+
+    CASE WHEN time_unit_name = 'hours' THEN cfte_full_time
+    ELSE cfte_full_time/60.0
     END cfte_full_time_hrs,
+
+
+
     x.provider_id, x.npi, x.employee_number, x.company_name, x.company_code, x.lob_name, x.lob_code,
     x.department_name, x.department_code, x.specialty_name, x.specialty_code, x.cost_center_name, x.cost_center_code,
     x.company_id, x.lob_id, x.department_id, x.specialty_id, x.cost_center_id
@@ -77,16 +86,48 @@ appointment_effort_cuts as (
         (  COALESCE(x.appointment_start_date, '0001-01-01'::DATE) <= dx.end_cut )
         AND
         (  dx.start_cut <= COALESCE(x.appointment_end_date, '9999-12-31'::DATE) )
-    WHERE x.appointment_id < 5 AND ( 
-            (  
-                dx.start_cut <= COALESCE(x.effective_end_date::date, '9999-12-31'::DATE )
-            )
-            AND
-            (  
-                x.effective_begin_date::date <= dx.end_cut
-            )
-        )
+    WHERE   
+            (  dx.start_cut <= COALESCE(x.effective_end_date::date, '9999-12-31'::DATE )  )
+            AND (  x.effective_begin_date::date <= dx.end_cut )
     ORDER BY x.appointment_id, dx.start_cut
 )
-SELECT * FROM appointment_effort_cuts;
+
+
+SELECT 
+    appointment_effort_id::bigint, appointment_id::bigint,
+    appointment_start_date::date, appointment_end_date::date,
+    start_cut::date, end_cut::date, effective_begin_date::date, effective_end_date::date,
+    active_start::date, active_end::date, active_days::integer, total_period_days::integer,
+    percent_days::numeric,
+    --normalization
+    CASE WHEN percent_days = 1 THEN cfte
+    ELSE cfte*percent_days END as cfte,
+
+    CASE WHEN percent_days = 1 THEN veterans_affairs
+    ELSE veterans_affairs*percent_days END as veterans_affairs,
+
+    CASE WHEN percent_days = 1 THEN academic
+    ELSE academic*percent_days END as academic,
+
+    CASE WHEN percent_days = 1 THEN administration
+    ELSE administration*percent_days END as administration,
+
+    CASE WHEN percent_days = 1 THEN contract
+    ELSE contract*percent_days END as contract,
+
+    CASE WHEN percent_days = 1 THEN full_effort
+    ELSE full_effort*percent_days END as full_effort,
+
+    CASE WHEN percent_days = 1 THEN cfte_time
+    ELSE cfte_time*percent_days END as cfte_time,
+
+    CASE WHEN percent_days = 1 THEN cfte_time_hrs
+    ELSE cfte_time_hrs*percent_days END as cfte_time_hrs,
+
+    cfte_full_time, time_unit_name, cfte_full_time_hrs,
+
+    provider_id, npi, employee_number, company_name, company_code, lob_name, lob_code,
+    department_name, department_code, specialty_name, specialty_code, cost_center_name, cost_center_code,
+    company_id, lob_id, department_id, specialty_id, cost_center_id
+FROM appointment_effort_cuts;
 -- $$

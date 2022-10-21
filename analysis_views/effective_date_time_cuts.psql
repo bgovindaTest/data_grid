@@ -1,3 +1,4 @@
+BEGIN;
 DROP FUNCTION IF EXISTS provider_effort.appointment_effort_timecuts(date,date,interval);
 CREATE OR REPLACE FUNCTION provider_effort.appointment_effort_timecuts (
     report_start_date date, report_end_date date, report_interval interval
@@ -22,7 +23,8 @@ RETURNS TABLE (
     provider_id bigint, npi text, employee_number text, company_name text, company_code text, 
     lob_name text, lob_code text, department_name text, department_code text, specialty_name text,
     specialty_code text, cost_center_name text, cost_center_code text,
-    company_id bigint, lob_id bigint, department_id bigint, specialty_id bigint, cost_center_id bigint
+    company_id bigint, lob_id bigint, department_id bigint, specialty_id bigint, cost_center_id bigint,
+    first_name text, last_name text
 )
 language sql
 AS $$
@@ -95,7 +97,8 @@ appointment_effort_cuts as (
     x.effective_date,
     x.provider_id, x.npi, x.employee_number, x.company_name, x.company_code, x.lob_name, x.lob_code,
     x.department_name, x.department_code, x.specialty_name, x.specialty_code, x.cost_center_name, x.cost_center_code,
-    x.company_id, x.lob_id, x.department_id, x.specialty_id, x.cost_center_id
+    x.company_id, x.lob_id, x.department_id, x.specialty_id, x.cost_center_id,
+    x.first_name, x.last_name
 
     --need to convert ovearl time to hours
 
@@ -151,7 +154,7 @@ SELECT
     cfte_full_time, time_unit_name, cfte_full_time_hrs,
     provider_id, npi, employee_number, company_name, company_code, lob_name, lob_code,
     department_name, department_code, specialty_name, specialty_code, cost_center_name, cost_center_code,
-    company_id, lob_id, department_id, specialty_id, cost_center_id
+    company_id, lob_id, department_id, specialty_id, cost_center_id, first_name, last_name
 FROM appointment_effort_cuts;
 $$;
 
@@ -176,3 +179,5 @@ If the reporting period occurs outside of the appointments start and stop dates 
 the query. If the effort_date occurs before the appointment_start it will be set to start at the appointment_start date.
 If the effort_date is after the appointment_end_date. It is excluded from the query.
 $$;
+
+COMMIT;

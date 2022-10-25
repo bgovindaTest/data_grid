@@ -1,0 +1,165 @@
+BEGIN;
+
+CREATE TABLE provider_effort.accountable_user (
+    id bigserial,
+    cost_center_id bigint REFERENCES provider_effort.cost_center (id),
+    first_name text,
+    last_name  text,
+    email text,
+    specialty_level boolean not null DEFAULT false,
+    department_level boolean not null DEFAULT false,
+    lob_level boolean not null DEFAULT false
+);
+
+CREATE VIEW provider_effort.accountable_user_rv AS
+    SELECT 
+        first_name, last_name, email, cost_center_id,
+        specialty_level, department_level, lob_level,    
+        company_name as "cost_center_id.company_name", company_code as "cost_center_id.company_code", 
+        lob_name as "cost_center_id.lob_name", lob_code as "cost_center_id.lob_code",
+        specialty_name as "cost_center_id.specialty_name", specialty_code as "cost_center_id.specialty_code", 
+        department_name as "cost_center_id.department_name", department_code as "cost_center_id.department_code",
+        cost_center_code as "cost_center_id.cost_center_code", cost_center_name as "cost_center_id.cost_center_name",
+        org_code as "cost_center_id.org_code",
+        org_name as "cost_center_id.org_name",
+        c.id as "cost_center_id.id",
+        ux.id as id
+    FROM provider_effort.accountable_user as ux
+    LEFT JOIN provider_effort.cost_center_rv  as c  on c.id = ux.cost_center_id
+;
+
+--accountable user permissions
+CREATE VIEW provider_effort.accountable_user_cost_centers_rv AS 
+    SELECT cost_center_id, first_name, last_name, email
+    FROM provider_effort.accountable_user
+    UNION 
+
+    SELECT ccx.id as cost_center_id, first_name, last_name, email
+    FROM provider_effort.accountable_user as uop
+    INNER JOIN provider_effort.cost_center as cc on cc.id = uop.cost_center_id
+    INNER JOIN provider_effort.specialty   as sp on cc.specialty_id = sp.id
+    INNER JOIN provider_effort.cost_center as ccx on ccx.specialty_id = sp.id
+    WHERE uop.specialty_level = true
+
+    UNION
+
+    SELECT ccx.id as cost_center_id, first_name, last_name, email
+    FROM provider_effort.accountable_user uop
+    INNER JOIN provider_effort.cost_center as cc on cc.id = uop.cost_center_id
+    INNER JOIN provider_effort.specialty   as sp on cc.specialty_id = sp.id
+    INNER JOIN provider_effort.department  as d   on d.id = sp.department_id
+    INNER JOIN provider_effort.specialty   as spx on spx.department_id = d.id
+    INNER JOIN provider_effort.cost_center as ccx on ccx.specialty_id = spx.id
+    WHERE uop.department_level = true
+
+    UNION
+
+    SELECT ccx.id as cost_center_id, first_name, last_name, email
+    FROM provider_effort.accountable_user uop
+    INNER JOIN provider_effort.cost_center as cc on cc.id = uop.cost_center_id
+    INNER JOIN provider_effort.specialty   as sp on cc.specialty_id = sp.id
+    INNER JOIN provider_effort.department  as d   on d.id = sp.department_id
+    INNER JOIN provider_effort.line_of_business as lob on d.lob_id = lob.id
+
+    INNER JOIN provider_effort.department  as dx   on dx.lob_id = lob.id
+    INNER JOIN provider_effort.specialty   as spx on spx.department_id = dx.id
+    INNER JOIN provider_effort.cost_center as ccx on ccx.specialty_id  = spx.id
+    WHERE uop.lob_level = true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+SET app.userid = "1";
+
+INSERT INTO app_admin.apps (project_name, table_name, is_test, is_public, description, page_config ) 
+VALUES (
+    'provider_effort',
+    'accountable_user',
+    false,
+    false,
+    'A list of people who are responsible for effort collection at different locations',
+
+$$
+{
+    "grids": [
+        {
+            "navHeaderParams": {
+                "links": []
+            },
+            "columnDefs": [
+
+                {"field": "last_name", "isRequired": true, "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc"},
+                {"field": "first_name", "isRequired": true, "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc"},
+                {"field": "email", "isRequired": true, "editable": true, "showSort": true, "showFilter": true, "defaultSort": "asc"},
+
+
+                {"field": "cost_center_id", "headerName": "CompanyCostCenterCode", "editable": true, "showSort": true, 
+                    "showFilter": true, "isRequired": true, "width": 230,
+                    "cellEditor": "autoCompleteEditor",
+                    "cellEditorParams": {
+                        "api_route": "data/provider_effort/cost_center_lv",
+                        "columnDefs": [
+                                {"field": "company_name"}, {"field": "cost_center_name"},
+                                {"field": "lob_name"}, {"field": "lob_code"},
+                                {"field": "department_name"}, {"field": "department_code"},
+                                {"field": "specialty_name"}, {"field":  "specialty_code"},
+                                {"field": "org_name"}, {"field": "org_code"}, 
+                                {"field": "id"}
+                            
+                            ],
+                        "displayKey": "org_code"
+                    }
+                },
+                {"field": "specialty_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
+                    "isRequired": true, "isLookup": true,
+                    "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
+                         {"specialty_level": "true",  "id": "true"} 
+                        ,{"specialty_level": "false", "id": "false"}
+                    
+                    ],"pullKey": "specialty_level"}
+                },
+                {"field": "department_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
+                    "isRequired": true, "isLookup": true,
+                    "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
+                         { "department_level": "true",  "id": "true"} 
+                        ,{"department_level":  "false", "id": "false"}
+                    
+                    ],"pullKey": "department_level"}
+                },
+                {"field": "lob_level",   "dataType": "boolean", "editable": true, "showSort": true, "showFilter": true,
+                    "isRequired": true, "isLookup": true,
+                    "cellEditor": "agRichSelectCellEditor", "cellEditorParams": {"valuesObject": [
+                         {"lob_level": "true", "id": "true"} 
+                        ,{"lob_level": "false", "id": "false"}
+                    ],"pullKey": "lob_level"}
+                },
+                {"field": "lob_name", "valueGetter":"lookup(cost_center_id, 'lob_name')", "editable": false, "showSort": true, "showFilter": true},                
+                {"field": "lob_code", "valueGetter":"lookup(cost_center_id, 'lob_code')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "department_name", "valueGetter":"lookup(cost_center_id,    'department_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "department_code", "valueGetter":"lookup(cost_center_id,    'department_code')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "specialty_name", "valueGetter":"lookup(cost_center_id,     'specialty_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "specialty_code", "valueGetter":"lookup(cost_center_id,     'specialty_code')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "cost_center_name", "valueGetter":"lookup(cost_center_id,   'cost_center_name')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "cost_center_code", "valueGetter":"lookup(cost_center_id,   'cost_center_code')", "editable": false, "showSort": true, "showFilter": true},
+                {"field": "id", "chmodParams": "rw", "editable": false, "showSort": true, "showFilter": true }
+            ],
+            "routeParams": {
+                "default_route":   "data/provider_effort/accountable_user",
+                "select": {"route":"data/provider_effort/accountable_user_rv/select"}
+            }
+        }
+    ]
+}
+$$
+);
+
+COMMIT;

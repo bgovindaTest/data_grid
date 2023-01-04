@@ -1,1 +1,0 @@
-SELECT npi from provider_effort.providers;

@@ -6,7 +6,7 @@ edw = {
     "database": ""
 }
 # postgres pe
-edw = {
+pe = {
     "user": "",
     "password": "",
     "server": "",

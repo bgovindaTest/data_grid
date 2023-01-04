@@ -1,15 +1,5 @@
 /*
-This query pulls data from roster and compares it to data stored in [Reporting_IUHP].[ProviderEffortOneMinus]
-
-Its used to look for new providers, appointments, company, lob, department, specialty and cost center. 
-
-The query adds boolean columns to know the state of providers and appointments i.e. if they are new or deactivated from
-a cost center or the iuh system.
-
-provider is a doctor at iu health
-appointment is a provider at a company and cost center
-
-need is active statement for appointment and provider lines 32-33 wont work yet.
+List of new providers in roster.
 */
 WITH roster as (
     SELECT -- TOP 10 
@@ -30,7 +20,9 @@ WITH roster as (
     ) as r
 )
 
+
+--need to verify data is verified data type
 SELECT Classification, EmployeeNumber, BeginDate,
-    EndDate, MaxFte,  LastName, FirstName,  EmpStatusCD, NPI
+    EndDate, LastName, FirstName, NPI
 FROM roster as rx
---where start_date >= ''
+WHERE BeginDate >= MONTH(DATEADD(MONTH, -1, CURRENT_TIMESTAMP));

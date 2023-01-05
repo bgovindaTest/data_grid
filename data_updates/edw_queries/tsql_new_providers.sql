@@ -22,7 +22,12 @@ WITH roster as (
 
 
 --need to verify data is verified data type
-SELECT Classification, EmployeeNumber, BeginDate,
-    EndDate, LastName, FirstName, NPI
+SELECT 
+    CASE 
+        WHEN LOWER(Classification) = 'physician' THEN 1
+        ELSE 2 END as classification_id,
+    EmployeeNumber as employee_number, 
+    BeginDate as start_date, EndDate as end_date,
+    LastName as last_name, FirstName as first_name, NPI as npi
 FROM roster as rx
 WHERE BeginDate >= MONTH(DATEADD(MONTH, -1, CURRENT_TIMESTAMP));

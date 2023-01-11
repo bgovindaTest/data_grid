@@ -20,7 +20,8 @@ WITH roster as (
     ) as r
 )
 
-SELECT Classification, EmployeeNumber, BeginDate,
-    EndDate, LastName, FirstName, NPI
+SELECT EmployeeNumber as employee_number, CONVERT(VARCHAR, EndDate, 23) as end_date
 FROM roster as rx
-WHERE EndDate >= MONTH(DATEADD(MONTH, -1, CURRENT_TIMESTAMP));
+WHERE EndDate >= DATEADD(MONTH, -1, CURRENT_TIMESTAMP)
+AND '9999-12-31' <> CONVERT(VARCHAR, EndDate, 23)
+;

@@ -8,7 +8,6 @@ insert into items_ver (item_id, name, item_group)
 select item_id, name, item_group from items where item_id=2;
 
 """
-
 import psycopg2
 import psycopg2.extras
 import config
@@ -17,21 +16,19 @@ import os
 pe  = config.pe
 edw = config.edw
 
-# file_name = 'output.txt'
-# output_path = "./pe_output.xlsx"
 psql_conn = "dbname={dbname} user={user} host='{server}' password='{password}'".format(
     dbname=pe['database'], user=pe['user'], server=pe['server'], password=pe['password']
 )
 
 conn = psycopg2.connect()
 
-pe_npi = {}
-
-cnxn_str = ("Driver={SQL Server Native Client 11.0};"
+cnxn_str = ("Driver=ODBC Driver 13 for SQL Server;"
             "Server={server};"
             "Database={database};"
             "UID={user};"
-            "PWD={password};").format(server=edw['server'], user=edw['user'], password=edw['password'], database=['database'])
+            "PWD={password};"
+            "Authentication=ActiveDirectoryPassword;"
+            ).format(server=edw['server'], user=edw['user'], password=edw['password'], database=edw['database'])
 
 cnxn = pyodbc.connect(cnxn_str)
 
@@ -65,8 +62,9 @@ class LoadRoster:
 
 
     def NewProviders(self):
+        columns = ['npi', 'employee_number', 'first_name', 'last_name', 'classification_id', 'start_date', 'end_date']
         rows = self.RunEdwPull('./edw_queries/tsql_new_providers.sql')
-        vals = self.ValueStr(rows, ['npi', 'employee_number', 'first_name', 'last_name', 'classificaiton_id', 'start_date', 'end_date'])
+        vals = self.ValueStr(rows, columns)
         newProvidersStr = self.PE_NewProviders(vals)
         fpath = outputDir+'/new_providers.psql'
         f = open(fpath, 'w')
@@ -76,7 +74,7 @@ class LoadRoster:
     def TermedProviders(self):
         rows = self.RunEdwPull('./edw_queries/tsql_termed_providers.sql')
         vals = self.ValueStr(rows, [ 'employee_number', 'end_date' ])
-        newProvidersStr = self.PE_NewProviders(vals)
+        newProvidersStr = self.PE_TermedProviders(vals)
         fpath = outputDir+'/termed_providers.psql'
         f = open(fpath, 'w')
         f.write(newProvidersStr)
@@ -89,7 +87,12 @@ class LoadRoster:
         sqlString = self.ReadSql(sql_file)
         cursor = cnxn.cursor()
         rows = cursor.execute(sqlString).fetchall()
-        return rows
+        columns = [column[0] for column in cursor.description]
+        # print(columns)
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return results
 
     def ReadSql(self, fpath):
         #Loads SQL strings
@@ -114,7 +117,10 @@ class LoadRoster:
         tmp = []
         for key in set_list:
             value = data_row[key]
-            set_str = "$${value}$$".format( value=value)
+            if value is None:
+                set_str = "null"
+            else:
+                set_str = "$${value}$$".format( value=value)
             tmp.append(set_str)
 
         return "( {values} ) ".format(values = ','.join(tmp) )
@@ -151,7 +157,6 @@ class LoadRoster:
         ON CONFLICT DO NOTHING;
         """.format(values=values)
         return x
-
 
 if __name__ == '__main__':
     x = LoadRoster()

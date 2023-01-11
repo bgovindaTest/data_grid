@@ -64,16 +64,24 @@ class LoadRoster:
     def NewProviders(self):
         columns = ['npi', 'employee_number', 'first_name', 'last_name', 'classification_id', 'start_date', 'end_date']
         rows = self.RunEdwPull('./edw_queries/tsql_new_providers.sql')
-        vals = self.ValueStr(rows, columns)
+        typeDict = {'classification_id': 'bigint', 'start_date': 'date', 'end_date': 'date'}
+        vals = self.ValueStr(rows, columns, typeDict)
         newProvidersStr = self.PE_NewProviders(vals)
         fpath = outputDir+'/new_providers.psql'
         f = open(fpath, 'w')
         f.write(newProvidersStr)
         f.close()
 
+    def AppendTypes(self, typeDict,key, value):
+        if key in typeDict:
+            return value+'::'+typeDict['key']
+        else:
+            return value
+
     def TermedProviders(self):
         rows = self.RunEdwPull('./edw_queries/tsql_termed_providers.sql')
-        vals = self.ValueStr(rows, [ 'employee_number', 'end_date' ])
+        typeDict = {'end_date': 'date'}
+        vals = self.ValueStr(rows, [ 'employee_number', 'end_date' ], typeDict)
         newProvidersStr = self.PE_TermedProviders(vals)
         fpath = outputDir+'/termed_providers.psql'
         f = open(fpath, 'w')
@@ -101,15 +109,15 @@ class LoadRoster:
         f.close()
         return sql_str
 
-    def ValueStr(self, rows, set_list):
+    def ValueStr(self, rows, set_list, typeDict):
         tmp = []
         for row in rows:
-            val = self.BuildValueRow(row, set_list)
+            val = self.BuildValueRow(row, set_list, typeDict)
             tmp.append(val)
         vals = ',\n'.join(tmp)
         return vals
 
-    def BuildValueRow(self,data_row, set_list):
+    def BuildValueRow(self,data_row, set_list, typeDict):
         """
         data_row is an dictionary. set_list contains the keys that should be used
         to create each update row
@@ -121,6 +129,7 @@ class LoadRoster:
                 set_str = "null"
             else:
                 set_str = "$${value}$$".format( value=value)
+            set_str = self.AppendTypes(typeDict, key, value)
             tmp.append(set_str)
 
         return "( {values} ) ".format(values = ','.join(tmp) )
@@ -128,15 +137,15 @@ class LoadRoster:
     def PE_TermedProviders(self, values):
         x = """
         UPDATE provider_effort.providers 
-            SET end_date  = t.end_date,
-            SET is_active = false
+            SET end_date  = t.end_date, is_active = false
         FROM 
-
-        SELECT employee_number,  end_date
-        FROM (
-            VALUES
-            {values}
-        ) as t ( employee_number, end_date )
+        (
+            SELECT employee_number,  end_date
+            FROM (
+                VALUES
+                {values}
+            ) as x ( employee_number, end_date )
+        ) as t
         WHERE providers.employee_number = t.employee_number 
             AND providers.end_date IS NULL;
         """.format(values=values)

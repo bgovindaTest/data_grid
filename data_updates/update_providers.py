@@ -126,7 +126,7 @@ class LoadRoster:
         for key in set_list:
             value = data_row[key]
             if value is None:
-                set_str = "null"
+                set_str = self.AppendTypes(typeDict, key, 'null')
             else:
                 set_str = "$${value}$$".format( value=value)
                 set_str = self.AppendTypes(typeDict, key, set_str)

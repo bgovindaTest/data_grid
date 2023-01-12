@@ -16,11 +16,11 @@ import os
 pe  = config.pe
 edw = config.edw
 
-psql_conn = "dbname={dbname} user={user} host='{server}' password='{password}'".format(
-    dbname=pe['database'], user=pe['user'], server=pe['server'], password=pe['password']
-)
+# psql_conn = "dbname={dbname} user={user} host='{server}' password='{password}'".format(
+#     dbname=pe['database'], user=pe['user'], server=pe['server'], password=pe['password']
+# )
 
-conn = psycopg2.connect()
+# conn = psycopg2.connect()
 
 cnxn_str = ("Driver=ODBC Driver 13 for SQL Server;"
             "Server={server};"
@@ -74,7 +74,7 @@ class LoadRoster:
 
     def AppendTypes(self, typeDict,key, value):
         if key in typeDict:
-            return value+'::'+typeDict['key']
+            return value+'::'+typeDict[key]
         else:
             return value
 
@@ -129,7 +129,7 @@ class LoadRoster:
                 set_str = "null"
             else:
                 set_str = "$${value}$$".format( value=value)
-            set_str = self.AppendTypes(typeDict, key, value)
+                set_str = self.AppendTypes(typeDict, key, set_str)
             tmp.append(set_str)
 
         return "( {values} ) ".format(values = ','.join(tmp) )
